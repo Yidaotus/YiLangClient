@@ -1,0 +1,11 @@
+.site-page-header {
+	border: 1px solid rgb(235, 237, 240);
+	padding: 24px;
+	background-color: #ffffff;
+}
+
+.entry-form-actions {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+}

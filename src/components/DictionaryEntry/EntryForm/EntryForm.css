@@ -1,0 +1,16 @@
+.word-root-form .ant-form-item {
+	margin-bottom: 6px;
+}
+
+.key-autocomplete input {
+	color: black !important;
+	font-size: 1.8em !important;
+}
+
+.key {
+	grid-area: key;
+}
+
+.word-root-form .ant-divider {
+	margin: 10px 0px;
+}

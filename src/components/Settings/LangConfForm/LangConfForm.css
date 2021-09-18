@@ -1,0 +1,10 @@
+.source-sub-form {
+	display: flex;
+	margin-bottom: 8px;
+	align-items: baseline;
+	gap: 12px;
+}
+
+.lu-description {
+	color: rgb(155, 155, 155);
+}

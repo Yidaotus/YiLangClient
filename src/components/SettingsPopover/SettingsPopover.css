@@ -1,0 +1,13 @@
+.settings-popover {
+	width: 200px;
+}
+
+.settings-language {
+	display: flex;
+	align-items: center;
+	gap: 5px;
+}
+
+.settings-language-select {
+	flex: 1;
+}

@@ -1,0 +1,20 @@
+.frag-sentence {
+	text-decoration: underline;
+	user-select: none;
+	padding-right: 5px;
+}
+
+.frag-text {
+	width: 750px;
+	margin: auto;
+	text-decoration: underline;
+}
+
+.sentence-container {
+	width: 750px;
+	margin: auto;
+}
+
+.found-word {
+	color: blue;
+}

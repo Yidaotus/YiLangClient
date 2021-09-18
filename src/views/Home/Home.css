@@ -1,0 +1,36 @@
+.yi-header {
+	display: flex;
+	align-items: flex-end;
+	background-color: white !important;
+	height: 64px;
+}
+
+.yi-header-links {
+	margin-left: auto;
+	display: flex;
+	justify-content: flex-end;
+	align-items: center;
+}
+
+.yi-content {
+	padding: 50px 50px;
+	flex-grow: 1;
+	background-color: rgba(0, 0, 0, 0.062);
+}
+
+.yi-layout {
+	min-height: 100vh;
+	display: flex;
+	flex-direction: column;
+}
+
+.yi-footer {
+	text-align: center;
+	height: 50px;
+}
+
+.yi-logo {
+	top: 0px;
+	height: 50px;
+	margin-left: 100px;
+}

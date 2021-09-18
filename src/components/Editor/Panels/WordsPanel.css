@@ -1,0 +1,28 @@
+.word-container {
+	font-family: 'Noto Sans', 'Noto Sans JP', sans-serif;
+	font-weight: 400;
+}
+
+.word-container-list {
+	border-right: 1px solid #e6e6e6;
+	padding-right: 20px !important;
+}
+
+.word-list-key {
+	color: #3366cc;
+	font-size: 1.3em;
+}
+
+.word-list-spelling {
+	font-size: 0.8em;
+	color: grey;
+}
+
+.word-list-header {
+	display: flex;
+	flex-direction: row;
+	flex-wrap: nowrap;
+	justify-content: space-between;
+	align-content: stretch;
+	align-items: flex-start;
+}

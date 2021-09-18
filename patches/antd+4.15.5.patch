@@ -1,0 +1,36 @@
+diff --git a/node_modules/antd/es/carousel/index.js b/node_modules/antd/es/carousel/index.js
+index 439077e..a6e165e 100644
+--- a/node_modules/antd/es/carousel/index.js
++++ b/node_modules/antd/es/carousel/index.js
+@@ -53,8 +53,11 @@ var Carousel = /*#__PURE__*/React.forwardRef(function (_a, ref) {
+   }, [slickRef.current]);
+   var prevCount = React.useRef(React.Children.count(props.children));
+   React.useEffect(function () {
+-    if (prevCount.current !== React.Children.count(props.children)) {
+-      goTo(props.initialSlide || 0, false);
++    const numberOfChildren = React.Children.count(props.children);
++    if (prevCount.current !== numberOfChildren) {
++      if(prevCount.current > numberOfChildren - 1) {
++        goTo(props.initialSlide || 0, false);
++      }
+       prevCount.current = React.Children.count(props.children);
+     }
+   }, [props.children]);
+diff --git a/node_modules/antd/lib/carousel/index.js b/node_modules/antd/lib/carousel/index.js
+index abd1a72..02be07f 100644
+--- a/node_modules/antd/lib/carousel/index.js
++++ b/node_modules/antd/lib/carousel/index.js
+@@ -73,8 +73,11 @@ var Carousel = /*#__PURE__*/React.forwardRef(function (_a, ref) {
+   }, [slickRef.current]);
+   var prevCount = React.useRef(React.Children.count(props.children));
+   React.useEffect(function () {
+-    if (prevCount.current !== React.Children.count(props.children)) {
+-      goTo(props.initialSlide || 0, false);
++    const numberOfChildren = React.Children.count(props.children);
++    if (prevCount.current !== numberOfChildren) {
++      if(prevCount.current > numberOfChildren - 1) {
++        goTo(props.initialSlide || 0, false);
++      }
+       prevCount.current = React.Children.count(props.children);
+     }
+   }, [props.children]);
