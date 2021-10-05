@@ -14,7 +14,9 @@ import { useDispatch, useSelector } from 'react-redux';
 import { DocumentBlock } from 'Document/Block';
 import { HTML5Backend } from 'react-dnd-html5-backend';
 import { DndProvider } from 'react-dnd';
+import { selectActiveLanguageConfig } from '@store/user/selectors';
 import {
+	fetchTags,
 	resetDictionary,
 	saveDictionary,
 	saveTags,
@@ -42,10 +44,10 @@ const YiEditor: React.FC = () => {
 
 	const [loading, setLoading] = useState<string | null>(null);
 	const [showAddBlockPanel, setShowAddBlockPanel] = useState(false);
-	const editorContainer = useRef<HTMLDivElement | null>(null);
 	const editorDocument = useSelector(
 		(state: IRootState) => state.editor.document
 	);
+	const currentLanguage = useSelector(selectActiveLanguageConfig);
 	const editorHasBlocks =
 		editorDocument && Object.values(editorDocument.blocks).length > 0;
 	const documentModified = useSelector(
@@ -89,6 +91,9 @@ const YiEditor: React.FC = () => {
 		try {
 			dispatch(resetEditor());
 			dispatch(resetDictionary());
+			if (currentLanguage) {
+				await dispatch(fetchTags(currentLanguage.key));
+			}
 			notification.open({
 				message: 'Done',
 				description: 'Editor Reset',
@@ -97,7 +102,7 @@ const YiEditor: React.FC = () => {
 		} catch (e) {
 			handleError(e);
 		}
-	}, [dispatch]);
+	}, [currentLanguage, dispatch]);
 
 	const confirmReset = useCallback(async () => {
 		if (documentModified) {
@@ -127,7 +132,7 @@ const YiEditor: React.FC = () => {
 					size="large"
 					tip={loading || undefined}
 				>
-					<div ref={editorContainer}>
+					<div>
 						<div className="editor-container">
 							<Tabs
 								defaultActiveKey="1"
