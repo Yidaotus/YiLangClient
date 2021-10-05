@@ -6,6 +6,7 @@ import { getUUID } from 'Document/UUID';
 import { IDocumentSelection } from 'Document/Document';
 import { useDispatch } from 'react-redux';
 import { setSelection } from '@store/editor/actions';
+import useClickOutside from './useClickOutside';
 
 export interface IScreenPosition {
 	y: number;
@@ -39,37 +40,9 @@ function useSelectedText(rootElement: React.RefObject<HTMLElement>): void {
 	const lastSelection = useRef<ISelection | null>(null);
 	const dispatch = useDispatch();
 
-	const selectionChangeListener = useCallback(() => {
-		/*
-		const windowSelection = window.getSelection();
-
-		if (windowSelection?.type === 'None') {
-			return;
-		}
-
-		const rootNode = rootElement.current;
-		if (rootNode && windowSelection?.focusNode?.parentElement) {
-			const preventSelectionNode = findNodeByDataType({
-				startNode: windowSelection.focusNode.parentElement,
-				boundaryNode: rootNode,
-				type: SELECTIONBLOCKER,
-				depth: 20,
-			});
-
-			if (preventSelectionNode) {
-				return;
-			}
-		}
-
-		if (
-			(!windowSelection || windowSelection?.isCollapsed) &&
-			lastSelection.current !== null
-		) {
-			dispatch(setSelection(null));
-			lastSelection.current = null;
-		}
-		*/
-	}, []);
+	useClickOutside(rootElement, () => {
+		dispatch(setSelection(null));
+	});
 
 	const mouseUpListener = useCallback(
 		(event: MouseEvent) => {
@@ -220,20 +193,12 @@ function useSelectedText(rootElement: React.RefObject<HTMLElement>): void {
 				currentElement.id = getUUID();
 			}
 			currentElement.addEventListener('mouseup', mouseUpListener);
-			document.addEventListener(
-				'selectionchange',
-				selectionChangeListener
-			);
 			return () => {
 				currentElement.removeEventListener('mouseup', mouseUpListener);
-				document.removeEventListener(
-					'selectionchange',
-					selectionChangeListener
-				);
 			};
 		}
 		return undefined;
-	}, [mouseUpListener, selectionChangeListener, rootElement]);
+	}, [mouseUpListener, rootElement]);
 }
 
 export default useSelectedText;
