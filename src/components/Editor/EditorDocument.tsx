@@ -4,8 +4,9 @@ import { Empty, Button, Tooltip, Select } from 'antd';
 import {
 	MinusCircleOutlined,
 	PlusCircleOutlined,
-	TranslationOutlined,
 	ArrowDownOutlined,
+	EyeTwoTone,
+	EyeInvisibleOutlined,
 } from '@ant-design/icons';
 import useSelectedText from '@hooks/useSelectedText';
 import { useDispatch, useSelector } from 'react-redux';
@@ -14,7 +15,10 @@ import { changeLayer, toggleSpelling } from '@store/editor/actions';
 import BlockContainer from '@editor/Blocks/BlockContainer/BlockContainer';
 import Toolbar from '@editor/Toolbar/Toolbar';
 import DropEdge from '@editor/Blocks/DropEdge/DropEdge';
-import { selectAvailableLayers } from '@store/editor/selectors';
+import {
+	selectAvailableLayers,
+	selectShowSpelling,
+} from '@store/editor/selectors';
 import { IRootState } from '@store/index';
 import { getUUID } from 'Document/UUID';
 import DictPopupController from './Popups/DictPopupController';
@@ -50,9 +54,10 @@ const EditorDocument: React.FC<IEditorDocumentProps> = ({ document }) => {
 	const activeLayer = useSelector(
 		(state: IRootState) => state.editor.selectedFragmentLayer
 	);
+	const showSpellingActive = useSelector(selectShowSpelling);
 	const editorContainer = useRef<HTMLDivElement | null>(null);
 	useSelectedText(editorContainer);
-	const { renderMap } = document;
+	const { renderMap } = document || [];
 
 	const options: IEditorOption[] = [
 		{
@@ -73,7 +78,11 @@ const EditorDocument: React.FC<IEditorDocumentProps> = ({ document }) => {
 		},
 		{
 			name: 'toggleSpelling',
-			icon: <TranslationOutlined />,
+			icon: showSpellingActive ? (
+				<EyeTwoTone />
+			) : (
+				<EyeInvisibleOutlined />
+			),
 			handler: () => {
 				dispatch(toggleSpelling());
 			},
@@ -82,11 +91,6 @@ const EditorDocument: React.FC<IEditorDocumentProps> = ({ document }) => {
 	];
 
 	const renderWidthFractions = new Set<number>();
-
-	// TODO Unreadable code!
-	if (!renderMap) {
-		return <></>;
-	}
 
 	for (const row of renderMap) {
 		let columnWidth = 0;

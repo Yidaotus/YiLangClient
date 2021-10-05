@@ -38,6 +38,8 @@ const selectActiveFragmentLayer = createSelector(
 	}
 );
 
+const selectShowSpelling = (state: IRootState) => state.editor.showSpelling;
+
 const selectAvailableLayers = createSelector(
 	(state: IRootState) => state.editor.fragmentLayers,
 	(fragmentLayers) =>
@@ -99,4 +101,5 @@ export {
 	selectClickedFragmentSelector,
 	selectAvailableLayers,
 	selectedFragmentsSelector,
+	selectShowSpelling,
 };
