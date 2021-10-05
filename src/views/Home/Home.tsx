@@ -158,7 +158,9 @@ const HomeView: React.FC = () => {
 					</Row>
 				</Spin>
 			</main>
-			<footer className="yi-footer">YiLang!</footer>
+			<footer className="yi-footer-container">
+				<div className="yi-footer">YiLang!</div>
+			</footer>
 		</div>
 	);
 };
