@@ -1,12 +1,10 @@
-<p align="center">
-  <img src="https://raw.githubusercontent.com/Yidaotus/YiLang_Client/main/public/yilang-green.png" />
-</p>
+![YiLang Logo](https://github.com/Yidaotus/YiLangClient/blob/main/public/yilang.png?raw=true)
 
 ## Basics
 
 YiLang helps you study new languages by providing a variety of tools for learning a variety of different content.
 
-<img src="https://i.imgur.com/fvEOgfK.png" />
+![YiLang Editor Preview](https://github.com/Yidaotus/YiLangClient/blob/main/public/editor_preview.png?raw=true)
 
 ## Tools
 
@@ -25,7 +23,7 @@ Contributions are always welcomed. Please follow a few guidelines if you want to
 
 ### Extensability
 
-YiLang is build to be as extensable as possible. Tools and Blocks can be added quickly without much code.
+YiLang is build to be as extensible as possible. Tools and Blocks can be added quickly without much code.
 Blocks are created wiith the `createBlockDefinition` helper which checks typings. As seen by the following type definition:
 
 ```ts
