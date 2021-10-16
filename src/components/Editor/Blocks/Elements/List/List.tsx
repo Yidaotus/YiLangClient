@@ -1,13 +1,5 @@
 import React from 'react';
-import {
-	createBlockConfigurator,
-	createBlockDefinition,
-} from 'store/editor/types';
-import { OrderedListOutlined, UnorderedListOutlined } from '@ant-design/icons';
 import { IListBlock } from 'Document/Block';
-import { FragmentableString } from 'Document/Fragment';
-import { getUUID } from 'Document/UUID';
-import FragmentedString from '@editor/Fragments/FragmentedString';
 
 /**
  * Renders a dialog.
@@ -19,11 +11,7 @@ const ListBlock: React.FC<IListBlock> = ({ fragmentables, items, config }) => {
 	const { style } = config;
 	const renderedItems = items.map((item) => {
 		const fragmentable = fragmentables.find((f) => f.id === item);
-		return fragmentable ? (
-			<li key={fragmentable.id}>
-				<FragmentedString fragmentable={fragmentable} />
-			</li>
-		) : null;
+		return fragmentable ? <li key={fragmentable.id} /> : null;
 	});
 	return (
 		<div className="list-block">
@@ -36,6 +24,7 @@ const ListBlock: React.FC<IListBlock> = ({ fragmentables, items, config }) => {
 	);
 };
 
+/*
 const ListBlockConfiguratorOrdered = createBlockConfigurator({
 	blockType: 'List',
 	icon: <OrderedListOutlined />,
@@ -51,6 +40,7 @@ const ListBlockConfiguratorUnordered = createBlockConfigurator({
 	parameter: 'style',
 	value: 'unordered',
 });
+
 
 const ListBlockDefinition = createBlockDefinition({
 	type: 'List',
@@ -76,5 +66,6 @@ const ListBlockDefinition = createBlockDefinition({
 		};
 	},
 });
+*/
 
-export default ListBlockDefinition;
+export default ListBlock;

@@ -6,7 +6,6 @@ import { listDocuments } from 'api/document.service';
 import { useDispatch, useSelector } from 'react-redux';
 import { IDocumentExcerpt } from 'api/definitions/api';
 import DocumentExcerpt from '@components/DocumentExcerpt/DocumentExcerpt';
-import { loadDocument } from '@store/editor/actions';
 import { UUID } from 'Document/UUID';
 import { useHistory } from 'react-router';
 import { IDictionaryEntryResolved } from 'Document/Dictionary';
@@ -93,14 +92,14 @@ const Overview: React.FC = () => {
 		async (id: UUID) => {
 			setLoading(true);
 			try {
-				await dispatch(loadDocument({ type: 'load', id }));
+				// await dispatch(loadDocument({ type: 'load', id }));
 				history.push('/home/editor/new');
 			} catch (e) {
 				handleError(e);
 			}
 			setLoading(false);
 		},
-		[dispatch, history]
+		[history]
 	);
 
 	return (

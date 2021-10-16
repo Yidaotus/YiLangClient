@@ -15,10 +15,6 @@ import DictEntryEdit, {
 } from '@components/DictionaryEntry/DictEntryEdit/DictEntryEdit';
 import { useSelector } from 'react-redux';
 import { IDictionaryEntryInput } from '@store/dictionary/actions';
-import {
-	selectAddedDictionaryEntries,
-	selectUserTags,
-} from '@store/dictionary/selectors';
 import { selectActiveLookupSources } from '@store/user/selectors';
 import LookupSourceLink from '@components/LookupSourceLink';
 
@@ -115,9 +111,6 @@ const WordInput: React.FC<IWordInputProps> = ({
 		}
 	};
 
-	const userTags = useSelector(selectUserTags);
-	const localDictionary = useSelector(selectAddedDictionaryEntries);
-
 	return (
 		<div>
 			<div className="word-input-container" style={{ width }}>
@@ -151,8 +144,6 @@ const WordInput: React.FC<IWordInputProps> = ({
 						<DictEntryEdit
 							ref={dictEntryEdit}
 							root={root}
-							userTags={userTags}
-							localDictionary={localDictionary}
 							stateChanged={setEditMode}
 						/>
 					</div>

@@ -7,9 +7,8 @@ import {
 	SettingOutlined,
 	TranslationOutlined,
 } from '@ant-design/icons';
-import { IRootDispatch, IRootState } from '@store/index';
+import { IRootDispatch } from '@store/index';
 import { logout, selectLanguage } from '@store/user/actions';
-import { resetEditor } from '@store/editor/actions';
 import { useDispatch, useSelector } from 'react-redux';
 import { useHistory } from 'react-router';
 import {
@@ -21,17 +20,12 @@ const { Option } = Select;
 const { confirm } = Modal;
 
 const SettingsPopover: React.FC = () => {
-	const documentLoaded = useSelector(
-		(state: IRootState) => !!state.editor.document
-	);
-	const documentModified = useSelector(
-		(state: IRootState) => !!state.editor.documentModified
-	);
 	const selectedLanguage = useSelector(selectActiveLanguageConfig);
 	const availableLanguages = useSelector(selectAvailableLanguageConfigs);
 	const dispatch: IRootDispatch = useDispatch();
 	const history = useHistory();
 
+	const documentModified = false;
 	const logoutConfirm = useCallback(() => {
 		if (documentModified) {
 			confirm({
@@ -52,6 +46,7 @@ const SettingsPopover: React.FC = () => {
 
 	const changeLanguage = useCallback(
 		(configKey: string) => {
+			const documentLoaded = false;
 			if (documentLoaded) {
 				confirm({
 					title: 'Changing language',
@@ -65,7 +60,7 @@ const SettingsPopover: React.FC = () => {
 							(langConf) => langConf.key === configKey
 						);
 						if (languageConfig) {
-							dispatch(resetEditor());
+							// dispatch(resetEditor());
 							dispatch(selectLanguage(languageConfig));
 						}
 					},
@@ -79,7 +74,7 @@ const SettingsPopover: React.FC = () => {
 				}
 			}
 		},
-		[availableLanguages, dispatch, documentLoaded]
+		[availableLanguages, dispatch]
 	);
 
 	return (

@@ -1,13 +1,12 @@
 import { IEntryFormFields } from '@components/DictionaryEntry/EntryForm/EntryForm';
-import { selectActiveLanguageFromState } from '@store/user/selectors';
-import {
-	applyDictionaryDelta,
-	getDictionary,
-	searchDictionary,
-} from 'api/dictionary.service';
+import { selectActiveLanguage } from '@store/user/selectors';
+import { applyDictionaryDelta } from 'api/dictionary.service';
 import { applyTagsDelta, getTags } from 'api/tags.service';
-import { IDictionaryEntry, IDictionaryTag } from 'Document/Dictionary';
-import { IDocumentLink } from 'Document/Document';
+import {
+	IDictionaryEntry,
+	IDictionaryTag,
+	IDocumentLink,
+} from 'Document/Dictionary';
 import { notUndefined } from 'Document/Utility';
 import { getUUID, UUID } from 'Document/UUID';
 import { StoreAction } from 'store';
@@ -15,58 +14,22 @@ import { DictionaryMutation } from './types';
 
 type DictionaryAction<R = void> = StoreAction<DictionaryMutation, R>;
 
-const changeEntry =
-	({
-		id,
-		entryData,
-	}: {
-		id: UUID;
-		entryData: Partial<IDictionaryEntry>;
-	}): DictionaryAction =>
-	(dispatch, getState) => {
-		const currentEntry = getState().dictionary.dictionary[id];
-		if (currentEntry) {
-			dispatch({
-				type: 'DICTIONARY_CHANGE_ENTRY',
-				payload: {
-					id,
-					entry: {
-						...currentEntry,
-						...entryData,
-					},
-				},
-			});
-		}
-	};
-
 const updateEntry =
 	({
 		id,
 		entryData,
 	}: {
 		id: UUID;
-		entryData: Partial<IDictionaryEntry>;
+		entryData: Omit<IDictionaryEntry, 'id'>;
 	}): DictionaryAction =>
-	(dispatch, getState) => {
-		const currentEntry = getState().dictionary.dictionary[id];
-		if (currentEntry) {
-			dispatch({
-				type: 'DICTIONARY_CHANGE_ENTRY',
-				payload: {
-					id,
-					entry: {
-						...currentEntry,
-						...entryData,
-					},
-				},
-			});
-			dispatch({
-				type: 'DICTIONARY_ADD_CHANGED_ENTRY',
-				payload: {
-					id,
-				},
-			});
-		}
+	(dispatch) => {
+		dispatch({
+			type: 'DICTIONARY_UPDATE_ENTRY',
+			payload: {
+				id,
+				entry: entryData,
+			},
+		});
 	};
 
 const updateTag =
@@ -106,11 +69,11 @@ const createTag =
 		return tagId;
 	};
 
-const addTag =
+const cacheTag =
 	(tag: IDictionaryTag): DictionaryAction =>
 	(dispatch) => {
 		dispatch({
-			type: 'DICTIONARY_ADD_TAG',
+			type: 'DICTIONARY_CACHE_TAG',
 			payload: { tag },
 		});
 	};
@@ -119,64 +82,12 @@ const fetchTags =
 	(lang: string): DictionaryAction<Promise<void>> =>
 	async (dispatch) => {
 		const tags = (await getTags(lang)) || [];
-		const tagMap = tags.reduce<{
-			[key: string]: IDictionaryTag;
-		}>((acc, entry) => {
-			acc[entry.id] = entry;
-			return acc;
-		}, {});
-
-		dispatch({
-			type: 'DICTIONARY_SET_TAGS',
-			payload: { tags: tagMap },
-		});
-	};
-
-const fetchDictionary =
-	(): DictionaryAction<Promise<void>> => async (dispatch, getState) => {
-		const activeLanguage = selectActiveLanguageFromState(getState().user);
-		if (!activeLanguage) {
-			throw Error('No Language selected!');
+		for (const tag of tags) {
+			dispatch({
+				type: 'DICTIONARY_CACHE_TAG',
+				payload: { tag },
+			});
 		}
-		const dictionaryState = getState().dictionary;
-		const hasDelta =
-			dictionaryState.addedEntries.length > 0 ||
-			dictionaryState.updatedEntries.length > 0 ||
-			dictionaryState.removedEntries.length > 0;
-
-		if (hasDelta) {
-			throw new Error(
-				`Outstanding dictionary delta. Please save first before loading the dicitonary again!`
-			);
-		}
-		const entries = (await getDictionary(activeLanguage.key)) || [];
-		const entriesMap = entries.reduce<{
-			[key: string]: IDictionaryEntry;
-		}>((acc, entry) => {
-			acc[entry.id] = entry;
-			return acc;
-		}, {});
-
-		const tags = (await getTags(activeLanguage.key)) || [];
-		const tagMap = tags.reduce<{
-			[key: string]: IDictionaryTag;
-		}>((acc, entry) => {
-			acc[entry.id] = entry;
-			return acc;
-		}, {});
-
-		dispatch({
-			type: 'DICTIONARY_RESET',
-			payload: null,
-		});
-		dispatch({
-			type: 'DICTIONARY_SET_TAGS',
-			payload: { tags: tagMap },
-		});
-		dispatch({
-			type: 'DICTIONARY_SET_ENTRIES',
-			payload: { entries: entriesMap },
-		});
 	};
 
 const resetDictionary = (): DictionaryAction => (dispatch) => {
@@ -185,61 +96,66 @@ const resetDictionary = (): DictionaryAction => (dispatch) => {
 
 const saveTags =
 	(): DictionaryAction<Promise<void>> => async (dispatch, getState) => {
-		const { tags, addedTags, updatedTags, removedTags } =
-			getState().dictionary;
+		const { tags } = getState().dictionary;
 
-		const updatedTagsToSave = updatedTags
-			.map((id) => tags[id])
-			.filter(notUndefined);
-		const addedTagsToSave = addedTags
-			.map((id) => tags[id])
-			.filter(notUndefined);
+		const dirtyTags = Object.values(tags)
+			.filter(notUndefined)
+			.filter((tag) => !!tag.dirty);
 
-		if (
-			updatedTagsToSave.length > 0 ||
-			addedTagsToSave.length > 0 ||
-			removedTags.length > 0
-		) {
-			await applyTagsDelta({
-				removedTags: [...removedTags.values()],
-				updatedTags: updatedTagsToSave,
-				addedTags: addedTagsToSave,
-			});
-			dispatch({ type: 'DICTIONARY_RESET_TAG_DELTA', payload: null });
+		const updatedTags = dirtyTags.filter((tag) => tag.dirty === 'UPDATED');
+		const newTags = dirtyTags.filter((tag) => tag.dirty === 'NEW');
+		const deletedTags = dirtyTags.filter((tag) => tag.dirty === 'DELETED');
+
+		// TODO: Use appropriate REST resource
+		await applyTagsDelta({
+			removedTags: [...deletedTags.map((tag) => tag.id)],
+			updatedTags,
+			addedTags: newTags,
+		});
+
+		for (const tag of dirtyTags) {
+			dispatch({ type: 'DICTIONARY_CLEAN_TAG', payload: { id: tag.id } });
 		}
 	};
 
 const saveDictionary =
 	(): DictionaryAction<Promise<void>> => async (dispatch, getState) => {
-		const { dictionary, addedEntries, updatedEntries, removedEntries } =
-			getState().dictionary;
+		const { entries } = getState().dictionary;
 
-		const updatedEntriesToSave = updatedEntries
-			.map((id) => dictionary[id])
-			.filter(notUndefined);
-		const addedEntriesToSave = addedEntries
-			.map((id) => dictionary[id])
-			.filter(notUndefined);
+		const dirtyEntries = Object.values(entries)
+			.filter(notUndefined)
+			.filter((tag) => !!tag.dirty);
 
-		if (
-			updatedEntriesToSave.length > 0 ||
-			addedEntriesToSave.length > 0 ||
-			removedEntries.length > 0
-		) {
-			await applyDictionaryDelta({
-				removedEntries: [...removedEntries.values()],
-				updatedEntries: updatedEntriesToSave,
-				addedEntries: addedEntriesToSave,
+		const updatedEntries = dirtyEntries.filter(
+			(entry) => entry.dirty === 'UPDATED'
+		);
+		const newEntries = dirtyEntries.filter(
+			(entry) => entry.dirty === 'NEW'
+		);
+		const deletedEntries = dirtyEntries.filter(
+			(entry) => entry.dirty === 'DELETED'
+		);
+
+		// TODO: Use appropriate REST resource
+		await applyDictionaryDelta({
+			removedEntries: [...deletedEntries.map((tag) => tag.id)],
+			updatedEntries,
+			addedEntries: newEntries,
+		});
+
+		for (const tag of dirtyEntries) {
+			dispatch({
+				type: 'DICTIONARY_CLEAN_ENTRY',
+				payload: { id: tag.id },
 			});
 		}
-		dispatch({ type: 'DICTIONARY_RESET_ENTRY_DELTA', payload: null });
 	};
 
 const cacheDictionaryEntry =
 	(entry: IDictionaryEntry): DictionaryAction =>
 	(dispatch, getState) => {
-		const { dictionary } = getState().dictionary;
-		if (!dictionary[entry.id]) {
+		const { entries } = getState().dictionary;
+		if (!entries[entry.id]) {
 			dispatch({ type: 'DICTIONARY_CACHE_ENTRY', payload: { entry } });
 		}
 	};
@@ -247,7 +163,7 @@ const cacheDictionaryEntry =
 const addWordToDictionary =
 	(word: Omit<IDictionaryEntry, 'id'>): DictionaryAction<UUID | null> =>
 	(dispatch, getState): UUID => {
-		const activeLanguage = selectActiveLanguageFromState(getState().user);
+		const activeLanguage = selectActiveLanguage(getState().user);
 		if (!activeLanguage) {
 			throw Error('No Language selected!');
 		}
@@ -318,7 +234,7 @@ const saveEntryRemote =
 		update = false
 	): DictionaryAction<Promise<void>> =>
 	async (dispatch, getState) => {
-		const activeLanguage = selectActiveLanguageFromState(getState().user);
+		const activeLanguage = selectActiveLanguage(getState().user);
 		if (!activeLanguage) {
 			throw Error('No Language selected!');
 		}
@@ -399,47 +315,6 @@ const saveEntryRemote =
 		}
 	};
 
-const checkSelectedWordExists =
-	(): DictionaryAction<Promise<UUID | null>> =>
-	async (dispatch, getState) => {
-		const { selection } = getState().editor;
-		if (!selection) {
-			return null;
-		}
-		const searchValue = selection.value.trim().toLocaleLowerCase();
-		const { dictionary } = getState().dictionary;
-
-		// Check local dictionary
-		const wordInLocalDictionay = Object.values(dictionary)
-			.filter(notUndefined)
-			.find((entry) => entry.key.toLocaleLowerCase() === searchValue);
-		if (wordInLocalDictionay) {
-			return wordInLocalDictionay.id;
-		}
-
-		// check remote dictionary
-		const activeLanguage = selectActiveLanguageFromState(getState().user);
-		if (!activeLanguage) {
-			throw Error('No Language selected!');
-		}
-
-		const wordsInRemoteDictionary = await searchDictionary({
-			key: searchValue,
-			lang: activeLanguage.key,
-		});
-		if (!wordsInRemoteDictionary) {
-			return null;
-		}
-		const foundExactWord = wordsInRemoteDictionary.find(
-			(entry) => entry.key.toLocaleLowerCase() === searchValue
-		);
-		if (foundExactWord) {
-			dispatch(cacheDictionaryEntry(foundExactWord));
-			return foundExactWord.id;
-		}
-		return null;
-	};
-
 const saveOrUpdateEntryInput =
 	(
 		entry: IDictionaryEntryInput
@@ -505,7 +380,6 @@ const saveOrUpdateEntryInput =
 
 export {
 	saveEntryRemote,
-	checkSelectedWordExists,
 	removeEntry,
 	removeTag,
 	removeTagRemote,
@@ -516,12 +390,11 @@ export {
 	saveDictionary,
 	saveTags,
 	createTag,
-	addTag,
-	fetchDictionary,
 	cacheDictionaryEntry,
 	updateEntry,
+	cacheTag,
 	updateTag,
 	fetchTags,
-	changeEntry,
+	updateEntry as changeEntry,
 	resetDictionary,
 };

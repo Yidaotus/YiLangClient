@@ -2,7 +2,6 @@ import './DropEdge.css';
 import React from 'react';
 import { useDrop } from 'react-dnd';
 import { useDispatch } from 'react-redux';
-import { addEmptyMapRow, moveBlockEntry } from 'store/editor/actions';
 
 export interface IDropEdgeProps {
 	rowIndex: number;
@@ -38,19 +37,18 @@ const DropEdge: React.FC<IDropEdgeProps> = ({
 				let currentRow = item.row;
 				const currentColumn = item.column;
 				if (type === 'horizontal') {
-					dispatch(addEmptyMapRow(rowIndex));
+					// dispatch(addEmptyMapRow(rowIndex));
 					if (rowIndex - 1 < currentRow) {
 						currentRow += 1;
 					}
 				}
-				dispatch(
-					moveBlockEntry({
+				/* dispatch();
+				moveBlockEntry({
 						currentRow,
 						currentColumn,
 						targetRow: rowIndex,
 						targetColumn: columnIndex,
-					})
-				);
+					}) */
 			},
 			collect: (monitor) => ({
 				isOver: !!monitor.isOver(),

@@ -2,19 +2,8 @@ import './Image.css';
 import React from 'react';
 import { Image } from 'antd';
 import { IImageBlock } from 'Document/Block';
-import {
-	AlignCenterOutlined,
-	AlignLeftOutlined,
-	AlignRightOutlined,
-} from '@ant-design/icons';
-import FragmentedString from '@editor/Fragments/FragmentedString';
-import {
-	createBlockConfigurator,
-	createBlockDefinition,
-} from 'store/editor/types';
-import { FragmentableString } from 'Document/Fragment';
-import { getUUID } from 'Document/UUID';
 
+/*
 const ImageBlockConfiguratorCenter = createBlockConfigurator({
 	blockType: 'Image',
 	icon: <AlignCenterOutlined />,
@@ -38,6 +27,7 @@ const ImageBlockConfiguratorRight = createBlockConfigurator({
 	parameter: 'alignment',
 	value: 'right',
 });
+*/
 
 const alignmentMap: { [key in IImageBlock['config']['alignment']]: string } = {
 	left: 'flow-left',
@@ -51,16 +41,10 @@ const alignmentMap: { [key in IImageBlock['config']['alignment']]: string } = {
  * @param source source of the image to render
  * @param title title of the image rendered at the bottom of the block
  */
-const ImageBlock: React.FC<IImageBlock> = ({
-	source,
-	title,
-	config,
-	fragmentables,
-}) => {
+const ImageBlock: React.FC<IImageBlock> = ({ source, config }) => {
 	const { alignment } = config;
 	const imageClass = alignmentMap[alignment];
 
-	const titleFragmentable = fragmentables.find((f) => f.id === title);
 	return (
 		<div
 			className={`image-block-container ${imageClass}`}
@@ -72,19 +56,11 @@ const ImageBlock: React.FC<IImageBlock> = ({
 				preview={false}
 				width="100%"
 			/>
-			{titleFragmentable && (
-				<FragmentedString fragmentable={titleFragmentable} />
-			)}
 		</div>
 	);
 };
 
-const configurators = [
-	ImageBlockConfiguratorLeft,
-	ImageBlockConfiguratorCenter,
-	ImageBlockConfiguratorRight,
-];
-
+/*
 const ImageBlockDefinition = createBlockDefinition({
 	type: 'Image',
 	block: ImageBlock,
@@ -120,5 +96,6 @@ const ImageBlockDefinition = createBlockDefinition({
 		};
 	},
 });
+*/
 
-export default ImageBlockDefinition;
+export default ImageBlock;

@@ -1,5 +1,4 @@
 import './Floating.css';
-import { SELECTIONBLOCKER } from '@hooks/useSelectedText';
 import React, { CSSProperties, useRef } from 'react';
 
 export interface IFloatingPosition {
@@ -45,8 +44,8 @@ const floatingReducer: React.Reducer<FloatingState, FloatingAction> = (
 const Floating: React.FC<IFloatingProps> = ({ state, arrow, children }) => {
 	const floatingNode = useRef<HTMLDivElement>(null);
 	const floatingPosition: CSSProperties = {
-		left: state.position.x,
-		top: state.position.y,
+		left: `${state.position.x}px`,
+		top: `${state.position.y}px`,
 		transform: `translate(${state.position.offsetX || 0}px, ${
 			state.position.offsetY || 0
 		}px)`,
@@ -59,7 +58,6 @@ const Floating: React.FC<IFloatingProps> = ({ state, arrow, children }) => {
 			style={floatingPosition}
 			className={`floating-container ${fadeClass}`}
 			ref={floatingNode}
-			data-type={SELECTIONBLOCKER}
 		>
 			{arrow && (
 				<div className="floating-arrow">

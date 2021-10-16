@@ -9,7 +9,6 @@ import React, {
 } from 'react';
 import { Form } from 'antd';
 import { IDictionaryEntry, IDictionaryTag } from 'Document/Dictionary';
-import { StoreMap } from 'store';
 import { getUUID } from 'Document/UUID';
 import TagForm, {
 	ITagFormFields,
@@ -17,12 +16,12 @@ import TagForm, {
 import { useSelector } from 'react-redux';
 import { selectActiveLanguageConfig } from '@store/user/selectors';
 import handleError from '@helpers/Error';
+import { IRootState } from '@store/index';
+import { notUndefined } from 'Document/Utility';
 import EntryForm, { IEntryFormFields } from '../EntryForm/EntryForm';
 
 export interface IWordInputState {
 	root: string | IDictionaryEntry;
-	localDictionary?: StoreMap<IDictionaryEntry>;
-	userTags: Array<IDictionaryTag>;
 	stateChanged?: (stage: WordEditorMode) => void;
 }
 
@@ -98,7 +97,7 @@ export interface IWordInputRef {
 const WordInput: React.ForwardRefRenderFunction<
 	IWordInputRef,
 	IWordInputState
-> = ({ root, userTags, localDictionary, stateChanged }, ref) => {
+> = ({ root, stateChanged }, ref) => {
 	const [wordForm] = Form.useForm<IEntryFormFields>();
 	const [rootForm] = Form.useForm<IEntryFormFields>();
 	const [tagForm] = Form.useForm<ITagFormFields>();
@@ -108,6 +107,13 @@ const WordInput: React.ForwardRefRenderFunction<
 		INITIAL_WORD_REDUCER_STATE
 	);
 	const selectedLanguage = useSelector(selectActiveLanguageConfig);
+
+	const userTags = useSelector((store: IRootState) =>
+		Object.values(store.dictionary.tags).filter(notUndefined)
+	);
+	const localDictionary = useSelector(
+		(store: IRootState) => store.dictionary.entries
+	);
 
 	useEffect(() => {
 		if (typeof root === 'string') {

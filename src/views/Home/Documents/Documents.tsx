@@ -4,7 +4,6 @@ import { IDocumentExcerpt } from 'api/definitions/api';
 import { listDocuments } from 'api/document.service';
 import { Card, Col, Empty, Pagination, Row, Space, Spin } from 'antd';
 import { useDispatch, useSelector } from 'react-redux';
-import { deleteDocument, loadDocument } from 'store/editor/actions';
 import { UUID } from 'Document/UUID';
 import { useHistory } from 'react-router-dom';
 import DocumentExcerpt from 'components/DocumentExcerpt/DocumentExcerpt';
@@ -35,14 +34,14 @@ const Documents: React.FC = () => {
 		async (id: UUID) => {
 			setLoading('Loading Document');
 			try {
-				await dispatch(loadDocument({ type: 'load', id }));
+				// await dispatch(loadDocument({ type: 'load', id }));
 				history.push('/home/editor/new');
 			} catch (e) {
 				handleError(e);
 			}
 			setLoading(null);
 		},
-		[dispatch, history]
+		[history]
 	);
 
 	const fetchData = useCallback(async () => {
@@ -72,14 +71,14 @@ const Documents: React.FC = () => {
 		async (id: UUID) => {
 			setLoading('Removing Document');
 			try {
-				dispatch(deleteDocument(id));
+				// dispatch(deleteDocument(id));
 				fetchData();
 			} catch (e) {
 				handleError(e);
 			}
 			setLoading(null);
 		},
-		[dispatch, fetchData]
+		[fetchData]
 	);
 
 	useEffect(() => {

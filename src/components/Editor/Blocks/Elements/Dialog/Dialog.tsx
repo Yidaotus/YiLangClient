@@ -1,10 +1,6 @@
 import './Dialog.css';
 import React from 'react';
-import { IDialogBlock, IDialogBlockLine } from 'Document/Block';
-import { createBlockDefinition } from 'store/editor/types';
-import { FragmentableString, IFragmentableString } from 'Document/Fragment';
-import { getUUID } from 'Document/UUID';
-import FragmentedString from '@editor/Fragments/FragmentedString';
+import { IDialogBlock } from 'Document/Block';
 
 /**
  * Renders a dialog.
@@ -12,7 +8,11 @@ import FragmentedString from '@editor/Fragments/FragmentedString';
  * @param lines the lines of the given dialog. Each line is rendered as a
  *				seperate RenderableString.
  */
-const DialogBlock: React.FC<IDialogBlock> = ({ lines, fragmentables }) => {
+const DialogBlock: React.FC<IDialogBlock> = ({
+	lines,
+	fragmentables,
+	children,
+}) => {
 	return (
 		<div className="dialog-block">
 			{lines.map((line) => {
@@ -29,9 +29,7 @@ const DialogBlock: React.FC<IDialogBlock> = ({ lines, fragmentables }) => {
 					>
 						<span>{line.speaker}</span>
 						<div>
-							<span>
-								<FragmentedString fragmentable={fragmentable} />
-							</span>
+							<span>{children}</span>
 						</div>
 					</div>
 				) : null;
@@ -40,6 +38,7 @@ const DialogBlock: React.FC<IDialogBlock> = ({ lines, fragmentables }) => {
 	);
 };
 
+/*
 const DialogBlockDefinition = createBlockDefinition({
 	type: 'Dialog',
 	block: DialogBlock,
@@ -82,5 +81,6 @@ const DialogBlockDefinition = createBlockDefinition({
 		};
 	},
 });
+*/
 
-export default DialogBlockDefinition;
+export default DialogBlock;

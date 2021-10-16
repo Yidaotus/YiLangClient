@@ -11,11 +11,6 @@ import {
 	SaveFilled,
 } from '@ant-design/icons';
 import { IDictionaryEntryResolved } from 'Document/Dictionary';
-import { useSelector } from 'react-redux';
-import {
-	selectAddedDictionaryEntries,
-	selectUserTags,
-} from '@store/dictionary/selectors';
 import { UUID } from 'Document/UUID';
 import DictEntry from '../DictionaryEntry';
 import DictEntryEdit, { IWordInputRef } from '../DictEntryEdit/DictEntryEdit';
@@ -34,9 +29,6 @@ const DictEntryWithEdit: React.FC<IDictEntryWithEditProps> = (props) => {
 	const { dictEntry, canLink, saveEntry, removeEntry } = props;
 	const [editing, setEditing] = useState(false);
 	const dictEntryEdit = useRef<IWordInputRef>(null);
-
-	const userTags = useSelector(selectUserTags);
-	const localDictionary = useSelector(selectAddedDictionaryEntries);
 
 	const finish = async () => {
 		if (dictEntryEdit.current) {
@@ -118,8 +110,6 @@ const DictEntryWithEdit: React.FC<IDictEntryWithEditProps> = (props) => {
 							root: dictEntry.root?.id,
 						}}
 						ref={dictEntryEdit}
-						userTags={userTags}
-						localDictionary={localDictionary}
 					/>
 					<div className="entry-with-edit-controlls-bottom">
 						<Button onClick={cancel} icon={<CloseOutlined />}>

@@ -1,40 +1,15 @@
 import './Editor.css';
-import React, { useCallback, useRef, useState } from 'react';
+import React, { useCallback, useState } from 'react';
 
-import { Tabs, Divider, Button, Spin, notification, Modal, Empty } from 'antd';
-import {
-	MinusOutlined,
-	PlusOutlined,
-	DeleteOutlined,
-	SaveOutlined,
-	ExclamationCircleOutlined,
-} from '@ant-design/icons';
+import { Tabs, Spin, notification, Modal } from 'antd';
 
 import { useDispatch, useSelector } from 'react-redux';
-import { DocumentBlock } from 'Document/Block';
-import { HTML5Backend } from 'react-dnd-html5-backend';
-import { DndProvider } from 'react-dnd';
 import { selectActiveLanguageConfig } from '@store/user/selectors';
-import {
-	fetchTags,
-	resetDictionary,
-	saveDictionary,
-	saveTags,
-} from 'store/dictionary/actions';
-import { IRootDispatch, IRootState } from 'store';
+import { fetchTags, saveDictionary, saveTags } from 'store/dictionary/actions';
+import { IRootDispatch } from 'store';
 import handleError from '@helpers/Error';
-import AddBlockPanel from './Panels/AddBlockPanel';
-import WordsPanel from './Panels/WordsPanel';
 
 import EditorDocument from './EditorDocument';
-
-import {
-	addBlock,
-	loadDocument,
-	resetEditor,
-	saveDocument,
-} from '../../store/editor/actions';
-import SentencesPanel from './Panels/SentencesPanel';
 
 const { TabPane } = Tabs;
 const { confirm } = Modal;
@@ -43,16 +18,7 @@ const YiEditor: React.FC = () => {
 	const dispatch: IRootDispatch = useDispatch();
 
 	const [loading, setLoading] = useState<string | null>(null);
-	const [showAddBlockPanel, setShowAddBlockPanel] = useState(false);
-	const editorDocument = useSelector(
-		(state: IRootState) => state.editor.document
-	);
 	const currentLanguage = useSelector(selectActiveLanguageConfig);
-	const editorHasBlocks =
-		editorDocument && Object.values(editorDocument.blocks).length > 0;
-	const documentModified = useSelector(
-		(state: IRootState) => state.editor.documentModified
-	);
 
 	const save = useCallback(async () => {
 		setLoading('Saving Dictionary');
@@ -62,7 +28,7 @@ const YiEditor: React.FC = () => {
 			setLoading('Saving Tags');
 			await dispatch(saveTags());
 			setLoading('Saving Document');
-			await dispatch(saveDocument());
+			// await dispatch(saveDocument());
 			notification.open({
 				message: 'Done',
 				description: 'Document saved',
@@ -76,7 +42,7 @@ const YiEditor: React.FC = () => {
 
 	const createEditorDocument = useCallback(async () => {
 		try {
-			await dispatch(loadDocument({ type: 'new' }));
+			// await dispatch(loadDocument({ type: 'new' }));
 			notification.open({
 				message: 'Done',
 				description: 'New Document created',
@@ -85,12 +51,12 @@ const YiEditor: React.FC = () => {
 		} catch (e) {
 			handleError(e);
 		}
-	}, [dispatch]);
+	}, []);
 
 	const resetEditorDocument = useCallback(async () => {
 		try {
-			dispatch(resetEditor());
-			dispatch(resetDictionary());
+			// dispatch(resetEditor());
+			// dispatch(resetDictionary());
 			if (currentLanguage) {
 				await dispatch(fetchTags(currentLanguage.key));
 			}
@@ -104,29 +70,11 @@ const YiEditor: React.FC = () => {
 		}
 	}, [currentLanguage, dispatch]);
 
-	const confirmReset = useCallback(async () => {
-		if (documentModified) {
-			confirm({
-				title: 'Resetting Document',
-				icon: <ExclamationCircleOutlined />,
-				content: `This will reset the currently loaded Document. Continue?`,
-				okText: 'Yes',
-				okType: 'primary',
-				cancelText: 'No',
-				async onOk() {
-					resetEditorDocument();
-				},
-			});
-		} else {
-			resetEditorDocument();
-		}
-	}, [documentModified, resetEditorDocument]);
-
 	// If we change our Document we need to check if we have stored caret
 	// and restore if this is the case.
 	return (
 		<div>
-			<div style={{ position: 'relative' }}>
+			<div>
 				<Spin
 					spinning={!!loading}
 					size="large"
@@ -142,82 +90,10 @@ const YiEditor: React.FC = () => {
 								}}
 							>
 								<TabPane tab="Document" key="1">
-									{editorDocument ? (
-										<DndProvider backend={HTML5Backend}>
-											<EditorDocument
-												document={editorDocument}
-											/>
-										</DndProvider>
-									) : (
-										<Empty
-											image={Empty.PRESENTED_IMAGE_SIMPLE}
-											description={
-												<span>No Document loaded.</span>
-											}
-										>
-											<Button
-												type="primary"
-												onClick={createEditorDocument}
-											>
-												Create Now
-											</Button>
-										</Empty>
-									)}
+									<EditorDocument />
 								</TabPane>
-								<TabPane tab="Elements" key="2">
-									<SentencesPanel />
-									<Divider />
-									<WordsPanel />
-								</TabPane>
+								<TabPane tab="Elements" key="2" />
 							</Tabs>
-
-							<ul className="editor-menu">
-								<li>
-									<Button
-										type="text"
-										icon={<DeleteOutlined />}
-										onClick={confirmReset}
-										disabled={!editorHasBlocks}
-									/>
-								</li>
-								<li>
-									<Button
-										type="text"
-										icon={
-											showAddBlockPanel ? (
-												<MinusOutlined />
-											) : (
-												<PlusOutlined />
-											)
-										}
-										onClick={() =>
-											setShowAddBlockPanel(
-												(current) => !current
-											)
-										}
-										disabled={!editorDocument}
-									/>
-								</li>
-								<li>
-									<Button
-										type="text"
-										icon={<SaveOutlined />}
-										disabled={
-											!editorHasBlocks ||
-											!documentModified
-										}
-										onClick={() => save()}
-									/>
-								</li>
-							</ul>
-							{showAddBlockPanel && (
-								<AddBlockPanel
-									addBlockCB={(block: DocumentBlock) => {
-										dispatch(addBlock(block));
-										setShowAddBlockPanel(false);
-									}}
-								/>
-							)}
 						</div>
 					</div>
 				</Spin>

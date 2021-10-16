@@ -3,13 +3,14 @@ import { createLogger } from 'redux-logger';
 import { composeWithDevTools } from 'redux-devtools-extension';
 import thunk, { ThunkAction, ThunkMiddleware } from 'redux-thunk';
 import userState from './user/reducers';
-import documentState from './editor/reducers';
 import dictionaryState from './dictionary/reducers';
 import uiState from './ui/reducers';
 import { UserMutation } from './user/types';
-import { EditorMutation } from './editor/types';
 import { DictionaryMutation } from './dictionary/types';
 import { UIMutation } from './ui/types';
+
+export type DirtyType = 'NEW' | 'UPDATED' | 'DELETED' | null;
+export type DirtyObject<T> = T & { dirty: DirtyType };
 
 export type IRootState = ReturnType<typeof rootReducer>;
 export type IRootDispatch = typeof store.dispatch;
@@ -29,7 +30,7 @@ const logger = createLogger();
 const dev = process.env.NODE_ENV === 'development';
 const thunkmw: ThunkMiddleware<
 	IRootState,
-	UserMutation | EditorMutation | DictionaryMutation | UIMutation
+	UserMutation | DictionaryMutation | UIMutation
 > = thunk;
 
 let middleware = dev
@@ -55,7 +56,6 @@ if (dev) {
 }
 const rootReducer = combineReducers({
 	user: userState,
-	editor: documentState,
 	dictionary: dictionaryState,
 	ui: uiState,
 });

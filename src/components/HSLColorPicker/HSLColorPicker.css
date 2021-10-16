@@ -1,5 +1,5 @@
-.slidecontainer {
-	width: 100%; /* Width of the outside container */
+.slide-container {
+	width: 200px; /* Width of the outside container */
 }
 
 /* The slider itself */

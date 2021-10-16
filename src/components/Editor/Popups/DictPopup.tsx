@@ -22,7 +22,7 @@ export interface IDictPopupProps {
 
 const DictPopup: React.FC<IDictPopupProps> = ({ dictId, popupState }) => {
 	const userDictionary = useSelector<IRootState, StoreMap<IDictionaryEntry>>(
-		(state) => state.dictionary.dictionary
+		(state) => state.dictionary.entries
 	);
 
 	const userTags = useSelector<IRootState, StoreMap<IDictionaryTag>>(

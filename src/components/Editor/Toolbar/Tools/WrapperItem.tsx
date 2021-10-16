@@ -1,17 +1,14 @@
 import './WrapperItem.css';
 import { DownOutlined, UpOutlined } from '@ant-design/icons';
 import { Button, Tooltip } from 'antd';
-import { FragmentType } from 'Document/Fragment';
 import React, { useCallback, useRef, useState } from 'react';
 import useClickOutside from '@hooks/useClickOutside';
 import { IToolbarItem } from './ToolbarItem';
 
 export interface IToolbarWrapperItem extends IToolbarItem {
-	type: 'Wrapper';
 	tooltipActive: string;
 	wrap: () => Promise<void>;
 	unwrap: () => Promise<void>;
-	fragmentType: FragmentType;
 	active: boolean;
 }
 

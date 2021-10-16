@@ -5,7 +5,7 @@
 }
 
 .floating-container > div {
-	transform: translate(-50%, 40px);
+	transform: translate(-50%, 0px);
 }
 
 .floating-container * {

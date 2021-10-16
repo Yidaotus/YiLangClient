@@ -1,37 +1,15 @@
 import {
-	DragOutlined,
 	UpOutlined,
 	DownOutlined,
 	DeleteOutlined,
 	MoreOutlined,
 } from '@ant-design/icons';
-import {
-	scaleMapEntry,
-	removeBlock,
-	configureBlock,
-} from '@store/editor/actions';
-import { DocumentBlockNormalized } from '@store/editor/types';
 import { Button, Popover, Space, Tooltip, Popconfirm } from 'antd';
 import React from 'react';
-import { ConnectDragSource } from 'react-dnd';
-import { useDispatch } from 'react-redux';
-import { configuratorMap } from '@components/Editor/Blocks/Elements';
 
-interface IContainerMenuProps {
-	block: DocumentBlockNormalized;
-	drag: ConnectDragSource;
-}
-
-const BlockContainerMenu: React.FC<IContainerMenuProps> = ({ block, drag }) => {
-	const dispatch = useDispatch();
-
-	const blockConfigurators = configuratorMap[block.type]
-		? configuratorMap[block.type]
-		: [];
-
+const BlockContainerMenu: React.FC = () => {
 	return (
 		<div>
-			<Button type="link" icon={<DragOutlined />} ref={drag} />
 			<Popover
 				placement="left"
 				trigger="click"
@@ -43,14 +21,7 @@ const BlockContainerMenu: React.FC<IContainerMenuProps> = ({ block, drag }) => {
 									size="small"
 									shape="circle"
 									icon={<UpOutlined />}
-									onClick={() =>
-										dispatch(
-											scaleMapEntry({
-												id: block.id,
-												mode: 'up',
-											})
-										)
-									}
+									onClick={() => {}}
 								/>
 							</Tooltip>
 							<Tooltip title="Scale down" placement="bottom">
@@ -58,14 +29,7 @@ const BlockContainerMenu: React.FC<IContainerMenuProps> = ({ block, drag }) => {
 									size="small"
 									shape="circle"
 									icon={<DownOutlined />}
-									onClick={() =>
-										dispatch(
-											scaleMapEntry({
-												id: block.id,
-												mode: 'down',
-											})
-										)
-									}
+									onClick={() => {}}
 								/>
 							</Tooltip>
 							<Tooltip title="Delete" placement="bottom">
@@ -74,9 +38,7 @@ const BlockContainerMenu: React.FC<IContainerMenuProps> = ({ block, drag }) => {
 									placement="bottom"
 									okText="Yes"
 									cancelText="No"
-									onConfirm={() =>
-										dispatch(removeBlock(block.id))
-									}
+									onConfirm={() => {}}
 								>
 									<Button
 										type="primary"
@@ -88,28 +50,7 @@ const BlockContainerMenu: React.FC<IContainerMenuProps> = ({ block, drag }) => {
 								</Popconfirm>
 							</Tooltip>
 						</Space>
-						<Space direction="horizontal">
-							{blockConfigurators?.map((configurator) => (
-								<Tooltip
-									title={configurator.title}
-									key={configurator.title}
-								>
-									<Button
-										size="small"
-										shape="circle"
-										icon={configurator.icon}
-										onClick={() =>
-											dispatch(
-												configureBlock({
-													configurator,
-													blockId: block.id,
-												})
-											)
-										}
-									/>
-								</Tooltip>
-							))}
-						</Space>
+						<Space direction="horizontal">test</Space>
 					</Space>
 				}
 			>

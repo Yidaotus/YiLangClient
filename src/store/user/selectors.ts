@@ -3,7 +3,7 @@ import { createSelector } from 'reselect';
 import { IRootState } from '../index';
 import { IUser, IUserState } from './types';
 
-const selectActiveLanguageFromState = (
+const selectActiveLanguage = (
 	state: IUserState
 ): ILanguageConfig | undefined => {
 	const { languageConfigs, activeLanguage } = state.config;
@@ -39,7 +39,7 @@ const selectActiveUser = (state: IRootState): IUser | null => state.user.user;
 // eslint-disable-next-line import/prefer-default-export
 export {
 	selectActiveLanguageConfig,
-	selectActiveLanguageFromState,
+	selectActiveLanguage,
 	selectActiveLookupSources,
 	selectAvailableLanguageConfigs,
 	selectActiveUser,

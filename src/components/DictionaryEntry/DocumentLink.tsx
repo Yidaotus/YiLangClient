@@ -1,12 +1,11 @@
 import React, { useCallback } from 'react';
-import { loadDocument } from '@store/editor/actions';
-import { IDocumentLink } from 'Document/Document';
 import { useDispatch } from 'react-redux';
 import { useHistory } from 'react-router';
 import Highlighter from 'react-highlight-words';
 import Link from 'antd/lib/typography/Link';
 import handleError from '@helpers/Error';
 import { IRootDispatch } from '@store/index';
+import { IDocumentLink } from 'Document/Dictionary';
 
 const DocumentLink: React.FC<{
 	link: IDocumentLink;
@@ -19,13 +18,13 @@ const DocumentLink: React.FC<{
 	const fetchDocumentAndSwitch = useCallback(async () => {
 		// setLoading('Loading Document');
 		try {
-			await dispatch(loadDocument({ type: 'load', id: link.documentId }));
+			// await dispatch(loadDocument({ type: 'load', id: link.documentId }));
 			history.push('/home/editor/new');
 		} catch (e) {
 			handleError(e);
 		}
 		// setLoading(null);
-	}, [dispatch, history, link]);
+	}, [history]);
 	return (
 		<Link onClick={() => fetchDocumentAndSwitch()}>
 			{

@@ -15,7 +15,7 @@ type IFetchFunction = (id: UUID) => Promise<IDictionaryEntryResolved | null>;
 
 const useLazyDictionary = (): IFetchFunction => {
 	const userDictionary = useSelector(
-		(state: IRootState) => state.dictionary.dictionary
+		(state: IRootState) => state.dictionary.entries
 	);
 	const userTags = useSelector((state: IRootState) => state.dictionary.tags);
 	const currentLanguage = useSelector(selectActiveLanguageConfig);

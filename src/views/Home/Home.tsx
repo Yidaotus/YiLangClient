@@ -25,10 +25,10 @@ import DictionaryEntry from 'views/Home/DictionaryEntry/DictionaryEntry';
 import { useDispatch, useSelector } from 'react-redux';
 import { UserOutlined } from '@ant-design/icons';
 import SettingsPopover from '@components/SettingsPopover/SettingsPopover';
-import { initialize } from '@store/editor/actions';
 import handleError from '@helpers/Error';
 import { selectActiveLanguageConfig } from '@store/user/selectors';
 import { IRootDispatch } from '@store/index';
+import { initialize } from '@store/user/actions';
 import Overview from './Overview/Overview';
 import Settings from './Settings/Settings';
 

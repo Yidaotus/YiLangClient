@@ -1,239 +1,310 @@
 import './EditorDocument.css';
-import React, { useState, useRef } from 'react';
-import { Empty, Button, Tooltip, Select } from 'antd';
+import React, { useCallback, useMemo, useRef, useState } from 'react';
 import {
-	MinusCircleOutlined,
-	PlusCircleOutlined,
-	ArrowDownOutlined,
-	EyeTwoTone,
-	EyeInvisibleOutlined,
-} from '@ant-design/icons';
-import useSelectedText from '@hooks/useSelectedText';
-import { useDispatch, useSelector } from 'react-redux';
-import { DocumentNormalized, IEditorState } from '@store/editor/types';
-import { changeLayer, toggleSpelling } from '@store/editor/actions';
-import BlockContainer from '@editor/Blocks/BlockContainer/BlockContainer';
-import Toolbar from '@editor/Toolbar/Toolbar';
-import DropEdge from '@editor/Blocks/DropEdge/DropEdge';
+	createEditor,
+	Descendant,
+	Transforms,
+	Text,
+	Editor,
+	Element as SlateElement,
+	Node as SlateNode,
+} from 'slate';
+
 import {
-	selectAvailableLayers,
-	selectShowSpelling,
-} from '@store/editor/selectors';
-import { IRootState } from '@store/index';
-import { getUUID } from 'Document/UUID';
+	Slate,
+	Editable,
+	withReact,
+	RenderLeafProps,
+	RenderElementProps,
+} from 'slate-react';
+import { addWordToDictionary } from '@store/dictionary/actions';
+import { IRootDispatch } from '@store/index';
+import { useDispatch } from 'react-redux';
+import { CustomElement, SentenceElement, VocabElement } from './CustomEditor';
+import Toolbar from './Toolbar/Toolbar';
+import MarkFragment from './Fragments/MarkFragment';
 import DictPopupController from './Popups/DictPopupController';
-import SentencePopupController from './Popups/SentencePopupController';
+import BlockContainer from './Blocks/BlockContainer/BlockContainer';
+import WordFragmentController from './Fragments/WordFragmentController';
+import SentenceFragment from './Fragments/SentenceFragment';
 
-const { Option } = Select;
-
-export interface IEditorOption {
-	name: string;
-	icon: React.ReactNode;
-	handler: () => void;
-	tooltip: string;
-}
-
-export interface IEditorBlocksProps {
-	editorDocument: IEditorState;
-}
-
-interface IEditorDocumentProps {
-	document: DocumentNormalized;
-}
-
-/**
- * Render the passed document.
- *
- * @param editorDocument The document to render.
- */
-const EditorDocument: React.FC<IEditorDocumentProps> = ({ document }) => {
-	const [fontSize, setFontSize] = useState(1.3);
-	const dispatch = useDispatch();
-
-	const availableLayers = useSelector(selectAvailableLayers);
-	const activeLayer = useSelector(
-		(state: IRootState) => state.editor.selectedFragmentLayer
+// Define a React component to render leaves with bold text.
+const Leaf = ({ attributes, leaf, children }: RenderLeafProps) => {
+	return (
+		<span
+			{...attributes}
+			style={{ fontWeight: leaf.bold ? 'bold' : 'normal' }}
+		>
+			{children}
+		</span>
 	);
-	const showSpellingActive = useSelector(selectShowSpelling);
-	const editorContainer = useRef<HTMLDivElement | null>(null);
-	useSelectedText(editorContainer);
-	const { renderMap } = document || [];
+};
 
-	const options: IEditorOption[] = [
-		{
-			name: 'fontSizeIncrease',
-			icon: <PlusCircleOutlined />,
-			handler: () => {
-				setFontSize((currentFontSize) => currentFontSize + 0.1);
-			},
-			tooltip: 'Increase font size',
-		},
-		{
-			name: 'fontSizeDecrease',
-			icon: <MinusCircleOutlined />,
-			handler: () => {
-				setFontSize((currentFontSize) => currentFontSize - 0.1);
-			},
-			tooltip: 'Decrease font size',
-		},
-		{
-			name: 'toggleSpelling',
-			icon: showSpellingActive ? (
-				<EyeTwoTone />
-			) : (
-				<EyeInvisibleOutlined />
-			),
-			handler: () => {
-				dispatch(toggleSpelling());
-			},
-			tooltip: 'Toggle spelling visibility',
-		},
+const isBoldMarkActive = (editor: Editor): boolean => {
+	const [matched] = Editor.nodes(editor, {
+		match: (n) => Text.isText(n) && n.bold === true,
+		universal: true,
+	});
+	return !!matched;
+};
+
+const withYiLang = (editor: Editor) => {
+	const { isInline, isVoid } = editor;
+	const availableElementTypes: Array<CustomElement['type']> = [
+		'vocab',
+		'mark',
+		'sentence',
 	];
 
-	const renderWidthFractions = new Set<number>();
+	// eslint-disable-next-line no-param-reassign
+	editor.isInline = (element) => {
+		return availableElementTypes.includes(element.type)
+			? true
+			: isInline(element);
+	};
 
-	for (const row of renderMap) {
-		let columnWidth = 0;
-		for (const renderEntry of row) {
-			const scalar = renderEntry.scale ? renderEntry.scale : 1;
-			columnWidth += scalar;
-		}
-		renderWidthFractions.add(columnWidth);
-	}
+	// eslint-disable-next-line no-param-reassign
+	editor.isVoid = (element) => {
+		return element.type === 'vocab' ? true : isVoid(element);
+	};
 
-	const renderedMap = renderMap.map((row, y) => {
-		const columnWidth = row.reduce((accu, entry) => accu + entry.scale, 0);
-		const rowKey = y * 20;
-		const renderedRow = (
-			<React.Fragment key={rowKey}>
-				<div className="block-row">
-					<>
-						{row.map((renderEntry, x) => {
-							const cssCalcWidth = `calc(100% * ${renderEntry.scale}/${columnWidth})`;
-							const renderCell =
-								renderEntry.type === 'block' ? (
-									<div
-										style={{
-											width: cssCalcWidth,
-										}}
-									>
-										<BlockContainer
-											fontSize={fontSize}
-											rowIndex={y}
-											columnIndex={x}
-											isSplitRow={row.length > 1}
-											blockId={renderEntry.id}
-										/>
-									</div>
-								) : (
-									<div
-										style={{
-											// custom-ident can't start with a number
-											border: '2px dashed #c1c1c1',
-											width: cssCalcWidth,
-										}}
-									>
-										<Empty
-											image={Empty.PRESENTED_IMAGE_SIMPLE}
-											description={false}
-										/>
-									</div>
-								);
-							return (
-								<React.Fragment key={renderEntry.id}>
-									<DropEdge
-										rowIndex={y}
-										columnIndex={x}
-										type="vertical"
-									/>
-									{renderCell}
-								</React.Fragment>
-							);
-						})}
-						<DropEdge
-							rowIndex={y}
-							columnIndex={row.length + 1}
-							type="vertical"
-							key={`RenderEdge${rowKey}`}
-						/>
-					</>
-				</div>
-				<div className="block-row">
-					<div style={{ width: '100%' }}>
-						<DropEdge
-							columnIndex={0}
-							rowIndex={y + 1}
-							type="horizontal"
-						/>
-					</div>
-				</div>
-			</React.Fragment>
-		);
-		return renderedRow;
+	return editor;
+};
+
+const insertSentence = (editor: Editor, translation: string) => {
+	Transforms.unwrapNodes(editor, {
+		match: (n) => {
+			return SlateElement.isElement(n) && n.type === 'sentence';
+		},
 	});
 
+	const vocab: SentenceElement = {
+		type: 'sentence',
+		translation,
+		children: [{ text: '' }],
+	};
+	Transforms.wrapNodes(editor, vocab, { split: true });
+	Transforms.collapse(editor, { edge: 'end' });
+};
+
+const insertVocab = (editor: Editor, wordId: string) => {
+	const vocab: VocabElement = {
+		type: 'vocab',
+		wordId,
+		children: [{ text: '' }],
+	};
+	Transforms.wrapNodes(editor, vocab, { split: true });
+};
+
+const Element = (props: RenderElementProps) => {
+	const { children, attributes, element } = props;
+	switch (element.type) {
+		case 'sentence':
+			return (
+				<SentenceFragment
+					// eslint-disable-next-line react/no-children-prop
+					children={children}
+					attributes={attributes}
+					element={element}
+				/>
+			);
+		case 'vocab':
+			return (
+				<WordFragmentController
+					// eslint-disable-next-line react/no-children-prop
+					children={children}
+					attributes={attributes}
+					element={element}
+				/>
+			);
+		case 'mark':
+			return (
+				<MarkFragment
+					// eslint-disable-next-line react/no-children-prop
+					children={children}
+					attributes={attributes}
+					element={element}
+				/>
+			);
+		default:
+			return <BlockContainer renderProps={props} fontSize={1.2} />;
+	}
+};
+
+const App: React.FC = () => {
+	const ref = useRef(null);
+	const editor = useMemo(() => withYiLang(withReact(createEditor())), []);
+	// Add the initial value when setting up our state.
+
+	const [editorNodes, setEditorNodes] = useState<Descendant[]>([
+		{
+			type: 'paragraph',
+			children: [{ text: 'A line of text in a paragraph.' }],
+		},
+	]);
+	const dispatch: IRootDispatch = useDispatch();
+
+	const renderLeaf = useCallback((props) => {
+		return <Leaf {...props} />;
+	}, []);
+
+	const renderElement = useCallback((props) => <Element {...props} />, []);
+
+	const vocab = useMemo(() => {
+		const vocabs: Array<string> = [];
+
+		if (editorNodes.length > 0) {
+			const vocabNodes = Editor.nodes(editor, {
+				match: (n) => SlateElement.isElement(n) && n.type === 'vocab',
+				at: [[0], [editor.children.length - 1]],
+			});
+			if (vocabNodes) {
+				for (const [vocabNode] of vocabNodes) {
+					vocabs.push(SlateNode.string(vocabNode));
+				}
+			}
+		}
+
+		return vocabs;
+	}, [editor, editorNodes.length]);
+
+	const sentences = useMemo(() => {
+		const sentencesInEditor: Array<string> = [];
+		for (const currentNode of editorNodes) {
+			const sentenceFragments = SlateNode.elements(currentNode, {
+				pass: ([node]) =>
+					SlateElement.isElement(node) && node.type === 'sentence',
+			});
+
+			if (sentenceFragments) {
+				for (const [sentenceFragment] of sentenceFragments) {
+					if (
+						SlateElement.isElement(sentenceFragment) &&
+						sentenceFragment.type === 'sentence'
+					) {
+						sentencesInEditor.push(
+							SlateNode.string(sentenceFragment)
+						);
+					}
+				}
+			}
+		}
+		return sentencesInEditor;
+	}, [editorNodes]);
+
 	return (
-		<div style={{ position: 'relative' }}>
-			<div className="editor-options-panel">
-				<Select
-					defaultValue={activeLayer || ''}
-					style={{ width: 160 }}
-					onChange={(id) => {
-						dispatch(changeLayer(getUUID(id as string)));
+		<div style={{ position: 'relative', fontSize: '1.3em' }} ref={ref}>
+			<Slate
+				editor={editor}
+				value={editorNodes}
+				onChange={(newValue) => setEditorNodes(newValue)}
+			>
+				<Toolbar rootElement={ref} />
+				<DictPopupController rootElement={ref} />
+				<div
+					style={{
+						display: 'flex',
+						flexDirection: 'column',
 					}}
 				>
-					{availableLayers.map((layer) => (
-						<Option value={layer.id} key={layer.id}>
-							{layer.name}
-						</Option>
-					))}
-				</Select>
-				{options.map((option) => (
-					<Tooltip
-						title={option.tooltip}
-						key={option.name}
-						placement="bottom"
-					>
-						<Button
-							shape="circle"
-							type="text"
-							size="large"
-							icon={option.icon}
-							onClick={option.handler}
+					<div>
+						<Editable
+							renderElement={renderElement}
+							renderLeaf={renderLeaf}
+							onKeyDown={(event) => {
+								if (event.getModifierState('Alt')) {
+									if (event.key === '&') {
+										// Prevent the ampersand character from being inserted.
+										event.preventDefault();
+										// Execute the `insertText` method when the event occurs.
+										editor.insertText('and');
+									}
+									if (event.key === 'a') {
+										if (editor.selection) {
+											event.preventDefault();
+											const root = Editor.string(
+												editor,
+												editor.selection,
+												{ voids: true }
+											);
+											const dictEntry = {
+												createdAt: new Date(),
+												// eslint-disable-next-line react/destructuring-assignment
+												key: root,
+												lang: 'jp',
+												tags: [],
+												translations: ['lul'],
+											};
+											const wordId = dispatch(
+												addWordToDictionary(dictEntry)
+											);
+											if (wordId) {
+												insertVocab(editor, wordId);
+											}
+										}
+									}
+									if (event.key === 's') {
+										event.preventDefault();
+										insertSentence(editor, 'test sentence');
+									}
+									if (event.key === 'b') {
+										// Prevent the ampersand character from being inserted.
+										event.preventDefault();
+										// Execute the `insertText` method when the event occurs.
+										if (isBoldMarkActive(editor)) {
+											Transforms.setNodes(
+												editor,
+												{ bold: undefined },
+												// Apply it to text nodes, and split the text node up if the
+												// selection is overlapping only part of it.
+												{
+													match: (n) =>
+														Text.isText(n),
+													split: true,
+												}
+											);
+										} else {
+											Transforms.setNodes(
+												editor,
+												{ bold: true },
+												// Apply it to text nodes, and split the text node up if the
+												// selection is overlapping only part of it.
+												{
+													match: (n) =>
+														Text.isText(n),
+													split: true,
+												}
+											);
+										}
+									}
+								}
+							}}
 						/>
-					</Tooltip>
-				))}
-			</div>
-			<Toolbar />
-			<div ref={editorContainer}>
-				<SentencePopupController />
-				<DictPopupController />
-				{Object.values(renderMap).length < 1 ? (
-					<Empty
-						key="Empty"
-						image={Empty.PRESENTED_IMAGE_SIMPLE}
-						description={
-							<>
-								<p>Add a block to start</p>
-								<ArrowDownOutlined
-									style={{ fontSize: '1.8em' }}
-								/>
-							</>
-						}
-					/>
-				) : (
-					<>
-						<DropEdge
-							columnIndex={0}
-							rowIndex={0}
-							type="horizontal"
-						/>
-						{renderedMap}
-					</>
-				)}
-			</div>
+					</div>
+					<div>
+						<h1>Sentence</h1>
+						<ul>
+							{sentences.map((sentence) => (
+								<li>{sentence}</li>
+							))}
+						</ul>
+						<h1>Vocab</h1>
+						<ul>
+							{vocab.map((v) => (
+								<li>{v}</li>
+							))}
+						</ul>
+						<h1>Value</h1>
+						<pre>{JSON.stringify(editorNodes, null, 2)}</pre>
+						<h1>State</h1>
+						<pre>{JSON.stringify(editor.children, null, 2)}</pre>
+						<h1>Operations</h1>
+						<pre>{JSON.stringify(editor.operations, null, 2)}</pre>
+					</div>
+				</div>
+			</Slate>
 		</div>
 	);
 };
 
-export default React.memo(EditorDocument);
+export default App;
