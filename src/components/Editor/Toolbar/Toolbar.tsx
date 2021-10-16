@@ -7,9 +7,20 @@ import { IRootDispatch } from 'store';
 
 import { selectActiveLookupSources } from '@store/user/selectors';
 import { ReactEditor, useSlate } from 'slate-react';
-import { Editor, Element as SlateElement, Range, Transforms } from 'slate';
-import { TranslationOutlined } from '@ant-design/icons';
+import {
+	Editor,
+	Element as SlateElement,
+	Range,
+	Transforms,
+	Text,
+} from 'slate';
+import {
+	PicRightOutlined,
+	SearchOutlined,
+	TranslationOutlined,
+} from '@ant-design/icons';
 import { saveOrUpdateEntryInput } from '@store/dictionary/actions';
+import { formatURL } from '@components/LookupSourceLink';
 import SimpleInput, { useSimpleInput } from './Modals/SimpleInput';
 import Floating, { floatingReducer } from '../Popups/Floating';
 
@@ -17,6 +28,7 @@ import WordInput, { useWordInput } from './Modals/WordEditor/WordEditor';
 import ColorPicker from './Tools/ColorPicker';
 import { isNodeInSelection, VocabElement } from '../CustomEditor';
 import WrapperItem from './Tools/WrapperItem';
+import DropdownItem from './Tools/DropdownItem';
 
 type IToolbarState =
 	| {
@@ -91,6 +103,7 @@ const Toolbar: React.FC<{ rootElement: React.RefObject<HTMLElement> }> = ({
 							y: relativeY,
 							width: rangeBounding.width,
 							height: rangeBounding.height,
+							offsetY: Math.ceil(rangeBounding.height * 0.15),
 						},
 					});
 				}
@@ -134,10 +147,39 @@ const Toolbar: React.FC<{ rootElement: React.RefObject<HTMLElement> }> = ({
 						wordId: mainId,
 						children: [{ text: '' }],
 					};
-					Transforms.wrapNodes(editor, vocab, {
-						at: savedSelection,
-						split: true,
+					const allLeafs = Editor.nodes(editor, {
+						at: [[0], [editor.children.length - 1]],
+						match: (e) => Text.isText(e),
 					});
+					const searchRegexp = new RegExp(root, 'g');
+					for (const [leafMatch, leafPath] of allLeafs) {
+						if (Text.isText(leafMatch)) {
+							const foundRoots = String(leafMatch.text).matchAll(
+								searchRegexp
+							);
+							const foundRoot = foundRoots.next();
+							if (foundRoot.value?.index !== undefined) {
+								// we split the node if we found any hits, so we can just wrap the first hit
+								// and continue the loop. Since the loop makes use of the generator function
+								// it will automatically iterate to the next (new)
+								Transforms.wrapNodes(editor, vocab, {
+									at: {
+										anchor: {
+											path: leafPath,
+											offset: foundRoot.value.index,
+										},
+										focus: {
+											path: leafPath,
+											offset:
+												foundRoot.value.index +
+												foundRoot.value[0].length,
+										},
+									},
+									split: true,
+								});
+							}
+						}
+					}
 				}
 			}
 			setToolbarState({
@@ -193,6 +235,79 @@ const Toolbar: React.FC<{ rootElement: React.RefObject<HTMLElement> }> = ({
 								},
 							});
 						}}
+					/>
+					<Divider
+						type="vertical"
+						style={{
+							margin: '0 0px !important',
+							borderLeft: '1px solid rgb(0 0 0 / 27%)',
+						}}
+					/>
+					<WrapperItem
+						icon={<PicRightOutlined />}
+						tooltip="sentence"
+						tooltipActive="sentence"
+						active={isNodeInSelection(
+							editor,
+							editor.selection,
+							'sentence'
+						)}
+						name="sentence"
+						visible
+						wrap={async () => {
+							Transforms.wrapNodes(
+								editor,
+								{
+									type: 'sentence',
+									translation: 'teste',
+									children: [{ text: '' }],
+								},
+								{
+									split: true,
+									voids: true,
+								}
+							);
+						}}
+						unwrap={async () => {
+							Transforms.unwrapNodes(editor, {
+								voids: true,
+								match: (n) => {
+									return (
+										SlateElement.isElement(n) &&
+										n.type === 'sentence'
+									);
+								},
+							});
+						}}
+					/>
+					<Divider
+						type="vertical"
+						style={{
+							margin: '0 0px !important',
+							borderLeft: '1px solid rgb(0 0 0 / 27%)',
+						}}
+					/>
+					<DropdownItem
+						icon={<SearchOutlined />}
+						tooltip="lookup"
+						name="lookup"
+						visible
+						items={lookupSources.map((source) => ({
+							type: 'Action',
+							name: source.name,
+							action: () => {
+								if (editor.selection) {
+									const url = formatURL({
+										source,
+										searchTerm: Editor.string(
+											editor,
+											editor.selection
+										),
+									});
+									window.open(url);
+								}
+							},
+						}))}
 					/>
 				</div>
 			)}

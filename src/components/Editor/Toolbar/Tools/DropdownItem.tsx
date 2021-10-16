@@ -8,7 +8,6 @@ export interface IDropdownAction {
 }
 
 export interface IToolbarDropdownItem extends IToolbarItem {
-	type: 'Dropdown';
 	items: IDropdownAction[];
 }
 
@@ -29,7 +28,13 @@ const DropdownItem: React.FC<IToolbarDropdownItem> = ({
 								{items.map((dropdownItem) => (
 									<Menu.Item
 										key={dropdownItem.name}
-										onClick={() => dropdownItem.action()}
+										onClick={() => {
+											dropdownItem.action();
+										}}
+										onMouseDown={(e) => {
+											// Fix so slate doesn't lose selection
+											e.preventDefault();
+										}}
 									>
 										{dropdownItem.name}
 									</Menu.Item>

@@ -1,5 +1,11 @@
 // This example is for an Editor with `ReactEditor` and `HistoryEditor`
-import { BaseEditor, Editor, Element as SlateElement, Selection } from 'slate';
+import {
+	BaseEditor,
+	Descendant,
+	Editor,
+	Element as SlateElement,
+	Selection,
+} from 'slate';
 import { ReactEditor } from 'slate-react';
 
 export type CustomEditor = BaseEditor & ReactEditor;
@@ -16,14 +22,20 @@ export type VocabElement = {
 	children: CustomText[];
 };
 
-export type ParagraphElement = {
-	type: 'paragraph';
+export type HeaderElement = {
+	type: 'head';
+	level: number;
 	children: CustomText[];
 };
 
-export type HeadingElement = {
-	type: 'heading';
-	level: number;
+export type ParagraphElement = {
+	type: 'paragraph';
+	children: Descendant[];
+};
+
+export type InlineImage = {
+	type: 'inline-image';
+	src: string;
 	children: CustomText[];
 };
 
@@ -35,9 +47,10 @@ export type MarkElement = {
 
 export type CustomElement =
 	| ParagraphElement
-	| HeadingElement
+	| InlineImage
 	| VocabElement
 	| MarkElement
+	| HeaderElement
 	| SentenceElement;
 
 export type FormattedText = { text: string; bold?: true };

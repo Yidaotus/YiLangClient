@@ -17,10 +17,7 @@ import {
 	RenderLeafProps,
 	RenderElementProps,
 } from 'slate-react';
-import { addWordToDictionary } from '@store/dictionary/actions';
-import { IRootDispatch } from '@store/index';
-import { useDispatch } from 'react-redux';
-import { CustomElement, SentenceElement, VocabElement } from './CustomEditor';
+import { CustomElement } from './CustomEditor';
 import Toolbar from './Toolbar/Toolbar';
 import MarkFragment from './Fragments/MarkFragment';
 import DictPopupController from './Popups/DictPopupController';
@@ -50,50 +47,26 @@ const isBoldMarkActive = (editor: Editor): boolean => {
 
 const withYiLang = (editor: Editor) => {
 	const { isInline, isVoid } = editor;
-	const availableElementTypes: Array<CustomElement['type']> = [
+	const inlineTypes: Array<CustomElement['type']> = [
 		'vocab',
 		'mark',
 		'sentence',
+		'inline-image',
 	];
+
+	const voidTypes: Array<CustomElement['type']> = ['vocab', 'inline-image'];
 
 	// eslint-disable-next-line no-param-reassign
 	editor.isInline = (element) => {
-		return availableElementTypes.includes(element.type)
-			? true
-			: isInline(element);
+		return inlineTypes.includes(element.type) ? true : isInline(element);
 	};
 
 	// eslint-disable-next-line no-param-reassign
 	editor.isVoid = (element) => {
-		return element.type === 'vocab' ? true : isVoid(element);
+		return voidTypes.includes(element.type) ? true : isVoid(element);
 	};
 
 	return editor;
-};
-
-const insertSentence = (editor: Editor, translation: string) => {
-	Transforms.unwrapNodes(editor, {
-		match: (n) => {
-			return SlateElement.isElement(n) && n.type === 'sentence';
-		},
-	});
-
-	const vocab: SentenceElement = {
-		type: 'sentence',
-		translation,
-		children: [{ text: '' }],
-	};
-	Transforms.wrapNodes(editor, vocab, { split: true });
-	Transforms.collapse(editor, { edge: 'end' });
-};
-
-const insertVocab = (editor: Editor, wordId: string) => {
-	const vocab: VocabElement = {
-		type: 'vocab',
-		wordId,
-		children: [{ text: '' }],
-	};
-	Transforms.wrapNodes(editor, vocab, { split: true });
 };
 
 const Element = (props: RenderElementProps) => {
@@ -101,48 +74,91 @@ const Element = (props: RenderElementProps) => {
 	switch (element.type) {
 		case 'sentence':
 			return (
-				<SentenceFragment
-					// eslint-disable-next-line react/no-children-prop
-					children={children}
-					attributes={attributes}
-					element={element}
-				/>
+				<SentenceFragment attributes={attributes} element={element}>
+					{children}
+				</SentenceFragment>
+			);
+		case 'head': {
+			switch (element.level) {
+				case 1:
+					return <h1 {...attributes}>{children}</h1>;
+				case 2:
+					return <h2 {...attributes}>{children}</h2>;
+				default:
+					return <h1 {...attributes}>{children}</h1>;
+			}
+		}
+		case 'inline-image':
+			return (
+				<span {...attributes}>
+					{children}
+					<img
+						src={element.src}
+						style={{ float: 'right', userSelect: 'none' }}
+						alt="test"
+					/>
+				</span>
 			);
 		case 'vocab':
 			return (
 				<WordFragmentController
-					// eslint-disable-next-line react/no-children-prop
-					children={children}
 					attributes={attributes}
 					element={element}
-				/>
+				>
+					{children}
+				</WordFragmentController>
 			);
 		case 'mark':
 			return (
-				<MarkFragment
-					// eslint-disable-next-line react/no-children-prop
-					children={children}
-					attributes={attributes}
-					element={element}
-				/>
+				<MarkFragment attributes={attributes} element={element}>
+					{children}
+				</MarkFragment>
 			);
 		default:
-			return <BlockContainer renderProps={props} fontSize={1.2} />;
+			return <div {...attributes}>{children}</div>;
 	}
 };
 
 const App: React.FC = () => {
 	const ref = useRef(null);
 	const editor = useMemo(() => withYiLang(withReact(createEditor())), []);
-	// Add the initial value when setting up our state.
 
 	const [editorNodes, setEditorNodes] = useState<Descendant[]>([
 		{
+			type: 'head',
+			level: 1,
+			children: [
+				{
+					text: 'イチゴの中はどうなっている？',
+				},
+			],
+		},
+		{
+			type: 'head',
+			level: 2,
+			children: [
+				{
+					text: 'イチゴの中はどうなっている？',
+				},
+			],
+		},
+		{
 			type: 'paragraph',
-			children: [{ text: 'A line of text in a paragraph.' }],
+			children: [
+				{
+					text: '今回のミカタは「中を見てみる」。イチゴの中はどうなっているか、街の人に聞いてみました。まず、男の子。「こんな感じだ と思います。まわりが赤くなって、中に粒（つぶ）がある」。中にツブツブ？　続いて女の子。',
+				},
+				{
+					type: 'inline-image',
+					src: 'https://www.nhk.or.jp/das/image/D0005110/D0005110342_00000_C_001.jpg',
+					children: [{ text: '' }],
+				},
+				{
+					text: '真ん中が白っぽくて空洞（くうどう）になっていて、まわりは赤い」。中に空洞？　若い女の人は、「真ん中が真っ白で、徐々（じょじょ）に赤くなっていく感じ」。真ん中は白い？　みんながかいたイチゴの中。中にツブツブ、中に空洞、真ん中が白い、スジがある…。実際はどうなっているのでしょう。',
+				},
+			],
 		},
 	]);
-	const dispatch: IRootDispatch = useDispatch();
 
 	const renderLeaf = useCallback((props) => {
 		return <Leaf {...props} />;
@@ -151,7 +167,7 @@ const App: React.FC = () => {
 	const renderElement = useCallback((props) => <Element {...props} />, []);
 
 	const vocab = useMemo(() => {
-		const vocabs: Array<string> = [];
+		const vocabs: Set<string> = new Set();
 
 		if (editorNodes.length > 0) {
 			const vocabNodes = Editor.nodes(editor, {
@@ -160,7 +176,7 @@ const App: React.FC = () => {
 			});
 			if (vocabNodes) {
 				for (const [vocabNode] of vocabNodes) {
-					vocabs.push(SlateNode.string(vocabNode));
+					vocabs.add(SlateNode.string(vocabNode));
 				}
 			}
 		}
@@ -219,34 +235,6 @@ const App: React.FC = () => {
 										// Execute the `insertText` method when the event occurs.
 										editor.insertText('and');
 									}
-									if (event.key === 'a') {
-										if (editor.selection) {
-											event.preventDefault();
-											const root = Editor.string(
-												editor,
-												editor.selection,
-												{ voids: true }
-											);
-											const dictEntry = {
-												createdAt: new Date(),
-												// eslint-disable-next-line react/destructuring-assignment
-												key: root,
-												lang: 'jp',
-												tags: [],
-												translations: ['lul'],
-											};
-											const wordId = dispatch(
-												addWordToDictionary(dictEntry)
-											);
-											if (wordId) {
-												insertVocab(editor, wordId);
-											}
-										}
-									}
-									if (event.key === 's') {
-										event.preventDefault();
-										insertSentence(editor, 'test sentence');
-									}
 									if (event.key === 'b') {
 										// Prevent the ampersand character from being inserted.
 										event.preventDefault();
@@ -290,7 +278,7 @@ const App: React.FC = () => {
 						</ul>
 						<h1>Vocab</h1>
 						<ul>
-							{vocab.map((v) => (
+							{[...vocab.values()].map((v) => (
 								<li>{v}</li>
 							))}
 						</ul>

@@ -1,5 +1,7 @@
 .slide-container {
 	width: 200px; /* Width of the outside container */
+	height: 24px;
+	margin-top: 4px;
 }
 
 /* The slider itself */
