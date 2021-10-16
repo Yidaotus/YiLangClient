@@ -13,6 +13,7 @@ import {
 	Range,
 	Transforms,
 	Text,
+	Path,
 } from 'slate';
 import {
 	PicRightOutlined,
@@ -26,9 +27,14 @@ import Floating, { floatingReducer } from '../Popups/Floating';
 
 import WordInput, { useWordInput } from './Modals/WordEditor/WordEditor';
 import ColorPicker from './Tools/ColorPicker';
-import { isNodeInSelection, VocabElement } from '../CustomEditor';
+import {
+	highlightSelection,
+	isNodeInSelection,
+	VocabElement,
+} from '../CustomEditor';
 import WrapperItem from './Tools/WrapperItem';
 import DropdownItem from './Tools/DropdownItem';
+import ActionItem from './Tools/ActionItem';
 
 type IToolbarState =
 	| {
@@ -124,6 +130,7 @@ const Toolbar: React.FC<{ rootElement: React.RefObject<HTMLElement> }> = ({
 	const wrapWithWord = async () => {
 		if (editor.selection) {
 			const savedSelection = editor.selection;
+			const removeHighlights = highlightSelection(editor, savedSelection);
 			setToolbarState({
 				actionBarVisible: false,
 				simpleInputVisible: false,
@@ -187,6 +194,7 @@ const Toolbar: React.FC<{ rootElement: React.RefObject<HTMLElement> }> = ({
 				simpleInputVisible: false,
 				wordInputVisible: false,
 			});
+			removeHighlights?.();
 		}
 	};
 
@@ -308,6 +316,26 @@ const Toolbar: React.FC<{ rootElement: React.RefObject<HTMLElement> }> = ({
 								}
 							},
 						}))}
+					/>
+					<Divider
+						type="vertical"
+						style={{
+							margin: '0 0px !important',
+							borderLeft: '1px solid rgb(0 0 0 / 27%)',
+						}}
+					/>
+					<ActionItem
+						icon={<SearchOutlined />}
+						tooltip="lookup"
+						name="lookup"
+						visible
+						action={() => {
+							console.log(Editor.string(editor, [2]));
+							Transforms.setSelection(editor, {
+								anchor: { path: [2], offset: 1 },
+								focus: { path: [2], offset: 10 },
+							});
+						}}
 					/>
 				</div>
 			)}

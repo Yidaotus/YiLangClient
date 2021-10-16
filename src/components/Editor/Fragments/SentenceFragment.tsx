@@ -14,8 +14,6 @@ const SentenceFragment: React.FC<SentenceFragmentProps> = ({
 		<span
 			{...attributes}
 			style={{
-				verticalAlign: 'baseline',
-				display: 'inline-block',
 				borderBottom: '1px dashed #8DA46E',
 			}}
 		>

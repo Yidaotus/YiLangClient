@@ -5,10 +5,21 @@ import {
 	Editor,
 	Element as SlateElement,
 	Selection,
+	Range,
+	Location,
+	Node as SlateNode,
+	Transforms,
 } from 'slate';
 import { ReactEditor } from 'slate-react';
+import { Transform } from 'stream';
 
 export type CustomEditor = BaseEditor & ReactEditor;
+
+export type HighlightElement = {
+	type: 'highlight';
+	role: 'highlight' | 'deemphasize';
+	children: CustomText[];
+};
 
 export type SentenceElement = {
 	type: 'sentence';
@@ -51,6 +62,7 @@ export type CustomElement =
 	| VocabElement
 	| MarkElement
 	| HeaderElement
+	| HighlightElement
 	| SentenceElement;
 
 export type FormattedText = { text: string; bold?: true };
@@ -96,4 +108,91 @@ export const isNodeInSelection = (
 		match: (n) => SlateElement.isElement(n) && n.type === type,
 	});
 	return !nodesInside.next().done;
+};
+
+export const highlightSelection = (
+	editor: Editor,
+	selection?: Location
+): (() => void) | null => {
+	const sel = selection || editor.selection;
+	if (!sel) {
+		return null;
+	}
+
+	const topLevelElement = Editor.above(editor, {
+		at: sel,
+		match: (e) => SlateElement.isElement(e),
+		mode: 'highest',
+	});
+
+	if (!topLevelElement) {
+		return null;
+	}
+
+	const [topLevelNode, topLevelPath] = topLevelElement;
+
+	const highlightElem: HighlightElement = {
+		type: 'highlight',
+		role: 'highlight',
+		children: [{ text: '' }],
+	};
+
+	const deepmhesizeElement: HighlightElement = {
+		type: 'highlight',
+		role: 'deemphasize',
+		children: [{ text: '' }],
+	};
+
+	Transforms.wrapNodes(editor, deepmhesizeElement, {
+		at: {
+			anchor: {
+				path: topLevelPath,
+				offset: 0,
+			},
+			focus: {
+				path: topLevelPath,
+				offset: 1,
+			},
+		},
+		split: false,
+	});
+
+	if (editor.selection) {
+		Transforms.wrapNodes(editor, highlightElem, {
+			at: editor.selection,
+			split: true,
+		});
+	}
+
+	const removeHighlights = () => {
+		Transforms.unwrapNodes(editor, {
+			at: {
+				anchor: {
+					path: topLevelPath,
+					offset: 0,
+				},
+				focus: {
+					path: topLevelPath,
+					offset: SlateNode.string(topLevelNode).length,
+				},
+			},
+			match: (e) => SlateElement.isElement(e) && e.type === 'highlight',
+		});
+
+		Transforms.unwrapNodes(editor, {
+			at: {
+				anchor: {
+					path: topLevelPath,
+					offset: 0,
+				},
+				focus: {
+					path: topLevelPath,
+					offset: SlateNode.string(topLevelNode).length,
+				},
+			},
+			match: (e) => SlateElement.isElement(e) && e.type === 'highlight',
+		});
+	};
+
+	return removeHighlights;
 };

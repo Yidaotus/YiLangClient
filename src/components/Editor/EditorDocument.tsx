@@ -51,6 +51,7 @@ const withYiLang = (editor: Editor) => {
 		'vocab',
 		'mark',
 		'sentence',
+		'highlight',
 		'inline-image',
 	];
 
@@ -88,6 +89,24 @@ const Element = (props: RenderElementProps) => {
 					return <h1 {...attributes}>{children}</h1>;
 			}
 		}
+		case 'highlight':
+			return element.role === 'highlight' ? (
+				<span
+					style={{ color: 'black' }}
+					{...attributes}
+					contentEditable
+				>
+					{children}
+				</span>
+			) : (
+				<span
+					style={{ color: 'lightgray' }}
+					{...attributes}
+					contentEditable={false}
+				>
+					{children}
+				</span>
+			);
 		case 'inline-image':
 			return (
 				<span {...attributes}>

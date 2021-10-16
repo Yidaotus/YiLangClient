@@ -3,7 +3,6 @@ import React from 'react';
 import { IToolbarItem } from './ToolbarItem';
 
 export interface IToolbarActionItem extends IToolbarItem {
-	type: 'Action';
 	action: () => void;
 }
 
