@@ -132,8 +132,8 @@ const Toolbar: React.FC<{ rootElement: React.RefObject<HTMLElement> }> = ({
 
 	const wrapWithWord = async () => {
 		if (editor.selection) {
-			const savedSelection = editor.selection;
-			// const removeHighlights = highlightSelection(editor, savedSelection);
+			const savedSelection = { ...editor.selection };
+			const removeHighlights = highlightSelection(editor, savedSelection);
 			setToolbarState({
 				actionBarVisible: false,
 				simpleInputVisible: false,
@@ -203,12 +203,12 @@ const Toolbar: React.FC<{ rootElement: React.RefObject<HTMLElement> }> = ({
 				simpleInputVisible: false,
 				wordInputVisible: false,
 			});
-			// removeHighlights?.();
+			removeHighlights?.();
 		}
 	};
 
 	return (
-		<Floating state={toolbarContainerState}>
+		<Floating state={toolbarContainerState} arrow>
 			{toolbarState.simpleInputVisible && (
 				<div tabIndex={0} role="button">
 					<SimpleInput {...simpleInputState} />

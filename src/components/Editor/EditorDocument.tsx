@@ -236,6 +236,7 @@ const EditorDocument: React.FC = () => {
 			>
 				<Toolbar rootElement={ref} />
 				<DictPopupController rootElement={ref} />
+
 				<div
 					style={{
 						display: 'flex',
