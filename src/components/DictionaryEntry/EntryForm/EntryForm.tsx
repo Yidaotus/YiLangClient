@@ -1,10 +1,9 @@
 import './EntryForm.css';
 import React from 'react';
 import { Divider, Form, Input } from 'antd';
-import { IDictionaryEntry, IDictionaryTag } from 'Document/Dictionary';
+import { IDictionaryTag } from 'Document/Dictionary';
 import { FormInstance, RuleObject } from 'antd/lib/form';
 import DictionarySelect from '@components/DictionaryEntry/DictionarySelect/DictionarySelect';
-import { StoreMap } from '@store/index';
 import YiSelect from '@components/DictionaryEntry/YiSelect';
 import YiTagsInput from '@components/DictionaryEntry/YiTagsInput/YiTagsInput';
 import { IDictionaryEntryInput } from '@store/dictionary/actions';
@@ -15,7 +14,6 @@ export interface IEntryFormProps {
 	createTag?: (tagName: string) => void;
 	createRoot?: (key: string) => void;
 	allTags: Array<IDictionaryTag>;
-	localDictionary?: StoreMap<IDictionaryEntry>;
 	canEditRoot?: boolean;
 }
 
@@ -36,7 +34,6 @@ const EntryForm: React.FC<IEntryFormProps> = ({
 	createTag,
 	createRoot,
 	allTags,
-	localDictionary,
 	canEditRoot,
 }) => {
 	return (
@@ -97,7 +94,6 @@ const EntryForm: React.FC<IEntryFormProps> = ({
 					<DictionarySelect
 						placeholder="Select a root entry"
 						createRoot={createRoot}
-						localDictionary={localDictionary}
 					/>
 				</Form.Item>
 			</Form>

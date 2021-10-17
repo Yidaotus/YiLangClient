@@ -26,16 +26,11 @@ export interface IWordInputState {
 }
 
 export type WordEditorMode = 'word' | 'tag' | 'root';
-
-interface IWordEditorState {
-	mode: WordEditorMode;
-}
-
 type WordReducerAction =
 	| {
 			type: 'pushState';
 			payload: {
-				newState: IWordEditorState;
+				newState: WordEditorMode;
 				stateChanged?: (stage: WordEditorMode) => void;
 			};
 	  }
@@ -45,8 +40,8 @@ type WordReducerAction =
 	  };
 
 interface IWordReducerState {
-	currentState: IWordEditorState;
-	stateHistory: Array<IWordEditorState>;
+	currentState: WordEditorMode;
+	stateHistory: Array<WordEditorMode>;
 }
 
 const wordStateReducer: React.Reducer<IWordReducerState, WordReducerAction> = (
@@ -55,7 +50,7 @@ const wordStateReducer: React.Reducer<IWordReducerState, WordReducerAction> = (
 ) => {
 	switch (action.type) {
 		case 'pushState': {
-			action.payload.stateChanged?.(action.payload.newState.mode);
+			action.payload.stateChanged?.(action.payload.newState);
 			return {
 				currentState: action.payload.newState,
 				stateHistory: [...state.stateHistory, state.currentState],
@@ -66,7 +61,7 @@ const wordStateReducer: React.Reducer<IWordReducerState, WordReducerAction> = (
 				const newHistory = [...state.stateHistory];
 				const newMode = newHistory.pop();
 				if (newMode) {
-					action.payload.stateChanged?.(newMode.mode);
+					action.payload.stateChanged?.(newMode);
 					return { currentState: newMode, stateHistory: newHistory };
 				}
 			}
@@ -78,8 +73,8 @@ const wordStateReducer: React.Reducer<IWordReducerState, WordReducerAction> = (
 };
 
 const INITIAL_WORD_REDUCER_STATE: IWordReducerState = {
-	currentState: { mode: 'word' as const },
-	stateHistory: new Array<IWordEditorState>(),
+	currentState: 'word',
+	stateHistory: new Array<WordEditorMode>(),
 };
 
 type FinishCallbackReturn =
@@ -111,9 +106,6 @@ const WordInput: React.ForwardRefRenderFunction<
 	const userTags = useSelector((store: IRootState) =>
 		Object.values(store.dictionary.tags).filter(notUndefined)
 	);
-	const localDictionary = useSelector(
-		(store: IRootState) => store.dictionary.entries
-	);
 
 	useEffect(() => {
 		if (typeof root === 'string') {
@@ -136,7 +128,7 @@ const WordInput: React.ForwardRefRenderFunction<
 				});
 				dispatchWordEditorState({
 					type: 'pushState',
-					payload: { newState: { mode: 'tag' }, stateChanged },
+					payload: { newState: 'tag', stateChanged },
 				});
 				createdId = getUUID();
 			} catch (e) {
@@ -157,7 +149,7 @@ const WordInput: React.ForwardRefRenderFunction<
 				rootForm.setFieldsValue({ key, lang: selectedLanguage.key });
 				dispatchWordEditorState({
 					type: 'pushState',
-					payload: { newState: { mode: 'root' }, stateChanged },
+					payload: { newState: 'root', stateChanged },
 				});
 				createdId = getUUID();
 			} catch (e) {
@@ -170,7 +162,7 @@ const WordInput: React.ForwardRefRenderFunction<
 
 	const finish = useCallback(async () => {
 		let result: FinishCallbackReturn = { isDone: false };
-		if (wordEditorState.currentState.mode === 'word') {
+		if (wordEditorState.currentState === 'word') {
 			try {
 				const wordFormData = await wordForm.validateFields();
 				result = { isDone: true, entry: wordFormData };
@@ -178,7 +170,7 @@ const WordInput: React.ForwardRefRenderFunction<
 			} catch (e) {
 				// The forms will show appropriate erros themselfes.
 			}
-		} else if (wordEditorState.currentState.mode === 'tag') {
+		} else if (wordEditorState.currentState === 'tag') {
 			try {
 				const tagValues = await tagForm.validateFields();
 				tagForm.resetFields();
@@ -199,7 +191,7 @@ const WordInput: React.ForwardRefRenderFunction<
 							wordEditorState.stateHistory.length - 1
 						];
 					let targetForm;
-					if (previousState.mode === 'word') {
+					if (previousState === 'word') {
 						targetForm = wordForm;
 					} else {
 						targetForm = rootForm;
@@ -242,50 +234,43 @@ const WordInput: React.ForwardRefRenderFunction<
 		rootForm,
 		stateChanged,
 		tagForm,
-		wordEditorState.currentState.mode,
+		wordEditorState.currentState,
 		wordEditorState.stateHistory,
 		wordForm,
 	]);
 
 	const cancel = useCallback(() => {
-		let isDone;
-		if (wordEditorState.currentState.mode === 'word') {
-			isDone = true;
-		} else {
+		const isDone = wordEditorState.currentState === 'word';
+		if (!isDone) {
 			dispatchWordEditorState({
 				type: 'popState',
 				payload: { stateChanged },
 			});
-			isDone = false;
 		}
 		return isDone;
-	}, [stateChanged, wordEditorState.currentState.mode]);
+	}, [stateChanged, wordEditorState.currentState]);
 
 	useImperativeHandle(ref, () => ({ finish, cancel }), [cancel, finish]);
-
 	const canEditRoot = typeof root === 'string' && root === '';
-
 	return (
 		<div>
-			{wordEditorState.currentState.mode === 'word' && (
+			{wordEditorState.currentState === 'word' && (
 				<EntryForm
 					form={wordForm}
 					canEditRoot={canEditRoot}
 					createTag={createTagCallback}
 					createRoot={createRootCallback}
-					localDictionary={localDictionary}
 					allTags={[...userTags, ...createdTags]}
 				/>
 			)}
-			{wordEditorState.currentState.mode === 'root' && (
+			{wordEditorState.currentState === 'root' && (
 				<EntryForm
 					form={rootForm}
 					createTag={createTagCallback}
-					localDictionary={localDictionary}
 					allTags={[...userTags, ...createdTags]}
 				/>
 			)}
-			{wordEditorState.currentState.mode === 'tag' && (
+			{wordEditorState.currentState === 'tag' && (
 				<TagForm form={tagForm} />
 			)}
 		</div>

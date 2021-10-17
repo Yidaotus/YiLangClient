@@ -11,7 +11,7 @@ import {
 import { useHistory } from 'react-router';
 
 type IDictEntryProps = {
-	dictEntry: IDictionaryEntryResolved;
+	entry: IDictionaryEntryResolved;
 	canLink?: boolean;
 };
 
@@ -58,11 +58,11 @@ const EntryTag: React.FC<{ tag: IDictionaryTag }> = ({ tag }) => {
 	);
 };
 
-const DictEntry: React.FC<IDictEntryProps> = (props) => {
-	const { dictEntry, canLink } = props;
-	const { key, spelling, comment, translations, tags, id } = dictEntry;
+const DictionaryEntry: React.FC<IDictEntryProps> = (props) => {
+	const { entry, canLink } = props;
 	const history = useHistory();
 
+	const { key, spelling, comment, translations, id } = entry;
 	return (
 		<div className="dictentry-panel">
 			<div className="dictentry-head">
@@ -89,7 +89,7 @@ const DictEntry: React.FC<IDictEntryProps> = (props) => {
 			<blockquote>{comment}</blockquote>
 			<p>{translations.join(', ')}</p>
 			<ul>
-				{tags.map((tag) => (
+				{entry.tags.map((tag) => (
 					<li key={tag.id} className="tag-node">
 						<EntryTag tag={tag} />
 					</li>
@@ -99,4 +99,4 @@ const DictEntry: React.FC<IDictEntryProps> = (props) => {
 	);
 };
 
-export default DictEntry;
+export default DictionaryEntry;

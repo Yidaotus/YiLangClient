@@ -1,4 +1,5 @@
 // This example is for an Editor with `ReactEditor` and `HistoryEditor`
+import { UUID } from 'Document/UUID';
 import {
 	BaseEditor,
 	Descendant,
@@ -11,7 +12,6 @@ import {
 	Transforms,
 } from 'slate';
 import { ReactEditor } from 'slate-react';
-import { Transform } from 'stream';
 
 export type CustomEditor = BaseEditor & ReactEditor;
 
@@ -27,9 +27,9 @@ export type SentenceElement = {
 	children: CustomText[];
 };
 
-export type VocabElement = {
-	type: 'vocab';
-	wordId: string;
+export type WordElement = {
+	type: 'word';
+	dictId: UUID;
 	children: CustomText[];
 };
 
@@ -59,7 +59,7 @@ export type MarkElement = {
 export type CustomElement =
 	| ParagraphElement
 	| InlineImage
-	| VocabElement
+	| WordElement
 	| MarkElement
 	| HeaderElement
 	| HighlightElement

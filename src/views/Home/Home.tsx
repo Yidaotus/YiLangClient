@@ -21,7 +21,7 @@ import {
 } from 'antd';
 import Dictionary from 'views/Home/Dictionary/Dictionary';
 import Documents from 'views/Home/Documents/Documents';
-import DictionaryEntry from 'views/Home/DictionaryEntry/DictionaryEntry';
+import DictionaryEntryPage from 'views/Home/DictionaryEntry/DictionaryEntryPage';
 import { useDispatch, useSelector } from 'react-redux';
 import { UserOutlined } from '@ant-design/icons';
 import SettingsPopover from '@components/SettingsPopover/SettingsPopover';
@@ -142,7 +142,7 @@ const HomeView: React.FC = () => {
 									<Documents />
 								</Route>
 								<Route path={locationMap.dicitonaryEntry}>
-									<DictionaryEntry />
+									<DictionaryEntryPage />
 								</Route>
 								<Route path={locationMap.dicitonary}>
 									<Dictionary />

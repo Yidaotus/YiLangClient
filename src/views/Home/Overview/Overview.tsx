@@ -23,7 +23,6 @@ const Overview: React.FC = () => {
 	const [loading, setLoading] = useState(false);
 	const [excerpts, setExcerpts] = useState<Array<IDocumentExcerpt>>([]);
 	const [entries, setEntries] = useState<Array<IDictionaryEntryResolved>>([]);
-	const dispatch: IRootDispatch = useDispatch();
 	const history = useHistory();
 
 	const cachedTags = useSelector(
@@ -160,7 +159,7 @@ const Overview: React.FC = () => {
 								entries.map((entry) => (
 									<DictionaryEntry
 										key={entry.id}
-										dictEntry={entry}
+										entry={entry}
 										canLink
 									/>
 								))}

@@ -1,8 +1,9 @@
+import useDictionaryEntry from '@hooks/useDictionaryEntry';
 import { UUID } from 'Document/UUID';
 import React, { useReducer, useState, useEffect } from 'react';
 import { Editor, Range } from 'slate';
 import { ReactEditor, useSlate } from 'slate-react';
-import { isNodeAtSelection, VocabElement } from '../CustomEditor';
+import { isNodeAtSelection, WordElement } from '../CustomEditor';
 import DictPopup from './DictPopup';
 import { floatingReducer } from './Floating';
 
@@ -11,6 +12,9 @@ const DictPopupController: React.FC<{
 }> = ({ rootElement }) => {
 	const editor = useSlate();
 	const [dictId, setDictId] = useState<UUID | null>(null);
+	const entry = useDictionaryEntry(dictId);
+	const rootEntry = useDictionaryEntry(entry?.root || null);
+
 	const [popupContainerState, dispatchPopupContainerState] = useReducer(
 		floatingReducer,
 		{
@@ -29,9 +33,9 @@ const DictPopupController: React.FC<{
 		const clickedVocab = isNodeAtSelection(
 			editor,
 			editor.selection,
-			'vocab'
+			'word'
 		);
-		let wordNode: VocabElement | null = null;
+		let wordNode: WordElement | null = null;
 
 		if (
 			rootNode &&
@@ -41,7 +45,7 @@ const DictPopupController: React.FC<{
 		) {
 			const wordFragment = Editor.above(editor);
 			if (wordFragment) {
-				wordNode = wordFragment[0] as VocabElement;
+				wordNode = wordFragment[0] as WordElement;
 				const range = ReactEditor.toDOMNode(editor, wordNode);
 				const rangeBounding = range?.getBoundingClientRect();
 				const containerBounding = rootNode.getBoundingClientRect();
@@ -62,7 +66,7 @@ const DictPopupController: React.FC<{
 							offsetY: 5,
 						},
 					});
-					setDictId(wordNode.wordId as UUID);
+					setDictId(wordNode.dictId);
 				}
 			}
 		} else {
@@ -70,7 +74,15 @@ const DictPopupController: React.FC<{
 		}
 	}, [editor, editor.selection, rootElement]);
 
-	return <DictPopup popupState={popupContainerState} dictId={dictId} />;
+	return (
+		entry && (
+			<DictPopup
+				popupState={popupContainerState}
+				entry={entry}
+				rootEntry={rootEntry}
+			/>
+		)
+	);
 };
 
 export default DictPopupController;

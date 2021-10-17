@@ -228,7 +228,7 @@ export type IDictionaryEntryInput = Omit<
 	root: UUID | IEntryFormFields;
 };
 
-const saveEntryRemote =
+const saveEntry =
 	(
 		entry: IDictionaryEntryInput,
 		update = false
@@ -379,7 +379,7 @@ const saveOrUpdateEntryInput =
 	};
 
 export {
-	saveEntryRemote,
+	saveEntry,
 	removeEntry,
 	removeTag,
 	removeTagRemote,

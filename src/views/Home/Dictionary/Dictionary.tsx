@@ -8,7 +8,7 @@ import WordInput, {
 } from '@components/Editor/Toolbar/Modals/WordEditor/WordEditor';
 import { IRootDispatch } from '@store/index';
 import { useDispatch, useSelector } from 'react-redux';
-import { fetchTags, saveEntryRemote } from '@store/dictionary/actions';
+import { fetchTags, saveEntry } from '@store/dictionary/actions';
 import TagList from '@components/TagList/TagList';
 import handleError from '@helpers/Error';
 import InnerModal from '@components/InnerModal/InnerModal';
@@ -27,7 +27,7 @@ const Dictionary: React.FC = () => {
 	const [newTagVisible, setNewTagVisible] = useState(false);
 	const activeLanguage = useSelector(selectActiveLanguageConfig);
 
-	const saveEntry = async () => {
+	const createNewEntry = async () => {
 		try {
 			if (!activeLanguage) {
 				throw new Error('No language selected!');
@@ -37,7 +37,7 @@ const Dictionary: React.FC = () => {
 			const editResult = await getUserWord('');
 			if (editResult) {
 				try {
-					await dispatch(saveEntryRemote(editResult));
+					await dispatch(saveEntry(editResult));
 					dispatch(fetchTags(activeLanguage.key));
 					notification.open({
 						message: 'Success',
@@ -73,7 +73,7 @@ const Dictionary: React.FC = () => {
 								icon={<PlusOutlined />}
 								type="primary"
 								onClick={() => {
-									saveEntry();
+									createNewEntry();
 								}}
 							>
 								New Entry
@@ -122,7 +122,7 @@ const Dictionary: React.FC = () => {
 							key="1"
 							icon={<PlusOutlined />}
 							onClick={() => {
-								saveEntry();
+								createNewEntry();
 							}}
 							type="primary"
 						>
