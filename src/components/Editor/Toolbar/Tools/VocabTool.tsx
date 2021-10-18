@@ -5,14 +5,11 @@ import React, { useState } from 'react';
 import { Editor, Transforms, Element as SlateElement } from 'slate';
 import {
 	isNodeInSelection,
-	VocabElement,
+	WordElement,
 } from '@components/Editor/CustomEditor';
 import { IRootDispatch } from '@store/index';
 import { useDispatch } from 'react-redux';
-import {
-	addWordToDictionary,
-	saveOrUpdateEntryInput,
-} from '@store/dictionary/actions';
+import { saveOrUpdateEntryInput } from '@store/dictionary/actions';
 import WordInput, { useWordInput } from '../Modals/WordEditor/WordEditor';
 
 export interface IToolbarWrapperItem {
@@ -23,7 +20,7 @@ const tooltip = 'Mark a Word';
 const icon = <TranslationOutlined />;
 const VocabTool: React.FC<IToolbarWrapperItem> = ({ editor }): JSX.Element => {
 	const [wordInputVisible, setWordInputVisible] = useState(false);
-	const isActive = isNodeInSelection(editor, editor.selection, 'vocab');
+	const isActive = isNodeInSelection(editor, editor.selection, 'word');
 	const { wordInputState, getUserWord } = useWordInput();
 	const dispatch: IRootDispatch = useDispatch();
 
@@ -45,9 +42,9 @@ const VocabTool: React.FC<IToolbarWrapperItem> = ({ editor }): JSX.Element => {
 				} else {
 					[mainId] = saveResult;
 				}
-				const vocab: VocabElement = {
-					type: 'vocab',
-					wordId: mainId,
+				const vocab: WordElement = {
+					type: 'word',
+					dictId: mainId,
 					children: [{ text: '' }],
 				};
 				Transforms.wrapNodes(editor, vocab, { split: true });
@@ -58,7 +55,7 @@ const VocabTool: React.FC<IToolbarWrapperItem> = ({ editor }): JSX.Element => {
 	const unwrap = () => {
 		Transforms.unwrapNodes(editor, {
 			match: (n) => {
-				return SlateElement.isElement(n) && n.type === 'vocab';
+				return SlateElement.isElement(n) && n.type === 'word';
 			},
 		});
 	};

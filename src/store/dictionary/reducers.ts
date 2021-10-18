@@ -10,18 +10,18 @@ import { DictionaryMutation, IDictionaryState } from './types';
 const USE_DEBUG_WORDS = false;
 const INITIAL_DICTIAONARY = USE_DEBUG_WORDS
 	? Object.entries(debugWords).reduce((acc, [key, value]) => {
-			acc[key] = {
-				id: getUUID(),
-				key,
-				lang: 'dft',
-				translations: [...value.translation.split(',')],
-				spelling: value.spelling,
-				tags: [],
-				createdAt: new Date(),
-				dirty: null,
-			};
-			return acc;
-	  }, {} as StoreMap<DirtyObject<IDictionaryEntry>>)
+		acc[key] = {
+			id: getUUID(),
+			key,
+			lang: 'dft',
+			translations: [...value.translation.split(',')],
+			spelling: value.spelling,
+			tags: [],
+			createdAt: new Date(),
+			dirty: null,
+		};
+		return acc;
+	}, {} as StoreMap<DirtyObject<IDictionaryEntry>>)
 	: {};
 
 const INITIAL_DICTIONARY_STATE: IDictionaryState = {
@@ -40,24 +40,14 @@ export default (
 				draft = dictionary;
 				break;
 			}
-			case 'DICTIONARY_CACHE_TAG': {
-				const { tag } = action.payload;
-				draft.tags[tag.id] = { ...tag, dirty: null };
+			case 'DICTIONARY_SET_TAG': {
+				const { id, tag } = action.payload;
+				draft.tags[id] = { ...tag, id };
 				break;
 			}
-			case 'DICTIONARY_CACHE_ENTRY': {
-				const { entry } = action.payload;
-				draft.entries[entry.id] = { ...entry, dirty: null };
-				break;
-			}
-			case 'DICTIONARY_ADD_TAG': {
-				const { tag } = action.payload;
-				draft.tags[tag.id] = { ...tag, dirty: 'NEW' };
-				break;
-			}
-			case 'DICTIONARY_ADD_ENTRY': {
-				const { entry } = action.payload;
-				draft.entries[entry.id] = { ...entry, dirty: 'NEW' };
+			case 'DICTIONARY_SET_ENTRY': {
+				const { id, entry } = action.payload;
+				draft.entries[id] = { ...entry, id };
 				break;
 			}
 			case 'DICTIONARY_REMOVE_TAG': {
@@ -65,7 +55,7 @@ export default (
 
 				const storeTag = draft.tags[id];
 				if (storeTag) {
-					draft.tags[id] = { ...storeTag, dirty: 'DELETED' };
+					delete draft.tags[id];
 				}
 				break;
 			}
@@ -73,50 +63,7 @@ export default (
 				const { id } = action.payload;
 				const storeEntry = draft.entries[id];
 				if (storeEntry) {
-					draft.entries[id] = { ...storeEntry, dirty: 'DELETED' };
-				}
-				break;
-			}
-			case 'DICTIONARY_UPDATE_TAG': {
-				const { id, tag } = action.payload;
-				const storeTag = draft.tags[id];
-				if (storeTag) {
-					const dirty = storeTag.dirty === 'NEW' ? 'NEW' : 'UPDATED';
-					draft.tags[id] = { ...tag, id, dirty };
-				}
-				break;
-			}
-			case 'DICTIONARY_UPDATE_ENTRY': {
-				const { id, entry } = action.payload;
-				const storeEntry = draft.tags[id];
-				if (storeEntry) {
-					const dirty =
-						storeEntry.dirty === 'NEW' ? 'NEW' : 'UPDATED';
-					draft.entries[id] = { ...entry, id, dirty };
-				}
-				break;
-			}
-			case 'DICTIONARY_SET_LINK': {
-				const { id, link } = action.payload;
-				const entry = draft.entries[id];
-				if (entry) {
-					entry.firstSeen = link;
-				}
-				break;
-			}
-			case 'DICTIONARY_CLEAN_TAG': {
-				const { id } = action.payload;
-				const entry = draft.entries[id];
-				if (entry) {
-					entry.dirty = null;
-				}
-				break;
-			}
-			case 'DICTIONARY_CLEAN_ENTRY': {
-				const { id } = action.payload;
-				const entry = draft.entries[id];
-				if (entry) {
-					entry.dirty = null;
+					delete draft.entries[id];
 				}
 				break;
 			}

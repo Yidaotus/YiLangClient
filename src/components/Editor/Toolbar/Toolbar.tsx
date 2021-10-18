@@ -20,7 +20,10 @@ import {
 	SearchOutlined,
 	TranslationOutlined,
 } from '@ant-design/icons';
-import { saveOrUpdateEntryInput } from '@store/dictionary/actions';
+import {
+	saveDictionary,
+	saveOrUpdateEntryInput,
+} from '@store/dictionary/actions';
 import { formatURL } from '@components/LookupSourceLink';
 import SimpleInput, { useSimpleInput } from './Modals/SimpleInput';
 import Floating, { floatingReducer } from '../Popups/Floating';
@@ -30,7 +33,7 @@ import ColorPicker from './Tools/ColorPicker';
 import {
 	highlightSelection,
 	isNodeInSelection,
-	VocabElement,
+	WordElement,
 } from '../CustomEditor';
 import WrapperItem from './Tools/WrapperItem';
 import DropdownItem from './Tools/DropdownItem';
@@ -129,7 +132,7 @@ const Toolbar: React.FC<{ rootElement: React.RefObject<HTMLElement> }> = ({
 
 	const wrapWithWord = async () => {
 		if (editor.selection) {
-			const savedSelection = editor.selection;
+			const savedSelection = { ...editor.selection };
 			const removeHighlights = highlightSelection(editor, savedSelection);
 			setToolbarState({
 				actionBarVisible: false,
@@ -149,11 +152,16 @@ const Toolbar: React.FC<{ rootElement: React.RefObject<HTMLElement> }> = ({
 					} else {
 						[mainId] = saveResult;
 					}
-					const vocab: VocabElement = {
-						type: 'vocab',
-						wordId: mainId,
+					const vocab: WordElement = {
+						type: 'word',
+						dictId: mainId,
 						children: [{ text: '' }],
 					};
+					Transforms.wrapNodes(editor, vocab, {
+						at: savedSelection,
+						split: true,
+					});
+					/*
 					const allLeafs = Editor.nodes(editor, {
 						at: [[0], [editor.children.length - 1]],
 						match: (e) => Text.isText(e),
@@ -187,6 +195,7 @@ const Toolbar: React.FC<{ rootElement: React.RefObject<HTMLElement> }> = ({
 							}
 						}
 					}
+					*/
 				}
 			}
 			setToolbarState({
@@ -199,7 +208,7 @@ const Toolbar: React.FC<{ rootElement: React.RefObject<HTMLElement> }> = ({
 	};
 
 	return (
-		<Floating state={toolbarContainerState}>
+		<Floating state={toolbarContainerState} arrow>
 			{toolbarState.simpleInputVisible && (
 				<div tabIndex={0} role="button">
 					<SimpleInput {...simpleInputState} />
@@ -227,7 +236,7 @@ const Toolbar: React.FC<{ rootElement: React.RefObject<HTMLElement> }> = ({
 						active={isNodeInSelection(
 							editor,
 							editor.selection,
-							'vocab'
+							'word'
 						)}
 						name="word"
 						visible
@@ -238,7 +247,7 @@ const Toolbar: React.FC<{ rootElement: React.RefObject<HTMLElement> }> = ({
 								match: (n) => {
 									return (
 										SlateElement.isElement(n) &&
-										n.type === 'vocab'
+										n.type === 'word'
 									);
 								},
 							});

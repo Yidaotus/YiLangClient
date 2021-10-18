@@ -1,45 +1,21 @@
-import { IDictionaryEntryResolved } from 'Document/Dictionary';
-import { UUID } from 'Document/UUID';
 import React, { CSSProperties } from 'react';
 import { RenderElementProps } from 'slate-react';
+import useDictionaryEntry from '../../../hooks/useDictionaryEntry';
+import { WordElement } from '../CustomEditor';
 
-const WordFragment: React.FC<{
-	id: UUID;
-	dictEntry: IDictionaryEntryResolved;
-	renderProps: RenderElementProps;
-}> = ({ id, dictEntry, renderProps }) => {
-	let wordTagsWithColor = [];
-	wordTagsWithColor = dictEntry.tags.filter((tag) => tag && tag.color);
-	const numberOfTags = wordTagsWithColor?.length || 0;
-	const lengthPerTag = 100 / numberOfTags;
+export type IWordFragmentData = Omit<RenderElementProps, 'element'> & {
+	element: WordElement;
+};
 
-	const defaultTagColor = '#aabbcc';
-	const defaultGradiant = [
-		`${defaultTagColor} 0%`,
-		`${defaultTagColor} 100%`,
-	];
+const WordFragment: React.FC<IWordFragmentData> = ({
+	attributes,
+	element,
+	children,
+}) => {
+	const dictEntry = useDictionaryEntry(element.dictId, { cache: true });
 
-	const gradiants =
-		numberOfTags > 0
-			? wordTagsWithColor?.reduce<Array<string>>(
-					(reducer, tag, index) => {
-						const gradiantParam1 = `${tag.color} ${
-							index * lengthPerTag
-						}%`;
-						const gradiantParam2 = `${tag.color} ${
-							(index + 1) * lengthPerTag
-						}%`;
-						reducer.push(gradiantParam1);
-						reducer.push(gradiantParam2);
-						return reducer;
-					},
-					[]
-			  )
-			: defaultGradiant;
-	const gradiantStyle: CSSProperties = {
-		background: `linear-gradient(to right, ${gradiants?.map(
-			(gradiant) => `${gradiant}`
-		)})`,
+	let gradiantStyle: CSSProperties = {
+		background: 'black',
 		borderRadius: '10px',
 		width: '100%',
 		right: '0px',
@@ -47,25 +23,66 @@ const WordFragment: React.FC<{
 		height: '2px',
 		position: 'absolute',
 	};
-	// linear-gradient(left, rgba(237,128,52,1) 0%, rgba(237,128,52,1) 33%, rgba(254,177,35,1) 33%, rgba(254,177,35,1) 66%, rgba(33,132,205,1) 66%, rgba(33,132,205,1) 100%);
 
-	const { spelling } = dictEntry;
+	if (dictEntry) {
+		let wordTagsWithColor = [];
+		wordTagsWithColor = dictEntry.tags.filter((tag) => tag && tag.color);
+		const numberOfTags = wordTagsWithColor?.length || 0;
+		const lengthPerTag = 100 / (numberOfTags || 1);
 
-	const { attributes, children } = renderProps;
+		const defaultTagColor = '#aabbcc';
+		const defaultGradiant = [
+			`${defaultTagColor} 0%`,
+			`${defaultTagColor} 100%`,
+		];
+
+		const gradiants =
+			numberOfTags > 0
+				? wordTagsWithColor?.reduce<Array<string>>(
+						(reducer, tag, index) => {
+							const gradiantParam1 = `${tag.color} ${
+								index * lengthPerTag
+							}%`;
+							const gradiantParam2 = `${tag.color} ${
+								(index + 1) * lengthPerTag
+							}%`;
+							reducer.push(gradiantParam1);
+							reducer.push(gradiantParam2);
+							return reducer;
+						},
+						[]
+				  )
+				: defaultGradiant;
+		gradiantStyle = {
+			background: `linear-gradient(to right, ${gradiants?.map(
+				(gradiant) => `${gradiant}`
+			)})`,
+			borderRadius: '10px',
+			width: '100%',
+			right: '0px',
+			bottom: '0px',
+			height: '2px',
+			position: 'absolute',
+		};
+	}
+
 	return (
-		<span
-			{...attributes}
-			data-spelling={spelling}
-			key={id}
-			className={`word-fragment ${spelling && 'kanji'}`}
-			style={{
-				position: 'relative',
-				cursor: 'default',
-			}}
-		>
+		<span {...attributes}>
 			{children}
-			{dictEntry.key}
-			<div style={gradiantStyle} contentEditable={false} />
+			{dictEntry && (
+				<span
+					data-spelling={dictEntry.spelling}
+					key={dictEntry.id}
+					className={`word-fragment ${dictEntry.spelling && 'kanji'}`}
+					style={{
+						position: 'relative',
+						cursor: 'default',
+					}}
+				>
+					{dictEntry.key}
+					<div style={gradiantStyle} />
+				</span>
+			)}
 		</span>
 	);
 };

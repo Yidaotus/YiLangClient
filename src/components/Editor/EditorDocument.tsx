@@ -21,9 +21,8 @@ import { CustomElement } from './CustomEditor';
 import Toolbar from './Toolbar/Toolbar';
 import MarkFragment from './Fragments/MarkFragment';
 import DictPopupController from './Popups/DictPopupController';
-import BlockContainer from './Blocks/BlockContainer/BlockContainer';
-import WordFragmentController from './Fragments/WordFragmentController';
 import SentenceFragment from './Fragments/SentenceFragment';
+import WordFragment from './Fragments/WordFragment';
 
 // Define a React component to render leaves with bold text.
 const Leaf = ({ attributes, leaf, children }: RenderLeafProps) => {
@@ -48,14 +47,14 @@ const isBoldMarkActive = (editor: Editor): boolean => {
 const withYiLang = (editor: Editor) => {
 	const { isInline, isVoid } = editor;
 	const inlineTypes: Array<CustomElement['type']> = [
-		'vocab',
+		'word',
 		'mark',
 		'sentence',
 		'highlight',
 		'inline-image',
 	];
 
-	const voidTypes: Array<CustomElement['type']> = ['vocab', 'inline-image'];
+	const voidTypes: Array<CustomElement['type']> = ['word', 'inline-image'];
 
 	// eslint-disable-next-line no-param-reassign
 	editor.isInline = (element) => {
@@ -72,6 +71,7 @@ const withYiLang = (editor: Editor) => {
 
 const Element = (props: RenderElementProps) => {
 	const { children, attributes, element } = props;
+
 	switch (element.type) {
 		case 'sentence':
 			return (
@@ -118,14 +118,14 @@ const Element = (props: RenderElementProps) => {
 					/>
 				</span>
 			);
-		case 'vocab':
+		case 'word':
 			return (
-				<WordFragmentController
+				<WordFragment
 					attributes={attributes}
 					element={element}
-				>
-					{children}
-				</WordFragmentController>
+					// eslint-disable-next-line react/no-children-prop
+					children={children}
+				/>
 			);
 		case 'mark':
 			return (
@@ -138,7 +138,7 @@ const Element = (props: RenderElementProps) => {
 	}
 };
 
-const App: React.FC = () => {
+const EditorDocument: React.FC = () => {
 	const ref = useRef(null);
 	const editor = useMemo(() => withYiLang(withReact(createEditor())), []);
 
@@ -190,7 +190,7 @@ const App: React.FC = () => {
 
 		if (editorNodes.length > 0) {
 			const vocabNodes = Editor.nodes(editor, {
-				match: (n) => SlateElement.isElement(n) && n.type === 'vocab',
+				match: (n) => SlateElement.isElement(n) && n.type === 'word',
 				at: [[0], [editor.children.length - 1]],
 			});
 			if (vocabNodes) {
@@ -236,6 +236,7 @@ const App: React.FC = () => {
 			>
 				<Toolbar rootElement={ref} />
 				<DictPopupController rootElement={ref} />
+
 				<div
 					style={{
 						display: 'flex',
@@ -292,13 +293,13 @@ const App: React.FC = () => {
 						<h1>Sentence</h1>
 						<ul>
 							{sentences.map((sentence) => (
-								<li>{sentence}</li>
+								<li key={sentence}>{sentence}</li>
 							))}
 						</ul>
 						<h1>Vocab</h1>
 						<ul>
 							{[...vocab.values()].map((v) => (
-								<li>{v}</li>
+								<li key={v}>{v}</li>
 							))}
 						</ul>
 						<h1>Value</h1>
@@ -314,4 +315,4 @@ const App: React.FC = () => {
 	);
 };
 
-export default App;
+export default EditorDocument;

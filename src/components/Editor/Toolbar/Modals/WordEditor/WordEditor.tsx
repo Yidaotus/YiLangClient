@@ -116,20 +116,6 @@ const WordInput: React.FC<IWordInputProps> = ({
 			<div className="word-input-container" style={{ width }}>
 				<Card
 					color="green"
-					title={
-						<div className="word-input-head">
-							<ReadOutlined />
-							{cardTitle}
-							<Dropdown overlay={menu} placement="bottomCenter">
-								<Button
-									shape="circle"
-									size="small"
-									type="primary"
-									icon={<SearchOutlined />}
-								/>
-							</Dropdown>
-						</div>
-					}
 					actions={[
 						editMode === 'word' ? (
 							<StopOutlined key="discard" onClick={cancel} />

@@ -1,3 +1,4 @@
+import { TagsFilled } from '@ant-design/icons';
 import { IEntryFormFields } from '@components/DictionaryEntry/EntryForm/EntryForm';
 import { selectActiveLanguage } from '@store/user/selectors';
 import { applyDictionaryDelta } from 'api/dictionary.service';
@@ -5,8 +6,8 @@ import { applyTagsDelta, getTags } from 'api/tags.service';
 import {
 	IDictionaryEntry,
 	IDictionaryTag,
-	IDocumentLink,
 } from 'Document/Dictionary';
+import { IDocumentLink } from 'Document/Document';
 import { notUndefined } from 'Document/Utility';
 import { getUUID, UUID } from 'Document/UUID';
 import { StoreAction } from 'store';
@@ -22,15 +23,15 @@ const updateEntry =
 		id: UUID;
 		entryData: Omit<IDictionaryEntry, 'id'>;
 	}): DictionaryAction =>
-	(dispatch) => {
-		dispatch({
-			type: 'DICTIONARY_UPDATE_ENTRY',
-			payload: {
-				id,
-				entry: entryData,
-			},
-		});
-	};
+		(dispatch, getState) => {
+			dispatch({
+				type: 'DICTIONARY_SET_ENTRY',
+				payload: {
+					id,
+					entry: { ...entryData, dirty: 'UPDATED' },
+				},
+			});
+		};
 
 const updateTag =
 	({
@@ -40,55 +41,57 @@ const updateTag =
 		id: UUID;
 		tagData: Partial<IDictionaryTag>;
 	}): DictionaryAction =>
-	(dispatch, getState) => {
-		const currentTag = getState().dictionary.tags[id];
-		if (currentTag) {
-			dispatch({
-				type: 'DICTIONARY_UPDATE_TAG',
-				payload: {
-					id,
-					tag: {
-						...currentTag,
-						...tagData,
+		(dispatch, getState) => {
+			const currentTag = getState().dictionary.tags[id];
+			if (currentTag) {
+				dispatch({
+					type: 'DICTIONARY_SET_TAG',
+					payload: {
+						id,
+						tag: {
+							...currentTag,
+							...tagData,
+							dirty: "UPDATED"
+						},
 					},
-				},
-			});
-		}
-	};
+				});
+			}
+		};
 
 const createTag =
 	(tag: Omit<IDictionaryTag, 'id'>): DictionaryAction<UUID> =>
-	(dispatch) => {
-		const tagId = getUUID();
-		dispatch({
-			type: 'DICTIONARY_ADD_TAG',
-			payload: {
-				tag: { ...tag, id: tagId },
-			},
-		});
-		return tagId;
-	};
+		(dispatch) => {
+			const tagId = getUUID();
+			dispatch({
+				type: 'DICTIONARY_SET_TAG',
+				payload: {
+					id: tagId,
+					tag: { ...tag, id: tagId, dirty: 'NEW' },
+				},
+			});
+			return tagId;
+		};
 
 const cacheTag =
 	(tag: IDictionaryTag): DictionaryAction =>
-	(dispatch) => {
-		dispatch({
-			type: 'DICTIONARY_CACHE_TAG',
-			payload: { tag },
-		});
-	};
+		(dispatch) => {
+			dispatch({
+				type: 'DICTIONARY_SET_TAG',
+				payload: {
+					id: tag.id,
+					tag: { ...tag, dirty: null },
+				}
+			});
+		};
 
 const fetchTags =
 	(lang: string): DictionaryAction<Promise<void>> =>
-	async (dispatch) => {
-		const tags = (await getTags(lang)) || [];
-		for (const tag of tags) {
-			dispatch({
-				type: 'DICTIONARY_CACHE_TAG',
-				payload: { tag },
-			});
-		}
-	};
+		async (dispatch) => {
+			const tags = (await getTags(lang)) || [];
+			for (const tag of tags) {
+				dispatch(cacheTag(tag));
+			}
+		};
 
 const resetDictionary = (): DictionaryAction => (dispatch) => {
 	dispatch({ type: 'DICTIONARY_RESET', payload: null });
@@ -114,7 +117,7 @@ const saveTags =
 		});
 
 		for (const tag of dirtyTags) {
-			dispatch({ type: 'DICTIONARY_CLEAN_TAG', payload: { id: tag.id } });
+			dispatch({ type: 'DICTIONARY_SET_TAG', payload: { id: tag.id, tag: { ...tag, dirty: null } } });
 		}
 	};
 
@@ -153,71 +156,74 @@ const saveDictionary =
 
 const cacheDictionaryEntry =
 	(entry: IDictionaryEntry): DictionaryAction =>
-	(dispatch, getState) => {
-		const { entries } = getState().dictionary;
-		if (!entries[entry.id]) {
-			dispatch({ type: 'DICTIONARY_CACHE_ENTRY', payload: { entry } });
-		}
-	};
+		(dispatch, getState) => {
+			const { entries } = getState().dictionary;
+			if (!entries[entry.id]) {
+				dispatch({ type: 'DICTIONARY_CACHE_ENTRY', payload: { entry } });
+			}
+		};
 
 const addWordToDictionary =
 	(word: Omit<IDictionaryEntry, 'id'>): DictionaryAction<UUID | null> =>
-	(dispatch, getState): UUID => {
-		const activeLanguage = selectActiveLanguage(getState().user);
-		if (!activeLanguage) {
-			throw Error('No Language selected!');
-		}
-		const dictEntryId = getUUID();
-		const dictEntry = {
-			...word,
-			id: dictEntryId,
-			lang: activeLanguage.key,
-			createdAt: new Date(),
+		(dispatch, getState): UUID => {
+			const activeLanguage = selectActiveLanguage(getState().user);
+			if (!activeLanguage) {
+				throw Error('No Language selected!');
+			}
+			const dictEntryId = getUUID();
+			const dictEntry = {
+				...word,
+				lang: activeLanguage.key,
+				createdAt: new Date(),
+			};
+			dispatch({
+				type: 'DICTIONARY_SET_ENTRY',
+				payload: {
+					id: dictEntryId, entry: { ...dictEntry, dirty: "NEW" },
+				}
+			});
+			return dictEntryId;
 		};
-		dispatch({
-			type: 'DICTIONARY_ADD_ENTRY',
-			payload: { entry: dictEntry },
-		});
-		return dictEntryId;
-	};
 
+/*
 const setDictionaryEntryLink =
-	({ id, link }: { id: UUID; link: IDocumentLink }): DictionaryAction =>
-	(dispatch) => {
-		dispatch({ type: 'DICTIONARY_SET_LINK', payload: { id, link } });
-	};
+({ id, link }: { id: UUID; link: IDocumentLink }): DictionaryAction =>
+(dispatch) => {
+	dispatch({ type: 'DICTIONARY_SET_LINK', payload: { id, link } });
+};
+*/
 
 const removeEntry =
 	(id: UUID): DictionaryAction =>
-	(dispatch) => {
-		dispatch({ type: 'DICTIONARY_REMOVE_ENTRY', payload: { id } });
-	};
+		(dispatch) => {
+			dispatch({ type: 'DICTIONARY_SET_ENTRY', payload: { id } });
+		};
 
 const removeEntryRemote =
 	(id: UUID): DictionaryAction<Promise<void>> =>
-	async () => {
-		return applyDictionaryDelta({
-			removedEntries: [id],
-			addedEntries: [],
-			updatedEntries: [],
-		});
-	};
+		async () => {
+			return applyDictionaryDelta({
+				removedEntries: [id],
+				addedEntries: [],
+				updatedEntries: [],
+			});
+		};
 
 const removeTag =
 	(id: UUID): DictionaryAction =>
-	(dispatch) => {
-		dispatch({ type: 'DICTIONARY_REMOVE_TAG', payload: { id } });
-	};
+		(dispatch) => {
+			dispatch({ type: 'DICTIONARY_REMOVE_TAG', payload: { id } });
+		};
 
 const removeTagRemote =
 	(id: UUID): DictionaryAction =>
-	() => {
-		return applyTagsDelta({
-			removedTags: [id],
-			addedTags: [],
-			updatedTags: [],
-		});
-	};
+		() => {
+			return applyTagsDelta({
+				removedTags: [id],
+				addedTags: [],
+				updatedTags: [],
+			});
+		};
 
 export type IDictionaryEntryInput = Omit<
 	IDictionaryEntry,
@@ -228,158 +234,158 @@ export type IDictionaryEntryInput = Omit<
 	root: UUID | IEntryFormFields;
 };
 
-const saveEntryRemote =
+const saveEntry =
 	(
 		entry: IDictionaryEntryInput,
 		update = false
 	): DictionaryAction<Promise<void>> =>
-	async (dispatch, getState) => {
-		const activeLanguage = selectActiveLanguage(getState().user);
-		if (!activeLanguage) {
-			throw Error('No Language selected!');
-		}
-		if (entry) {
-			const addedTags = [];
-			const addedEntries = [];
-			const updatedEntries = [];
-			let rootId: UUID | null;
-			if (typeof entry.root === 'object') {
-				const normalizedRootTags = new Array<UUID>();
-				for (const rootTag of entry.root.tags) {
-					let rootTagId: UUID;
-					if (typeof rootTag === 'object') {
-						rootTagId = getUUID();
-						addedTags.push({
-							...rootTag,
-							id: rootTagId,
-							lang: activeLanguage.key,
-						});
-					} else {
-						rootTagId = rootTag;
-					}
-					normalizedRootTags.push(rootTagId);
-				}
-				const normalizedRoot = {
-					...entry.root,
-					tags: normalizedRootTags,
-					// TODO We do NOT support double nested root creation
-					root: entry.root.root as UUID,
-					lang: activeLanguage.key,
-				};
-				rootId = getUUID();
-				addedEntries.push({
-					...normalizedRoot,
-					id: rootId,
-					lang: activeLanguage.key,
-				});
-			} else {
-				rootId = entry.root;
+		async (dispatch, getState) => {
+			const activeLanguage = selectActiveLanguage(getState().user);
+			if (!activeLanguage) {
+				throw Error('No Language selected!');
 			}
-			const normalizedTags = new Array<UUID>();
-			for (const tag of entry.tags) {
-				let tagId: UUID;
-				if (typeof tag === 'object') {
-					tagId = getUUID();
-					addedTags.push({
-						...tag,
-						id: tagId,
+			if (entry) {
+				const addedTags = [];
+				const addedEntries = [];
+				const updatedEntries = [];
+				let rootId: UUID | null;
+				if (typeof entry.root === 'object') {
+					const normalizedRootTags = new Array<UUID>();
+					for (const rootTag of entry.root.tags) {
+						let rootTagId: UUID;
+						if (typeof rootTag === 'object') {
+							rootTagId = getUUID();
+							addedTags.push({
+								...rootTag,
+								id: rootTagId,
+								lang: activeLanguage.key,
+							});
+						} else {
+							rootTagId = rootTag;
+						}
+						normalizedRootTags.push(rootTagId);
+					}
+					const normalizedRoot = {
+						...entry.root,
+						tags: normalizedRootTags,
+						// TODO We do NOT support double nested root creation
+						root: entry.root.root as UUID,
+						lang: activeLanguage.key,
+					};
+					rootId = getUUID();
+					addedEntries.push({
+						...normalizedRoot,
+						id: rootId,
 						lang: activeLanguage.key,
 					});
 				} else {
-					tagId = tag;
+					rootId = entry.root;
 				}
-				normalizedTags.push(tagId);
-			}
+				const normalizedTags = new Array<UUID>();
+				for (const tag of entry.tags) {
+					let tagId: UUID;
+					if (typeof tag === 'object') {
+						tagId = getUUID();
+						addedTags.push({
+							...tag,
+							id: tagId,
+							lang: activeLanguage.key,
+						});
+					} else {
+						tagId = tag;
+					}
+					normalizedTags.push(tagId);
+				}
 
-			const normalizedWord = {
-				...entry,
-				tags: normalizedTags,
-				root: rootId || undefined,
-				lang: activeLanguage.key,
-			};
-			if (update) {
-				updatedEntries.push(normalizedWord);
-			} else {
-				addedEntries.push({ ...normalizedWord, id: getUUID() });
+				const normalizedWord = {
+					...entry,
+					tags: normalizedTags,
+					root: rootId || undefined,
+					lang: activeLanguage.key,
+				};
+				if (update) {
+					updatedEntries.push(normalizedWord);
+				} else {
+					addedEntries.push({ ...normalizedWord, id: getUUID() });
+				}
+				await applyTagsDelta({
+					addedTags,
+					removedTags: [],
+					updatedTags: [],
+				});
+				await applyDictionaryDelta({
+					addedEntries,
+					removedEntries: [],
+					updatedEntries,
+				});
 			}
-			await applyTagsDelta({
-				addedTags,
-				removedTags: [],
-				updatedTags: [],
-			});
-			await applyDictionaryDelta({
-				addedEntries,
-				removedEntries: [],
-				updatedEntries,
-			});
-		}
-	};
+		};
 
 const saveOrUpdateEntryInput =
 	(
 		entry: IDictionaryEntryInput
 	): DictionaryAction<UUID | [UUID, UUID] | null> =>
-	(dispatch) => {
-		let resultId: UUID | [UUID, UUID] | null = null;
-		let rootId: UUID | null = null;
-		if (entry) {
-			if (typeof entry.root === 'object') {
-				const normalizedRootTags = new Array<UUID>();
-				for (const rootTag of entry.root.tags) {
-					let rootTagId: UUID;
-					if (typeof rootTag === 'object') {
-						rootTagId = dispatch(createTag(rootTag));
-					} else {
-						rootTagId = rootTag;
+		(dispatch) => {
+			let resultId: UUID | [UUID, UUID] | null = null;
+			let rootId: UUID | null = null;
+			if (entry) {
+				if (typeof entry.root === 'object') {
+					const normalizedRootTags = new Array<UUID>();
+					for (const rootTag of entry.root.tags) {
+						let rootTagId: UUID;
+						if (typeof rootTag === 'object') {
+							rootTagId = dispatch(createTag(rootTag));
+						} else {
+							rootTagId = rootTag;
+						}
+						normalizedRootTags.push(rootTagId);
 					}
-					normalizedRootTags.push(rootTagId);
-				}
-				const normalizedRoot = {
-					...entry.root,
-					tags: normalizedRootTags,
-					// TODO We do NOT support double nested root creation
-					root: entry.root.root as UUID,
-				};
-				rootId = dispatch(addWordToDictionary(normalizedRoot));
-			} else {
-				rootId = entry.root;
-			}
-			const normalizedTags = new Array<UUID>();
-			for (const tag of entry.tags) {
-				let tagId: UUID;
-				if (typeof tag === 'object') {
-					tagId = dispatch(createTag(tag));
+					const normalizedRoot = {
+						...entry.root,
+						tags: normalizedRootTags,
+						// TODO We do NOT support double nested root creation
+						root: entry.root.root as UUID,
+					};
+					rootId = dispatch(addWordToDictionary(normalizedRoot));
 				} else {
-					tagId = tag;
+					rootId = entry.root;
 				}
-				normalizedTags.push(tagId);
-			}
-			const normalizedWord = {
-				...entry,
-				tags: normalizedTags,
-				root: rootId || undefined,
-			};
+				const normalizedTags = new Array<UUID>();
+				for (const tag of entry.tags) {
+					let tagId: UUID;
+					if (typeof tag === 'object') {
+						tagId = dispatch(createTag(tag));
+					} else {
+						tagId = tag;
+					}
+					normalizedTags.push(tagId);
+				}
+				const normalizedWord = {
+					...entry,
+					tags: normalizedTags,
+					root: rootId || undefined,
+				};
 
-			if (entry.id) {
-				dispatch(
-					updateEntry({
-						id: entry.id,
-						entryData: normalizedWord,
-					})
-				);
-				resultId = entry.id;
-			} else {
-				resultId = dispatch(addWordToDictionary(normalizedWord));
+				if (entry.id) {
+					dispatch(
+						updateEntry({
+							id: entry.id,
+							entryData: normalizedWord,
+						})
+					);
+					resultId = entry.id;
+				} else {
+					resultId = dispatch(addWordToDictionary(normalizedWord));
+				}
 			}
-		}
-		if (rootId && resultId) {
-			return [resultId, rootId];
-		}
-		return resultId;
-	};
+			if (rootId && resultId) {
+				return [resultId, rootId];
+			}
+			return resultId;
+		};
 
 export {
-	saveEntryRemote,
+	saveEntry,
 	removeEntry,
 	removeTag,
 	removeTagRemote,

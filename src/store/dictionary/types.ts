@@ -1,7 +1,6 @@
 import {
 	IDictionaryEntry,
 	IDictionaryTag,
-	IDocumentLink,
 } from 'Document/Dictionary';
 import { UUID } from 'Document/UUID';
 import { DirtyObject, StoreMutation } from 'store';
@@ -22,21 +21,8 @@ type DictionaryMutationType<T extends string, P = null> = StoreMutation<
 export type DictionaryMutation =
 	| DictionaryMutationType<'RESET'>
 	| DictionaryMutationType<'SET_STATE', { dictionary: IDictionaryState }>
-	| DictionaryMutationType<'CACHE_ENTRY', { entry: IDictionaryEntry }>
-	| DictionaryMutationType<'CACHE_TAG', { tag: IDictionaryTag }>
 	| DictionaryMutationType<'INITIALIZE', { entries: Array<IDictionaryEntry> }>
-	| DictionaryMutationType<
-			'UPDATE_TAG',
-			{ id: UUID; tag: Omit<IDictionaryTag, 'id'> }
-	  >
-	| DictionaryMutationType<
-			'UPDATE_ENTRY',
-			{ id: UUID; entry: Omit<IDictionaryEntry, 'id'> }
-	  >
 	| DictionaryMutationType<'REMOVE_ENTRY', { id: UUID }>
 	| DictionaryMutationType<'REMOVE_TAG', { id: UUID }>
-	| DictionaryMutationType<'ADD_ENTRY', { entry: IDictionaryEntry }>
-	| DictionaryMutationType<'ADD_TAG', { tag: IDictionaryTag }>
-	| DictionaryMutationType<'CLEAN_ENTRY', { id: UUID }>
-	| DictionaryMutationType<'CLEAN_TAG', { id: UUID }>
-	| DictionaryMutationType<'SET_LINK', { id: UUID; link: IDocumentLink }>;
+	| DictionaryMutationType<'SET_ENTRY', { id: UUID, entry: DirtyObject<Omit<IDictionaryEntry, 'id'>> }>
+	| DictionaryMutationType<'SET_TAG', { id: UUID, tag: DirtyObject<Omit<IDictionaryTag, 'id'>> }>

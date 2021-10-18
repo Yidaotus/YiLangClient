@@ -12,7 +12,7 @@ import {
 } from '@ant-design/icons';
 import { IDictionaryEntryResolved } from 'Document/Dictionary';
 import { UUID } from 'Document/UUID';
-import DictEntry from '../DictionaryEntry';
+import DictionaryEntry from '../DictionaryEntry';
 import DictEntryEdit, { IWordInputRef } from '../DictEntryEdit/DictEntryEdit';
 import { IEntryFormFields } from '../EntryForm/EntryForm';
 
@@ -107,7 +107,7 @@ const DictEntryWithEdit: React.FC<IDictEntryWithEditProps> = (props) => {
 						root={{
 							...dictEntry,
 							tags: dictEntry.tags.map((tag) => tag.id),
-							root: dictEntry.root?.id,
+							root: dictEntry.root,
 						}}
 						ref={dictEntryEdit}
 					/>
@@ -125,7 +125,9 @@ const DictEntryWithEdit: React.FC<IDictEntryWithEditProps> = (props) => {
 					</div>
 				</div>
 			)}
-			{!editing && <DictEntry dictEntry={dictEntry} canLink={canLink} />}
+			{!editing && (
+				<DictionaryEntry entry={dictEntry} canLink={canLink} />
+			)}
 		</div>
 	);
 };
