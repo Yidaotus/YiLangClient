@@ -1,13 +1,10 @@
-import { IRootState } from '@store/index';
+import { StoreMap, IRootState } from '@store/index';
 import { IDictionaryTag } from 'Document/Dictionary';
-import { notUndefined } from 'Document/Utility';
-import { UUID } from 'Document/UUID';
 import { useSelector } from 'react-redux';
 
-const useDictionaryEntry = (tags: Array<UUID>): Array<IDictionaryTag> => {
+const useDictionaryTags = (): StoreMap<IDictionaryTag> => {
 	const userTags = useSelector((state: IRootState) => state.dictionary.tags);
-
-	return tags.map((tagId) => userTags[tagId]).filter(notUndefined);
+	return userTags;
 };
 
-export default useDictionaryEntry;
+export default useDictionaryTags;

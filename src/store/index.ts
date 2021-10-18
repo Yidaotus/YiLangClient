@@ -9,7 +9,7 @@ import { UserMutation } from './user/types';
 import { DictionaryMutation } from './dictionary/types';
 import { UIMutation } from './ui/types';
 
-export type DirtyType = 'NEW' | 'UPDATED' | 'DELETED' | null;
+export type DirtyType = 'NEW' | 'UPDATED' | 'DELETED' | 'CLEAN';
 export type DirtyObject<T> = T & { dirty: DirtyType };
 
 export type IRootState = ReturnType<typeof rootReducer>;

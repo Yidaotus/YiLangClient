@@ -10,6 +10,7 @@ import { notUndefined } from 'Document/Utility';
 import { UUID } from 'Document/UUID';
 import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
+import useDictionaryTags from './useDictionaryTags';
 
 export interface IUseDictionaryOptions {
 	cache: boolean;
