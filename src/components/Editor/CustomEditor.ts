@@ -197,3 +197,49 @@ export const highlightSelection = (
 
 	return removeHighlights;
 };
+
+export const getTextBlockStyle = (
+	editor: Editor
+): CustomElement['type'] | null | 'multiple' => {
+	const { selection } = editor;
+	if (selection == null) {
+		return null;
+	}
+	const [start, end] = Range.edges(selection);
+
+	let startTopLevelBlockIndex = start.path[0];
+	const endTopLevelBlockIndex = end.path[0];
+
+	let blockType = null;
+	while (startTopLevelBlockIndex <= endTopLevelBlockIndex) {
+		const [node] = Editor.node(editor, [startTopLevelBlockIndex]);
+		if (SlateElement.isElement(node)) {
+			if (blockType === null) {
+				blockType = node.type;
+			} else if (blockType !== node.type) {
+				return 'multiple';
+			}
+		}
+		startTopLevelBlockIndex++;
+	}
+
+	return blockType;
+};
+
+export const toggleBlockType = (
+	editor: Editor,
+	blockType: CustomElement['type']
+): void => {
+	if (editor.selection) {
+		const currentBlockType = getTextBlockStyle(editor);
+		const changeTo =
+			currentBlockType === blockType ? 'paragraph' : blockType;
+		Transforms.setNodes(
+			editor,
+			{ type: changeTo },
+			// Node filtering options supported here too. We use the same
+			// we used with Editor.nodes above.
+			{ at: editor.selection, match: (n) => Editor.isBlock(editor, n) }
+		);
+	}
+};

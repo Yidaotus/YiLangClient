@@ -28,6 +28,7 @@ import Floating from '../Popups/Floating';
 import WordInput, { useWordInput } from './Modals/WordEditor/WordEditor';
 import ColorPicker from './Tools/ColorPicker';
 import {
+	getTextBlockStyle,
 	highlightSelection,
 	isNodeInSelection,
 	WordElement,
@@ -74,18 +75,13 @@ const menu = (
 			e.domEvent.preventDefault();
 		}}
 	>
-		<Menu.ItemGroup title="Group title">
-			<Menu.Item>1st menu item</Menu.Item>
-			<Menu.Item>2nd menu item</Menu.Item>
-		</Menu.ItemGroup>
-		<SubMenu title="sub menu">
-			<Menu.Item>3rd menu item</Menu.Item>
-			<Menu.Item>4th menu item</Menu.Item>
+		<Menu.Item disabled>Paragraph</Menu.Item>
+		<SubMenu title="Title">
+			<Menu.Item>Title</Menu.Item>
+			<Menu.Item>Subtitle</Menu.Item>
 		</SubMenu>
-		<SubMenu title="disabled sub menu" disabled>
-			<Menu.Item>5d menu item</Menu.Item>
-			<Menu.Item>6th menu item</Menu.Item>
-		</SubMenu>
+		<Menu.Item>Dialog</Menu.Item>
+		<Menu.Item>Image</Menu.Item>
 	</Menu>
 );
 
@@ -93,6 +89,7 @@ const Toolbar: React.FC<{ rootElement: React.RefObject<HTMLElement> }> = ({
 	rootElement,
 }) => {
 	const editor = useSlate();
+	const blockType = getTextBlockStyle(editor);
 	const { simpleInputState, getUserInput } = useSimpleInput();
 	const { wordInputState, getUserWord } = useWordInput();
 
@@ -361,13 +358,12 @@ const Toolbar: React.FC<{ rootElement: React.RefObject<HTMLElement> }> = ({
 							<Button
 								style={{
 									fontSize: '0.8em',
-									fontWeight: 'bold',
 								}}
 								onClick={(e) => {
 									e.preventDefault();
 								}}
 							>
-								Paragraph <DownOutlined />
+								{blockType} <DownOutlined />
 							</Button>
 						</Dropdown>
 					</div>
