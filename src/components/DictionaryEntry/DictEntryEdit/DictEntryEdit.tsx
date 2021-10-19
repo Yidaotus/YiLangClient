@@ -166,6 +166,9 @@ const WordInput: React.ForwardRefRenderFunction<
 			try {
 				const wordFormData = await wordForm.validateFields();
 				result = { isDone: true, entry: wordFormData };
+				setCreatedTags([]);
+				tagForm.resetFields();
+				rootForm.resetFields();
 				wordForm.resetFields();
 			} catch (e) {
 				// The forms will show appropriate erros themselfes.
@@ -247,8 +250,18 @@ const WordInput: React.ForwardRefRenderFunction<
 				payload: { stateChanged },
 			});
 		}
+		setCreatedTags([]);
+		tagForm.resetFields();
+		rootForm.resetFields();
+		wordForm.resetFields();
 		return isDone;
-	}, [stateChanged, wordEditorState.currentState]);
+	}, [
+		rootForm,
+		stateChanged,
+		tagForm,
+		wordEditorState.currentState,
+		wordForm,
+	]);
 
 	useImperativeHandle(ref, () => ({ finish, cancel }), [cancel, finish]);
 	const canEditRoot = typeof root === 'string' && root === '';
