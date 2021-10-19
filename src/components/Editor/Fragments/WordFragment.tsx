@@ -87,4 +87,4 @@ const WordFragment: React.FC<IWordFragmentData> = ({
 	);
 };
 
-export default WordFragment;
+export default React.memo(WordFragment);

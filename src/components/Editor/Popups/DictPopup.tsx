@@ -34,11 +34,8 @@ const DictPopup: React.FC<IDictPopupProps> = ({
 						dataSource={[entry]}
 						renderItem={(entryItem) => (
 							<List.Item key={entryItem.key}>
-								{!!entry && (
-									<DictionaryEntry entry={entryItem} />
-								)}
-
-								{!!rootEntry && (
+								{entry && <DictionaryEntry entry={entryItem} />}
+								{rootEntry && (
 									<>
 										<Divider
 											style={{

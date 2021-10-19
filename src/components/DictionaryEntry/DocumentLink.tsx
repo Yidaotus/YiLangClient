@@ -1,11 +1,9 @@
 import React, { useCallback } from 'react';
-import { useDispatch } from 'react-redux';
 import { useHistory } from 'react-router';
 import Highlighter from 'react-highlight-words';
 import Link from 'antd/lib/typography/Link';
 import handleError from '@helpers/Error';
-import { IRootDispatch } from '@store/index';
-import { IDocumentLink } from 'Document/Dictionary';
+import { IDocumentLink } from 'Document/Document';
 
 const DocumentLink: React.FC<{
 	link: IDocumentLink;
@@ -13,7 +11,6 @@ const DocumentLink: React.FC<{
 	word: string;
 }> = ({ link, excerpt, word }) => {
 	const history = useHistory();
-	const dispatch: IRootDispatch = useDispatch();
 
 	const fetchDocumentAndSwitch = useCallback(async () => {
 		// setLoading('Loading Document');

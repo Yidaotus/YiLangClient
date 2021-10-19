@@ -289,26 +289,6 @@ const EditorDocument: React.FC = () => {
 							}}
 						/>
 					</div>
-					<div>
-						<h1>Sentence</h1>
-						<ul>
-							{sentences.map((sentence) => (
-								<li key={sentence}>{sentence}</li>
-							))}
-						</ul>
-						<h1>Vocab</h1>
-						<ul>
-							{[...vocab.values()].map((v) => (
-								<li key={v}>{v}</li>
-							))}
-						</ul>
-						<h1>Value</h1>
-						<pre>{JSON.stringify(editorNodes, null, 2)}</pre>
-						<h1>State</h1>
-						<pre>{JSON.stringify(editor.children, null, 2)}</pre>
-						<h1>Operations</h1>
-						<pre>{JSON.stringify(editor.operations, null, 2)}</pre>
-					</div>
 				</div>
 			</Slate>
 		</div>

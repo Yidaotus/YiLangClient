@@ -1,7 +1,4 @@
-import {
-	IDictionaryEntry,
-	IDictionaryTag,
-} from 'Document/Dictionary';
+import { IDictionaryEntry, IDictionaryTag } from 'Document/Dictionary';
 import { UUID } from 'Document/UUID';
 import { DirtyObject, StoreMutation } from 'store';
 
@@ -24,5 +21,11 @@ export type DictionaryMutation =
 	| DictionaryMutationType<'INITIALIZE', { entries: Array<IDictionaryEntry> }>
 	| DictionaryMutationType<'REMOVE_ENTRY', { id: UUID }>
 	| DictionaryMutationType<'REMOVE_TAG', { id: UUID }>
-	| DictionaryMutationType<'SET_ENTRY', { id: UUID, entry: DirtyObject<Omit<IDictionaryEntry, 'id'>> }>
-	| DictionaryMutationType<'SET_TAG', { id: UUID, tag: DirtyObject<Omit<IDictionaryTag, 'id'>> }>
+	| DictionaryMutationType<
+			'SET_ENTRY',
+			{ id: UUID; entry: DirtyObject<Omit<IDictionaryEntry, 'id'>> }
+	  >
+	| DictionaryMutationType<
+			'SET_TAG',
+			{ id: UUID; tag: DirtyObject<Omit<IDictionaryTag, 'id'>> }
+	  >;

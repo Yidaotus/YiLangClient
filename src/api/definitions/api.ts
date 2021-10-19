@@ -62,11 +62,11 @@ const ApiPaths: IApiPaths = {
 		endpoints: {
 			get: {
 				method: 'get',
-				path: '/',
+				path: '',
 			},
 			set: {
 				method: 'post',
-				path: '/',
+				path: '',
 			},
 			setActiveLanguage: {
 				method: 'post',

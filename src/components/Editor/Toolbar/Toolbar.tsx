@@ -143,6 +143,7 @@ const Toolbar: React.FC<{ rootElement: React.RefObject<HTMLElement> }> = ({
 				voids: true,
 			});
 			const entry = await getUserWord(root);
+			removeHighlights?.();
 			if (entry) {
 				const saveResult = dispatch(saveOrUpdateEntryInput(entry));
 				if (saveResult) {
@@ -203,7 +204,6 @@ const Toolbar: React.FC<{ rootElement: React.RefObject<HTMLElement> }> = ({
 				simpleInputVisible: false,
 				wordInputVisible: false,
 			});
-			removeHighlights?.();
 		}
 	};
 
@@ -297,55 +297,39 @@ const Toolbar: React.FC<{ rootElement: React.RefObject<HTMLElement> }> = ({
 							});
 						}}
 					/>
-					<Divider
-						type="vertical"
-						style={{
-							margin: '0 0px !important',
-							borderLeft: '1px solid rgb(0 0 0 / 27%)',
-						}}
-					/>
-					<DropdownItem
-						icon={<SearchOutlined />}
-						tooltip="lookup"
-						name="lookup"
-						visible
-						items={lookupSources.map((source) => ({
-							type: 'Action',
-							name: source.name,
-							action: () => {
-								if (editor.selection) {
-									const url = formatURL({
-										source,
-										searchTerm: Editor.string(
-											editor,
-											editor.selection
-										),
-									});
-									window.open(url);
-								}
-							},
-						}))}
-					/>
-					<Divider
-						type="vertical"
-						style={{
-							margin: '0 0px !important',
-							borderLeft: '1px solid rgb(0 0 0 / 27%)',
-						}}
-					/>
-					<ActionItem
-						icon={<SearchOutlined />}
-						tooltip="lookup"
-						name="lookup"
-						visible
-						action={() => {
-							console.log(Editor.string(editor, [2]));
-							Transforms.setSelection(editor, {
-								anchor: { path: [2], offset: 1 },
-								focus: { path: [2], offset: 10 },
-							});
-						}}
-					/>
+					{lookupSources.length > 0 && (
+						<>
+							<Divider
+								type="vertical"
+								style={{
+									margin: '0 0px !important',
+									borderLeft: '1px solid rgb(0 0 0 / 27%)',
+								}}
+							/>
+							<DropdownItem
+								icon={<SearchOutlined />}
+								tooltip="lookup"
+								name="lookup"
+								visible
+								items={lookupSources.map((source) => ({
+									type: 'Action',
+									name: source.name,
+									action: () => {
+										if (editor.selection) {
+											const url = formatURL({
+												source,
+												searchTerm: Editor.string(
+													editor,
+													editor.selection
+												),
+											});
+											window.open(url);
+										}
+									},
+								}))}
+							/>
+						</>
+					)}
 				</div>
 			)}
 		</Floating>

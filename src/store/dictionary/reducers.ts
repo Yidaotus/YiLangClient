@@ -1,28 +1,27 @@
 /* eslint-disable no-param-reassign */
-import { getUUID } from 'Document/UUID';
 import produce from 'immer';
-import { DirtyObject, StoreMap } from 'store';
-import { IDictionaryEntry } from 'Document/Dictionary';
 import { ensureNever } from 'Document/Utility';
-import debugWords from './words.json';
+// import debugWords from './words.json';
 import { DictionaryMutation, IDictionaryState } from './types';
 
-const USE_DEBUG_WORDS = false;
-const INITIAL_DICTIAONARY = USE_DEBUG_WORDS
+// const USE_DEBUG_WORDS = false;
+const INITIAL_DICTIAONARY = {};
+/*
+USE_DEBUG_WORDS
 	? Object.entries(debugWords).reduce((acc, [key, value]) => {
-		acc[key] = {
-			id: getUUID(),
-			key,
-			lang: 'dft',
-			translations: [...value.translation.split(',')],
-			spelling: value.spelling,
-			tags: [],
-			createdAt: new Date(),
-			dirty: null,
-		};
-		return acc;
-	}, {} as StoreMap<DirtyObject<IDictionaryEntry>>)
+			acc[key] = {
+				id: getUUID(),
+				key,
+				lang: 'dft',
+				translations: [...value.translation.split(',')],
+				spelling: value.spelling,
+				tags: [],
+				dirty: null,
+			};
+			return acc;
+	  }, {} as StoreMap<DirtyObject<IDictionaryEntry>>)
 	: {};
+	*/
 
 const INITIAL_DICTIONARY_STATE: IDictionaryState = {
 	entries: INITIAL_DICTIAONARY,
