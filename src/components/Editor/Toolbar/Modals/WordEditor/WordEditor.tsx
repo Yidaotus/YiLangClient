@@ -151,5 +151,5 @@ const WordInput: React.FC<IWordInputProps> = ({
 	);
 };
 
-export default WordInput;
+export default React.memo(WordInput);
 export { useWordInput };

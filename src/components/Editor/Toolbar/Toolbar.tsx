@@ -1,14 +1,7 @@
 import './Toolbar.css';
-import React, {
-	useCallback,
-	useEffect,
-	useMemo,
-	useReducer,
-	useRef,
-	useState,
-} from 'react';
+import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { Divider } from 'antd';
+import { Button, Divider, Dropdown, Menu } from 'antd';
 
 import { IRootDispatch } from 'store';
 
@@ -20,17 +13,14 @@ import {
 	Range,
 	Transforms,
 	Text,
-	Path,
 } from 'slate';
 import {
+	DownOutlined,
 	PicRightOutlined,
 	SearchOutlined,
 	TranslationOutlined,
 } from '@ant-design/icons';
-import {
-	saveDictionary,
-	saveOrUpdateEntryInput,
-} from '@store/dictionary/actions';
+import { saveOrUpdateEntryInput } from '@store/dictionary/actions';
 import { formatURL } from '@components/LookupSourceLink';
 import SimpleInput, { useSimpleInput } from './Modals/SimpleInput';
 import Floating from '../Popups/Floating';
@@ -72,6 +62,32 @@ const defaultToolbarState: IToolbarState = {
 	simpleInputVisible: false,
 	wordInputVisible: false,
 } as const;
+
+const { SubMenu } = Menu;
+
+const menu = (
+	<Menu
+		onMouseDown={(e) => {
+			e.preventDefault();
+		}}
+		onClick={(e) => {
+			e.domEvent.preventDefault();
+		}}
+	>
+		<Menu.ItemGroup title="Group title">
+			<Menu.Item>1st menu item</Menu.Item>
+			<Menu.Item>2nd menu item</Menu.Item>
+		</Menu.ItemGroup>
+		<SubMenu title="sub menu">
+			<Menu.Item>3rd menu item</Menu.Item>
+			<Menu.Item>4th menu item</Menu.Item>
+		</SubMenu>
+		<SubMenu title="disabled sub menu" disabled>
+			<Menu.Item>5d menu item</Menu.Item>
+			<Menu.Item>6th menu item</Menu.Item>
+		</SubMenu>
+	</Menu>
+);
 
 const Toolbar: React.FC<{ rootElement: React.RefObject<HTMLElement> }> = ({
 	rootElement,
@@ -156,7 +172,6 @@ const Toolbar: React.FC<{ rootElement: React.RefObject<HTMLElement> }> = ({
 						at: savedSelection,
 						split: true,
 					});
-					/*
 					const allLeafs = Editor.nodes(editor, {
 						at: [[0], [editor.children.length - 1]],
 						match: (e) => Text.isText(e),
@@ -190,7 +205,6 @@ const Toolbar: React.FC<{ rootElement: React.RefObject<HTMLElement> }> = ({
 							}
 						}
 					}
-					*/
 				}
 			}
 			setToolbarState({
@@ -336,6 +350,26 @@ const Toolbar: React.FC<{ rootElement: React.RefObject<HTMLElement> }> = ({
 								/>
 							</>
 						)}
+						<Divider
+							type="vertical"
+							style={{
+								margin: '0 0px !important',
+								borderLeft: '1px solid rgb(0 0 0 / 27%)',
+							}}
+						/>
+						<Dropdown overlay={menu} trigger={['click']}>
+							<Button
+								style={{
+									fontSize: '0.8em',
+									fontWeight: 'bold',
+								}}
+								onClick={(e) => {
+									e.preventDefault();
+								}}
+							>
+								Paragraph <DownOutlined />
+							</Button>
+						</Dropdown>
 					</div>
 				)}
 			</Floating>
