@@ -13,6 +13,7 @@ import { Slate, withReact } from 'slate-react';
 import { createEditor, Descendant, Editor } from 'slate';
 import EditorDocument from './EditorDocument';
 import { CustomElement } from './CustomEditor';
+import WordsPanel from './WordsPanel/WordsPanel';
 
 const { TabPane } = Tabs;
 
@@ -165,7 +166,9 @@ const YiEditor: React.FC = () => {
 									<TabPane tab="Document" key="1">
 										<EditorDocument />
 									</TabPane>
-									<TabPane tab="Elements" key="2" />
+									<TabPane tab="Elements" key="2">
+										<WordsPanel />
+									</TabPane>
 									<TabPane tab="Debug" key="3">
 										<pre>
 											{JSON.stringify(

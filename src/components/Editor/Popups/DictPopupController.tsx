@@ -1,9 +1,9 @@
 import useDictionaryEntry from '@hooks/useDictionaryEntry';
 import { UUID } from 'Document/UUID';
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Editor, Range } from 'slate';
 import { ReactEditor, useSlate } from 'slate-react';
-import { isNodeAtSelection } from '../CustomEditor';
+import { isNodeAtSelection, WordElement } from '../CustomEditor';
 import DictPopup from './DictPopup';
 import Floating from './Floating';
 
@@ -14,8 +14,11 @@ const DictPopupController: React.FC<{
 	const [dictId, setDictId] = useState<UUID | null>(null);
 	const entry = useDictionaryEntry(dictId);
 	const rootEntry = useDictionaryEntry(entry?.root || null);
+	const [relativeBounding, setRelativeBounding] = useState<DOMRect | null>(
+		null
+	);
 
-	const relativeBounding = useMemo(() => {
+	useEffect(() => {
 		const clickedVocab = isNodeAtSelection(
 			editor,
 			editor.selection,
@@ -29,18 +32,21 @@ const DictPopupController: React.FC<{
 		) {
 			const wordFragment = Editor.above(editor);
 			if (wordFragment) {
-				const wordNode = wordFragment[0];
+				const wordNode = wordFragment[0] as WordElement;
 				const range = ReactEditor.toDOMNode(editor, wordNode);
 				const bounding = range.getBoundingClientRect();
-				return bounding;
+				setDictId(wordNode.dictId);
+				setRelativeBounding(bounding);
 			}
+		} else {
+			setDictId(null);
+			setRelativeBounding(null);
 		}
-		return null;
-	}, [editor]);
+	}, [editor, editor.selection]);
 
 	return (
 		<Floating
-			visible
+			visible={!!dictId}
 			parentElement={rootElement}
 			relativeBounding={relativeBounding}
 		>

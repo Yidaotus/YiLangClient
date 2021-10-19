@@ -30,6 +30,7 @@ const useDictionaryEntry = (
 	useEffect(() => {
 		const fetch = async () => {
 			if (!dictId || !currentLanguage) {
+				setEntry(null);
 				return;
 			}
 
