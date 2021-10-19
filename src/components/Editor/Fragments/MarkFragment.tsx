@@ -14,7 +14,7 @@ const MarkFragment: React.FC<IMarkFragmentData> = ({
 	return (
 		<span
 			{...attributes}
-			style={{ background: element.color, borderRadius: '5px' }}
+			style={{ background: element.color, borderRadius: '3px' }}
 		>
 			{children}
 		</span>

@@ -44,9 +44,10 @@ export type ParagraphElement = {
 	children: Descendant[];
 };
 
-export type InlineImage = {
-	type: 'inline-image';
+export type ImageElement = {
+	type: 'image';
 	src: string;
+	caption?: string;
 	children: CustomText[];
 };
 
@@ -58,7 +59,7 @@ export type MarkElement = {
 
 export type CustomElement =
 	| ParagraphElement
-	| InlineImage
+	| ImageElement
 	| WordElement
 	| MarkElement
 	| HeaderElement

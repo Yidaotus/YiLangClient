@@ -1,5 +1,11 @@
 import './Floating.css';
-import React, { CSSProperties, useRef } from 'react';
+import React, {
+	CSSProperties,
+	RefObject,
+	useEffect,
+	useRef,
+	useState,
+} from 'react';
 
 export interface IFloatingPosition {
 	x: number;
@@ -11,63 +17,86 @@ export interface IFloatingPosition {
 }
 
 export interface IFloatingProps {
-	state: FloatingState;
+	visible: boolean;
+	parentElement: RefObject<HTMLElement>;
+	relativeBounding: DOMRect | null;
 	arrow?: boolean;
 }
 
-export type FloatingState = { visible: boolean; position: IFloatingPosition };
-
-type FloatingAction =
-	| { type: 'show'; position: IFloatingPosition }
-	| { type: 'hide' };
-
-const floatingReducer: React.Reducer<FloatingState, FloatingAction> = (
-	state: FloatingState,
-	action: FloatingAction
-): FloatingState => {
-	switch (action.type) {
-		case 'show':
-			return {
-				visible: true,
-				position: { ...state.position, ...action.position },
-			};
-		case 'hide':
-			return {
-				visible: false,
-				position: state.position,
-			};
-		default:
-			return state;
-	}
-};
-
-const Floating: React.FC<IFloatingProps> = ({ state, arrow, children }) => {
+const Floating: React.FC<IFloatingProps> = ({
+	visible,
+	arrow,
+	parentElement,
+	relativeBounding,
+	children,
+}) => {
+	const [floatingStyle, setFloatingStyle] = useState<CSSProperties>({});
 	const floatingNode = useRef<HTMLDivElement>(null);
-	const floatingPosition: CSSProperties = {
-		left: `${state.position.x}px`,
-		top: `${state.position.y}px`,
-		transform: `translate(${state.position.offsetX || 0}px, ${
-			state.position.offsetY || 0
-		}px)`,
-	};
 
-	const fadeClass = state.visible ? 'fadeIn' : 'fadeOut';
+	useEffect(() => {
+		if (visible) {
+			if (relativeBounding && parentElement.current) {
+				const containerBounding =
+					parentElement.current.getBoundingClientRect();
+
+				if (relativeBounding && containerBounding) {
+					const posX =
+						relativeBounding.x + relativeBounding.width * 0.5;
+					const posY = relativeBounding.y + relativeBounding.height;
+
+					const relativeX = posX - containerBounding.x;
+					const relativeY = posY - containerBounding.y;
+
+					const floatingBounding =
+						floatingNode.current?.getBoundingClientRect();
+					const floatingHeight = floatingBounding?.height || 0;
+					const floatingWidth = floatingBounding?.width || 0;
+
+					const offsetY = 5;
+					const bufferSpace = 25;
+					const shouldRenderAbove =
+						relativeBounding.y +
+							relativeBounding.height +
+							floatingHeight +
+							offsetY >
+						window.innerHeight - bufferSpace;
+
+					const top =
+						relativeY +
+						(shouldRenderAbove
+							? -(
+									floatingHeight +
+									offsetY +
+									relativeBounding.height
+							  )
+							: offsetY);
+					const left = relativeX - floatingWidth * 0.5;
+
+					setFloatingStyle({
+						left,
+						top,
+						visibility: 'visible',
+						opacity: '100%',
+					});
+				}
+			}
+		} else {
+			setFloatingStyle({
+				visibility: 'hidden',
+				opacity: '0%',
+			});
+		}
+	}, [parentElement, relativeBounding, visible]);
 
 	return (
 		<div
-			style={floatingPosition}
-			className={`floating-container ${fadeClass}`}
+			style={floatingStyle}
 			ref={floatingNode}
+			className="floating-container"
 		>
-			{arrow && (
-				<div className="floating-arrow">
-					<div className="floating-arrow-content" />
-				</div>
-			)}
 			{children}
 		</div>
 	);
 };
 
 export default Floating;
-export { floatingReducer };

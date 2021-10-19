@@ -112,29 +112,41 @@ const WordInput: React.FC<IWordInputProps> = ({
 	};
 
 	return (
-		<div>
-			<div className="word-input-container" style={{ width }}>
-				<Card
-					color="green"
-					actions={[
-						editMode === 'word' ? (
-							<StopOutlined key="discard" onClick={cancel} />
-						) : (
-							<RollbackOutlined key="discard" onClick={cancel} />
-						),
-						<SaveOutlined key="save" onClick={() => finish()} />,
-					]}
-					bodyStyle={{ padding: '12px' }}
-				>
-					<div className="word-input-root-form">
-						<DictEntryEdit
-							ref={dictEntryEdit}
-							root={root}
-							stateChanged={setEditMode}
-						/>
+		<div className="word-input-container" style={{ width }}>
+			<Card
+				color="green"
+				title={
+					<div className="word-input-head">
+						<ReadOutlined />
+						{cardTitle}
+						<Dropdown overlay={menu} placement="bottomCenter">
+							<Button
+								shape="circle"
+								size="small"
+								type="primary"
+								icon={<SearchOutlined />}
+							/>
+						</Dropdown>
 					</div>
-				</Card>
-			</div>
+				}
+				actions={[
+					editMode === 'word' ? (
+						<StopOutlined key="discard" onClick={cancel} />
+					) : (
+						<RollbackOutlined key="discard" onClick={cancel} />
+					),
+					<SaveOutlined key="save" onClick={() => finish()} />,
+				]}
+				bodyStyle={{ padding: '12px' }}
+			>
+				<div className="word-input-root-form">
+					<DictEntryEdit
+						ref={dictEntryEdit}
+						root={root}
+						stateChanged={setEditMode}
+					/>
+				</div>
+			</Card>
 		</div>
 	);
 };

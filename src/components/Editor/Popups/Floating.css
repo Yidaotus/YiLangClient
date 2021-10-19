@@ -2,10 +2,11 @@
 	position: absolute;
 	z-index: 10;
 	pointer-events: none;
-}
-
-.floating-container > div {
-	transform: translate(-50%, 0px);
+	transition: visibility 0s linear 0s, opacity ease-in 200ms;
+	border-radius: 3px;
+	box-shadow: 0px 0px 5px 0px rgb(173, 173, 173);
+	border: 1px solid #c5c5c5;
+	background: #fff;
 }
 
 .floating-container * {
@@ -20,34 +21,4 @@
 .fadeIn {
 	visibility: visible;
 	opacity: 1;
-	transition: visibility 0s linear 0s, opacity ease-in 200ms;
-}
-
-.floating-arrow {
-	position: absolute;
-	display: block;
-	width: 8.48528137px;
-	height: 8.48528137px;
-	overflow: hidden;
-	background: 0 0;
-	pointer-events: none;
-	top: -7px;
-	z-index: 30;
-}
-
-.floating-arrow-content {
-	box-shadow: -2px -2px 5px #0000000f;
-	transform: translateY(4.24264069px) rotate(45deg);
-	position: absolute;
-	top: 0;
-	right: 0;
-	bottom: 0;
-	left: 0;
-	display: block;
-	width: 6px;
-	height: 6px;
-	margin: auto;
-	background-color: #fff;
-	content: '';
-	pointer-events: auto;
 }

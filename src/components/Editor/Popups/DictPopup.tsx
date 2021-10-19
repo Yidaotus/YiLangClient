@@ -3,21 +3,15 @@ import React from 'react';
 import { Divider, List } from 'antd';
 import DictionaryEntry from '@components/DictionaryEntry/DictionaryEntry';
 import { IDictionaryEntryResolved } from 'Document/Dictionary';
-import Floating, { FloatingState } from './Floating';
 
 export interface IDictPopupProps {
 	entry: IDictionaryEntryResolved | null;
 	rootEntry: IDictionaryEntryResolved | null;
-	popupState: FloatingState;
 }
 
-const DictPopup: React.FC<IDictPopupProps> = ({
-	entry,
-	popupState,
-	rootEntry,
-}) => {
+const DictPopup: React.FC<IDictPopupProps> = ({ entry, rootEntry }) => {
 	return (
-		<Floating state={popupState} arrow>
+		<div>
 			{entry && (
 				<div
 					className="dictpopup-container"
@@ -51,7 +45,7 @@ const DictPopup: React.FC<IDictPopupProps> = ({
 					/>
 				</div>
 			)}
-		</Floating>
+		</div>
 	);
 };
 

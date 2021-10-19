@@ -78,7 +78,12 @@ const ColorPicker: React.FC<{ editor: Editor }> = ({ editor }) => {
 					onClick={(e) => {
 						e.preventDefault();
 					}}
-					style={{ width: '242px', height: '22px' }}
+					style={{
+						width: '242px',
+						height: '22px',
+						top: '100%',
+						position: 'absolute',
+					}}
 				>
 					<HSLColorPicker
 						value={selectedColorValue}

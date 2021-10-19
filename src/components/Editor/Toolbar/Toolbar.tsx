@@ -1,5 +1,12 @@
 import './Toolbar.css';
-import React, { useEffect, useReducer, useState } from 'react';
+import React, {
+	useCallback,
+	useEffect,
+	useMemo,
+	useReducer,
+	useRef,
+	useState,
+} from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Divider } from 'antd';
 
@@ -26,7 +33,7 @@ import {
 } from '@store/dictionary/actions';
 import { formatURL } from '@components/LookupSourceLink';
 import SimpleInput, { useSimpleInput } from './Modals/SimpleInput';
-import Floating, { floatingReducer } from '../Popups/Floating';
+import Floating from '../Popups/Floating';
 
 import WordInput, { useWordInput } from './Modals/WordEditor/WordEditor';
 import ColorPicker from './Tools/ColorPicker';
@@ -37,9 +44,13 @@ import {
 } from '../CustomEditor';
 import WrapperItem from './Tools/WrapperItem';
 import DropdownItem from './Tools/DropdownItem';
-import ActionItem from './Tools/ActionItem';
 
 type IToolbarState =
+	| {
+			actionBarVisible: false;
+			simpleInputVisible: false;
+			wordInputVisible: false;
+	  }
 	| {
 			actionBarVisible: true;
 			simpleInputVisible: false;
@@ -71,68 +82,51 @@ const Toolbar: React.FC<{ rootElement: React.RefObject<HTMLElement> }> = ({
 
 	const dispatch: IRootDispatch = useDispatch();
 	const lookupSources = useSelector(selectActiveLookupSources);
+	const [selectionNode, setSelectionNode] = useState<DOMRect | null>(null);
 
 	const [toolbarState, setToolbarState] =
 		useState<IToolbarState>(defaultToolbarState);
-	const [toolbarContainerState, dispatchToolbarContainerState] = useReducer(
-		floatingReducer,
-		{
-			visible: false,
-			position: {
-				x: 0,
-				y: 0,
-				width: 0,
-				height: 0,
-			},
-		}
-	);
 
 	useEffect(() => {
-		const rootNode = rootElement.current;
 		if (
 			!toolbarState.simpleInputVisible &&
-			!toolbarState.wordInputVisible &&
-			rootNode
+			!toolbarState.wordInputVisible
 		) {
 			if (editor.selection && !Range.isCollapsed(editor.selection)) {
 				const range = ReactEditor.toDOMRange(editor, editor.selection);
-				const rangeBounding = range?.getBoundingClientRect();
-				const containerBounding = rootNode.getBoundingClientRect();
-
-				if (rangeBounding && containerBounding) {
-					const posX = rangeBounding.x + rangeBounding.width * 0.5;
-					const posY = rangeBounding.y + rangeBounding.height;
-
-					const relativeX = posX - containerBounding.x;
-					const relativeY = posY - containerBounding.y;
-					dispatchToolbarContainerState({
-						type: 'show',
-						position: {
-							x: relativeX,
-							y: relativeY,
-							width: rangeBounding.width,
-							height: rangeBounding.height,
-							offsetY: Math.ceil(rangeBounding.height * 0.15),
-						},
-					});
-				}
-
-				// Fix document selection not representing slate selection
-				// for example after clicking a toolbar button
+				const bounding = range.getBoundingClientRect();
+				setSelectionNode(bounding);
+				setToolbarState({
+					actionBarVisible: true,
+					simpleInputVisible: false,
+					wordInputVisible: false,
+				});
 				const domSelection = document.getSelection();
 				if (domSelection?.isCollapsed && !range.collapsed) {
 					document.getSelection()?.removeAllRanges();
 					document.getSelection()?.addRange(range);
 				}
 			} else {
-				dispatchToolbarContainerState({ type: 'hide' });
+				setToolbarState({
+					actionBarVisible: false,
+					simpleInputVisible: false,
+					wordInputVisible: false,
+				});
 			}
 		}
-	}, [editor, editor.selection, rootElement, toolbarState]);
+	}, [
+		editor,
+		editor.selection,
+		toolbarState.simpleInputVisible,
+		toolbarState.wordInputVisible,
+	]);
 
 	const wrapWithWord = async () => {
 		if (editor.selection) {
 			const savedSelection = { ...editor.selection };
+			const range = ReactEditor.toDOMRange(editor, editor.selection);
+			const bounding = range.getBoundingClientRect();
+			setSelectionNode(bounding);
 			const removeHighlights = highlightSelection(editor, savedSelection);
 			setToolbarState({
 				actionBarVisible: false,
@@ -208,131 +202,144 @@ const Toolbar: React.FC<{ rootElement: React.RefObject<HTMLElement> }> = ({
 	};
 
 	return (
-		<Floating state={toolbarContainerState} arrow>
-			{toolbarState.simpleInputVisible && (
-				<div tabIndex={0} role="button">
-					<SimpleInput {...simpleInputState} />
-				</div>
-			)}
-			{toolbarState.wordInputVisible && (
+		<>
+			<Floating
+				arrow
+				visible={toolbarState.wordInputVisible}
+				parentElement={rootElement}
+				relativeBounding={selectionNode}
+			>
 				<div tabIndex={0} role="button">
 					<WordInput {...wordInputState} />
 				</div>
-			)}
-			{toolbarState.actionBarVisible && (
-				<div className="toolbar">
-					<ColorPicker editor={editor} />
-					<Divider
-						type="vertical"
-						style={{
-							margin: '0 0px !important',
-							borderLeft: '1px solid rgb(0 0 0 / 27%)',
-						}}
-					/>
-					<WrapperItem
-						icon={<TranslationOutlined />}
-						tooltip="word"
-						tooltipActive="word"
-						active={isNodeInSelection(
-							editor,
-							editor.selection,
-							'word'
-						)}
-						name="word"
-						visible
-						wrap={wrapWithWord}
-						unwrap={async () => {
-							Transforms.unwrapNodes(editor, {
-								voids: true,
-								match: (n) => {
-									return (
-										SlateElement.isElement(n) &&
-										n.type === 'word'
-									);
-								},
-							});
-						}}
-					/>
-					<Divider
-						type="vertical"
-						style={{
-							margin: '0 0px !important',
-							borderLeft: '1px solid rgb(0 0 0 / 27%)',
-						}}
-					/>
-					<WrapperItem
-						icon={<PicRightOutlined />}
-						tooltip="sentence"
-						tooltipActive="sentence"
-						active={isNodeInSelection(
-							editor,
-							editor.selection,
-							'sentence'
-						)}
-						name="sentence"
-						visible
-						wrap={async () => {
-							Transforms.wrapNodes(
+			</Floating>
+			<Floating
+				arrow
+				visible={toolbarState.actionBarVisible}
+				parentElement={rootElement}
+				relativeBounding={selectionNode}
+			>
+				{toolbarState.simpleInputVisible && (
+					<div tabIndex={0} role="button">
+						<SimpleInput {...simpleInputState} />
+					</div>
+				)}
+				{toolbarState.actionBarVisible && (
+					<div className="toolbar">
+						<ColorPicker editor={editor} />
+						<Divider
+							type="vertical"
+							style={{
+								margin: '0 0px !important',
+								borderLeft: '1px solid rgb(0 0 0 / 27%)',
+							}}
+						/>
+						<WrapperItem
+							icon={<TranslationOutlined />}
+							tooltip="word"
+							tooltipActive="word"
+							active={isNodeInSelection(
 								editor,
-								{
-									type: 'sentence',
-									translation: 'teste',
-									children: [{ text: '' }],
-								},
-								{
-									split: true,
+								editor.selection,
+								'word'
+							)}
+							name="word"
+							visible
+							wrap={wrapWithWord}
+							unwrap={async () => {
+								Transforms.unwrapNodes(editor, {
 									voids: true,
-								}
-							);
-						}}
-						unwrap={async () => {
-							Transforms.unwrapNodes(editor, {
-								voids: true,
-								match: (n) => {
-									return (
-										SlateElement.isElement(n) &&
-										n.type === 'sentence'
-									);
-								},
-							});
-						}}
-					/>
-					{lookupSources.length > 0 && (
-						<>
-							<Divider
-								type="vertical"
-								style={{
-									margin: '0 0px !important',
-									borderLeft: '1px solid rgb(0 0 0 / 27%)',
-								}}
-							/>
-							<DropdownItem
-								icon={<SearchOutlined />}
-								tooltip="lookup"
-								name="lookup"
-								visible
-								items={lookupSources.map((source) => ({
-									type: 'Action',
-									name: source.name,
-									action: () => {
-										if (editor.selection) {
-											const url = formatURL({
-												source,
-												searchTerm: Editor.string(
-													editor,
-													editor.selection
-												),
-											});
-											window.open(url);
-										}
+									match: (n) => {
+										return (
+											SlateElement.isElement(n) &&
+											n.type === 'word'
+										);
 									},
-								}))}
-							/>
-						</>
-					)}
-				</div>
-			)}
-		</Floating>
+								});
+							}}
+						/>
+						<Divider
+							type="vertical"
+							style={{
+								margin: '0 0px !important',
+								borderLeft: '1px solid rgb(0 0 0 / 27%)',
+							}}
+						/>
+						<WrapperItem
+							icon={<PicRightOutlined />}
+							tooltip="sentence"
+							tooltipActive="sentence"
+							active={isNodeInSelection(
+								editor,
+								editor.selection,
+								'sentence'
+							)}
+							name="sentence"
+							visible
+							wrap={async () => {
+								Transforms.wrapNodes(
+									editor,
+									{
+										type: 'sentence',
+										translation: 'teste',
+										children: [{ text: '' }],
+									},
+									{
+										split: true,
+										voids: true,
+									}
+								);
+							}}
+							unwrap={async () => {
+								Transforms.unwrapNodes(editor, {
+									voids: true,
+									match: (n) => {
+										return (
+											SlateElement.isElement(n) &&
+											n.type === 'sentence'
+										);
+									},
+								});
+							}}
+						/>
+						{lookupSources.length > 0 && (
+							<>
+								<Divider
+									type="vertical"
+									style={{
+										margin: '0 0px !important',
+										borderLeft:
+											'1px solid rgb(0 0 0 / 27%)',
+									}}
+								/>
+								<DropdownItem
+									icon={<SearchOutlined />}
+									tooltip="lookup"
+									name="lookup"
+									visible
+									items={lookupSources.map((source) => ({
+										type: 'Action',
+										name: source.name,
+										action: () => {
+											if (editor.selection) {
+												const url = formatURL({
+													source,
+													searchTerm: Editor.string(
+														editor,
+														editor.selection
+													),
+												});
+												window.open(url);
+											}
+										},
+									}))}
+								/>
+							</>
+						)}
+					</div>
+				)}
+			</Floating>
+		</>
 	);
 };
 

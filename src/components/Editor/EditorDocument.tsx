@@ -16,6 +16,7 @@ import {
 	withReact,
 	RenderLeafProps,
 	RenderElementProps,
+	useSlateStatic,
 } from 'slate-react';
 import { CustomElement } from './CustomEditor';
 import Toolbar from './Toolbar/Toolbar';
@@ -23,6 +24,7 @@ import MarkFragment from './Fragments/MarkFragment';
 import DictPopupController from './Popups/DictPopupController';
 import SentenceFragment from './Fragments/SentenceFragment';
 import WordFragment from './Fragments/WordFragment';
+import ImageBlock from './Blocks/Elements/Image/Image';
 
 // Define a React component to render leaves with bold text.
 const Leaf = ({ attributes, leaf, children }: RenderLeafProps) => {
@@ -42,31 +44,6 @@ const isBoldMarkActive = (editor: Editor): boolean => {
 		universal: true,
 	});
 	return !!matched;
-};
-
-const withYiLang = (editor: Editor) => {
-	const { isInline, isVoid } = editor;
-	const inlineTypes: Array<CustomElement['type']> = [
-		'word',
-		'mark',
-		'sentence',
-		'highlight',
-		'inline-image',
-	];
-
-	const voidTypes: Array<CustomElement['type']> = ['word', 'inline-image'];
-
-	// eslint-disable-next-line no-param-reassign
-	editor.isInline = (element) => {
-		return inlineTypes.includes(element.type) ? true : isInline(element);
-	};
-
-	// eslint-disable-next-line no-param-reassign
-	editor.isVoid = (element) => {
-		return voidTypes.includes(element.type) ? true : isVoid(element);
-	};
-
-	return editor;
 };
 
 const Element = (props: RenderElementProps) => {
@@ -94,7 +71,7 @@ const Element = (props: RenderElementProps) => {
 				<span
 					style={{ color: 'black' }}
 					{...attributes}
-					contentEditable
+					contentEditable={false}
 				>
 					{children}
 				</span>
@@ -107,16 +84,11 @@ const Element = (props: RenderElementProps) => {
 					{children}
 				</span>
 			);
-		case 'inline-image':
+		case 'image':
 			return (
-				<span {...attributes}>
+				<ImageBlock attributes={attributes} element={element}>
 					{children}
-					<img
-						src={element.src}
-						style={{ float: 'right', userSelect: 'none' }}
-						alt="test"
-					/>
-				</span>
+				</ImageBlock>
 			);
 		case 'word':
 			return (
@@ -140,51 +112,15 @@ const Element = (props: RenderElementProps) => {
 
 const EditorDocument: React.FC = () => {
 	const ref = useRef(null);
-	const editor = useMemo(() => withYiLang(withReact(createEditor())), []);
-
-	const [editorNodes, setEditorNodes] = useState<Descendant[]>([
-		{
-			type: 'head',
-			level: 1,
-			children: [
-				{
-					text: 'イチゴの中はどうなっている？',
-				},
-			],
-		},
-		{
-			type: 'head',
-			level: 2,
-			children: [
-				{
-					text: 'イチゴの中はどうなっている？',
-				},
-			],
-		},
-		{
-			type: 'paragraph',
-			children: [
-				{
-					text: '今回のミカタは「中を見てみる」。イチゴの中はどうなっているか、街の人に聞いてみました。まず、男の子。「こんな感じだ と思います。まわりが赤くなって、中に粒（つぶ）がある」。中にツブツブ？　続いて女の子。',
-				},
-				{
-					type: 'inline-image',
-					src: 'https://www.nhk.or.jp/das/image/D0005110/D0005110342_00000_C_001.jpg',
-					children: [{ text: '' }],
-				},
-				{
-					text: '真ん中が白っぽくて空洞（くうどう）になっていて、まわりは赤い」。中に空洞？　若い女の人は、「真ん中が真っ白で、徐々（じょじょ）に赤くなっていく感じ」。真ん中は白い？　みんながかいたイチゴの中。中にツブツブ、中に空洞、真ん中が白い、スジがある…。実際はどうなっているのでしょう。',
-				},
-			],
-		},
-	]);
 
 	const renderLeaf = useCallback((props) => {
 		return <Leaf {...props} />;
 	}, []);
 
 	const renderElement = useCallback((props) => <Element {...props} />, []);
+	const editor = useSlateStatic();
 
+	/*
 	const vocab = useMemo(() => {
 		const vocabs: Set<string> = new Set();
 
@@ -226,71 +162,64 @@ const EditorDocument: React.FC = () => {
 		}
 		return sentencesInEditor;
 	}, [editorNodes]);
+	*/
 
 	return (
 		<div style={{ position: 'relative', fontSize: '1.3em' }} ref={ref}>
-			<Slate
-				editor={editor}
-				value={editorNodes}
-				onChange={(newValue) => setEditorNodes(newValue)}
+			<Toolbar rootElement={ref} />
+			<DictPopupController rootElement={ref} />
+			<div
+				style={{
+					display: 'flex',
+					flexDirection: 'column',
+				}}
 			>
-				<Toolbar rootElement={ref} />
-				<DictPopupController rootElement={ref} />
-
-				<div
-					style={{
-						display: 'flex',
-						flexDirection: 'column',
-					}}
-				>
-					<div>
-						<Editable
-							renderElement={renderElement}
-							renderLeaf={renderLeaf}
-							onKeyDown={(event) => {
-								if (event.getModifierState('Alt')) {
-									if (event.key === '&') {
-										// Prevent the ampersand character from being inserted.
-										event.preventDefault();
-										// Execute the `insertText` method when the event occurs.
-										editor.insertText('and');
-									}
-									if (event.key === 'b') {
-										// Prevent the ampersand character from being inserted.
-										event.preventDefault();
-										// Execute the `insertText` method when the event occurs.
-										if (isBoldMarkActive(editor)) {
-											Transforms.setNodes(
-												editor,
-												{ bold: undefined },
-												// Apply it to text nodes, and split the text node up if the
-												// selection is overlapping only part of it.
-												{
-													match: (n) =>
-														Text.isText(n),
-													split: true,
-												}
-											);
-										} else {
-											Transforms.setNodes(
-												editor,
-												{ bold: true },
-												// Apply it to text nodes, and split the text node up if the
-												// selection is overlapping only part of it.
-												{
-													match: (n) =>
-														Text.isText(n),
-													split: true,
-												}
-											);
-										}
+				<div>
+					<Editable
+						className="editor-container"
+						renderElement={renderElement}
+						renderLeaf={renderLeaf}
+						onKeyDown={(event) => {
+							if (event.getModifierState('Alt')) {
+								if (event.key === '&') {
+									// Prevent the ampersand character from being inserted.
+									event.preventDefault();
+									// Execute the `insertText` method when the event occurs.
+									editor.insertText('and');
+								}
+								if (event.key === 'b') {
+									// Prevent the ampersand character from being inserted.
+									event.preventDefault();
+									// Execute the `insertText` method when the event occurs.
+									if (isBoldMarkActive(editor)) {
+										Transforms.setNodes(
+											editor,
+											{ bold: undefined },
+											// Apply it to text nodes, and split the text node up if the
+											// selection is overlapping only part of it.
+											{
+												match: (n) => Text.isText(n),
+												split: true,
+											}
+										);
+									} else {
+										Transforms.setNodes(
+											editor,
+											{ bold: true },
+											// Apply it to text nodes, and split the text node up if the
+											// selection is overlapping only part of it.
+											{
+												match: (n) => Text.isText(n),
+												split: true,
+											}
+										);
 									}
 								}
-							}}
-						/>
-					</div>
+							}
+						}}
+					/>
 				</div>
-			</Slate>
+			</div>
 		</div>
 	);
 };

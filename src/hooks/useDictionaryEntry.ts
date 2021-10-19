@@ -10,7 +10,6 @@ import { notUndefined } from 'Document/Utility';
 import { UUID } from 'Document/UUID';
 import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import useDictionaryTags from './useDictionaryTags';
 
 export interface IUseDictionaryOptions {
 	cache: boolean;
@@ -21,11 +20,12 @@ const useDictionaryEntry = (
 ): IDictionaryEntryResolved | null => {
 	const dispatch = useDispatch();
 	const [entry, setEntry] = useState<IDictionaryEntryResolved | null>(null);
-	const userDictionary = useSelector(
-		(state: IRootState) => state.dictionary.entries
+	const cachedEntry = useSelector(
+		(state: IRootState) => dictId && state.dictionary.entries[dictId]
 	);
 	const userTags = useSelector((state: IRootState) => state.dictionary.tags);
 	const currentLanguage = useSelector(selectActiveLanguageConfig);
+	const shouldCache = options?.cache || false;
 
 	useEffect(() => {
 		const fetch = async () => {
@@ -34,7 +34,6 @@ const useDictionaryEntry = (
 			}
 
 			let fetchedEntry: IDictionaryEntry | null = null;
-			const cachedEntry = userDictionary[dictId];
 			if (cachedEntry) {
 				fetchedEntry = cachedEntry;
 			} else {
@@ -44,7 +43,7 @@ const useDictionaryEntry = (
 				});
 				if (remoteEntry) {
 					fetchedEntry = remoteEntry.entry;
-					if (options?.cache) {
+					if (shouldCache) {
 						dispatch(cacheDictionaryEntry(remoteEntry.entry));
 					}
 				}
@@ -61,7 +60,7 @@ const useDictionaryEntry = (
 		};
 
 		fetch();
-	}, [currentLanguage, dictId, dispatch, options, userDictionary, userTags]);
+	}, [cachedEntry, currentLanguage, dictId, dispatch, shouldCache, userTags]);
 
 	return entry;
 };

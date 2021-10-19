@@ -133,7 +133,7 @@ const HomeView: React.FC = () => {
 			<main className="yi-content">
 				<Spin spinning={!!loading} tip={loading || ''}>
 					<Row justify="center" align="top">
-						<Col span={21}>
+						<Col style={{ width: '1024px' }}>
 							<Switch>
 								<Route path={locationMap.home} exact>
 									<Overview />
