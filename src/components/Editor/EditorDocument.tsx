@@ -88,6 +88,14 @@ const Element = (props: RenderElementProps) => {
 					{children}
 				</MarkFragment>
 			);
+		case 'listItem':
+			return <li {...attributes}>{children}</li>;
+		case 'numberedList':
+			return <ol {...attributes}>{children}</ol>;
+		case 'bulletedList':
+			return <ul {...attributes}>{children}</ul>;
+		case 'blockQuote':
+			return <blockquote {...attributes}>{children}</blockquote>;
 		default:
 			return <div {...attributes}>{children}</div>;
 	}

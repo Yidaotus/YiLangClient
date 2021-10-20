@@ -21,6 +21,7 @@ const ActionItem: React.FC<IToolbarActionItem> = ({
 					onMouseDown={(event) => {
 						event.preventDefault();
 					}}
+					size="large"
 					onMouseUp={() => {
 						action();
 					}}

@@ -15,7 +15,16 @@ import { ReactEditor } from 'slate-react';
 
 export type CustomEditor = BaseEditor & ReactEditor;
 
-export const BlockTypes = ['title', 'subtitle', 'paragraph', 'image'] as const;
+export const BlockTypes = [
+	'title',
+	'subtitle',
+	'paragraph',
+	'image',
+	'listItem',
+	'bulletedList',
+	'numberedList',
+	'blockQuote',
+] as const;
 export const InlineTypes = ['word', 'sentence', 'mark', 'highlight'] as const;
 export const ElementTypeLabels: {
 	[k in typeof BlockTypes[number] | typeof InlineTypes[number]]: string;
@@ -28,12 +37,36 @@ export const ElementTypeLabels: {
 	sentence: 'Sentence',
 	mark: 'Mark',
 	highlight: 'Highlight',
+	listItem: 'List',
+	numberedList: 'Numbered List',
+	bulletedList: 'Bulleted List',
+	blockQuote: 'Quote',
 };
 
 export type HighlightElement = {
 	type: 'highlight';
 	role: 'highlight' | 'deemphasize';
 	children: CustomText[];
+};
+
+export type ListItemElement = {
+	type: 'listItem';
+	children: CustomText[];
+};
+
+export type BlockQuoteElement = {
+	type: 'blockQuote';
+	children: CustomText[];
+};
+
+export type NumberedListElement = {
+	type: 'numberedList';
+	children: ListItemElement[];
+};
+
+export type BulletedListElement = {
+	type: 'bulletedList';
+	children: ListItemElement[];
 };
 
 export type SentenceElement = {
@@ -80,6 +113,10 @@ export type EditorBlockElement =
 	| ParagraphElement
 	| ImageElement
 	| TitleElement
+	| BlockQuoteElement
+	| BulletedListElement
+	| NumberedListElement
+	| ListItemElement
 	| SubtitleElement;
 
 export type EditorInlineElement =

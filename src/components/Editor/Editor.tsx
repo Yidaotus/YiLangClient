@@ -134,6 +134,14 @@ const YiEditor: React.FC = () => {
 			children: [{ text: '' }],
 		},
 		{
+			type: 'blockQuote',
+			children: [
+				{
+					text: 'Lorem ipsum dolar sit!',
+				},
+			],
+		},
+		{
 			type: 'paragraph',
 			children: [
 				{
@@ -141,6 +149,35 @@ const YiEditor: React.FC = () => {
 				},
 				{
 					text: '真ん中が白っぽくて空洞（くうどう）になっていて、まわりは赤い」。中に空洞？　若い女の人は、「真ん中が真っ白で、徐々（じょじょ）に赤くなっていく感じ」。真ん中は白い？　みんながかいたイチゴの中。中にツブツブ、中に空洞、真ん中が白い、スジがある…。実際はどうなっているのでしょう。',
+				},
+			],
+		},
+		{
+			type: 'bulletedList',
+			children: [
+				{
+					type: 'listItem',
+					children: [
+						{
+							text: 'First',
+						},
+					],
+				},
+				{
+					type: 'listItem',
+					children: [
+						{
+							text: 'Second',
+						},
+					],
+				},
+				{
+					type: 'listItem',
+					children: [
+						{
+							text: 'Third',
+						},
+					],
 				},
 			],
 		},
