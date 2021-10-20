@@ -15,6 +15,21 @@ import { ReactEditor } from 'slate-react';
 
 export type CustomEditor = BaseEditor & ReactEditor;
 
+export const BlockTypes = ['title', 'subtitle', 'paragraph', 'image'] as const;
+export const InlineTypes = ['word', 'sentence', 'mark', 'highlight'] as const;
+export const ElementTypeLabels: {
+	[k in typeof BlockTypes[number] | typeof InlineTypes[number]]: string;
+} = {
+	title: 'Title',
+	subtitle: 'Subtitle',
+	paragraph: 'Paragraph',
+	image: 'Image',
+	word: 'Word',
+	sentence: 'Sentence',
+	mark: 'Mark',
+	highlight: 'Highlight',
+};
+
 export type HighlightElement = {
 	type: 'highlight';
 	role: 'highlight' | 'deemphasize';
@@ -33,9 +48,13 @@ export type WordElement = {
 	children: CustomText[];
 };
 
-export type HeaderElement = {
-	type: 'head';
-	level: number;
+export type SubtitleElement = {
+	type: 'subtitle';
+	children: CustomText[];
+};
+
+export type TitleElement = {
+	type: 'title';
 	children: CustomText[];
 };
 
@@ -57,23 +76,26 @@ export type MarkElement = {
 	children: CustomText[];
 };
 
-export type CustomElement =
+export type EditorBlockElement =
 	| ParagraphElement
 	| ImageElement
+	| TitleElement
+	| SubtitleElement;
+
+export type EditorInlineElement =
 	| WordElement
 	| MarkElement
-	| HeaderElement
 	| HighlightElement
 	| SentenceElement;
 
+export type EditorElement = EditorBlockElement | EditorInlineElement;
 export type FormattedText = { text: string; bold?: true };
-
 export type CustomText = FormattedText;
 
 declare module 'slate' {
 	interface CustomTypes {
 		Editor: CustomEditor;
-		Element: CustomElement;
+		Element: EditorElement;
 		Text: CustomText;
 	}
 }
@@ -81,7 +103,7 @@ declare module 'slate' {
 export const isNodeAtSelection = (
 	editor: Editor,
 	selection: Selection,
-	type: CustomElement['type']
+	type: EditorElement['type']
 ): boolean => {
 	if (selection == null) {
 		return false;
@@ -98,7 +120,7 @@ export const isNodeAtSelection = (
 export const isNodeInSelection = (
 	editor: Editor,
 	selection: Selection,
-	type: CustomElement['type']
+	type: EditorElement['type']
 ): boolean => {
 	if (selection == null) {
 		return false;
@@ -200,7 +222,7 @@ export const highlightSelection = (
 
 export const getTextBlockStyle = (
 	editor: Editor
-): CustomElement['type'] | null | 'multiple' => {
+): EditorElement['type'] | null | 'multiple' => {
 	const { selection } = editor;
 	if (selection == null) {
 		return null;
@@ -228,7 +250,7 @@ export const getTextBlockStyle = (
 
 export const toggleBlockType = (
 	editor: Editor,
-	blockType: CustomElement['type']
+	blockType: EditorElement['type']
 ): void => {
 	if (editor.selection) {
 		const currentBlockType = getTextBlockStyle(editor);
@@ -237,8 +259,6 @@ export const toggleBlockType = (
 		Transforms.setNodes(
 			editor,
 			{ type: changeTo },
-			// Node filtering options supported here too. We use the same
-			// we used with Editor.nodes above.
 			{ at: editor.selection, match: (n) => Editor.isBlock(editor, n) }
 		);
 	}

@@ -1,7 +1,7 @@
 import './Editor.css';
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useRef, useState } from 'react';
 
-import { Tabs, Spin, notification, Modal } from 'antd';
+import { Tabs, Spin, notification } from 'antd';
 
 import { useDispatch, useSelector } from 'react-redux';
 import { selectActiveLanguageConfig } from '@store/user/selectors';
@@ -11,22 +11,25 @@ import handleError from '@helpers/Error';
 
 import { Slate, withReact } from 'slate-react';
 import { createEditor, Descendant, Editor } from 'slate';
+import useSelection from '@hooks/useSelection';
 import EditorDocument from './EditorDocument';
-import { CustomElement } from './CustomEditor';
+import { EditorElement } from './CustomEditor';
 import WordsPanel from './WordsPanel/WordsPanel';
+import DictPopupController from './Popups/DictPopupController';
+import Toolbar from './Toolbar/Toolbar';
 
 const { TabPane } = Tabs;
 
 const withYiLang = (editor: Editor) => {
 	const { isInline, isVoid } = editor;
-	const inlineTypes: Array<CustomElement['type']> = [
+	const inlineTypes: Array<EditorElement['type']> = [
 		'word',
 		'mark',
 		'sentence',
 		'highlight',
 	];
 
-	const voidTypes: Array<CustomElement['type']> = ['word', 'image'];
+	const voidTypes: Array<EditorElement['type']> = ['word', 'image'];
 
 	// eslint-disable-next-line no-param-reassign
 	editor.isInline = (element) => {
@@ -44,6 +47,7 @@ const withYiLang = (editor: Editor) => {
 const YiEditor: React.FC = () => {
 	const dispatch: IRootDispatch = useDispatch();
 
+	const editorContainer = useRef(null);
 	const [loading, setLoading] = useState<string | null>(null);
 	const currentLanguage = useSelector(selectActiveLanguageConfig);
 
@@ -98,11 +102,11 @@ const YiEditor: React.FC = () => {
 	}, [currentLanguage, dispatch]);
 
 	const editor = useMemo(() => withYiLang(withReact(createEditor())), []);
+	const [selection, setSelection] = useSelection(editor);
 
 	const [editorNodes, setEditorNodes] = useState<Descendant[]>([
 		{
-			type: 'head',
-			level: 1,
+			type: 'title',
 			children: [
 				{
 					text: 'イチゴの中はどうなっている？',
@@ -110,8 +114,7 @@ const YiEditor: React.FC = () => {
 			],
 		},
 		{
-			type: 'head',
-			level: 2,
+			type: 'subtitle',
 			children: [
 				{
 					text: 'イチゴの中はどうなっている？',
@@ -152,9 +155,10 @@ const YiEditor: React.FC = () => {
 							<Slate
 								editor={editor}
 								value={editorNodes}
-								onChange={(newValue) =>
-									setEditorNodes(newValue)
-								}
+								onChange={(newValue) => {
+									setEditorNodes(newValue);
+									setSelection(editor.selection);
+								}}
 							>
 								<Tabs
 									defaultActiveKey="1"
@@ -164,7 +168,17 @@ const YiEditor: React.FC = () => {
 									}}
 								>
 									<TabPane tab="Document" key="1">
-										<EditorDocument />
+										<div ref={editorContainer}>
+											<EditorDocument />
+										</div>
+										<Toolbar
+											rootElement={editorContainer}
+											selection={selection}
+										/>
+										<DictPopupController
+											rootElement={editorContainer}
+											selection={selection}
+										/>
 									</TabPane>
 									<TabPane tab="Elements" key="2">
 										<WordsPanel />

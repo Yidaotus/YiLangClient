@@ -2,17 +2,16 @@ import './Toolbar.css';
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Button, Divider, Dropdown, Menu } from 'antd';
-
 import { IRootDispatch } from 'store';
-
 import { selectActiveLookupSources } from '@store/user/selectors';
-import { ReactEditor, useSlate } from 'slate-react';
+import { ReactEditor, useSlateStatic } from 'slate-react';
 import {
 	Editor,
 	Element as SlateElement,
 	Range,
 	Transforms,
 	Text,
+	BaseSelection,
 } from 'slate';
 import {
 	DownOutlined,
@@ -22,15 +21,16 @@ import {
 } from '@ant-design/icons';
 import { saveOrUpdateEntryInput } from '@store/dictionary/actions';
 import { formatURL } from '@components/LookupSourceLink';
-import SimpleInput, { useSimpleInput } from './Modals/SimpleInput';
 import Floating from '../Popups/Floating';
-
 import WordInput, { useWordInput } from './Modals/WordEditor/WordEditor';
 import ColorPicker from './Tools/ColorPicker';
 import {
+	BlockTypes,
+	ElementTypeLabels,
 	getTextBlockStyle,
 	highlightSelection,
 	isNodeInSelection,
+	toggleBlockType,
 	WordElement,
 } from '../CustomEditor';
 import WrapperItem from './Tools/WrapperItem';
@@ -64,33 +64,14 @@ const defaultToolbarState: IToolbarState = {
 	wordInputVisible: false,
 } as const;
 
-const { SubMenu } = Menu;
+export interface IToolbarProps {
+	rootElement: React.RefObject<HTMLElement>;
+	selection: BaseSelection;
+}
 
-const menu = (
-	<Menu
-		onMouseDown={(e) => {
-			e.preventDefault();
-		}}
-		onClick={(e) => {
-			e.domEvent.preventDefault();
-		}}
-	>
-		<Menu.Item disabled>Paragraph</Menu.Item>
-		<SubMenu title="Title">
-			<Menu.Item>Title</Menu.Item>
-			<Menu.Item>Subtitle</Menu.Item>
-		</SubMenu>
-		<Menu.Item>Dialog</Menu.Item>
-		<Menu.Item>Image</Menu.Item>
-	</Menu>
-);
-
-const Toolbar: React.FC<{ rootElement: React.RefObject<HTMLElement> }> = ({
-	rootElement,
-}) => {
-	const editor = useSlate();
+const Toolbar: React.FC<IToolbarProps> = ({ rootElement, selection }) => {
+	const editor = useSlateStatic();
 	const blockType = getTextBlockStyle(editor);
-	const { simpleInputState, getUserInput } = useSimpleInput();
 	const { wordInputState, getUserWord } = useWordInput();
 
 	const dispatch: IRootDispatch = useDispatch();
@@ -105,8 +86,8 @@ const Toolbar: React.FC<{ rootElement: React.RefObject<HTMLElement> }> = ({
 			!toolbarState.simpleInputVisible &&
 			!toolbarState.wordInputVisible
 		) {
-			if (editor.selection && !Range.isCollapsed(editor.selection)) {
-				const range = ReactEditor.toDOMRange(editor, editor.selection);
+			if (selection && !Range.isCollapsed(selection)) {
+				const range = ReactEditor.toDOMRange(editor, selection);
 				const bounding = range.getBoundingClientRect();
 				setSelectionNode(bounding);
 				setToolbarState({
@@ -129,7 +110,7 @@ const Toolbar: React.FC<{ rootElement: React.RefObject<HTMLElement> }> = ({
 		}
 	}, [
 		editor,
-		editor.selection,
+		selection,
 		toolbarState.simpleInputVisible,
 		toolbarState.wordInputVisible,
 	]);
@@ -212,6 +193,28 @@ const Toolbar: React.FC<{ rootElement: React.RefObject<HTMLElement> }> = ({
 		}
 	};
 
+	const blockMenu = (
+		<Menu
+			onMouseDown={(e) => {
+				e.preventDefault();
+			}}
+			onClick={(e) => {
+				e.domEvent.preventDefault();
+			}}
+		>
+			{BlockTypes.map((menuBlockType) => (
+				<Menu.Item
+					disabled={blockType === menuBlockType}
+					onClick={() => {
+						toggleBlockType(editor, menuBlockType);
+					}}
+				>
+					{ElementTypeLabels[menuBlockType]}
+				</Menu.Item>
+			))}
+		</Menu>
+	);
+
 	return (
 		<>
 			<Floating
@@ -230,11 +233,6 @@ const Toolbar: React.FC<{ rootElement: React.RefObject<HTMLElement> }> = ({
 				parentElement={rootElement}
 				relativeBounding={selectionNode}
 			>
-				{toolbarState.simpleInputVisible && (
-					<div tabIndex={0} role="button">
-						<SimpleInput {...simpleInputState} />
-					</div>
-				)}
 				{toolbarState.actionBarVisible && (
 					<div className="toolbar">
 						<ColorPicker editor={editor} />
@@ -354,7 +352,7 @@ const Toolbar: React.FC<{ rootElement: React.RefObject<HTMLElement> }> = ({
 								borderLeft: '1px solid rgb(0 0 0 / 27%)',
 							}}
 						/>
-						<Dropdown overlay={menu} trigger={['click']}>
+						<Dropdown overlay={blockMenu} trigger={['click']}>
 							<Button
 								style={{
 									fontSize: '0.8em',
@@ -363,7 +361,10 @@ const Toolbar: React.FC<{ rootElement: React.RefObject<HTMLElement> }> = ({
 									e.preventDefault();
 								}}
 							>
-								{blockType} <DownOutlined />
+								{blockType === null || blockType === 'multiple'
+									? 'Multiple'
+									: ElementTypeLabels[blockType]}
+								<DownOutlined />
 							</Button>
 						</Dropdown>
 					</div>

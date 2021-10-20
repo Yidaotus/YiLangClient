@@ -1,27 +1,14 @@
 import './EditorDocument.css';
-import React, { useCallback, useMemo, useRef, useState } from 'react';
-import {
-	createEditor,
-	Descendant,
-	Transforms,
-	Text,
-	Editor,
-	Element as SlateElement,
-	Node as SlateNode,
-} from 'slate';
+import React, { useCallback } from 'react';
+import { Transforms, Text, Editor } from 'slate';
 
 import {
-	Slate,
 	Editable,
-	withReact,
 	RenderLeafProps,
 	RenderElementProps,
 	useSlateStatic,
 } from 'slate-react';
-import { CustomElement } from './CustomEditor';
-import Toolbar from './Toolbar/Toolbar';
 import MarkFragment from './Fragments/MarkFragment';
-import DictPopupController from './Popups/DictPopupController';
 import SentenceFragment from './Fragments/SentenceFragment';
 import WordFragment from './Fragments/WordFragment';
 import ImageBlock from './Blocks/Elements/Image/Image';
@@ -56,15 +43,11 @@ const Element = (props: RenderElementProps) => {
 					{children}
 				</SentenceFragment>
 			);
-		case 'head': {
-			switch (element.level) {
-				case 1:
-					return <h1 {...attributes}>{children}</h1>;
-				case 2:
-					return <h2 {...attributes}>{children}</h2>;
-				default:
-					return <h1 {...attributes}>{children}</h1>;
-			}
+		case 'title': {
+			return <h1 {...attributes}>{children}</h1>;
+		}
+		case 'subtitle': {
+			return <h2 {...attributes}>{children}</h2>;
 		}
 		case 'highlight':
 			return element.role === 'highlight' ? (
@@ -111,8 +94,6 @@ const Element = (props: RenderElementProps) => {
 };
 
 const EditorDocument: React.FC = () => {
-	const ref = useRef(null);
-
 	const renderLeaf = useCallback((props) => {
 		return <Leaf {...props} />;
 	}, []);
@@ -165,9 +146,7 @@ const EditorDocument: React.FC = () => {
 	*/
 
 	return (
-		<div style={{ position: 'relative', fontSize: '1.3em' }} ref={ref}>
-			<Toolbar rootElement={ref} />
-			<DictPopupController rootElement={ref} />
+		<div style={{ position: 'relative', fontSize: '1.3em' }}>
 			<div
 				style={{
 					display: 'flex',
