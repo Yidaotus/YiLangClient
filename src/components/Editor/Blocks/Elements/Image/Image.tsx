@@ -80,7 +80,10 @@ const ImageBlock: React.FC<IImageBlockData> = ({
 	return (
 		<div {...attributes}>
 			{children}
-			<div contentEditable={false}>
+			<div
+				contentEditable={false}
+				style={{ marginTop: '15px', marginBottom: '15px' }}
+			>
 				<img
 					alt="lul"
 					src={element.src}

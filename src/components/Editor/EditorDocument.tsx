@@ -147,58 +147,49 @@ const EditorDocument: React.FC = () => {
 
 	return (
 		<div style={{ position: 'relative', fontSize: '1.3em' }}>
-			<div
-				style={{
-					display: 'flex',
-					flexDirection: 'column',
-				}}
-			>
-				<div>
-					<Editable
-						className="editor-container"
-						renderElement={renderElement}
-						renderLeaf={renderLeaf}
-						onKeyDown={(event) => {
-							if (event.getModifierState('Alt')) {
-								if (event.key === '&') {
-									// Prevent the ampersand character from being inserted.
-									event.preventDefault();
-									// Execute the `insertText` method when the event occurs.
-									editor.insertText('and');
-								}
-								if (event.key === 'b') {
-									// Prevent the ampersand character from being inserted.
-									event.preventDefault();
-									// Execute the `insertText` method when the event occurs.
-									if (isBoldMarkActive(editor)) {
-										Transforms.setNodes(
-											editor,
-											{ bold: undefined },
-											// Apply it to text nodes, and split the text node up if the
-											// selection is overlapping only part of it.
-											{
-												match: (n) => Text.isText(n),
-												split: true,
-											}
-										);
-									} else {
-										Transforms.setNodes(
-											editor,
-											{ bold: true },
-											// Apply it to text nodes, and split the text node up if the
-											// selection is overlapping only part of it.
-											{
-												match: (n) => Text.isText(n),
-												split: true,
-											}
-										);
+			<Editable
+				className="editor-container"
+				renderElement={renderElement}
+				renderLeaf={renderLeaf}
+				onKeyDown={(event) => {
+					if (event.getModifierState('Alt')) {
+						if (event.key === '&') {
+							// Prevent the ampersand character from being inserted.
+							event.preventDefault();
+							// Execute the `insertText` method when the event occurs.
+							editor.insertText('and');
+						}
+						if (event.key === 'b') {
+							// Prevent the ampersand character from being inserted.
+							event.preventDefault();
+							// Execute the `insertText` method when the event occurs.
+							if (isBoldMarkActive(editor)) {
+								Transforms.setNodes(
+									editor,
+									{ bold: undefined },
+									// Apply it to text nodes, and split the text node up if the
+									// selection is overlapping only part of it.
+									{
+										match: (n) => Text.isText(n),
+										split: true,
 									}
-								}
+								);
+							} else {
+								Transforms.setNodes(
+									editor,
+									{ bold: true },
+									// Apply it to text nodes, and split the text node up if the
+									// selection is overlapping only part of it.
+									{
+										match: (n) => Text.isText(n),
+										split: true,
+									}
+								);
 							}
-						}}
-					/>
-				</div>
-			</div>
+						}
+					}
+				}}
+			/>
 		</div>
 	);
 };

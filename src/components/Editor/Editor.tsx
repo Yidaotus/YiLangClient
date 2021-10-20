@@ -1,5 +1,11 @@
 import './Editor.css';
-import React, { useCallback, useMemo, useRef, useState } from 'react';
+import React, {
+	useCallback,
+	useEffect,
+	useMemo,
+	useRef,
+	useState,
+} from 'react';
 
 import { Tabs, Spin, notification } from 'antd';
 
@@ -9,7 +15,7 @@ import { fetchTags, saveDictionary, saveTags } from 'store/dictionary/actions';
 import { IRootDispatch } from 'store';
 import handleError from '@helpers/Error';
 
-import { Slate, withReact } from 'slate-react';
+import { ReactEditor, Slate, withReact } from 'slate-react';
 import { createEditor, Descendant, Editor } from 'slate';
 import useSelection from '@hooks/useSelection';
 import EditorDocument from './EditorDocument';
@@ -140,6 +146,17 @@ const YiEditor: React.FC = () => {
 		},
 	]);
 
+	useEffect(() => {
+		if (selection) {
+			const range = ReactEditor.toDOMRange(editor, selection);
+			const domSelection = document.getSelection();
+			if (domSelection?.isCollapsed && !range.collapsed) {
+				document.getSelection()?.removeAllRanges();
+				document.getSelection()?.addRange(range);
+			}
+		}
+	}, [editor, selection]);
+
 	// If we change our Document we need to check if we have stored caret
 	// and restore if this is the case.
 	return (
@@ -168,17 +185,20 @@ const YiEditor: React.FC = () => {
 									}}
 								>
 									<TabPane tab="Document" key="1">
-										<div ref={editorContainer}>
+										<div
+											ref={editorContainer}
+											style={{ position: 'relative' }}
+										>
+											<Toolbar
+												rootElement={editorContainer}
+												selection={selection}
+											/>
+											<DictPopupController
+												rootElement={editorContainer}
+												selection={selection}
+											/>
 											<EditorDocument />
 										</div>
-										<Toolbar
-											rootElement={editorContainer}
-											selection={selection}
-										/>
-										<DictPopupController
-											rootElement={editorContainer}
-											selection={selection}
-										/>
 									</TabPane>
 									<TabPane tab="Elements" key="2">
 										<WordsPanel />

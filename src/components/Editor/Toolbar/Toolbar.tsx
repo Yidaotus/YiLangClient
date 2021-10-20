@@ -95,11 +95,6 @@ const Toolbar: React.FC<IToolbarProps> = ({ rootElement, selection }) => {
 					simpleInputVisible: false,
 					wordInputVisible: false,
 				});
-				const domSelection = document.getSelection();
-				if (domSelection?.isCollapsed && !range.collapsed) {
-					document.getSelection()?.removeAllRanges();
-					document.getSelection()?.addRange(range);
-				}
 			} else {
 				setToolbarState({
 					actionBarVisible: false,
@@ -205,7 +200,12 @@ const Toolbar: React.FC<IToolbarProps> = ({ rootElement, selection }) => {
 			{BlockTypes.map((menuBlockType) => (
 				<Menu.Item
 					disabled={blockType === menuBlockType}
-					onClick={() => {
+					onClick={(e) => {
+						setToolbarState({
+							actionBarVisible: false,
+							simpleInputVisible: false,
+							wordInputVisible: false,
+						});
 						toggleBlockType(editor, menuBlockType);
 					}}
 				>
