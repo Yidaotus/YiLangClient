@@ -1,27 +1,14 @@
 import './EditorDocument.css';
-import React, { useCallback, useMemo, useRef, useState } from 'react';
-import {
-	createEditor,
-	Descendant,
-	Transforms,
-	Text,
-	Editor,
-	Element as SlateElement,
-	Node as SlateNode,
-} from 'slate';
+import React, { useCallback } from 'react';
+import { Transforms, Text, Editor } from 'slate';
 
 import {
-	Slate,
 	Editable,
-	withReact,
 	RenderLeafProps,
 	RenderElementProps,
 	useSlateStatic,
 } from 'slate-react';
-import { CustomElement } from './CustomEditor';
-import Toolbar from './Toolbar/Toolbar';
 import MarkFragment from './Fragments/MarkFragment';
-import DictPopupController from './Popups/DictPopupController';
 import SentenceFragment from './Fragments/SentenceFragment';
 import WordFragment from './Fragments/WordFragment';
 import ImageBlock from './Blocks/Elements/Image/Image';
@@ -56,15 +43,11 @@ const Element = (props: RenderElementProps) => {
 					{children}
 				</SentenceFragment>
 			);
-		case 'head': {
-			switch (element.level) {
-				case 1:
-					return <h1 {...attributes}>{children}</h1>;
-				case 2:
-					return <h2 {...attributes}>{children}</h2>;
-				default:
-					return <h1 {...attributes}>{children}</h1>;
-			}
+		case 'title': {
+			return <h1 {...attributes}>{children}</h1>;
+		}
+		case 'subtitle': {
+			return <h2 {...attributes}>{children}</h2>;
 		}
 		case 'highlight':
 			return element.role === 'highlight' ? (
@@ -105,14 +88,20 @@ const Element = (props: RenderElementProps) => {
 					{children}
 				</MarkFragment>
 			);
+		case 'listItem':
+			return <li {...attributes}>{children}</li>;
+		case 'numberedList':
+			return <ol {...attributes}>{children}</ol>;
+		case 'bulletedList':
+			return <ul {...attributes}>{children}</ul>;
+		case 'blockQuote':
+			return <blockquote {...attributes}>{children}</blockquote>;
 		default:
 			return <div {...attributes}>{children}</div>;
 	}
 };
 
 const EditorDocument: React.FC = () => {
-	const ref = useRef(null);
-
 	const renderLeaf = useCallback((props) => {
 		return <Leaf {...props} />;
 	}, []);
@@ -165,61 +154,50 @@ const EditorDocument: React.FC = () => {
 	*/
 
 	return (
-		<div style={{ position: 'relative', fontSize: '1.3em' }} ref={ref}>
-			<Toolbar rootElement={ref} />
-			<DictPopupController rootElement={ref} />
-			<div
-				style={{
-					display: 'flex',
-					flexDirection: 'column',
-				}}
-			>
-				<div>
-					<Editable
-						className="editor-container"
-						renderElement={renderElement}
-						renderLeaf={renderLeaf}
-						onKeyDown={(event) => {
-							if (event.getModifierState('Alt')) {
-								if (event.key === '&') {
-									// Prevent the ampersand character from being inserted.
-									event.preventDefault();
-									// Execute the `insertText` method when the event occurs.
-									editor.insertText('and');
-								}
-								if (event.key === 'b') {
-									// Prevent the ampersand character from being inserted.
-									event.preventDefault();
-									// Execute the `insertText` method when the event occurs.
-									if (isBoldMarkActive(editor)) {
-										Transforms.setNodes(
-											editor,
-											{ bold: undefined },
-											// Apply it to text nodes, and split the text node up if the
-											// selection is overlapping only part of it.
-											{
-												match: (n) => Text.isText(n),
-												split: true,
-											}
-										);
-									} else {
-										Transforms.setNodes(
-											editor,
-											{ bold: true },
-											// Apply it to text nodes, and split the text node up if the
-											// selection is overlapping only part of it.
-											{
-												match: (n) => Text.isText(n),
-												split: true,
-											}
-										);
+		<div style={{ position: 'relative', fontSize: '1.3em' }}>
+			<Editable
+				className="editor-container"
+				renderElement={renderElement}
+				renderLeaf={renderLeaf}
+				onKeyDown={(event) => {
+					if (event.getModifierState('Alt')) {
+						if (event.key === '&') {
+							// Prevent the ampersand character from being inserted.
+							event.preventDefault();
+							// Execute the `insertText` method when the event occurs.
+							editor.insertText('and');
+						}
+						if (event.key === 'b') {
+							// Prevent the ampersand character from being inserted.
+							event.preventDefault();
+							// Execute the `insertText` method when the event occurs.
+							if (isBoldMarkActive(editor)) {
+								Transforms.setNodes(
+									editor,
+									{ bold: undefined },
+									// Apply it to text nodes, and split the text node up if the
+									// selection is overlapping only part of it.
+									{
+										match: (n) => Text.isText(n),
+										split: true,
 									}
-								}
+								);
+							} else {
+								Transforms.setNodes(
+									editor,
+									{ bold: true },
+									// Apply it to text nodes, and split the text node up if the
+									// selection is overlapping only part of it.
+									{
+										match: (n) => Text.isText(n),
+										split: true,
+									}
+								);
 							}
-						}}
-					/>
-				</div>
-			</div>
+						}
+					}
+				}}
+			/>
 		</div>
 	);
 };

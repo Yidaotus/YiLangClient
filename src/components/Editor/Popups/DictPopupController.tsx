@@ -1,16 +1,22 @@
 import useDictionaryEntry from '@hooks/useDictionaryEntry';
 import { UUID } from 'Document/UUID';
 import React, { useEffect, useState } from 'react';
-import { Editor, Range } from 'slate';
-import { ReactEditor, useSlate } from 'slate-react';
+import { BaseSelection, Editor, Range } from 'slate';
+import { ReactEditor, useSlateStatic } from 'slate-react';
 import { isNodeAtSelection, WordElement } from '../CustomEditor';
 import DictPopup from './DictPopup';
 import Floating from './Floating';
 
-const DictPopupController: React.FC<{
+export interface IDictPopupControllerProps {
 	rootElement: React.RefObject<HTMLElement>;
-}> = ({ rootElement }) => {
-	const editor = useSlate();
+	selection: BaseSelection;
+}
+
+const DictPopupController: React.FC<IDictPopupControllerProps> = ({
+	rootElement,
+	selection,
+}) => {
+	const editor = useSlateStatic();
 	const [dictId, setDictId] = useState<UUID | null>(null);
 	const entry = useDictionaryEntry(dictId);
 	const rootEntry = useDictionaryEntry(entry?.root || null);
@@ -19,17 +25,9 @@ const DictPopupController: React.FC<{
 	);
 
 	useEffect(() => {
-		const clickedVocab = isNodeAtSelection(
-			editor,
-			editor.selection,
-			'word'
-		);
+		const clickedVocab = isNodeAtSelection(editor, selection, 'word');
 
-		if (
-			clickedVocab &&
-			editor.selection &&
-			Range.isCollapsed(editor.selection)
-		) {
+		if (clickedVocab && selection && Range.isCollapsed(selection)) {
 			const wordFragment = Editor.above(editor);
 			if (wordFragment) {
 				const wordNode = wordFragment[0] as WordElement;
@@ -42,7 +40,7 @@ const DictPopupController: React.FC<{
 			setDictId(null);
 			setRelativeBounding(null);
 		}
-	}, [editor, editor.selection]);
+	}, [editor, selection]);
 
 	return (
 		<Floating

@@ -43,6 +43,7 @@ const WrapperItem: React.FC<IToolbarWrapperItem> = ({
 					style={{
 						fill: active ? 'white' : 'black',
 					}}
+					size="large"
 					onMouseUp={async () => {
 						if (active) {
 							await unwrap();

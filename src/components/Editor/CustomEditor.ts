@@ -15,10 +15,58 @@ import { ReactEditor } from 'slate-react';
 
 export type CustomEditor = BaseEditor & ReactEditor;
 
+export const BlockTypes = [
+	'title',
+	'subtitle',
+	'paragraph',
+	'image',
+	'listItem',
+	'bulletedList',
+	'numberedList',
+	'blockQuote',
+] as const;
+export const InlineTypes = ['word', 'sentence', 'mark', 'highlight'] as const;
+export const ElementTypeLabels: {
+	[k in typeof BlockTypes[number] | typeof InlineTypes[number]]: string;
+} = {
+	title: 'Title',
+	subtitle: 'Subtitle',
+	paragraph: 'Paragraph',
+	image: 'Image',
+	word: 'Word',
+	sentence: 'Sentence',
+	mark: 'Mark',
+	highlight: 'Highlight',
+	listItem: 'List',
+	numberedList: 'Numbered List',
+	bulletedList: 'Bulleted List',
+	blockQuote: 'Quote',
+};
+
 export type HighlightElement = {
 	type: 'highlight';
 	role: 'highlight' | 'deemphasize';
 	children: CustomText[];
+};
+
+export type ListItemElement = {
+	type: 'listItem';
+	children: CustomText[];
+};
+
+export type BlockQuoteElement = {
+	type: 'blockQuote';
+	children: CustomText[];
+};
+
+export type NumberedListElement = {
+	type: 'numberedList';
+	children: ListItemElement[];
+};
+
+export type BulletedListElement = {
+	type: 'bulletedList';
+	children: ListItemElement[];
 };
 
 export type SentenceElement = {
@@ -33,9 +81,13 @@ export type WordElement = {
 	children: CustomText[];
 };
 
-export type HeaderElement = {
-	type: 'head';
-	level: number;
+export type SubtitleElement = {
+	type: 'subtitle';
+	children: CustomText[];
+};
+
+export type TitleElement = {
+	type: 'title';
 	children: CustomText[];
 };
 
@@ -57,23 +109,30 @@ export type MarkElement = {
 	children: CustomText[];
 };
 
-export type CustomElement =
+export type EditorBlockElement =
 	| ParagraphElement
 	| ImageElement
+	| TitleElement
+	| BlockQuoteElement
+	| BulletedListElement
+	| NumberedListElement
+	| ListItemElement
+	| SubtitleElement;
+
+export type EditorInlineElement =
 	| WordElement
 	| MarkElement
-	| HeaderElement
 	| HighlightElement
 	| SentenceElement;
 
+export type EditorElement = EditorBlockElement | EditorInlineElement;
 export type FormattedText = { text: string; bold?: true };
-
 export type CustomText = FormattedText;
 
 declare module 'slate' {
 	interface CustomTypes {
 		Editor: CustomEditor;
-		Element: CustomElement;
+		Element: EditorElement;
 		Text: CustomText;
 	}
 }
@@ -81,7 +140,7 @@ declare module 'slate' {
 export const isNodeAtSelection = (
 	editor: Editor,
 	selection: Selection,
-	type: CustomElement['type']
+	type: EditorElement['type']
 ): boolean => {
 	if (selection == null) {
 		return false;
@@ -98,7 +157,7 @@ export const isNodeAtSelection = (
 export const isNodeInSelection = (
 	editor: Editor,
 	selection: Selection,
-	type: CustomElement['type']
+	type: EditorElement['type']
 ): boolean => {
 	if (selection == null) {
 		return false;
@@ -196,4 +255,48 @@ export const highlightSelection = (
 	};
 
 	return removeHighlights;
+};
+
+export const getTextBlockStyle = (
+	editor: Editor
+): EditorElement['type'] | null | 'multiple' => {
+	const { selection } = editor;
+	if (selection == null) {
+		return null;
+	}
+	const [start, end] = Range.edges(selection);
+
+	let startTopLevelBlockIndex = start.path[0];
+	const endTopLevelBlockIndex = end.path[0];
+
+	let blockType = null;
+	while (startTopLevelBlockIndex <= endTopLevelBlockIndex) {
+		const [node] = Editor.node(editor, [startTopLevelBlockIndex]);
+		if (SlateElement.isElement(node)) {
+			if (blockType === null) {
+				blockType = node.type;
+			} else if (blockType !== node.type) {
+				return 'multiple';
+			}
+		}
+		startTopLevelBlockIndex++;
+	}
+
+	return blockType;
+};
+
+export const toggleBlockType = (
+	editor: Editor,
+	blockType: EditorElement['type']
+): void => {
+	if (editor.selection) {
+		const currentBlockType = getTextBlockStyle(editor);
+		const changeTo =
+			currentBlockType === blockType ? 'paragraph' : blockType;
+		Transforms.setNodes(
+			editor,
+			{ type: changeTo },
+			{ at: editor.selection, match: (n) => Editor.isBlock(editor, n) }
+		);
+	}
 };

@@ -70,10 +70,18 @@ const Floating: React.FC<IFloatingProps> = ({
 									relativeBounding.height
 							  )
 							: offsetY);
-					const left = relativeX - floatingWidth * 0.5;
+					const leftClampLeft = Math.max(
+						-containerBounding.x + 10,
+						relativeX - floatingWidth * 0.5
+					);
+					const leftClampRight = Math.min(
+						leftClampLeft,
+						window.innerWidth -
+							(containerBounding.x + floatingWidth + 20)
+					);
 
 					setFloatingStyle({
-						left,
+						left: leftClampRight,
 						top,
 						visibility: 'visible',
 						opacity: '100%',
