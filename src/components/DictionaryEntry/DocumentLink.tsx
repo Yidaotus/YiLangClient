@@ -3,7 +3,7 @@ import { useHistory } from 'react-router';
 import Highlighter from 'react-highlight-words';
 import Link from 'antd/lib/typography/Link';
 import handleError from '@helpers/Error';
-import { IDocumentLink } from 'Document/Document';
+import { IDocumentLink } from 'Document/Dictionary';
 
 const DocumentLink: React.FC<{
 	link: IDocumentLink;

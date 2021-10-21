@@ -1,17 +1,15 @@
 /* eslint-disable react/destructuring-assignment */
 import './DictionaryEntry.css';
 import React from 'react';
-import { Popover, Tag, Button } from 'antd';
+import { Popover, Tag, Button, Spin } from 'antd';
 import { ExclamationCircleOutlined } from '@ant-design/icons';
-import {
-	IGrammarPoint,
-	IDictionaryTag,
-	IDictionaryEntryResolved,
-} from 'Document/Dictionary';
+import { IGrammarPoint, IDictionaryTag } from 'Document/Dictionary';
 import { useHistory } from 'react-router';
+import { UUID } from 'Document/UUID';
+import useDictionaryEntryResolved from '@hooks/useDictionaryEntriesResolved';
 
 type IDictEntryProps = {
-	entry: IDictionaryEntryResolved;
+	entryId: UUID;
 	canLink?: boolean;
 };
 
@@ -59,43 +57,55 @@ const EntryTag: React.FC<{ tag: IDictionaryTag }> = ({ tag }) => {
 };
 
 const DictionaryEntry: React.FC<IDictEntryProps> = (props) => {
-	const { entry, canLink } = props;
+	const { entryId, canLink } = props;
+	const [loading, entryResolved] = useDictionaryEntryResolved(entryId);
 	const history = useHistory();
 
-	const { key, spelling, comment, translations, id } = entry;
 	return (
-		<div className="dictentry-panel">
-			<div className="dictentry-head">
-				{canLink ? (
-					<h1 className="dictentry-head-item">
-						<Button
-							type="link"
-							size="large"
-							onClick={() => {
-								history.push(`/home/dictionary/${id}`);
-							}}
-						>
-							{key}
-						</Button>
-						{spelling && <span>{spelling}</span>}
-					</h1>
-				) : (
-					<h1 className="dictentry-head-item">
-						{key}
-						{spelling && <span>{spelling}</span>}
-					</h1>
-				)}
-			</div>
-			<blockquote>{comment}</blockquote>
-			<p>{translations.join(', ')}</p>
-			<ul>
-				{entry.tags.map((tag) => (
-					<li key={tag.id} className="tag-node">
-						<EntryTag tag={tag} />
-					</li>
-				))}
-			</ul>
-		</div>
+		<>
+			{entryResolved && (
+				<div className="dictentry-panel">
+					<div className="dictentry-head">
+						{canLink ? (
+							<h1 className="dictentry-head-item">
+								<Button
+									type="link"
+									size="large"
+									onClick={() => {
+										history.push(
+											`/home/dictionary/${entryResolved.id}`
+										);
+									}}
+								>
+									{entryResolved.key}
+								</Button>
+								{entryResolved.spelling && (
+									<span>{entryResolved.spelling}</span>
+								)}
+							</h1>
+						) : (
+							<h1 className="dictentry-head-item">
+								{entryResolved.key}
+								{entryResolved.spelling && (
+									<span>{entryResolved.spelling}</span>
+								)}
+							</h1>
+						)}
+					</div>
+					<blockquote>{entryResolved.comment}</blockquote>
+					<p>{entryResolved.translations.join(', ')}</p>
+					<ul>
+						{entryResolved.tags.map((tag) => (
+							<li key={tag.id} className="tag-node">
+								<EntryTag tag={tag} />
+							</li>
+						))}
+					</ul>
+				</div>
+			)}
+			{loading && <Spin tip="Fetching Entry" />}
+			{!loading && !entryResolved && <span>ERROR</span>}
+		</>
 	);
 };
 

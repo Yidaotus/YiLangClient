@@ -1,6 +1,6 @@
+import useDictionaryEntryResolved from '@hooks/useDictionaryEntriesResolved';
 import React, { CSSProperties } from 'react';
 import { RenderElementProps } from 'slate-react';
-import useDictionaryEntry from '../../../hooks/useDictionaryEntry';
 import { WordElement } from '../CustomEditor';
 
 export type IWordFragmentData = Omit<RenderElementProps, 'element'> & {
@@ -12,7 +12,9 @@ const WordFragment: React.FC<IWordFragmentData> = ({
 	element,
 	children,
 }) => {
-	const dictEntry = useDictionaryEntry(element.dictId, { cache: true });
+	const [loadingEntry, dictEntry] = useDictionaryEntryResolved(
+		element.dictId
+	);
 
 	let gradiantStyle: CSSProperties = {
 		background: 'black',

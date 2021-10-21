@@ -126,7 +126,7 @@ const DictEntryWithEdit: React.FC<IDictEntryWithEditProps> = (props) => {
 				</div>
 			)}
 			{!editing && (
-				<DictionaryEntry entry={dictEntry} canLink={canLink} />
+				<DictionaryEntry entryId={dictEntry.id} canLink={canLink} />
 			)}
 		</div>
 	);

@@ -26,9 +26,9 @@ import { IEntryFormFields } from '@components/DictionaryEntry/EntryForm/EntryFor
 import DictEntryWithEdit from '@components/DictionaryEntry/DictEntryWithEdit/DictEntryWithEdit';
 import Title from 'antd/lib/typography/Title';
 import handleError from '@helpers/Error';
-import useDictionaryEntry from '@hooks/useDictionaryEntry';
 import DictionaryEntry from '@components/DictionaryEntry/DictionaryEntry';
 import { IDictionaryEntryResolved } from 'Document/Dictionary';
+import useDictionaryEntryResolved from '@hooks/useDictionaryEntriesResolved';
 
 interface IDictionaryEntryViewParams {
 	entryId: UUID;
@@ -50,8 +50,10 @@ const DictionaryEntryPage: React.FC = () => {
 	const history = useHistory();
 	const dispatch: IRootDispatch = useDispatch();
 	const { entryId } = useParams<IDictionaryEntryViewParams>();
-	const entry = useDictionaryEntry(entryId);
-	const rootEntry = useDictionaryEntry(entry?.root || null);
+	const [loadingMain, entry] = useDictionaryEntryResolved(entryId);
+	const [loadingRoot, rootEntry] = useDictionaryEntryResolved(
+		entry?.root || null
+	);
 	const [subDictEntries, setSubDictEntries] = useState<
 		Array<IDictionaryEntryResolved>
 	>([]);
@@ -141,7 +143,7 @@ const DictionaryEntryPage: React.FC = () => {
 								renderItem={(entryItem) => (
 									<List.Item>
 										<DictionaryEntry
-											entry={entryItem}
+											entryId={entryItem.id}
 											canLink
 										/>
 									</List.Item>
@@ -167,7 +169,7 @@ const DictionaryEntryPage: React.FC = () => {
 								renderItem={(entryItem) => (
 									<List.Item>
 										<DictionaryEntry
-											entry={entryItem}
+											entryId={entryItem.id}
 											canLink
 										/>
 									</List.Item>

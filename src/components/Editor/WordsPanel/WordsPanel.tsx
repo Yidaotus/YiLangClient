@@ -9,7 +9,7 @@ const WordsPanel: React.FC = () => {
 	return (
 		<div>
 			{addedEntries.map((v) => (
-				<DictionaryEntry entry={v} />
+				<DictionaryEntry entryId={v.id} />
 			))}
 		</div>
 	);

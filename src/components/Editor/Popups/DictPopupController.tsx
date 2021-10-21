@@ -1,3 +1,5 @@
+import useActiveLanguageConf from '@hooks/useActiveLanguageConf';
+import useDictionaryEntryResolved from '@hooks/useDictionaryEntriesResolved';
 import useDictionaryEntry from '@hooks/useDictionaryEntry';
 import { UUID } from 'Document/UUID';
 import React, { useEffect, useState } from 'react';
@@ -18,8 +20,10 @@ const DictPopupController: React.FC<IDictPopupControllerProps> = ({
 }) => {
 	const editor = useSlateStatic();
 	const [dictId, setDictId] = useState<UUID | null>(null);
-	const entry = useDictionaryEntry(dictId);
-	const rootEntry = useDictionaryEntry(entry?.root || null);
+	const [loadingMain, entry] = useDictionaryEntryResolved(dictId);
+	const [loadingRoot, rootEntry] = useDictionaryEntryResolved(
+		entry?.root || null
+	);
 	const [relativeBounding, setRelativeBounding] = useState<DOMRect | null>(
 		null
 	);

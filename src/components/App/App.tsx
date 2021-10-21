@@ -12,9 +12,12 @@ import Login from '@views/Login';
 import Verify from '@views/Verify';
 import { notification } from 'antd';
 import AuthProvider, { Role } from '@components/AuthProvider/AuthProvider';
+import { ReactQueryDevtools } from 'react-query/devtools';
 import { QueryClient, QueryClientProvider } from 'react-query';
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+	defaultOptions: { queries: { staleTime: 60000 } },
+});
 
 const App: React.FC = () => {
 	notification.config({
@@ -46,6 +49,7 @@ const App: React.FC = () => {
 					</Switch>
 				</Router>
 			</AuthProvider>
+			<ReactQueryDevtools initialIsOpen={false} />
 		</QueryClientProvider>
 	);
 };

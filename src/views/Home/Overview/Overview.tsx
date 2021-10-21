@@ -159,7 +159,7 @@ const Overview: React.FC = () => {
 								entries.map((entry) => (
 									<DictionaryEntry
 										key={entry.id}
-										entry={entry}
+										entryId={entry.id}
 										canLink
 									/>
 								))}

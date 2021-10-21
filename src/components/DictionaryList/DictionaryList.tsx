@@ -1,6 +1,6 @@
 import './DictionaryList.css';
 
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { Button, Input, Space, Table, Tag } from 'antd';
 import { ColumnsType, ColumnType } from 'antd/lib/table';
@@ -13,14 +13,14 @@ import {
 	SorterResult,
 	TablePaginationConfig,
 } from 'antd/lib/table/interface';
-import { listDictionary } from 'api/dictionary.service';
 import { notUndefined } from 'Document/Utility';
 import { IListDictionaryParams } from 'api/definitions/api';
 import { useHistory } from 'react-router-dom';
 import Link from 'antd/lib/typography/Link';
 import { selectActiveLanguageConfig } from '@store/user/selectors';
-import handleError from '@helpers/Error';
-import { getTags } from 'api/tags.service';
+import useDictionaryEntries from '@hooks/useDictionaryEntries';
+import useTags from '@hooks/useTags';
+import EntryForm from '@components/DictionaryEntry/EntryForm/EntryForm';
 
 type ColumnSearchMap = {
 	[key in keyof IDictionaryEntryResolved]?: string;
@@ -33,77 +33,21 @@ const INITIAL_PAGE_SIZE = 2;
  * Let's the user filter tags, and search other columns
  */
 const DictionaryList: React.FC = () => {
-	const [loading, setLoading] = useState<string | null>(null);
-	const [total, setTotal] = useState(0);
 	const [pageSize, setPageSize] = useState(10);
-	const [entries, setEntries] = useState<Array<IDictionaryEntryResolved>>([]);
-	const [tags, setTags] = useState<Array<IDictionaryTag>>([]);
-
+	const selectedLanguage = useSelector(selectActiveLanguageConfig) || null;
+	const [paginationOptions, setPaginationOptions] =
+		useState<IListDictionaryParams | null>({
+			excerptLength: 80,
+			lang: selectedLanguage?.key || 'jp',
+			limit: 20,
+			skip: 0,
+		});
+	const [loading, paginatedEntries] = useDictionaryEntries(paginationOptions);
+	const tags = useTags();
 	const [columnSearch, setColumnSearch] = useState<ColumnSearchMap>({});
 
-	const selectedLanguage = useSelector(selectActiveLanguageConfig);
 	const searchInput = useRef<Input>(null);
 	const history = useHistory();
-
-	useEffect(() => {
-		const fetch = async () => {
-			if (!selectedLanguage) {
-				return;
-			}
-			const tagData = await getTags(selectedLanguage.key);
-			if (tagData) {
-				setTags(tagData);
-			}
-		};
-		fetch();
-	}, [selectedLanguage]);
-
-	const fetchEntries = useCallback(
-		async ({
-			pagination,
-			filter,
-			sortBy,
-		}: {
-			pagination: { skip: number; limit: number };
-			filter?: Record<string, FilterValue | null>;
-			sortBy?: { key: string; order: 'ascend' | 'descend' };
-		}) => {
-			setLoading('Loading Entries');
-			try {
-				if (!selectedLanguage) {
-					return;
-				}
-
-				const list = await listDictionary({
-					excerptLength: 0,
-					skip: pagination.skip,
-					limit: pagination.limit,
-					lang: selectedLanguage.key,
-					sortBy,
-					filter,
-				});
-
-				const denormalizedEntries = list.entries.map((entry) => ({
-					...entry,
-					root: undefined,
-					tags: entry.tags
-						.map((tagId) => tags.find((tag) => tag.id === tagId))
-						.filter(notUndefined),
-				}));
-				setEntries(denormalizedEntries);
-				setTotal(list.total);
-			} catch (e) {
-				handleError(e);
-			}
-
-			setLoading(null);
-		},
-		[selectedLanguage, tags]
-	);
-
-	useEffect(() => {
-		fetchEntries({ pagination: { skip: 0, limit: pageSize } });
-	}, [fetchEntries, pageSize]);
 
 	const tableChangeHandler = async (
 		pagination: TablePaginationConfig,
@@ -112,8 +56,6 @@ const DictionaryList: React.FC = () => {
 			| SorterResult<IDictionaryEntryResolved>
 			| SorterResult<IDictionaryEntryResolved>[]
 	) => {
-		setLoading('Loading Entries');
-
 		const skip = ((pagination.current || 1) - 1) * pageSize;
 		const limit = pagination.pageSize || INITIAL_PAGE_SIZE;
 		const filter = filters;
@@ -125,7 +67,16 @@ const DictionaryList: React.FC = () => {
 			};
 		}
 
-		fetchEntries({ pagination: { skip, limit }, filter, sortBy });
+		if (selectedLanguage) {
+			setPaginationOptions({
+				skip,
+				limit,
+				filter,
+				sortBy,
+				excerptLength: 80,
+				lang: selectedLanguage?.key,
+			});
+		}
 	};
 
 	const handleSearch = (
@@ -337,7 +288,12 @@ const DictionaryList: React.FC = () => {
 	return (
 		<Table<IDictionaryEntryResolved>
 			columns={columns}
-			dataSource={entries}
+			dataSource={paginatedEntries.entries.map((entry) => ({
+				...entry,
+				tags: entry.tags
+					.map((tagId) => tags.find((tag) => tag.id === tagId))
+					.filter(notUndefined),
+			}))}
 			pagination={{
 				position: ['bottomCenter'],
 				onChange: (page, size) => {
@@ -346,11 +302,11 @@ const DictionaryList: React.FC = () => {
 					}
 				},
 				pageSize,
-				total,
+				total: paginatedEntries.total,
 				defaultCurrent: 1,
-				defaultPageSize: 2,
+				defaultPageSize: 10,
 			}}
-			loading={!!loading}
+			loading={loading}
 			size="middle"
 			onChange={(pagination, filters, sorter) => {
 				tableChangeHandler(pagination, filters, sorter);
