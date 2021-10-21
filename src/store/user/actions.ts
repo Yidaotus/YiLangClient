@@ -9,44 +9,19 @@ import {
 } from 'Document/Config';
 import { getUUID, UUID } from 'Document/UUID';
 import { LS_TOKEN_POINTER } from 'api/api.service';
-import * as UserService from '../../api/user.service';
+import * as UserService from 'api/user.service';
 import { UserMutation, Role } from './types';
 
 type UserAction<R = void> = StoreAction<UserMutation, R>;
 
 const register =
 	(userDetails: IRegisterParams): UserAction =>
-	async (): Promise<void> => {
-		await UserService.register(userDetails);
-	};
+	async (): Promise<void> => {};
 
 const verify =
 	(tokenDetail: IVerifyEmailParams): UserAction =>
 	async (): Promise<void> => {
 		await UserService.verify(tokenDetail);
-	};
-
-const authorize =
-	(): UserAction<Promise<void>> =>
-	async (dispatch: Dispatch<UserMutation>): Promise<void> => {
-		const token = localStorage.getItem(LS_TOKEN_POINTER);
-		if (!token) {
-			return;
-		}
-
-		const user = await UserService.authorize();
-		dispatch({
-			type: 'USER_SETTOKEN',
-			payload: token,
-		});
-		dispatch({
-			type: 'USER_SETUSER',
-			payload: {
-				email: user.email,
-				username: user.username,
-				role: Role.USER,
-			},
-		});
 	};
 
 const login =
@@ -183,7 +158,6 @@ const initialize = (): UserAction<Promise<void>> => async (dispatch) => {
 export {
 	register,
 	login,
-	authorize,
 	verify,
 	logout,
 	selectLanguage,

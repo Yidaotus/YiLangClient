@@ -31,7 +31,6 @@ ApiService.interceptors.response.use(
 			switch (status) {
 				case ApiStatuses.UNAUTHANTICATED:
 				case ApiStatuses.UNAUTHORIZED: {
-					store.dispatch(logout());
 					break;
 				}
 				default:

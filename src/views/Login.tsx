@@ -1,19 +1,17 @@
 import './Login.css';
 
 import React, { useState } from 'react';
-import { useDispatch } from 'react-redux';
-import { useHistory } from 'react-router-dom';
+import { Redirect } from 'react-router-dom';
 import { Button, Col, Row, Spin } from 'antd';
 import RegisterForm from 'components/Login/RegisterFormAnt';
 import UIError from 'components/Error/UIError';
 import { IUIError } from 'store/ui/types';
 import { getUUID } from 'Document/UUID';
-import { IRootDispatch } from '@store/index';
+import useAuth from '@hooks/useAuth';
+import { LS_TOKEN_POINTER } from 'api/api.service';
+import { useQueryClient } from 'react-query';
+import { login, register } from 'api/user.service';
 import LoginForm from '../components/Login/LoginFormAnt';
-import {
-	login as loginDispatcher,
-	register as registerDispatcher,
-} from '../store/user/actions';
 
 export interface IRegisterData {
 	email: string;
@@ -27,15 +25,14 @@ export interface ILoginData {
 }
 
 const LoginView: React.FC = () => {
-	const history = useHistory();
+	const queryClient = useQueryClient();
+	const user = useAuth();
 
 	const [isLoading, setIsLoading] = useState(false);
 	const [errors, setErrors] = useState(new Array<IUIError>());
 
 	const [isRegister, setRegister] = useState<boolean>(false);
 	const [infoMsg, setInfoMsg] = useState<string>('');
-
-	const dispatch: IRootDispatch = useDispatch();
 
 	const toggleRegister = () => {
 		setRegister(!isRegister);
@@ -44,8 +41,9 @@ const LoginView: React.FC = () => {
 	const loginCB = async (loginData: { email: string; password: string }) => {
 		setIsLoading(true);
 		try {
-			await dispatch(loginDispatcher(loginData));
-			history.push('/');
+			const { token } = await login(loginData);
+			localStorage.setItem(LS_TOKEN_POINTER, token);
+			queryClient.invalidateQueries('user');
 		} catch (e) {
 			if (e instanceof Error) {
 				const { message } = e;
@@ -59,14 +57,16 @@ const LoginView: React.FC = () => {
 	};
 
 	const registerCB = async (registerData: IRegisterData) => {
-		dispatch(registerDispatcher(registerData));
+		await register(registerData);
 		setInfoMsg(
 			'Registration complete! Please check your emails and validate your Account'
 		);
 		setRegister(false);
 	};
 
-	return (
+	return user ? (
+		<Redirect to="/home" />
+	) : (
 		<Row justify="center">
 			<Col span={6}>
 				<div className="login-logo">

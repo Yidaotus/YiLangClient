@@ -1,4 +1,4 @@
-import React, { useState, FC, useEffect } from 'react';
+import React from 'react';
 import './App.css';
 import {
 	BrowserRouter as Router,
@@ -7,51 +7,29 @@ import {
 	Redirect,
 } from 'react-router-dom';
 import PrivateRoute from '@components/PrivateRoute';
-import { Role } from '@store/user/types';
-import { authorize as authDispatcher } from '@store/user/actions';
-import { useDispatch, useSelector } from 'react-redux';
-import { IRootDispatch } from '@store/index';
 import Home from '@views/Home/Home';
 import Login from '@views/Login';
 import Verify from '@views/Verify';
-import { notification, Spin } from 'antd';
-import handleError from '@helpers/Error';
-import { selectActiveUser } from '@store/user/selectors';
+import { notification } from 'antd';
+import AuthProvider, { Role } from '@components/AuthProvider/AuthProvider';
+import { QueryClient, QueryClientProvider } from 'react-query';
 
-const App: FC = () => {
-	const dispatch: IRootDispatch = useDispatch();
-	const [loading, setLoading] = useState(true);
-	const user = useSelector(selectActiveUser);
+const queryClient = new QueryClient();
 
+const App: React.FC = () => {
 	notification.config({
 		placement: 'topRight',
 		top: 80,
 		duration: 3,
 	});
 
-	useEffect(() => {
-		setLoading(true);
-		const auth = async () => {
-			try {
-				await dispatch(authDispatcher());
-			} catch (e) {
-				handleError(e);
-			} finally {
-				setLoading(false);
-			}
-		};
-		auth();
-	}, [dispatch]);
-
 	return (
-		<>
-			{loading ? (
-				<Spin tip="Loading Application" />
-			) : (
+		<QueryClientProvider client={queryClient}>
+			<AuthProvider>
 				<Router>
 					<Switch>
 						<Route path="/login">
-							{user ? <Redirect to="/home" /> : <Login />}
+							<Login />
 						</Route>
 						<Route path="/verify/:code">
 							<Verify />
@@ -67,8 +45,8 @@ const App: FC = () => {
 						</Route>
 					</Switch>
 				</Router>
-			)}
-		</>
+			</AuthProvider>
+		</QueryClientProvider>
 	);
 };
 
