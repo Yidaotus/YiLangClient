@@ -1,7 +1,6 @@
 import './DictionaryList.css';
 
 import React, { useRef, useState } from 'react';
-import { useSelector } from 'react-redux';
 import { Button, Input, Space, Table, Tag } from 'antd';
 import { ColumnsType, ColumnType } from 'antd/lib/table';
 import { IDictionaryTag, IDictionaryEntryResolved } from 'Document/Dictionary';
@@ -17,10 +16,9 @@ import { notUndefined } from 'Document/Utility';
 import { IListDictionaryParams } from 'api/definitions/api';
 import { useHistory } from 'react-router-dom';
 import Link from 'antd/lib/typography/Link';
-import { selectActiveLanguageConfig } from '@store/user/selectors';
 import useDictionaryEntries from '@hooks/useDictionaryEntries';
-import useTags from '@hooks/useTags';
-import EntryForm from '@components/DictionaryEntry/EntryForm/EntryForm';
+import { useTags } from '@hooks/useTags';
+import { useActiveLanguageConf } from '@hooks/useActiveLanguageConf';
 
 type ColumnSearchMap = {
 	[key in keyof IDictionaryEntryResolved]?: string;
@@ -34,7 +32,7 @@ const INITIAL_PAGE_SIZE = 2;
  */
 const DictionaryList: React.FC = () => {
 	const [pageSize, setPageSize] = useState(10);
-	const selectedLanguage = useSelector(selectActiveLanguageConfig) || null;
+	const selectedLanguage = useActiveLanguageConf();
 	const [paginationOptions, setPaginationOptions] =
 		useState<IListDictionaryParams | null>({
 			excerptLength: 80,

@@ -1,14 +1,12 @@
 import './YiTagsInput.css';
 
 import { Button, Divider, Empty, Select, SelectProps, Tag } from 'antd';
-import { UUID } from 'Document/UUID';
 import React, { useState, useCallback } from 'react';
-import { notUndefined } from 'Document/Utility';
 import { IDictionaryTag } from 'Document/Dictionary';
 import { OptionProps } from 'antd/lib/select';
 
 export interface YiTagsInputProps
-	extends SelectProps<Array<IDictionaryTag | UUID>> {
+	extends SelectProps<Array<IDictionaryTag | string>> {
 	allTags: Array<IDictionaryTag>;
 	createTag?: (input: string) => void;
 }
@@ -120,13 +118,11 @@ const YiTagsInput: React.FC<YiTagsInputProps> = ({
 			allowClear
 			dropdownRender={dropDownRender}
 		>
-			{Object.values(allTags)
-				.filter(notUndefined)
-				.map((tag) => (
-					<Select.Option name={tag.name} key={tag.id} value={tag.id}>
-						{tag.name}
-					</Select.Option>
-				))}
+			{allTags.map((tag) => (
+				<Select.Option name={tag.name} key={tag.id} value={tag.id}>
+					{tag.name}
+				</Select.Option>
+			))}
 		</Select>
 	);
 };

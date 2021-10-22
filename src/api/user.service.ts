@@ -11,6 +11,11 @@ import {
 } from './definitions/api';
 import ApiService from './api.service';
 
+export enum Role {
+	USER = 'USER',
+	ADMIN = 'ADMIN',
+}
+
 const UserEndpoints = ApiPaths.user.endpoints;
 const UserPath = (endpoint: string) => `${ApiPaths.user.path}/${endpoint}`;
 

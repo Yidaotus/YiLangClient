@@ -3,13 +3,10 @@ import React, { useEffect, useState, useCallback } from 'react';
 import { IDocumentExcerpt } from 'api/definitions/api';
 import { listDocuments } from 'api/document.service';
 import { Card, Col, Empty, Pagination, Row, Space, Spin } from 'antd';
-import { useDispatch, useSelector } from 'react-redux';
-import { UUID } from 'Document/UUID';
 import { useHistory } from 'react-router-dom';
 import DocumentExcerpt from 'components/DocumentExcerpt/DocumentExcerpt';
 import handleError from '@helpers/Error';
-import { selectActiveLanguageConfig } from '@store/user/selectors';
-import { IRootDispatch } from '@store/index';
+import { useActiveLanguageConf } from '@hooks/useActiveLanguageConf';
 
 /**
  * Renders the Dictionary into a Table.
@@ -26,12 +23,11 @@ const Documents: React.FC = () => {
 	const [pageSkip, setPageSkip] = useState(0);
 	const [currentPage, setCurrentPage] = useState(1);
 	const [excerpts, setExcerpts] = useState<Array<IDocumentExcerpt>>([]);
-	const dispatch: IRootDispatch = useDispatch();
 
-	const activeLanguage = useSelector(selectActiveLanguageConfig);
+	const activeLanguage = useActiveLanguageConf();
 
 	const fetchDocumentAndSwitch = useCallback(
-		async (id: UUID) => {
+		async (id: string) => {
 			setLoading('Loading Document');
 			try {
 				// await dispatch(loadDocument({ type: 'load', id }));
@@ -68,7 +64,7 @@ const Documents: React.FC = () => {
 	}, [pageSkip, activeLanguage]);
 
 	const removeDocument = useCallback(
-		async (id: UUID) => {
+		async (id: string) => {
 			setLoading('Removing Document');
 			try {
 				// dispatch(deleteDocument(id));

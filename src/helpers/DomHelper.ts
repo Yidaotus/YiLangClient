@@ -1,5 +1,3 @@
-import { getUUID, UUID } from 'Document/UUID';
-
 const findTagElement = ({
 	startNode,
 	boundaryNode,
@@ -127,7 +125,7 @@ const getTextNodeAtPosition = ({
 };
 
 export interface ICaretPosition {
-	context: UUID;
+	context: string;
 	startOffset: number;
 	endOffset: number;
 }
@@ -199,7 +197,8 @@ const saveCaretPosition = (
 	const startOffset = startRange.toString().length - rangeLength;
 	const endOffset = startOffset + rangeLength;
 
-	const boundaryNodeId = getUUID();
+	// TODO
+	const boundaryNodeId = '';
 	(boundaryNode as HTMLElement).dataset.id = boundaryNodeId;
 	return {
 		context: boundaryNodeId,
@@ -282,7 +281,7 @@ const isChild = ({ parent, child }: { parent: Node; child: Node }): boolean => {
 	return false;
 };
 
-const scrollIdIntoView = (id: UUID): void => {
+const scrollIdIntoView = (id: string): void => {
 	const node = document.querySelector(`[data-id='${id}']`);
 	if (node) {
 		node.scrollIntoView({ behavior: 'smooth', block: 'center' });

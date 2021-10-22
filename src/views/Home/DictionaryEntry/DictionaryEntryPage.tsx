@@ -1,7 +1,5 @@
 import './DictionaryEntryPage.css';
 import React, { useState, useCallback } from 'react';
-import { useDispatch } from 'react-redux';
-import { IRootDispatch } from 'store';
 import {
 	Card,
 	Col,
@@ -13,25 +11,17 @@ import {
 	Spin,
 } from 'antd';
 import { useHistory, useParams } from 'react-router-dom';
-import { UUID } from 'Document/UUID';
 import { IExcerptedDocumentLink } from 'Document/Document';
 import DocumentLink from '@components/DictionaryEntry/DocumentLink';
-import {
-	removeEntry,
-	removeEntryRemote,
-	saveEntry,
-	saveOrUpdateEntryInput,
-} from '@store/dictionary/actions';
 import { IEntryFormFields } from '@components/DictionaryEntry/EntryForm/EntryForm';
 import DictEntryWithEdit from '@components/DictionaryEntry/DictEntryWithEdit/DictEntryWithEdit';
 import Title from 'antd/lib/typography/Title';
-import handleError from '@helpers/Error';
 import DictionaryEntry from '@components/DictionaryEntry/DictionaryEntry';
 import { IDictionaryEntryResolved } from 'Document/Dictionary';
 import useDictionaryEntryResolved from '@hooks/useDictionaryEntriesResolved';
 
 interface IDictionaryEntryViewParams {
-	entryId: UUID;
+	entryId: string;
 }
 
 /**
@@ -48,7 +38,6 @@ const DictionaryEntryPage: React.FC = () => {
 	>([]);
 
 	const history = useHistory();
-	const dispatch: IRootDispatch = useDispatch();
 	const { entryId } = useParams<IDictionaryEntryViewParams>();
 	const [loadingMain, entry] = useDictionaryEntryResolved(entryId);
 	const [loadingRoot, rootEntry] = useDictionaryEntryResolved(
@@ -59,33 +48,14 @@ const DictionaryEntryPage: React.FC = () => {
 	>([]);
 
 	const saveDictEntry = useCallback(
-		async (editResult: IEntryFormFields | null) => {
-			if (editResult) {
-				try {
-					dispatch(saveOrUpdateEntryInput(editResult));
-					await dispatch(saveEntry(editResult, true));
-				} catch (e) {
-					handleError(e);
-				}
-			}
-		},
-		[dispatch]
+		async (editResult: IEntryFormFields | null) => {},
+		[]
 	);
 
-	const removeDictEntry = useCallback(
-		async (id: UUID) => {
-			setLoading(true);
-			try {
-				dispatch(removeEntry(id));
-				await dispatch(removeEntryRemote(id));
-				history.goBack();
-			} catch (e) {
-				handleError(e);
-			}
-			setLoading(false);
-		},
-		[dispatch, history]
-	);
+	const removeDictEntry = useCallback(async (id: string) => {
+		setLoading(true);
+		setLoading(false);
+	}, []);
 
 	return (
 		<PageHeader

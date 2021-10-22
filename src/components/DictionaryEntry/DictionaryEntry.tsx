@@ -5,11 +5,10 @@ import { Popover, Tag, Button, Spin } from 'antd';
 import { ExclamationCircleOutlined } from '@ant-design/icons';
 import { IGrammarPoint, IDictionaryTag } from 'Document/Dictionary';
 import { useHistory } from 'react-router';
-import { UUID } from 'Document/UUID';
 import useDictionaryEntryResolved from '@hooks/useDictionaryEntriesResolved';
 
 type IDictEntryProps = {
-	entryId: UUID;
+	entryId: string;
 	canLink?: boolean;
 };
 

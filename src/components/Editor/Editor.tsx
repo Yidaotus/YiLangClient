@@ -9,15 +9,12 @@ import React, {
 
 import { Tabs, Spin, notification } from 'antd';
 
-import { useDispatch, useSelector } from 'react-redux';
-import { selectActiveLanguageConfig } from '@store/user/selectors';
-import { fetchTags, saveDictionary, saveTags } from 'store/dictionary/actions';
-import { IRootDispatch } from 'store';
 import handleError from '@helpers/Error';
 
 import { ReactEditor, Slate, withReact } from 'slate-react';
 import { createEditor, Descendant, Editor } from 'slate';
 import useSelection from '@hooks/useSelection';
+import { useActiveLanguageConf } from '@hooks/useActiveLanguageConf';
 import EditorDocument from './EditorDocument';
 import { EditorElement } from './CustomEditor';
 import WordsPanel from './WordsPanel/WordsPanel';
@@ -51,19 +48,17 @@ const withYiLang = (editor: Editor) => {
 };
 
 const YiEditor: React.FC = () => {
-	const dispatch: IRootDispatch = useDispatch();
-
 	const editorContainer = useRef(null);
 	const [loading, setLoading] = useState<string | null>(null);
-	const currentLanguage = useSelector(selectActiveLanguageConfig);
+	const currentLanguage = useActiveLanguageConf();
 
 	const save = useCallback(async () => {
 		setLoading('Saving Dictionary');
 		try {
 			setLoading('Saving Dictionary');
-			await dispatch(saveDictionary());
+			// await dispatch(saveDictionary());
 			setLoading('Saving Tags');
-			await dispatch(saveTags());
+			// await dispatch(saveTags());
 			setLoading('Saving Document');
 			// await dispatch(saveDocument());
 			notification.open({
@@ -75,7 +70,7 @@ const YiEditor: React.FC = () => {
 			handleError(e);
 		}
 		setLoading(null);
-	}, [dispatch]);
+	}, []);
 
 	const createEditorDocument = useCallback(async () => {
 		try {
@@ -95,7 +90,7 @@ const YiEditor: React.FC = () => {
 			// dispatch(resetEditor());
 			// dispatch(resetDictionary());
 			if (currentLanguage) {
-				await dispatch(fetchTags(currentLanguage.key));
+				// await dispatch(fetchTags(currentLanguage.key));
 			}
 			notification.open({
 				message: 'Done',
@@ -105,7 +100,7 @@ const YiEditor: React.FC = () => {
 		} catch (e) {
 			handleError(e);
 		}
-	}, [currentLanguage, dispatch]);
+	}, [currentLanguage]);
 
 	const editor = useMemo(() => withYiLang(withReact(createEditor())), []);
 	const [selection, setSelection] = useSelection(editor);

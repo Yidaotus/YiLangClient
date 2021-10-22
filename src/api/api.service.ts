@@ -1,8 +1,6 @@
 import axios, { AxiosError } from 'axios';
-import { logout } from 'store/user/actions';
 import API_URL from './config';
 import { IApiResponse, ApiStatuses } from './definitions/api';
-import store from '../store';
 
 const debug = true;
 export const LS_TOKEN_POINTER = 'token' as const;

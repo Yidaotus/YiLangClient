@@ -6,13 +6,10 @@ import { PlusOutlined } from '@ant-design/icons';
 import WordInput, {
 	useWordInput,
 } from '@components/Editor/Toolbar/Modals/WordEditor/WordEditor';
-import { IRootDispatch } from '@store/index';
-import { useDispatch, useSelector } from 'react-redux';
-import { fetchTags, saveEntry } from '@store/dictionary/actions';
 import TagList from '@components/TagList/TagList';
 import handleError from '@helpers/Error';
 import InnerModal from '@components/InnerModal/InnerModal';
-import { selectActiveLanguageConfig } from '@store/user/selectors';
+import { useActiveLanguageConf } from '@hooks/useActiveLanguageConf';
 
 /**
  * Renders the Dictionary into a Table.
@@ -21,11 +18,10 @@ import { selectActiveLanguageConfig } from '@store/user/selectors';
  */
 const Dictionary: React.FC = () => {
 	const { wordInputState, getUserWord } = useWordInput();
-	const dispatch: IRootDispatch = useDispatch();
 	const dictCardRef = useRef<HTMLDivElement>(null);
 	const [newEntryVisible, setNewEntryVisible] = useState(false);
 	const [newTagVisible, setNewTagVisible] = useState(false);
-	const activeLanguage = useSelector(selectActiveLanguageConfig);
+	const activeLanguage = useActiveLanguageConf();
 
 	const createNewEntry = async () => {
 		try {
@@ -36,22 +32,13 @@ const Dictionary: React.FC = () => {
 			setNewEntryVisible(true);
 			const editResult = await getUserWord('');
 			if (editResult) {
-				try {
-					await dispatch(saveEntry(editResult));
-					dispatch(fetchTags(activeLanguage.key));
-					notification.open({
-						message: 'Success',
-						description: 'Entry saved!',
-						type: 'success',
-					});
-				} catch (e) {
-					handleError(e);
-				} finally {
-					setNewEntryVisible(false);
-				}
-			} else {
-				setNewEntryVisible(false);
+				notification.open({
+					message: 'Success',
+					description: 'Entry saved!',
+					type: 'success',
+				});
 			}
+			setNewEntryVisible(false);
 		} catch (e) {
 			handleError(e);
 		}

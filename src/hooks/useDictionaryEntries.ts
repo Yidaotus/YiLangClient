@@ -4,7 +4,7 @@ import {
 } from 'api/definitions/api';
 import { listDictionary } from 'api/dictionary.service';
 import { useQuery } from 'react-query';
-import useActiveLanguageConf from './useActiveLanguageConf';
+import { useActiveLanguageConf } from './useActiveLanguageConf';
 
 const defaultValue = {
 	total: 0,

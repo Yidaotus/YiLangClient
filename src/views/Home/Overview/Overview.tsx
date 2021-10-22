@@ -1,94 +1,30 @@
 import './Overview.css';
-import React, { useCallback, useEffect, useState } from 'react';
-import { IRootDispatch, IRootState } from '@store/index';
+import React, { useCallback, useState } from 'react';
 import { Card, Col, Empty, Row, Space, Spin } from 'antd';
-import { listDocuments } from 'api/document.service';
-import { useDispatch, useSelector } from 'react-redux';
 import { IDocumentExcerpt } from 'api/definitions/api';
 import DocumentExcerpt from '@components/DocumentExcerpt/DocumentExcerpt';
-import { UUID } from 'Document/UUID';
 import { useHistory } from 'react-router';
-import { IDictionaryEntryResolved } from 'Document/Dictionary';
-import { listDictionary } from 'api/dictionary.service';
-import { notUndefined } from 'Document/Utility';
 import DictionaryEntry from '@components/DictionaryEntry/DictionaryEntry';
 import handleError from '@helpers/Error';
-import { selectActiveLanguageConfig } from '@store/user/selectors';
+import { useActiveLanguageConf } from '@hooks/useActiveLanguageConf';
+import { useDictionaryEntries } from '@hooks/DictionaryQueryHooks';
 
 const excerptsToLoad = 3;
-
 const Overview: React.FC = () => {
 	const [loadingExcerpts, setLoadingExcerpts] = useState(false);
-	const [loadingEntries, setLoadingEntries] = useState(false);
 	const [loading, setLoading] = useState(false);
 	const [excerpts, setExcerpts] = useState<Array<IDocumentExcerpt>>([]);
-	const [entries, setEntries] = useState<Array<IDictionaryEntryResolved>>([]);
+	const activeLanguage = useActiveLanguageConf();
+	const [loadingEntries, entries] = useDictionaryEntries({
+		excerptLength: 0,
+		lang: activeLanguage?.key || 'dfl',
+		limit: 3,
+		skip: 0,
+	});
 	const history = useHistory();
 
-	const cachedTags = useSelector(
-		(state: IRootState) => state.dictionary.tags
-	);
-	const activeLanguage = useSelector(selectActiveLanguageConfig);
-
-	useEffect(() => {
-		const fetchData = async () => {
-			setLoadingEntries(true);
-
-			try {
-				if (!activeLanguage) {
-					return;
-				}
-				const list = await listDictionary({
-					excerptLength: 0,
-					skip: 0,
-					limit: 3,
-					lang: activeLanguage.key,
-					sortBy: { key: 'createdAt', order: 'descend' },
-				});
-				const denormalizedEntries = list.entries.map((entry) => ({
-					...entry,
-					root: undefined,
-					tags: entry.tags
-						.map((tagId) => cachedTags[tagId])
-						.filter(notUndefined),
-				}));
-				setEntries(denormalizedEntries);
-			} catch (e) {
-				handleError(e);
-			}
-			setLoadingEntries(false);
-		};
-
-		fetchData();
-	}, [cachedTags, activeLanguage]);
-
-	useEffect(() => {
-		const fetchData = async () => {
-			setLoadingExcerpts(true);
-
-			try {
-				if (!activeLanguage) {
-					return;
-				}
-				const result = await listDocuments({
-					excerptLength: 100,
-					skip: 0,
-					limit: excerptsToLoad,
-					sortBy: 'createdAt',
-					lang: activeLanguage.key,
-				});
-				setExcerpts(result.excerpts);
-			} catch (e) {
-				handleError(e);
-			}
-			setLoadingExcerpts(false);
-		};
-
-		fetchData();
-	}, [activeLanguage]);
-
 	const fetchDocumentAndSwitch = useCallback(
-		async (id: UUID) => {
+		async (id: string) => {
 			setLoading(true);
 			try {
 				// await dispatch(loadDocument({ type: 'load', id }));
@@ -155,8 +91,8 @@ const Overview: React.FC = () => {
 						<Card title="Latest Entries">
 							{activeLanguage &&
 								!loadingEntries &&
-								entries.length > 0 &&
-								entries.map((entry) => (
+								entries.total > 0 &&
+								entries.entries.map((entry) => (
 									<DictionaryEntry
 										key={entry.id}
 										entryId={entry.id}
@@ -172,7 +108,7 @@ const Overview: React.FC = () => {
 							)}
 							{activeLanguage &&
 								!loadingEntries &&
-								entries.length < 1 && (
+								entries.total < 1 && (
 									<Empty
 										image={Empty.PRESENTED_IMAGE_SIMPLE}
 									/>

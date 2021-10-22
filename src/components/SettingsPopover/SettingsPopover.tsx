@@ -7,22 +7,18 @@ import {
 	SettingOutlined,
 	TranslationOutlined,
 } from '@ant-design/icons';
-import { IRootDispatch } from '@store/index';
-import { logout, selectLanguage } from '@store/user/actions';
-import { useDispatch, useSelector } from 'react-redux';
 import { useHistory } from 'react-router';
 import {
-	selectActiveLanguageConfig,
-	selectAvailableLanguageConfigs,
-} from '@store/user/selectors';
+	useActiveLanguageConf,
+	useLanguageConfigs,
+} from '@hooks/useActiveLanguageConf';
 
 const { Option } = Select;
 const { confirm } = Modal;
 
 const SettingsPopover: React.FC = () => {
-	const selectedLanguage = useSelector(selectActiveLanguageConfig);
-	const availableLanguages = useSelector(selectAvailableLanguageConfigs);
-	const dispatch: IRootDispatch = useDispatch();
+	const selectedLanguage = useActiveLanguageConf();
+	const availableLanguages = useLanguageConfigs();
 	const history = useHistory();
 
 	const documentModified = false;
@@ -36,13 +32,15 @@ const SettingsPopover: React.FC = () => {
 				okType: 'primary',
 				cancelText: 'No',
 				onOk() {
-					dispatch(logout());
+					// TODO
+					// dispatch(logout());
 				},
 			});
 		} else {
-			dispatch(logout());
+			// TODO
+			// dispatch(logout());
 		}
-	}, [dispatch, documentModified]);
+	}, [documentModified]);
 
 	const changeLanguage = useCallback(
 		(configKey: string) => {
@@ -60,8 +58,9 @@ const SettingsPopover: React.FC = () => {
 							(langConf) => langConf.key === configKey
 						);
 						if (languageConfig) {
+							// TODO
 							// dispatch(resetEditor());
-							dispatch(selectLanguage(languageConfig));
+							// dispatch(selectLanguage(languageConfig));
 						}
 					},
 				});
@@ -70,11 +69,12 @@ const SettingsPopover: React.FC = () => {
 					(langConf) => langConf.key === configKey
 				);
 				if (languageConfig) {
-					dispatch(selectLanguage(languageConfig));
+					// TODO
+					// dispatch(selectLanguage(languageConfig));
 				}
 			}
 		},
-		[availableLanguages, dispatch]
+		[availableLanguages]
 	);
 
 	return (

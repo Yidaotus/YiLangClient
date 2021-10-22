@@ -9,7 +9,6 @@ import {
 	ExclamationCircleOutlined,
 	MoreOutlined,
 } from '@ant-design/icons';
-import { UUID } from 'Document/UUID';
 import Meta from 'antd/lib/card/Meta';
 import Link from 'antd/lib/typography/Link';
 
@@ -17,8 +16,8 @@ const { confirm } = Modal;
 
 interface IDocumentExcerptProps {
 	excerpt: IDocumentExcerpt;
-	selectDocument: (id: UUID) => void;
-	removeDocument?: (id: UUID) => void;
+	selectDocument: (id: string) => void;
+	removeDocument?: (id: string) => void;
 }
 
 /**

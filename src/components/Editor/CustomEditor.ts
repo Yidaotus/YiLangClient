@@ -1,5 +1,4 @@
 // This example is for an Editor with `ReactEditor` and `HistoryEditor`
-import { UUID } from 'Document/UUID';
 import {
 	BaseEditor,
 	Descendant,
@@ -77,7 +76,7 @@ export type SentenceElement = {
 
 export type WordElement = {
 	type: 'word';
-	dictId: UUID;
+	dictId: string;
 	children: CustomText[];
 };
 

@@ -8,9 +8,9 @@ import {
 } from './definitions/api';
 import ApiService from './api.service';
 
-const DocumentEndpoints = ApiPaths.document.endpoints;
-const DocumentPath = (endpoint: string) =>
-	`${ApiPaths.document.path}/${endpoint}`;
+const DocumentAPI = ApiPaths.documents;
+const DocumentEndpoints = DocumentAPI.endpoints;
+const DocumentPath = (endpoint: string) => `${DocumentAPI.path}/${endpoint}`;
 
 const remove = async (id: string): Promise<void> => {
 	const { path } = DocumentEndpoints.remove;

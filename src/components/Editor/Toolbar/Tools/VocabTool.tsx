@@ -7,9 +7,6 @@ import {
 	isNodeInSelection,
 	WordElement,
 } from '@components/Editor/CustomEditor';
-import { IRootDispatch } from '@store/index';
-import { useDispatch } from 'react-redux';
-import { saveOrUpdateEntryInput } from '@store/dictionary/actions';
 import WordInput, { useWordInput } from '../Modals/WordEditor/WordEditor';
 
 export interface IToolbarWrapperItem {
@@ -22,7 +19,6 @@ const VocabTool: React.FC<IToolbarWrapperItem> = ({ editor }): JSX.Element => {
 	const [wordInputVisible, setWordInputVisible] = useState(false);
 	const isActive = isNodeInSelection(editor, editor.selection, 'word');
 	const { wordInputState, getUserWord } = useWordInput();
-	const dispatch: IRootDispatch = useDispatch();
 
 	const wrap = async () => {
 		if (editor.selection) {
@@ -30,21 +26,14 @@ const VocabTool: React.FC<IToolbarWrapperItem> = ({ editor }): JSX.Element => {
 			const root = Editor.string(editor, editor.selection, {
 				voids: true,
 			});
-			const entry = await getUserWord(root);
-			if (!entry) {
+			const entryId = await getUserWord(root);
+			if (!entryId) {
 				return;
 			}
-			const saveResult = dispatch(saveOrUpdateEntryInput(entry));
-			if (saveResult) {
-				let mainId;
-				if (typeof saveResult === 'string') {
-					mainId = saveResult;
-				} else {
-					[mainId] = saveResult;
-				}
+			if (entryId) {
 				const vocab: WordElement = {
 					type: 'word',
-					dictId: mainId,
+					dictId: entryId,
 					children: [{ text: '' }],
 				};
 				Transforms.wrapNodes(editor, vocab, { split: true });

@@ -73,7 +73,7 @@ const DialogBlockDefinition = createBlockDefinition({
 
 		return {
 			type: 'Dialog',
-			id: getUUID(),
+			id: getstring(),
 			lines,
 			fragmentables,
 			position,

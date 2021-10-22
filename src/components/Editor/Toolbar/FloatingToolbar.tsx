@@ -1,16 +1,12 @@
 import './Toolbar.css';
 import React, { useEffect, useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
 import { Button, Divider, Dropdown, Menu } from 'antd';
-import { IRootDispatch } from 'store';
-import { selectActiveLookupSources } from '@store/user/selectors';
 import { ReactEditor, useSlateStatic } from 'slate-react';
 import {
 	Editor,
 	Element as SlateElement,
 	Range,
 	Transforms,
-	Text,
 	BaseSelection,
 } from 'slate';
 import {
@@ -19,8 +15,8 @@ import {
 	SearchOutlined,
 	TranslationOutlined,
 } from '@ant-design/icons';
-import { saveOrUpdateEntryInput } from '@store/dictionary/actions';
 import { formatURL } from '@components/LookupSourceLink';
+import { IDictionaryLookupSource } from 'Document/Config';
 import Floating from '../Popups/Floating';
 import WordInput, { useWordInput } from './Modals/WordEditor/WordEditor';
 import ColorPicker from './Tools/ColorPicker';
@@ -31,7 +27,6 @@ import {
 	highlightSelection,
 	isNodeInSelection,
 	toggleBlockType,
-	WordElement,
 } from '../CustomEditor';
 import WrapperItem from './Tools/WrapperItem';
 import DropdownItem from './Tools/DropdownItem';
@@ -77,8 +72,7 @@ const FloatingToolbar: React.FC<IToolbarProps> = ({
 	const blockType = getTextBlockStyle(editor);
 	const { wordInputState, getUserWord } = useWordInput();
 
-	const dispatch: IRootDispatch = useDispatch();
-	const lookupSources = useSelector(selectActiveLookupSources);
+	const lookupSources: Array<IDictionaryLookupSource> = [];
 	const [selectionNode, setSelectionNode] = useState<DOMRect | null>(null);
 
 	const [toolbarState, setToolbarState] =
@@ -131,7 +125,8 @@ const FloatingToolbar: React.FC<IToolbarProps> = ({
 			const entry = await getUserWord(root);
 			removeHighlights?.();
 			if (entry) {
-				const saveResult = dispatch(saveOrUpdateEntryInput(entry));
+				/*
+				const saveResult = null; //dispatch(saveOrUpdateEntryInput(entry));
 				if (saveResult) {
 					let mainId;
 					if (typeof saveResult === 'string') {
@@ -182,6 +177,7 @@ const FloatingToolbar: React.FC<IToolbarProps> = ({
 						}
 					}
 				}
+				*/
 			}
 			setToolbarState({
 				actionBarVisible: true,
@@ -203,7 +199,7 @@ const FloatingToolbar: React.FC<IToolbarProps> = ({
 			{BlockTypes.map((menuBlockType) => (
 				<Menu.Item
 					disabled={blockType === menuBlockType}
-					onClick={(e) => {
+					onClick={() => {
 						setToolbarState({
 							actionBarVisible: false,
 							simpleInputVisible: false,

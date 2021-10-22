@@ -22,13 +22,10 @@ import {
 import Dictionary from 'views/Home/Dictionary/Dictionary';
 import Documents from 'views/Home/Documents/Documents';
 import DictionaryEntryPage from 'views/Home/DictionaryEntry/DictionaryEntryPage';
-import { useDispatch, useSelector } from 'react-redux';
 import { UserOutlined } from '@ant-design/icons';
 import SettingsPopover from '@components/SettingsPopover/SettingsPopover';
 import handleError from '@helpers/Error';
-import { selectActiveLanguageConfig } from '@store/user/selectors';
-import { IRootDispatch } from '@store/index';
-import { initialize } from '@store/user/actions';
+import { useActiveLanguageConf } from '@hooks/useActiveLanguageConf';
 import Overview from './Overview/Overview';
 import Settings from './Settings/Settings';
 
@@ -37,9 +34,8 @@ const HomeView: React.FC = () => {
 
 	const { url } = useRouteMatch();
 	const { location } = useHistory();
-	const dispatch: IRootDispatch = useDispatch();
 
-	const activeLanguage = useSelector(selectActiveLanguageConfig);
+	const activeLanguage = useActiveLanguageConf();
 
 	const locationMap = {
 		home: `${url}`,
@@ -55,7 +51,6 @@ const HomeView: React.FC = () => {
 		const init = async () => {
 			setLoading('Initializing');
 			try {
-				await dispatch(initialize());
 				notification.open({
 					message: 'Done',
 					description: `YiLang initialized`,
@@ -67,7 +62,7 @@ const HomeView: React.FC = () => {
 			setLoading(null);
 		};
 		init();
-	}, [dispatch]);
+	}, []);
 
 	useEffect(() => {
 		if (activeLanguage) {
@@ -77,7 +72,7 @@ const HomeView: React.FC = () => {
 				type: 'success',
 			});
 		}
-	}, [dispatch, activeLanguage]);
+	}, [activeLanguage]);
 
 	return (
 		<div className="yi-layout">

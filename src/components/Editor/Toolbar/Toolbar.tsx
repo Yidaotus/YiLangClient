@@ -1,14 +1,11 @@
 import './Toolbar.css';
-import React, { useEffect, useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import React, { useState } from 'react';
+import { useSelector } from 'react-redux';
 import { Button, Divider, Dropdown, Menu } from 'antd';
-import { IRootDispatch } from 'store';
-import { selectActiveLookupSources } from '@store/user/selectors';
 import { ReactEditor, useSlateStatic } from 'slate-react';
 import {
 	Editor,
 	Element as SlateElement,
-	Range,
 	Transforms,
 	Text,
 	BaseSelection,
@@ -19,8 +16,8 @@ import {
 	SearchOutlined,
 	TranslationOutlined,
 } from '@ant-design/icons';
-import { saveOrUpdateEntryInput } from '@store/dictionary/actions';
 import { formatURL } from '@components/LookupSourceLink';
+import { IDictionaryLookupSource } from 'Document/Config';
 import Floating from '../Popups/Floating';
 import WordInput, { useWordInput } from './Modals/WordEditor/WordEditor';
 import ColorPicker from './Tools/ColorPicker';
@@ -74,8 +71,7 @@ const Toolbar: React.FC<IToolbarProps> = ({ rootElement, selection }) => {
 	const blockType = getTextBlockStyle(editor);
 	const { wordInputState, getUserWord } = useWordInput();
 
-	const dispatch: IRootDispatch = useDispatch();
-	const lookupSources = useSelector(selectActiveLookupSources);
+	const lookupSources: Array<IDictionaryLookupSource> = [];
 	const [selectionNode, setSelectionNode] = useState<DOMRect | null>(null);
 
 	const [toolbarState, setToolbarState] =
@@ -96,57 +92,48 @@ const Toolbar: React.FC<IToolbarProps> = ({ rootElement, selection }) => {
 			const root = Editor.string(editor, editor.selection, {
 				voids: true,
 			});
-			const entry = await getUserWord(root);
+			const entryId = await getUserWord(root);
 			removeHighlights?.();
-			if (entry) {
-				const saveResult = dispatch(saveOrUpdateEntryInput(entry));
-				if (saveResult) {
-					let mainId;
-					if (typeof saveResult === 'string') {
-						mainId = saveResult;
-					} else {
-						[mainId] = saveResult;
-					}
-					const vocab: WordElement = {
-						type: 'word',
-						dictId: mainId,
-						children: [{ text: '' }],
-					};
-					Transforms.wrapNodes(editor, vocab, {
-						at: savedSelection,
-						split: true,
-					});
-					const allLeafs = Editor.nodes(editor, {
-						at: [[0], [editor.children.length - 1]],
-						match: (e) => Text.isText(e),
-					});
-					const searchRegexp = new RegExp(root, 'g');
-					for (const [leafMatch, leafPath] of allLeafs) {
-						if (Text.isText(leafMatch)) {
-							const foundRoots = String(leafMatch.text).matchAll(
-								searchRegexp
-							);
-							const foundRoot = foundRoots.next();
-							if (foundRoot.value?.index !== undefined) {
-								// we split the node if we found any hits, so we can just wrap the first hit
-								// and continue the loop. Since the loop makes use of the generator function
-								// it will automatically iterate to the next (new)
-								Transforms.wrapNodes(editor, vocab, {
-									at: {
-										anchor: {
-											path: leafPath,
-											offset: foundRoot.value.index,
-										},
-										focus: {
-											path: leafPath,
-											offset:
-												foundRoot.value.index +
-												foundRoot.value[0].length,
-										},
+			if (entryId) {
+				const vocab: WordElement = {
+					type: 'word',
+					dictId: entryId,
+					children: [{ text: '' }],
+				};
+				Transforms.wrapNodes(editor, vocab, {
+					at: savedSelection,
+					split: true,
+				});
+				const allLeafs = Editor.nodes(editor, {
+					at: [[0], [editor.children.length - 1]],
+					match: (e) => Text.isText(e),
+				});
+				const searchRegexp = new RegExp(root, 'g');
+				for (const [leafMatch, leafPath] of allLeafs) {
+					if (Text.isText(leafMatch)) {
+						const foundRoots = String(leafMatch.text).matchAll(
+							searchRegexp
+						);
+						const foundRoot = foundRoots.next();
+						if (foundRoot.value?.index !== undefined) {
+							// we split the node if we found any hits, so we can just wrap the first hit
+							// and continue the loop. Since the loop makes use of the generator function
+							// it will automatically iterate to the next (new)
+							Transforms.wrapNodes(editor, vocab, {
+								at: {
+									anchor: {
+										path: leafPath,
+										offset: foundRoot.value.index,
 									},
-									split: true,
-								});
-							}
+									focus: {
+										path: leafPath,
+										offset:
+											foundRoot.value.index +
+											foundRoot.value[0].length,
+									},
+								},
+								split: true,
+							});
 						}
 					}
 				}
@@ -171,7 +158,7 @@ const Toolbar: React.FC<IToolbarProps> = ({ rootElement, selection }) => {
 			{BlockTypes.map((menuBlockType) => (
 				<Menu.Item
 					disabled={blockType === menuBlockType}
-					onClick={(e) => {
+					onClick={() => {
 						setToolbarState({
 							actionBarVisible: false,
 							simpleInputVisible: false,

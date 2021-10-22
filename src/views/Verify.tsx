@@ -1,7 +1,6 @@
 import React, { FC, useState, useEffect } from 'react';
 import { useDispatch } from 'react-redux';
 import { useParams, useHistory } from 'react-router-dom';
-import { verify as verifyDispatcher } from '../store/user/actions';
 
 export interface IRegisterData {
 	email: string;
@@ -23,12 +22,9 @@ const VerifyView: FC = () => {
 	useEffect(() => {
 		const verifyCB = async () => {
 			setErrors([]);
-			try {
-				await dispatch(verifyDispatcher({ token: code }));
-				history.push('/login');
-			} catch (err) {
-				setErrors((state) => [...state, err.message]);
-			}
+			// @TODO Verify
+			// await dispatch(verifyDispatcher({ token: code }));
+			history.push('/login');
 		};
 
 		verifyCB();

@@ -1,8 +1,7 @@
-import { IDictionaryEntry } from 'Document/Dictionary';
+import { IDictionaryEntry, IDictionaryTag } from 'Document/Dictionary';
 import { IExcerptedDocumentLink } from 'Document/Document';
-import { UUID } from 'Document/UUID';
 
-export type DictionaryEntryFields =
+export type DictionaryEntryField =
 	| 'word'
 	| 'translation'
 	| 'createdAt'
@@ -19,23 +18,7 @@ export type ApiStatus = typeof ApiStatuses[keyof typeof ApiStatuses];
 
 export type ApiMethod = 'post' | 'put' | 'patch' | 'get' | 'delete';
 
-interface IApiEndpoint {
-	path: string;
-	method: ApiMethod;
-}
-
-interface IApiPath {
-	path: string;
-	endpoints: {
-		[index: string]: IApiEndpoint;
-	};
-}
-
-interface IApiPaths {
-	[index: string]: IApiPath;
-}
-
-const ApiPaths: IApiPaths = {
+const ApiPaths = {
 	user: {
 		path: 'user',
 		endpoints: {
@@ -74,98 +57,77 @@ const ApiPaths: IApiPaths = {
 			},
 		},
 	},
-	document: {
-		path: 'document',
+	documents: {
+		path: 'documents',
 		endpoints: {
 			save: {
-				path: 'entries',
-				method: 'post',
-			},
-			list: {
-				path: 'entries/list',
-				method: 'post',
-			},
-			remove: {
-				path: 'entries',
-				method: 'delete',
-			},
-			getById: {
-				path: 'entries',
-				method: 'get',
-			},
-		},
-	},
-	tags: {
-		path: 'tags',
-		endpoints: {
-			getMany: {
-				path: 'retrieve',
-				method: 'post',
-			},
-			getAll: {
-				path: 'entries',
-				method: 'get',
-			},
-			applyDelta: {
-				path: 'delta',
-				method: 'post',
-			},
-		},
-	},
-	dict: {
-		path: 'dict',
-		endpoints: {
-			getMany: {
-				path: 'retrieve',
-				method: 'post',
-			},
-			add: {
-				path: 'entries',
-				method: 'post',
-			},
-			applyDelta: {
-				path: 'delta',
+				path: '/',
 				method: 'post',
 			},
 			list: {
 				path: 'list',
 				method: 'post',
 			},
-			modify: {
-				path: 'entry',
-				method: 'patch',
-			},
-			delete: {
-				path: 'entry',
+			remove: {
+				path: '/',
 				method: 'delete',
 			},
-			search: {
-				path: 'search',
+			getById: {
+				path: '/',
 				method: 'get',
-			},
-			get: {
-				path: 'entry',
-				method: 'get',
-			},
-			getAll: {
-				path: 'entries',
-				method: 'get',
-			},
-			analyze: {
-				path: 'analyze',
-				method: 'post',
 			},
 		},
 	},
-};
+	dictionary: {
+		path: 'dictionary',
+		endpoints: {
+			tags: {
+				path: 'tags',
+				endpoints: {
+					getAll: {
+						path: '/',
+						method: 'get',
+					},
+					add: {
+						path: '/',
+						method: 'post',
+					},
+				},
+			},
+			entries: {
+				path: 'entries',
+				endpoints: {
+					add: {
+						path: '/',
+						method: 'post',
+					},
+					modify: {
+						path: '/',
+						method: 'patch',
+					},
+					delete: {
+						path: '/',
+						method: 'delete',
+					},
+					search: {
+						path: 'search',
+						method: 'get',
+					},
+					list: {
+						path: 'list',
+						method: 'post',
+					},
+					get: {
+						path: '/:id',
+						method: 'get',
+					},
+				},
+			},
+		},
+	},
+} as const;
 
 export { ApiPaths };
-
-export enum ApiPathString {
-	LOGIN = 'user/login',
-	REGISTER = 'user/register',
-	AUTH = 'user/auth',
-}
 
 export interface IRegisterParams {
 	username: string;
@@ -225,7 +187,7 @@ export interface IDictionaryEntryData {
 }
 
 export interface IDictionaryFetchParams {
-	sortBy: DictionaryEntryFields;
+	sortBy: DictionaryEntryField;
 	lang: string;
 	limit: number;
 	skip: number;
@@ -238,6 +200,13 @@ export interface IDictionaryEntryFetchResponse {
 	subEntries: Array<IDictionaryEntry>;
 	otherExcerpts?: Array<IExcerptedDocumentLink>;
 }
+
+export interface IAddTagParams {
+	lang: string;
+	tag: Omit<IDictionaryTag, 'id' | 'lang'>;
+}
+
+export type IAddDictionaryEntryParams = Omit<IDictionaryEntry, 'id'>;
 
 export interface IDocumentParam {
 	document: string;
@@ -258,7 +227,7 @@ export interface IGetManyDictEntriesPrams {
 }
 
 export interface IDocumentExcerpt {
-	id: UUID;
+	id: string;
 	title: string;
 	excerpt: string;
 	createdAt: Date;
@@ -292,7 +261,7 @@ export interface IListDictionaryParams {
 
 export interface IGetManyTagsPrams {
 	lang: string;
-	ids: Array<UUID>;
+	ids: Array<string>;
 }
 
 export interface ISearchDictionaryParams {
@@ -301,5 +270,5 @@ export interface ISearchDictionaryParams {
 }
 
 export interface ISetActiveLangParams {
-	languageId: UUID;
+	languageId: string;
 }

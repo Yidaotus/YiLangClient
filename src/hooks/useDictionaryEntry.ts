@@ -1,11 +1,10 @@
 import { getEntry } from 'api/dictionary.service';
 import { IDictionaryEntry } from 'Document/Dictionary';
-import { UUID } from 'Document/UUID';
 import { useQuery } from 'react-query';
-import useActiveLanguageConf from './useActiveLanguageConf';
+import { useActiveLanguageConf } from './useActiveLanguageConf';
 
 const useDictionaryEntry = (
-	id: UUID | null
+	id: string | null
 ): [boolean, IDictionaryEntry | null] => {
 	const lang = useActiveLanguageConf();
 

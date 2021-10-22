@@ -1,11 +1,10 @@
 import { IDictionaryEntryResolved } from 'Document/Dictionary';
 import { notUndefined } from 'Document/Utility';
-import { UUID } from 'Document/UUID';
 import useDictionaryEntry from './useDictionaryEntry';
-import useTags from './useTags';
+import { useTags } from './useTags';
 
 const useDictionaryEntryResolved = (
-	id: UUID | null
+	id: string | null
 ): [boolean, IDictionaryEntryResolved | null] => {
 	const [loading, entry] = useDictionaryEntry(id);
 	const tags = useTags();

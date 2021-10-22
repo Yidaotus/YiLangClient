@@ -56,7 +56,7 @@ const ListBlockDefinition = createBlockDefinition({
 		const fragmentables = items.map((item) => FragmentableString(item));
 		return {
 			type: 'List',
-			id: getUUID(),
+			id: getstring(),
 			fragmentables,
 			position,
 			items: fragmentables.map((frag) => frag.id),

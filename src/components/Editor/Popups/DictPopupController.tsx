@@ -1,7 +1,4 @@
-import useActiveLanguageConf from '@hooks/useActiveLanguageConf';
 import useDictionaryEntryResolved from '@hooks/useDictionaryEntriesResolved';
-import useDictionaryEntry from '@hooks/useDictionaryEntry';
-import { UUID } from 'Document/UUID';
 import React, { useEffect, useState } from 'react';
 import { BaseSelection, Editor, Range } from 'slate';
 import { ReactEditor, useSlateStatic } from 'slate-react';
@@ -19,7 +16,7 @@ const DictPopupController: React.FC<IDictPopupControllerProps> = ({
 	selection,
 }) => {
 	const editor = useSlateStatic();
-	const [dictId, setDictId] = useState<UUID | null>(null);
+	const [dictId, setDictId] = useState<string | null>(null);
 	const [loadingMain, entry] = useDictionaryEntryResolved(dictId);
 	const [loadingRoot, rootEntry] = useDictionaryEntryResolved(
 		entry?.root || null

@@ -9,16 +9,17 @@ import React, {
 } from 'react';
 import { Form } from 'antd';
 import { IDictionaryEntry, IDictionaryTag } from 'Document/Dictionary';
-import { getUUID } from 'Document/UUID';
 import TagForm, {
 	ITagFormFields,
 } from '@components/DictionaryEntry/TagForm/TagForm';
-import { useSelector } from 'react-redux';
-import { selectActiveLanguageConfig } from '@store/user/selectors';
 import handleError from '@helpers/Error';
-import { IRootState } from '@store/index';
-import { notUndefined } from 'Document/Utility';
-import EntryForm, { IEntryFormFields } from '../EntryForm/EntryForm';
+import { useTags, useAddDictionaryTag } from '@hooks/useTags';
+import { useAddDictionaryEntry } from '@hooks/DictionaryQueryHooks';
+import { randomBytes } from 'crypto';
+import EntryForm, {
+	IEntryFormFields,
+	IDictionaryEntryInput,
+} from '../EntryForm/EntryForm';
 
 export interface IWordInputState {
 	root: string | IDictionaryEntry;
@@ -80,7 +81,7 @@ const INITIAL_WORD_REDUCER_STATE: IWordReducerState = {
 type FinishCallbackReturn =
 	| {
 			isDone: true;
-			entry: IEntryFormFields;
+			entryId: string | null;
 	  }
 	| { isDone: false };
 
@@ -101,11 +102,9 @@ const WordInput: React.ForwardRefRenderFunction<
 		wordStateReducer,
 		INITIAL_WORD_REDUCER_STATE
 	);
-	const selectedLanguage = useSelector(selectActiveLanguageConfig);
-
-	const userTags = useSelector((store: IRootState) =>
-		Object.values(store.dictionary.tags).filter(notUndefined)
-	);
+	const userTags = useTags();
+	const addTag = useAddDictionaryTag();
+	const addEntry = useAddDictionaryEntry();
 
 	useEffect(() => {
 		if (typeof root === 'string') {
@@ -117,47 +116,91 @@ const WordInput: React.ForwardRefRenderFunction<
 
 	const createTagCallback = useCallback(
 		async (tagName: string) => {
-			let createdId = null;
 			try {
-				if (!selectedLanguage) {
-					throw new Error('No language selected!');
-				}
 				tagForm.setFieldsValue({
 					name: tagName,
-					lang: selectedLanguage.key,
 				});
 				dispatchWordEditorState({
 					type: 'pushState',
 					payload: { newState: 'tag', stateChanged },
 				});
-				createdId = getUUID();
 			} catch (e) {
 				handleError(e);
 			}
-			return createdId;
 		},
-		[selectedLanguage, stateChanged, tagForm]
+		[stateChanged, tagForm]
 	);
 
 	const createRootCallback = useCallback(
 		async (key: string) => {
-			let createdId = null;
 			try {
-				if (!selectedLanguage) {
-					throw new Error('No language selected!');
-				}
-				rootForm.setFieldsValue({ key, lang: selectedLanguage.key });
+				rootForm.setFieldsValue({ key });
 				dispatchWordEditorState({
 					type: 'pushState',
 					payload: { newState: 'root', stateChanged },
 				});
-				createdId = getUUID();
 			} catch (e) {
 				handleError(e);
 			}
-			return createdId;
 		},
-		[rootForm, selectedLanguage, stateChanged]
+		[rootForm, stateChanged]
+	);
+
+	const saveEntry = useCallback(
+		async (input: IDictionaryEntryInput): Promise<string | null> => {
+			// We have  new root entry
+			try {
+				if (input.root && typeof input.root === 'object') {
+					const newTagsToSave = input.root.tags.filter(
+						(tag): tag is IDictionaryTag => typeof tag === 'object'
+					);
+					const tagPromises = [];
+					for (const newTag of newTagsToSave) {
+						tagPromises.push(addTag.mutateAsync(newTag));
+					}
+					const createdTagIds = await Promise.all(tagPromises);
+
+					const rootToCreate: Omit<IDictionaryEntry, 'id' | 'lang'> =
+						{
+							...input.root,
+							root: undefined,
+							tags: [
+								...input.tags.filter(
+									(tag): tag is string =>
+										typeof tag !== 'object'
+								),
+								...createdTagIds,
+							],
+						};
+					addEntry.mutate(rootToCreate);
+				}
+				const newTagsToSave = input.tags.filter(
+					(tag): tag is IDictionaryTag => typeof tag === 'object'
+				);
+				const tagPromises = [];
+				for (const newTag of newTagsToSave) {
+					tagPromises.push(addTag.mutateAsync(newTag));
+				}
+				const createdTagIds = await Promise.all(tagPromises);
+
+				const entryToCreate: Omit<IDictionaryEntry, 'id' | 'lang'> = {
+					...input,
+					root: undefined,
+					tags: [
+						...input.tags.filter(
+							(tag): tag is string => typeof tag !== 'object'
+						),
+						...createdTagIds,
+					],
+				};
+				const createdId = await addEntry.mutateAsync(entryToCreate);
+				return createdId;
+			} catch (e) {
+				handleError(e);
+			}
+			return null;
+		},
+		[addEntry, addTag]
 	);
 
 	const finish = useCallback(async () => {
@@ -165,7 +208,8 @@ const WordInput: React.ForwardRefRenderFunction<
 		if (wordEditorState.currentState === 'word') {
 			try {
 				const wordFormData = await wordForm.validateFields();
-				result = { isDone: true, entry: wordFormData };
+				const entryId = await saveEntry(wordFormData);
+				result = { isDone: true, entryId };
 				setCreatedTags([]);
 				tagForm.resetFields();
 				rootForm.resetFields();
@@ -179,7 +223,7 @@ const WordInput: React.ForwardRefRenderFunction<
 				tagForm.resetFields();
 				const cleanedUpTagValues = {
 					...tagValues,
-					id: getUUID(),
+					id: String(randomBytes(12)),
 					grammarPoint: tagValues.grammarPoint?.name
 						? tagValues.grammarPoint
 						: undefined,
@@ -222,7 +266,7 @@ const WordInput: React.ForwardRefRenderFunction<
 				const currentWordFormValues = wordForm.getFieldsValue(true);
 				wordForm.setFieldsValue({
 					...currentWordFormValues,
-					root: { ...rootValues, id: getUUID() },
+					root: { ...rootValues },
 				});
 				dispatchWordEditorState({
 					type: 'popState',
@@ -235,6 +279,7 @@ const WordInput: React.ForwardRefRenderFunction<
 		return result;
 	}, [
 		rootForm,
+		saveEntry,
 		stateChanged,
 		tagForm,
 		wordEditorState.currentState,

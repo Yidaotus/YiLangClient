@@ -6,39 +6,32 @@ import {
 } from '@ant-design/icons';
 import InnerModal from '@components/InnerModal/InnerModal';
 import LangConfForm from '@components/Settings/LangConfForm/LangConfForm';
-import { IRootDispatch } from '@store/index';
-import {
-	updateLanguageConfig,
-	addLanguageConfig,
-	removeLanguageConfig,
-} from '@store/user/actions';
-import { selectAvailableLanguageConfigs } from '@store/user/selectors';
 import { Card, Button, Form, Modal, List, PageHeader } from 'antd';
 import { ILanguageConfig } from 'Document/Config';
-import { UUID } from 'Document/UUID';
 import React, { useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useLanguageConfigs } from '@hooks/useActiveLanguageConf';
 
 const { confirm } = Modal;
 
 const LanguageConfig: React.FC = () => {
-	const availableLanguages = useSelector(selectAvailableLanguageConfigs);
+	const availableLanguages = useLanguageConfigs();
 	const [addFormVisible, setAddFormVisible] = useState(false);
 
-	const dispatch: IRootDispatch = useDispatch();
 	const [langConfForm] = Form.useForm<ILanguageConfig>();
 
 	const saveConfig = (entry: ILanguageConfig) => {
 		if (entry.key) {
-			dispatch(updateLanguageConfig(entry));
+			// TODO
+			// dispatch(updateLanguageConfig(entry));
 		} else {
-			dispatch(addLanguageConfig(entry));
+			// TODO
+			// dispatch(addLanguageConfig(entry));
 		}
 		langConfForm.resetFields();
 		setAddFormVisible(false);
 	};
 
-	const removeConfig = (key: UUID) => {
+	const removeConfig = (key: string) => {
 		confirm({
 			title: 'Are you sure delete this language?',
 			icon: <ExclamationCircleOutlined />,
@@ -47,12 +40,13 @@ const LanguageConfig: React.FC = () => {
 			okType: 'danger',
 			cancelText: 'No',
 			onOk() {
-				dispatch(removeLanguageConfig(key));
+				// TODO
+				// dispatch(removeLanguageConfig(key));
 			},
 		});
 	};
 
-	const editConfig = (key: UUID) => {
+	const editConfig = (key: string) => {
 		const selectedLanguage = availableLanguages.find(
 			(lang) => lang.key === key
 		);

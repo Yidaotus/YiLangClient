@@ -1,13 +1,20 @@
 import './EntryForm.css';
 import React from 'react';
 import { Divider, Form, Input } from 'antd';
-import { IDictionaryTag } from 'Document/Dictionary';
+import { IDictionaryEntry, IDictionaryTag } from 'Document/Dictionary';
 import { FormInstance, RuleObject } from 'antd/lib/form';
 import DictionarySelect from '@components/DictionaryEntry/DictionarySelect/DictionarySelect';
 import YiSelect from '@components/DictionaryEntry/YiSelect';
 import YiTagsInput from '@components/DictionaryEntry/YiTagsInput/YiTagsInput';
-import { IDictionaryEntryInput } from '@store/dictionary/actions';
 
+export type IDictionaryEntryInput = Omit<
+	IDictionaryEntry,
+	'firstSeen' | 'id' | 'tags' | 'root'
+> & {
+	id?: string;
+	tags: Array<IDictionaryTag | string>;
+	root: string | IEntryFormFields;
+};
 export type IEntryFormFields = IDictionaryEntryInput;
 export interface IEntryFormProps {
 	form: FormInstance<IEntryFormFields>;

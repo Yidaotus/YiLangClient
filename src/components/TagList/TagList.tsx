@@ -1,8 +1,6 @@
 import './TagList.css';
 
-import React, { useEffect, useRef, useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import { IRootDispatch } from 'store';
+import React, { useRef, useState } from 'react';
 import { Button, Dropdown, Input, Menu, Modal, Space, Table } from 'antd';
 import { ColumnsType, ColumnType } from 'antd/lib/table';
 import { IDictionaryTag } from 'Document/Dictionary';
@@ -16,10 +14,7 @@ import {
 import Highlighter from 'react-highlight-words';
 import { FilterConfirmProps } from 'antd/lib/table/interface';
 import { GrammarPoint } from '@components/DictionaryEntry/DictionaryEntry';
-import { UUID } from 'Document/UUID';
-import { removeTag, removeTagRemote } from '@store/dictionary/actions';
-import { selectActiveLanguageConfig } from '@store/user/selectors';
-import { getTags } from 'api/tags.service';
+import { useTags } from '@hooks/useTags';
 
 const confirmModal = Modal.confirm;
 
@@ -32,27 +27,11 @@ type ColumnSearchMap = {
  *
  */
 const TagList: React.FC = () => {
-	const [tags, setTags] = useState<Array<IDictionaryTag>>([]);
-	const total = tags.length;
-	const dispatch: IRootDispatch = useDispatch();
 	const [pageSize, setPageSize] = useState(10);
 	const [columnSearch, setColumnSearch] = useState<ColumnSearchMap>({});
-	const selectedLanguage = useSelector(selectActiveLanguageConfig);
+	const allTags = useTags();
 
 	const searchInput = useRef<Input>(null);
-
-	useEffect(() => {
-		const fetch = async () => {
-			if (!selectedLanguage) {
-				return;
-			}
-			const tagData = await getTags(selectedLanguage.key);
-			if (tagData) {
-				setTags(tagData);
-			}
-		};
-		fetch();
-	}, [selectedLanguage]);
 
 	const handleSearch = (
 		selectedKeys: React.Key[],
@@ -176,7 +155,7 @@ const TagList: React.FC = () => {
 		},
 	});
 
-	const showDeleteConfirm = (id: UUID) => {
+	const showDeleteConfirm = (id: string) => {
 		confirmModal({
 			title: 'Are you sure to delete this tag?',
 			icon: <ExclamationCircleOutlined />,
@@ -185,8 +164,8 @@ const TagList: React.FC = () => {
 			okType: 'danger',
 			cancelText: 'No',
 			async onOk() {
-				await dispatch(removeTag(id));
-				await dispatch(removeTagRemote(id));
+				// await dispatch(removeTag(id));
+				// await dispatch(removeTagRemote(id));
 			},
 		});
 	};
@@ -243,7 +222,7 @@ const TagList: React.FC = () => {
 		<Table<IDictionaryTag>
 			columns={columns}
 			rowKey="id"
-			dataSource={tags}
+			dataSource={allTags}
 			expandable={{
 				expandedRowRender: ({ grammarPoint }) =>
 					grammarPoint && <GrammarPoint point={grammarPoint} />,
@@ -258,7 +237,7 @@ const TagList: React.FC = () => {
 					}
 				},
 				pageSize,
-				total,
+				total: allTags.length,
 				defaultCurrent: 1,
 				defaultPageSize: 2,
 			}}

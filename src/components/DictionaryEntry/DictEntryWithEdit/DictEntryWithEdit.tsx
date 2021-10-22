@@ -11,7 +11,6 @@ import {
 	SaveFilled,
 } from '@ant-design/icons';
 import { IDictionaryEntryResolved } from 'Document/Dictionary';
-import { UUID } from 'Document/UUID';
 import DictionaryEntry from '../DictionaryEntry';
 import DictEntryEdit, { IWordInputRef } from '../DictEntryEdit/DictEntryEdit';
 import { IEntryFormFields } from '../EntryForm/EntryForm';
@@ -22,11 +21,11 @@ type IDictEntryWithEditProps = {
 	dictEntry: IDictionaryEntryResolved;
 	canLink?: boolean;
 	saveEntry: (entry: IEntryFormFields) => void;
-	removeEntry?: (entryId: UUID) => void;
+	removeEntry?: (entryId: string) => void;
 };
 
 const DictEntryWithEdit: React.FC<IDictEntryWithEditProps> = (props) => {
-	const { dictEntry, canLink, saveEntry, removeEntry } = props;
+	const { dictEntry, canLink, removeEntry } = props;
 	const [editing, setEditing] = useState(false);
 	const dictEntryEdit = useRef<IWordInputRef>(null);
 
@@ -34,7 +33,6 @@ const DictEntryWithEdit: React.FC<IDictEntryWithEditProps> = (props) => {
 		if (dictEntryEdit.current) {
 			const editResult = await dictEntryEdit.current.finish();
 			if (editResult.isDone) {
-				saveEntry(editResult.entry);
 				setEditing(false);
 			}
 		}

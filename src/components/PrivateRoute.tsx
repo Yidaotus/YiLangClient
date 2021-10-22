@@ -1,7 +1,7 @@
 import React from 'react';
 import { Route, Redirect } from 'react-router-dom';
-import { Role } from 'store/user/types';
 import useAuth from '@hooks/useAuth';
+import { Role } from 'api/user.service';
 
 interface IPrivateRouteProps {
 	component: React.FC;

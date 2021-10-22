@@ -6,10 +6,10 @@ import {
 	IDictionaryEntry,
 	IDictionaryEntryResolved,
 } from 'Document/Dictionary';
-import { UUID } from 'Document/UUID';
-import useSearchDictionary from '@hooks/useSearchDictionary';
+import { useDictionarySearch } from '@hooks/DictionaryQueryHooks';
 
-export interface IRootSelectProps extends SelectProps<IDictionaryEntry | UUID> {
+export interface IRootSelectProps
+	extends SelectProps<IDictionaryEntry | string> {
 	placeholder: string;
 	createRoot?: (input: string) => void;
 }
@@ -34,7 +34,7 @@ const DictionarySelect: React.FC<IRootSelectProps> = ({
 }) => {
 	const [wordSearchInput, setWordSearchInput] = useState('');
 	const debouncedSeach = useDebounce(wordSearchInput, 500);
-	const [searching, searchEntries] = useSearchDictionary(debouncedSeach);
+	const [searching, searchEntries] = useDictionarySearch(debouncedSeach);
 
 	const rootOptions = useMemo(() => {
 		const searchOptions = searchEntries.map((searchEntry) => ({

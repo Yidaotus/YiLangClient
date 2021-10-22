@@ -5,17 +5,14 @@ import { enableMapSet } from 'immer';
 
 import App from './components/App/App';
 import * as serviceWorker from './serviceWorker';
-import store from './store';
 import 'antd/dist/antd.css';
 
 enableMapSet();
 
 ReactDOM.render(
-	<Provider store={store}>
-		<React.StrictMode>
-			<App />
-		</React.StrictMode>
-	</Provider>,
+	<React.StrictMode>
+		<App />
+	</React.StrictMode>,
 	document.getElementById('root')
 );
 

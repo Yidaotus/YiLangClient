@@ -4,9 +4,6 @@ import React, { useState } from 'react';
 import { Redirect } from 'react-router-dom';
 import { Button, Col, Row, Spin } from 'antd';
 import RegisterForm from 'components/Login/RegisterFormAnt';
-import UIError from 'components/Error/UIError';
-import { IUIError } from 'store/ui/types';
-import { getUUID } from 'Document/UUID';
 import useAuth from '@hooks/useAuth';
 import { LS_TOKEN_POINTER } from 'api/api.service';
 import { useQueryClient } from 'react-query';
@@ -29,7 +26,7 @@ const LoginView: React.FC = () => {
 	const user = useAuth();
 
 	const [isLoading, setIsLoading] = useState(false);
-	const [errors, setErrors] = useState(new Array<IUIError>());
+	const [errors, setErrors] = useState(new Array<string>());
 
 	const [isRegister, setRegister] = useState<boolean>(false);
 	const [infoMsg, setInfoMsg] = useState<string>('');
@@ -47,10 +44,7 @@ const LoginView: React.FC = () => {
 		} catch (e) {
 			if (e instanceof Error) {
 				const { message } = e;
-				setErrors((stateErrors) => [
-					...stateErrors,
-					{ message, id: getUUID(), type: 'error' },
-				]);
+				setErrors((stateErrors) => [...stateErrors, message]);
 			}
 		}
 		setIsLoading(false);
@@ -100,7 +94,7 @@ const LoginView: React.FC = () => {
 					<div className="flex justify-center pt-4">
 						<span className="text-md text-red-600">
 							{errors.map((err) => (
-								<UIError {...err} />
+								<span>{err}</span>
 							))}
 						</span>
 					</div>

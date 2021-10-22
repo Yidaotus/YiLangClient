@@ -1,6 +1,12 @@
 import { ILanguageConfig } from 'Document/Config';
 import useUserConfig from './useUserConfig';
 
+const useLanguageConfigs = (): Array<ILanguageConfig> => {
+	const userConfig = useUserConfig();
+
+	return userConfig?.languageConfigs || [];
+};
+
 const useActiveLanguageConf = (): ILanguageConfig | null => {
 	const userConfig = useUserConfig();
 	let activeConfig: ILanguageConfig | null = null;
@@ -10,7 +16,8 @@ const useActiveLanguageConf = (): ILanguageConfig | null => {
 				(langConf) => langConf.key === userConfig.activeLanguage
 			) || null;
 	}
-	return activeConfig;
+
+	return activeConfig || null;
 };
 
-export default useActiveLanguageConf;
+export { useActiveLanguageConf, useLanguageConfigs };

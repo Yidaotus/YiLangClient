@@ -13,24 +13,23 @@ import DictEntryEdit, {
 	IWordInputRef,
 	WordEditorMode,
 } from '@components/DictionaryEntry/DictEntryEdit/DictEntryEdit';
-import { useSelector } from 'react-redux';
-import { IDictionaryEntryInput } from '@store/dictionary/actions';
-import { selectActiveLookupSources } from '@store/user/selectors';
 import LookupSourceLink from '@components/LookupSourceLink';
+import { IDictionaryLookupSource } from 'Document/Config';
 
 export type WordInputResult = Omit<IDictionaryEntry, 'firstSeen' | 'id'>;
 
 export interface IWordInputState {
-	callback: (entry: IDictionaryEntryInput | null) => void;
+	callback: (entry: string | null) => void;
 	root: string;
 }
 
 export interface IWordInputProps extends IWordInputState {
 	width?: string;
 }
+
 interface IWordInputReturn {
 	wordInputState: IWordInputState;
-	getUserWord: (key: string) => Promise<IDictionaryEntryInput | null>;
+	getUserWord: (key: string) => Promise<string | null>;
 }
 
 const defaultInputstate: IWordInputState = {
@@ -42,13 +41,11 @@ const useWordInput = (): IWordInputReturn => {
 	const [inputState, setInputState] =
 		useState<IWordInputState>(defaultInputstate);
 
-	const getUserWord = (
-		root: string
-	): Promise<IDictionaryEntryInput | null> => {
+	const getUserWord = (root: string): Promise<string | null> => {
 		return new Promise((resolve) => {
 			setInputState({
-				callback: (entry: IDictionaryEntryInput | null) => {
-					resolve(entry);
+				callback: (entryID: string | null) => {
+					resolve(entryID);
 					setInputState(defaultInputstate);
 				},
 				root,
@@ -66,7 +63,7 @@ const WordInput: React.FC<IWordInputProps> = ({
 }) => {
 	const dictEntryEdit = useRef<IWordInputRef>(null);
 	const [editMode, setEditMode] = useState<WordEditorMode>('word');
-	const lookupSources = useSelector(selectActiveLookupSources);
+	const lookupSources: Array<IDictionaryLookupSource> = [];
 
 	const cardTitle = useMemo(() => {
 		switch (editMode) {
@@ -97,7 +94,7 @@ const WordInput: React.FC<IWordInputProps> = ({
 		if (dictEntryEdit.current) {
 			const editResult = await dictEntryEdit.current.finish();
 			if (editResult.isDone) {
-				callback(editResult.entry);
+				callback(editResult.entryId);
 			}
 		}
 	};
