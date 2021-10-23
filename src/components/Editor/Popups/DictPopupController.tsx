@@ -1,4 +1,4 @@
-import useDictionaryEntryResolved from '@hooks/useDictionaryEntriesResolved';
+import { useDictionaryEntryResolved } from '@hooks/DictionaryQueryHooks';
 import React, { useEffect, useState } from 'react';
 import { BaseSelection, Editor, Range } from 'slate';
 import { ReactEditor, useSlateStatic } from 'slate-react';

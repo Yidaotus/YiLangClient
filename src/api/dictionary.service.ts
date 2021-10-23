@@ -1,6 +1,5 @@
 import { IDictionaryEntry } from 'Document/Dictionary';
 import {
-	ApiPaths,
 	IAddDictionaryEntryParams,
 	IApiResponse,
 	IDictionaryEntryFetchResponse,
@@ -10,17 +9,11 @@ import {
 } from './definitions/api';
 import ApiService from './api.service';
 
-const DictionaryEntryAPI = ApiPaths.dictionary.endpoints.entries;
-const DictionaryEntryEndpoints = DictionaryEntryAPI.endpoints;
-const DictionaryEntryPath = (endpoint: string) =>
-	`${DictionaryEntryAPI.path}/${endpoint}`;
-
 const addDictionaryEntry = async (
 	addParams: IAddDictionaryEntryParams
 ): Promise<string> => {
-	const { path } = DictionaryEntryEndpoints.add;
 	const response = await ApiService.post<IApiResponse<string>>(
-		DictionaryEntryPath(path),
+		`dictionary/entries`,
 		addParams
 	);
 	return response.data.payload as string;
@@ -28,25 +21,20 @@ const addDictionaryEntry = async (
 
 const getEntry = async ({
 	id,
-	language,
 }: {
 	id: string;
-	language: string;
 }): Promise<IDictionaryEntryFetchResponse> => {
-	const { path } = DictionaryEntryEndpoints.get;
 	const response = await ApiService.get<
 		IApiResponse<IDictionaryEntryFetchResponse>
-	>(`
-		${DictionaryEntryPath(path)}/${language}/${id}`);
+	>(`dictionary/entries/${id}`);
 	return response.data.payload as IDictionaryEntryFetchResponse;
 };
 
 const listDictionary = async (
 	listParams: IListDictionaryParams
 ): Promise<IListDictionaryResult> => {
-	const { path } = DictionaryEntryEndpoints.list;
 	const response = await ApiService.post<IApiResponse<IListDictionaryResult>>(
-		DictionaryEntryPath(path),
+		'dictionary/entries/list',
 		listParams
 	);
 	const list = response.data.payload;
@@ -56,11 +44,9 @@ const listDictionary = async (
 const searchDictionary = async (
 	searchParams: ISearchDictionaryParams
 ): Promise<Array<IDictionaryEntry>> => {
-	const { path } = DictionaryEntryEndpoints.search;
-	const { lang, key } = searchParams;
-	const response = await ApiService.get<
+	const response = await ApiService.post<
 		IApiResponse<Array<IDictionaryEntry>>
-	>(`${DictionaryEntryPath(path)}/${lang}/${key}`);
+	>(`dictionary/entries/search`, searchParams);
 	const entries = response.data.payload;
 	return entries as Array<IDictionaryEntry>;
 };

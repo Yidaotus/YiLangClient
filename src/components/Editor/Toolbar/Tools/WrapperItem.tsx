@@ -1,81 +1,32 @@
-import './WrapperItem.css';
-import { DownOutlined, UpOutlined } from '@ant-design/icons';
-import { Button, Tooltip } from 'antd';
-import React, { useCallback, useRef, useState } from 'react';
-import useClickOutside from '@hooks/useClickOutside';
-import { IToolbarItem } from './ToolbarItem';
+import React from 'react';
+import {
+	EditorBlockElement,
+	getTextBlockStyle,
+	toggleBlockType,
+} from '@components/Editor/CustomEditor';
+import { Editor } from 'slate';
+import ToolbarButton, { IToolbarItem } from './ToolbarButton';
 
 export interface IToolbarWrapperItem extends IToolbarItem {
-	tooltipActive: string;
-	wrap: () => Promise<void>;
-	unwrap: () => Promise<void>;
-	active: boolean;
+	type: EditorBlockElement['type'];
+	editor: Editor;
 }
 
 const WrapperItem: React.FC<IToolbarWrapperItem> = ({
-	name,
+	type,
 	icon,
-	tooltip,
-	options,
-	active,
-	tooltipActive,
-	visible,
-	wrap,
-	unwrap,
+	title,
+	editor,
 }): JSX.Element => {
-	const [optionsVisible, setOptionsVisible] = useState(false);
-	const optionsContainer = useRef(null);
-
-	const clickOutsideHandler = useCallback(() => {
-		setOptionsVisible(false);
-	}, [setOptionsVisible]);
-	useClickOutside(optionsContainer, clickOutsideHandler);
+	const isActive = getTextBlockStyle(editor) === type;
 
 	return (
-		<div style={{ display: `${visible ? 'block' : 'none'}` }}>
-			<Tooltip
-				title={active ? tooltipActive : tooltip}
-				key={name}
-				mouseEnterDelay={1}
-			>
-				<Button
-					type={active ? 'primary' : 'default'}
-					style={{
-						fill: active ? 'white' : 'black',
-					}}
-					size="large"
-					onMouseUp={async () => {
-						if (active) {
-							await unwrap();
-						} else {
-							await wrap();
-						}
-					}}
-				>
-					{icon}
-				</Button>
-				{options && (
-					<Button
-						style={{ width: '15px' }}
-						className="wrapper-item-dropdown-button"
-						onClick={() => {
-							setOptionsVisible((visibleState) => !visibleState);
-						}}
-						icon={
-							optionsVisible ? <UpOutlined /> : <DownOutlined />
-						}
-					/>
-				)}
-				{optionsVisible && (
-					<div
-						ref={optionsContainer}
-						className="wrapper-options-container"
-					>
-						{options}
-					</div>
-				)}
-			</Tooltip>
-		</div>
+		<ToolbarButton
+			title={title}
+			action={() => toggleBlockType(editor, type)}
+			active={isActive}
+			icon={icon}
+		/>
 	);
 };
 

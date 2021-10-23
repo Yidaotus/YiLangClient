@@ -1,4 +1,4 @@
-import useDictionaryEntryResolved from '@hooks/useDictionaryEntriesResolved';
+import { useDictionaryEntryResolved } from '@hooks/DictionaryQueryHooks';
 import React, { CSSProperties } from 'react';
 import { RenderElementProps } from 'slate-react';
 import { WordElement } from '../CustomEditor';

@@ -7,7 +7,7 @@ import React, {
 	forwardRef,
 	useState,
 } from 'react';
-import { Form } from 'antd';
+import { Form, Spin } from 'antd';
 import { IDictionaryEntry, IDictionaryTag } from 'Document/Dictionary';
 import TagForm, {
 	ITagFormFields,
@@ -205,6 +205,9 @@ const WordInput: React.ForwardRefRenderFunction<
 
 	const finish = useCallback(async () => {
 		let result: FinishCallbackReturn = { isDone: false };
+		if (addTag.isLoading || addEntry.isLoading) {
+			return result;
+		}
 		if (wordEditorState.currentState === 'word') {
 			try {
 				const wordFormData = await wordForm.validateFields();
@@ -278,6 +281,8 @@ const WordInput: React.ForwardRefRenderFunction<
 		}
 		return result;
 	}, [
+		addEntry.isLoading,
+		addTag.isLoading,
 		rootForm,
 		saveEntry,
 		stateChanged,
@@ -288,6 +293,9 @@ const WordInput: React.ForwardRefRenderFunction<
 	]);
 
 	const cancel = useCallback(() => {
+		if (addTag.isLoading || addEntry.isLoading) {
+			return false;
+		}
 		const isDone = wordEditorState.currentState === 'word';
 		if (!isDone) {
 			dispatchWordEditorState({
@@ -301,6 +309,8 @@ const WordInput: React.ForwardRefRenderFunction<
 		wordForm.resetFields();
 		return isDone;
 	}, [
+		addEntry.isLoading,
+		addTag.isLoading,
 		rootForm,
 		stateChanged,
 		tagForm,
@@ -312,25 +322,27 @@ const WordInput: React.ForwardRefRenderFunction<
 	const canEditRoot = typeof root === 'string' && root === '';
 	return (
 		<div>
-			{wordEditorState.currentState === 'word' && (
-				<EntryForm
-					form={wordForm}
-					canEditRoot={canEditRoot}
-					createTag={createTagCallback}
-					createRoot={createRootCallback}
-					allTags={[...userTags, ...createdTags]}
-				/>
-			)}
-			{wordEditorState.currentState === 'root' && (
-				<EntryForm
-					form={rootForm}
-					createTag={createTagCallback}
-					allTags={[...userTags, ...createdTags]}
-				/>
-			)}
-			{wordEditorState.currentState === 'tag' && (
-				<TagForm form={tagForm} />
-			)}
+			<Spin spinning={addTag.isLoading || addEntry.isLoading}>
+				{wordEditorState.currentState === 'word' && (
+					<EntryForm
+						form={wordForm}
+						canEditRoot={canEditRoot}
+						createTag={createTagCallback}
+						createRoot={createRootCallback}
+						allTags={[...userTags, ...createdTags]}
+					/>
+				)}
+				{wordEditorState.currentState === 'root' && (
+					<EntryForm
+						form={rootForm}
+						createTag={createTagCallback}
+						allTags={[...userTags, ...createdTags]}
+					/>
+				)}
+				{wordEditorState.currentState === 'tag' && (
+					<TagForm form={tagForm} />
+				)}
+			</Spin>
 		</div>
 	);
 };

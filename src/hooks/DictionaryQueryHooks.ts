@@ -1,4 +1,6 @@
+import handleError from '@helpers/Error';
 import {
+	IApiResponse,
 	IListDictionaryParams,
 	IListDictionaryResult,
 } from 'api/definitions/api';
@@ -20,13 +22,13 @@ import { useTags } from './useTags';
 const useDictionaryEntry = (
 	id: string | null
 ): [boolean, IDictionaryEntry | null] => {
-	const lang = useActiveLanguageConf();
-
 	const { data, isLoading } = useQuery(
-		['dictEntries', 'details', lang, id],
-		() => (id && lang ? getEntry({ id, language: lang?.key }) : null),
+		['dictEntries', 'details', id],
+		() => {
+			return id ? getEntry({ id }) : null;
+		},
 		{
-			enabled: !!lang && !!id,
+			enabled: !!id,
 			keepPreviousData: true,
 			refetchOnWindowFocus: false,
 		}
@@ -63,19 +65,22 @@ const useDictionarySearch = (
 	searchTerm: string
 ): [boolean, Array<IDictionaryEntry>] => {
 	const activeLanguage = useActiveLanguageConf();
-	if (!activeLanguage) {
-		throw new Error('No language selected!');
-	}
 
 	const { data, isLoading } = useQuery(
 		['dictEntries', 'search', searchTerm],
-		() =>
-			searchDictionary({
+		() => {
+			if (!activeLanguage) {
+				throw new Error('No language selected!');
+			}
+
+			return searchDictionary({
 				key: searchTerm,
 				lang: activeLanguage.key,
-			}),
+			});
+		},
 		{
 			staleTime: 60000,
+			enabled: !!searchTerm,
 		}
 	);
 
@@ -138,6 +143,9 @@ const useAddDictionaryEntry = () => {
 					lang,
 					response,
 				]);
+			},
+			onError: (response: IApiResponse<void>) => {
+				handleError(response.message);
 			},
 		}
 	);

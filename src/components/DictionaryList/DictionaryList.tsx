@@ -16,9 +16,9 @@ import { notUndefined } from 'Document/Utility';
 import { IListDictionaryParams } from 'api/definitions/api';
 import { useHistory } from 'react-router-dom';
 import Link from 'antd/lib/typography/Link';
-import useDictionaryEntries from '@hooks/useDictionaryEntries';
 import { useTags } from '@hooks/useTags';
 import { useActiveLanguageConf } from '@hooks/useActiveLanguageConf';
+import { useDictionaryEntries } from '@hooks/DictionaryQueryHooks';
 
 type ColumnSearchMap = {
 	[key in keyof IDictionaryEntryResolved]?: string;

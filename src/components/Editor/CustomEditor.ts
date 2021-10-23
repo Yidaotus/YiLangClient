@@ -9,6 +9,7 @@ import {
 	Location,
 	Node as SlateNode,
 	Transforms,
+	BaseRange,
 } from 'slate';
 import { ReactEditor } from 'slate-react';
 
@@ -42,6 +43,8 @@ export const ElementTypeLabels: {
 	blockQuote: 'Quote',
 };
 
+export type AlignValue = 'left' | 'right' | 'center' | null;
+
 export type HighlightElement = {
 	type: 'highlight';
 	role: 'highlight' | 'deemphasize';
@@ -55,6 +58,7 @@ export type ListItemElement = {
 
 export type BlockQuoteElement = {
 	type: 'blockQuote';
+	align: AlignValue;
 	children: CustomText[];
 };
 
@@ -82,22 +86,26 @@ export type WordElement = {
 
 export type SubtitleElement = {
 	type: 'subtitle';
+	align: AlignValue;
 	children: CustomText[];
 };
 
 export type TitleElement = {
 	type: 'title';
+	align: AlignValue;
 	children: CustomText[];
 };
 
 export type ParagraphElement = {
 	type: 'paragraph';
+	align: AlignValue;
 	children: Descendant[];
 };
 
 export type ImageElement = {
 	type: 'image';
 	src: string;
+	align: AlignValue;
 	caption?: string;
 	children: CustomText[];
 };
@@ -107,6 +115,12 @@ export type MarkElement = {
 	color: string;
 	children: CustomText[];
 };
+
+export type AlignableElement =
+	| ParagraphElement
+	| TitleElement
+	| BlockQuoteElement
+	| SubtitleElement;
 
 export type EditorBlockElement =
 	| ParagraphElement
@@ -125,7 +139,7 @@ export type EditorInlineElement =
 	| SentenceElement;
 
 export type EditorElement = EditorBlockElement | EditorInlineElement;
-export type FormattedText = { text: string; bold?: true };
+export type FormattedText = { text: string; bold?: true; color?: string };
 export type CustomText = FormattedText;
 
 declare module 'slate' {
@@ -256,46 +270,68 @@ export const highlightSelection = (
 	return removeHighlights;
 };
 
-export const getTextBlockStyle = (
-	editor: Editor
-): EditorElement['type'] | null | 'multiple' => {
+export const getRootBlocks = (editor: Editor) => {
 	const { selection } = editor;
 	if (selection == null) {
-		return null;
+		return [];
 	}
 	const [start, end] = Range.edges(selection);
 
 	let startTopLevelBlockIndex = start.path[0];
 	const endTopLevelBlockIndex = end.path[0];
 
-	let blockType = null;
+	const rootBlocks: Array<EditorElement> = [];
 	while (startTopLevelBlockIndex <= endTopLevelBlockIndex) {
 		const [node] = Editor.node(editor, [startTopLevelBlockIndex]);
 		if (SlateElement.isElement(node)) {
-			if (blockType === null) {
-				blockType = node.type;
-			} else if (blockType !== node.type) {
-				return 'multiple';
-			}
+			rootBlocks.push(node);
 		}
 		startTopLevelBlockIndex++;
 	}
 
+	return rootBlocks;
+};
+
+export const getTextBlockStyle = (
+	editor: Editor
+): EditorElement['type'] | null | 'multiple' => {
+	let blockType = null;
+	const rootBlocks = getRootBlocks(editor);
+	for (const block of rootBlocks) {
+		if (blockType === null) {
+			blockType = block.type;
+		} else if (blockType !== block.type) {
+			return 'multiple';
+		}
+	}
 	return blockType;
+};
+
+export const getAlign = (editor: Editor): AlignValue | null => {
+	let blockAlign = null;
+	const rootBlocks = getRootBlocks(editor).filter(
+		(block): block is AlignableElement =>
+			(block as AlignableElement).align !== undefined
+	);
+	for (const block of rootBlocks) {
+		if (blockAlign === null) {
+			blockAlign = block.align;
+		} else if (blockAlign !== block.align) {
+			return null;
+		}
+	}
+	return blockAlign;
 };
 
 export const toggleBlockType = (
 	editor: Editor,
 	blockType: EditorElement['type']
 ): void => {
-	if (editor.selection) {
-		const currentBlockType = getTextBlockStyle(editor);
-		const changeTo =
-			currentBlockType === blockType ? 'paragraph' : blockType;
-		Transforms.setNodes(
-			editor,
-			{ type: changeTo },
-			{ at: editor.selection, match: (n) => Editor.isBlock(editor, n) }
-		);
-	}
+	const currentBlockType = getTextBlockStyle(editor);
+	const changeTo = currentBlockType === blockType ? 'paragraph' : blockType;
+	Transforms.setNodes(
+		editor,
+		{ type: changeTo },
+		{ match: (n) => Editor.isBlock(editor, n) }
+	);
 };

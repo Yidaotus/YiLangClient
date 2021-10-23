@@ -18,7 +18,10 @@ const Leaf = ({ attributes, leaf, children }: RenderLeafProps) => {
 	return (
 		<span
 			{...attributes}
-			style={{ fontWeight: leaf.bold ? 'bold' : 'normal' }}
+			style={{
+				fontWeight: leaf.bold ? 'bold' : 'normal',
+				color: leaf.color,
+			}}
 		>
 			{children}
 		</span>
@@ -44,10 +47,24 @@ const Element = (props: RenderElementProps) => {
 				</SentenceFragment>
 			);
 		case 'title': {
-			return <h1 {...attributes}>{children}</h1>;
+			return (
+				<h1
+					{...attributes}
+					style={{ textAlign: element.align || 'left' }}
+				>
+					{children}
+				</h1>
+			);
 		}
 		case 'subtitle': {
-			return <h2 {...attributes}>{children}</h2>;
+			return (
+				<h2
+					{...attributes}
+					style={{ textAlign: element.align || 'left' }}
+				>
+					{children}
+				</h2>
+			);
 		}
 		case 'highlight':
 			return element.role === 'highlight' ? (
@@ -95,9 +112,23 @@ const Element = (props: RenderElementProps) => {
 		case 'bulletedList':
 			return <ul {...attributes}>{children}</ul>;
 		case 'blockQuote':
-			return <blockquote {...attributes}>{children}</blockquote>;
+			return (
+				<blockquote
+					{...attributes}
+					style={{ textAlign: element.align || 'left' }}
+				>
+					{children}
+				</blockquote>
+			);
 		default:
-			return <div {...attributes}>{children}</div>;
+			return (
+				<p
+					{...attributes}
+					style={{ textAlign: element.align || 'left' }}
+				>
+					{children}
+				</p>
+			);
 	}
 };
 

@@ -5,7 +5,7 @@ import { Popover, Tag, Button, Spin } from 'antd';
 import { ExclamationCircleOutlined } from '@ant-design/icons';
 import { IGrammarPoint, IDictionaryTag } from 'Document/Dictionary';
 import { useHistory } from 'react-router';
-import useDictionaryEntryResolved from '@hooks/useDictionaryEntriesResolved';
+import { useDictionaryEntryResolved } from '@hooks/DictionaryQueryHooks';
 
 type IDictEntryProps = {
 	entryId: string;

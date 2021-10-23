@@ -18,7 +18,7 @@ import DictEntryWithEdit from '@components/DictionaryEntry/DictEntryWithEdit/Dic
 import Title from 'antd/lib/typography/Title';
 import DictionaryEntry from '@components/DictionaryEntry/DictionaryEntry';
 import { IDictionaryEntryResolved } from 'Document/Dictionary';
-import useDictionaryEntryResolved from '@hooks/useDictionaryEntriesResolved';
+import { useDictionaryEntryResolved } from '@hooks/DictionaryQueryHooks';
 
 interface IDictionaryEntryViewParams {
 	entryId: string;

@@ -1,31 +1,23 @@
 import { IDocument } from 'Document/Document';
 
 import {
-	ApiPaths,
 	IApiResponse,
 	IListDocumentResult,
 	IListDocumentsParams,
 } from './definitions/api';
 import ApiService from './api.service';
 
-const DocumentAPI = ApiPaths.documents;
-const DocumentEndpoints = DocumentAPI.endpoints;
-const DocumentPath = (endpoint: string) => `${DocumentAPI.path}/${endpoint}`;
-
 const remove = async (id: string): Promise<void> => {
-	const { path } = DocumentEndpoints.remove;
-	await ApiService.delete<IApiResponse<void>>(`${DocumentPath(path)}/${id}`);
+	await ApiService.delete<IApiResponse<void>>(`documents/${id}`);
 };
 
 const save = async (document: IDocument): Promise<void> => {
-	const { path } = DocumentEndpoints.save;
-	await ApiService.post<IApiResponse<void>>(DocumentPath(path), document);
+	await ApiService.post<IApiResponse<void>>('documents', document);
 };
 
 const getDocument = async (id: string): Promise<IDocument> => {
-	const { path } = DocumentEndpoints.getById;
 	const response = await ApiService.get<IApiResponse<IDocument>>(
-		`${DocumentPath(path)}/${id}`
+		`documents/${id}`
 	);
 	return response.data.payload as IDocument;
 };
@@ -33,9 +25,8 @@ const getDocument = async (id: string): Promise<IDocument> => {
 const listDocuments = async (
 	listParams: IListDocumentsParams
 ): Promise<IListDocumentResult> => {
-	const { path } = DocumentEndpoints.list;
 	const response = await ApiService.post<IApiResponse<IListDocumentResult>>(
-		DocumentPath(path),
+		'documents/list',
 		listParams
 	);
 	const documentResult = response.data.payload;

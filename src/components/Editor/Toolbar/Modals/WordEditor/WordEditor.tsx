@@ -15,55 +15,27 @@ import DictEntryEdit, {
 } from '@components/DictionaryEntry/DictEntryEdit/DictEntryEdit';
 import LookupSourceLink from '@components/LookupSourceLink';
 import { IDictionaryLookupSource } from 'Document/Config';
+import { WordElement } from '@components/Editor/CustomEditor';
+import { Editor, Transforms, Text, BaseRange, BaseSelection } from 'slate';
+import { useSlateStatic } from 'slate-react';
 
 export type WordInputResult = Omit<IDictionaryEntry, 'firstSeen' | 'id'>;
 
-export interface IWordInputState {
-	callback: (entry: string | null) => void;
-	root: string;
+export interface IWordInputProps {
+	close: () => void;
+	selection: BaseSelection;
 }
 
-export interface IWordInputProps extends IWordInputState {
-	width?: string;
-}
-
-interface IWordInputReturn {
-	wordInputState: IWordInputState;
-	getUserWord: (key: string) => Promise<string | null>;
-}
-
-const defaultInputstate: IWordInputState = {
-	root: '',
-	callback: () => {},
-};
-
-const useWordInput = (): IWordInputReturn => {
-	const [inputState, setInputState] =
-		useState<IWordInputState>(defaultInputstate);
-
-	const getUserWord = (root: string): Promise<string | null> => {
-		return new Promise((resolve) => {
-			setInputState({
-				callback: (entryID: string | null) => {
-					resolve(entryID);
-					setInputState(defaultInputstate);
-				},
-				root,
-			});
-		});
-	};
-
-	return { wordInputState: inputState, getUserWord };
-};
-
-const WordInput: React.FC<IWordInputProps> = ({
-	callback,
-	root,
-	width = '400px',
-}) => {
+const WordInput: React.FC<IWordInputProps> = ({ close, selection }) => {
+	const editor = useSlateStatic();
 	const dictEntryEdit = useRef<IWordInputRef>(null);
 	const [editMode, setEditMode] = useState<WordEditorMode>('word');
 	const lookupSources: Array<IDictionaryLookupSource> = [];
+	const root = selection
+		? Editor.string(editor, selection, {
+				voids: true,
+		  })
+		: '';
 
 	const cardTitle = useMemo(() => {
 		switch (editMode) {
@@ -90,11 +62,57 @@ const WordInput: React.FC<IWordInputProps> = ({
 		</Menu>
 	);
 
+	const wrapWithWord = async (entryId: string) => {
+		if (entryId) {
+			const vocab: WordElement = {
+				type: 'word',
+				dictId: entryId,
+				children: [{ text: '' }],
+			};
+			Transforms.wrapNodes(editor, vocab, {
+				split: true,
+			});
+			const allLeafs = Editor.nodes(editor, {
+				at: [[0], [editor.children.length - 1]],
+				match: (e) => Text.isText(e),
+			});
+			const searchRegexp = new RegExp(root, 'g');
+			for (const [leafMatch, leafPath] of allLeafs) {
+				if (Text.isText(leafMatch)) {
+					const foundRoots = String(leafMatch.text).matchAll(
+						searchRegexp
+					);
+					const foundRoot = foundRoots.next();
+					if (foundRoot.value?.index !== undefined) {
+						// we split the node if we found any hits, so we can just wrap the first hit
+						// and continue the loop. Since the loop makes use of the generator function
+						// it will automatically iterate to the next (new)
+						Transforms.wrapNodes(editor, vocab, {
+							at: {
+								anchor: {
+									path: leafPath,
+									offset: foundRoot.value.index,
+								},
+								focus: {
+									path: leafPath,
+									offset:
+										foundRoot.value.index +
+										foundRoot.value[0].length,
+								},
+							},
+							split: true,
+						});
+					}
+				}
+			}
+		}
+	};
+
 	const finish = async () => {
 		if (dictEntryEdit.current) {
 			const editResult = await dictEntryEdit.current.finish();
-			if (editResult.isDone) {
-				callback(editResult.entryId);
+			if (editResult.isDone && editResult.entryId) {
+				wrapWithWord(editResult.entryId);
 			}
 		}
 	};
@@ -103,13 +121,13 @@ const WordInput: React.FC<IWordInputProps> = ({
 		if (dictEntryEdit.current) {
 			const isDone = dictEntryEdit.current.cancel();
 			if (isDone) {
-				callback(null);
+				close();
 			}
 		}
 	};
 
 	return (
-		<div className="word-input-container" style={{ width }}>
+		<div className="word-input-container" style={{ width: '300px' }}>
 			<Card
 				color="green"
 				title={
@@ -148,5 +166,4 @@ const WordInput: React.FC<IWordInputProps> = ({
 	);
 };
 
-export default React.memo(WordInput);
-export { useWordInput };
+export default WordInput;

@@ -108,6 +108,7 @@ const YiEditor: React.FC = () => {
 	const [editorNodes, setEditorNodes] = useState<Descendant[]>([
 		{
 			type: 'title',
+			align: null,
 			children: [
 				{
 					text: 'イチゴの中はどうなっている？',
@@ -116,6 +117,7 @@ const YiEditor: React.FC = () => {
 		},
 		{
 			type: 'subtitle',
+			align: null,
 			children: [
 				{
 					text: 'イチゴの中はどうなっている？',
@@ -124,12 +126,14 @@ const YiEditor: React.FC = () => {
 		},
 		{
 			type: 'image',
+			align: null,
 			src: 'https://www.nhk.or.jp/das/image/D0005110/D0005110342_00000_C_001.jpg',
 			caption: 'lul123',
 			children: [{ text: '' }],
 		},
 		{
 			type: 'blockQuote',
+			align: null,
 			children: [
 				{
 					text: 'Lorem ipsum dolar sit!',
@@ -138,6 +142,7 @@ const YiEditor: React.FC = () => {
 		},
 		{
 			type: 'paragraph',
+			align: null,
 			children: [
 				{
 					text: '今回のミカタは「中を見てみる」。イチゴの中はどうなっているか、街の人に聞いてみました。まず、男の子。「こんな感じだ と思います。まわりが赤くなって、中に粒（つぶ）がある」。中にツブツブ？　続いて女の子。',
@@ -221,10 +226,7 @@ const YiEditor: React.FC = () => {
 											ref={editorContainer}
 											style={{ position: 'relative' }}
 										>
-											<Toolbar
-												rootElement={editorContainer}
-												selection={selection}
-											/>
+											<Toolbar selection={selection} />
 											<DictPopupController
 												rootElement={editorContainer}
 												selection={selection}
