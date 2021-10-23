@@ -5,7 +5,7 @@ import {
 	toggleBlockType,
 } from '@components/Editor/CustomEditor';
 import React from 'react';
-import { Editor, Transforms } from 'slate';
+import { Editor, Transforms, Element as SlateElement } from 'slate';
 import ToolbarButton, { IToolbarItem } from './ToolbarButton';
 
 export interface IListButtonProps extends IToolbarItem {
@@ -32,18 +32,27 @@ const ListButton: React.FC<IListButtonProps> = ({
 			title={title}
 			action={() => {
 				if (inList && selectedBlockType === type) {
-					toggleBlockType(editor, 'paragraph');
+					Transforms.unwrapNodes(editor, {
+						match: (n) =>
+							!Editor.isEditor(n) &&
+							SlateElement.isElement(n) &&
+							(n.type === 'bulletedList' ||
+								n.type === 'numberedList'),
+						split: true,
+					});
+					toggleBlockType(editor, 'paragraph', true);
 					return onChange();
 				}
 
 				if (inList && editor.selection) {
 					// Todo selection after unwrap invalid??
-					Transforms.unwrapNodes(editor);
-					toggleBlockType(editor, type);
+					toggleBlockType(editor, type, true);
 					return onChange();
 				}
 
-				toggleBlockType(editor, type);
+				toggleBlockType(editor, 'listItem', true);
+				const block = { type, children: [] };
+				Transforms.wrapNodes(editor, block);
 				return onChange();
 			}}
 			active={selectedBlockType === type}

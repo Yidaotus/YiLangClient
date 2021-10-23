@@ -325,13 +325,17 @@ export const getAlign = (editor: Editor): AlignValue | null => {
 
 export const toggleBlockType = (
 	editor: Editor,
-	blockType: EditorElement['type']
+	blockType: EditorElement['type'],
+	applyToRoot?: boolean
 ): void => {
 	const currentBlockType = getTextBlockStyle(editor);
 	const changeTo = currentBlockType === blockType ? 'paragraph' : blockType;
 	Transforms.setNodes(
 		editor,
 		{ type: changeTo },
-		{ match: (n) => Editor.isBlock(editor, n) }
+		{
+			match: (n) => Editor.isBlock(editor, n),
+			mode: applyToRoot ? 'highest' : 'lowest',
+		}
 	);
 };
