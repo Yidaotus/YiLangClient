@@ -11,15 +11,17 @@ import { Tabs, Spin, notification } from 'antd';
 
 import handleError from '@helpers/Error';
 
+import { withHistory } from 'slate-history';
 import { ReactEditor, Slate, withReact } from 'slate-react';
 import { createEditor, Descendant, Editor } from 'slate';
 import useSelection from '@hooks/useSelection';
 import { useActiveLanguageConf } from '@hooks/useActiveLanguageConf';
+import usePerstistantState from '@hooks/usePersistantState';
 import EditorDocument from './EditorDocument';
-import { EditorElement } from './CustomEditor';
 import WordsPanel from './WordsPanel/WordsPanel';
 import DictPopupController from './Popups/DictPopupController';
 import Toolbar from './Toolbar/Toolbar';
+import { EditorElement, CustomEditor } from './CustomEditor';
 
 const { TabPane } = Tabs;
 
@@ -102,86 +104,93 @@ const YiEditor: React.FC = () => {
 		}
 	}, [currentLanguage]);
 
-	const editor = useMemo(() => withYiLang(withReact(createEditor())), []);
+	const editor = useMemo(
+		() =>
+			withReact(withHistory(withYiLang(createEditor()))) as CustomEditor,
+		[]
+	);
 	const [selection, setSelection] = useSelection(editor);
 
-	const [editorNodes, setEditorNodes] = useState<Descendant[]>([
-		{
-			type: 'title',
-			align: null,
-			children: [
-				{
-					text: 'イチゴの中はどうなっている？',
-				},
-			],
-		},
-		{
-			type: 'subtitle',
-			align: null,
-			children: [
-				{
-					text: 'イチゴの中はどうなっている？',
-				},
-			],
-		},
-		{
-			type: 'image',
-			align: null,
-			src: 'https://www.nhk.or.jp/das/image/D0005110/D0005110342_00000_C_001.jpg',
-			caption: 'lul123',
-			children: [{ text: '' }],
-		},
-		{
-			type: 'blockQuote',
-			align: null,
-			children: [
-				{
-					text: 'Lorem ipsum dolar sit!',
-				},
-			],
-		},
-		{
-			type: 'paragraph',
-			align: null,
-			children: [
-				{
-					text: '今回のミカタは「中を見てみる」。イチゴの中はどうなっているか、街の人に聞いてみました。まず、男の子。「こんな感じだ と思います。まわりが赤くなって、中に粒（つぶ）がある」。中にツブツブ？　続いて女の子。',
-				},
-				{
-					text: '真ん中が白っぽくて空洞（くうどう）になっていて、まわりは赤い」。中に空洞？　若い女の人は、「真ん中が真っ白で、徐々（じょじょ）に赤くなっていく感じ」。真ん中は白い？　みんながかいたイチゴの中。中にツブツブ、中に空洞、真ん中が白い、スジがある…。実際はどうなっているのでしょう。',
-				},
-			],
-		},
-		{
-			type: 'bulletedList',
-			children: [
-				{
-					type: 'listItem',
-					children: [
-						{
-							text: 'First',
-						},
-					],
-				},
-				{
-					type: 'listItem',
-					children: [
-						{
-							text: 'Second',
-						},
-					],
-				},
-				{
-					type: 'listItem',
-					children: [
-						{
-							text: 'Third',
-						},
-					],
-				},
-			],
-		},
-	]);
+	const [editorNodes, setEditorNodes] = usePerstistantState<Descendant[]>(
+		'editor',
+		[
+			{
+				type: 'title',
+				align: null,
+				children: [
+					{
+						text: 'イチゴの中はどうなっている？',
+					},
+				],
+			},
+			{
+				type: 'subtitle',
+				align: null,
+				children: [
+					{
+						text: 'イチゴの中はどうなっている？',
+					},
+				],
+			},
+			{
+				type: 'image',
+				align: null,
+				src: 'https://www.nhk.or.jp/das/image/D0005110/D0005110342_00000_C_001.jpg',
+				caption: 'lul123',
+				children: [{ text: '' }],
+			},
+			{
+				type: 'blockQuote',
+				align: null,
+				children: [
+					{
+						text: 'Lorem ipsum dolar sit!',
+					},
+				],
+			},
+			{
+				type: 'paragraph',
+				align: null,
+				children: [
+					{
+						text: '今回のミカタは「中を見てみる」。イチゴの中はどうなっているか、街の人に聞いてみました。まず、男の子。「こんな感じだ と思います。まわりが赤くなって、中に粒（つぶ）がある」。中にツブツブ？　続いて女の子。',
+					},
+					{
+						text: '真ん中が白っぽくて空洞（くうどう）になっていて、まわりは赤い」。中に空洞？　若い女の人は、「真ん中が真っ白で、徐々（じょじょ）に赤くなっていく感じ」。真ん中は白い？　みんながかいたイチゴの中。中にツブツブ、中に空洞、真ん中が白い、スジがある…。実際はどうなっているのでしょう。',
+					},
+				],
+			},
+			{
+				type: 'bulletedList',
+				children: [
+					{
+						type: 'listItem',
+						children: [
+							{
+								text: 'First',
+							},
+						],
+					},
+					{
+						type: 'listItem',
+						children: [
+							{
+								text: 'Second',
+							},
+						],
+					},
+					{
+						type: 'listItem',
+						children: [
+							{
+								text: 'Third',
+							},
+						],
+					},
+				],
+			},
+		]
+	);
 
 	useEffect(() => {
 		if (selection) {
@@ -210,13 +219,9 @@ const YiEditor: React.FC = () => {
 								editor={editor}
 								value={editorNodes}
 								onChange={(newValue) => {
-									if (editor.selection) {
-										Editor.unhangRange(
-											editor,
-											editor.selection
-										);
+									if (newValue !== editorNodes) {
+										setEditorNodes(newValue);
 									}
-									setEditorNodes(newValue);
 									setSelection(editor.selection);
 								}}
 							>

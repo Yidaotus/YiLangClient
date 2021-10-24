@@ -32,7 +32,7 @@ const ToolbarMenu: React.FC<IToolbarMenuProps> = ({
 			style={{ display: menus[type] ? 'block' : 'none' }}
 			role="none"
 		>
-			{children}
+			{menus[type] && children}
 		</div>
 	</div>
 );

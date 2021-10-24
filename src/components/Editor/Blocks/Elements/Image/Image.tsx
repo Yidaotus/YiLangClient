@@ -82,15 +82,22 @@ const ImageBlock: React.FC<IImageBlockData> = ({
 			{children}
 			<div
 				contentEditable={false}
-				style={{ marginTop: '15px', marginBottom: '15px' }}
+				style={{
+					marginTop: '15px',
+					marginBottom: '15px',
+				}}
 			>
 				<img
 					alt="lul"
 					src={element.src}
 					style={{
 						display: 'block',
-						maxWidth: '100%',
-						margin: 'auto',
+						marginLeft:
+							element.align === 'center' ||
+							element.align === 'right'
+								? 'auto'
+								: '0',
+						marginRight: element.align === 'center' ? 'auto' : '0',
 						maxHeight: '20em',
 						boxShadow:
 							selected && focused ? '0 0 0 3px #B4D5FF' : 'none',

@@ -2,8 +2,6 @@ import React from 'react';
 import {
 	EditorInlineElement,
 	isNodeInSelection,
-	MarkElement,
-	toggleBlockType,
 } from '@components/Editor/CustomEditor';
 import { Editor, Transforms, Element as SlateElement } from 'slate';
 import ToolbarButton, { IToolbarItem } from './ToolbarButton';
@@ -12,6 +10,7 @@ export interface IToolbarWrapperItem extends IToolbarItem {
 	type: EditorInlineElement['type'];
 	editor: Editor;
 	onChange: () => void;
+	createElement: () => EditorInlineElement;
 }
 
 const ElementButton: React.FC<IToolbarWrapperItem> = ({
@@ -20,6 +19,7 @@ const ElementButton: React.FC<IToolbarWrapperItem> = ({
 	title,
 	editor,
 	onChange,
+	createElement,
 }): JSX.Element => {
 	const isActive = isNodeInSelection(editor, editor.selection, type);
 
@@ -33,12 +33,17 @@ const ElementButton: React.FC<IToolbarWrapperItem> = ({
 							SlateElement.isElement(e) && e.type === type,
 					});
 				} else {
-					const element: MarkElement = {
-						type: 'mark',
-						color: 'green',
-						children: [],
-					};
-					Transforms.wrapNodes(editor, element, { split: true });
+					const element = createElement();
+					if (editor.selection) {
+						const newRange = Editor.unhangRange(
+							editor,
+							editor.selection
+						);
+						Transforms.wrapNodes(editor, element, {
+							split: true,
+							at: newRange,
+						});
+					}
 				}
 				onChange();
 			}}

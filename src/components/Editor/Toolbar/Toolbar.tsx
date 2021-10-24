@@ -1,7 +1,7 @@
 import './Toolbar.css';
 import React, { useRef, useState } from 'react';
 import { useSlateStatic } from 'slate-react';
-import { BaseSelection, Transforms } from 'slate';
+import { BaseSelection } from 'slate';
 import {
 	AlignCenterOutlined,
 	AlignLeftOutlined,
@@ -9,7 +9,9 @@ import {
 	ArrowDownOutlined,
 	FontColorsOutlined,
 	HighlightOutlined,
+	LineOutlined,
 	OrderedListOutlined,
+	PicCenterOutlined,
 	RedoOutlined,
 	TranslationOutlined,
 	UndoOutlined,
@@ -54,7 +56,7 @@ const Toolbar: React.FC<IToolbarProps> = ({ selection }) => {
 	const menuProps = {
 		menus,
 		onMenuToggle: (type: string) => {
-			setMenus({ ...menus, [type]: !menus[type] });
+			setMenus({ [type]: !menus[type] });
 		},
 	};
 
@@ -65,14 +67,21 @@ const Toolbar: React.FC<IToolbarProps> = ({ selection }) => {
 	);
 
 	return (
-		<div className="toolbar" ref={toolbarRef}>
+		<div
+			className="toolbar"
+			ref={toolbarRef}
+			role="none"
+			onMouseDown={(e) => {
+				e.preventDefault();
+			}}
+		>
 			<ToolbarMenu
 				type="wordEditor"
 				icon={<TranslationOutlined />}
 				title="Word Editor"
 				active={wordNodeSelected}
 				{...menuProps}
-				onMenuToggle={() => {
+				onMenuToggle={async () => {
 					if (!wordNodeSelected) {
 						setSavedSelection(selection);
 						menuProps.onMenuToggle('wordEditor');
@@ -87,22 +96,26 @@ const Toolbar: React.FC<IToolbarProps> = ({ selection }) => {
 				/>
 			</ToolbarMenu>
 			<ElementButton
+				type="sentence"
+				title="Sentence"
+				icon={<LineOutlined />}
+				createElement={() => ({
+					type: 'sentence',
+					translation: '',
+					children: [],
+				})}
+				{...sharedProps}
+			/>
+			<ElementButton
 				type="mark"
 				title="Mark"
-				{...sharedProps}
 				icon={<HighlightOutlined />}
-			/>
-			<BlockButton
-				type="title"
-				title="Title"
+				createElement={() => ({
+					type: 'mark',
+					color: 'green',
+					children: [],
+				})}
 				{...sharedProps}
-				icon="Title"
-			/>
-			<BlockButton
-				type="subtitle"
-				title="Subtitle"
-				{...sharedProps}
-				icon="Subtitle"
 			/>
 			<Divider
 				type="vertical"
@@ -136,18 +149,37 @@ const Toolbar: React.FC<IToolbarProps> = ({ selection }) => {
 					borderLeft: '1px solid rgb(0 0 0 / 27%)',
 				}}
 			/>
-			<ListButton
-				type="numberedList"
-				icon={<OrderedListOutlined />}
-				title="Numbered List"
-				{...sharedProps}
-			/>
-			<ListButton
-				type="bulletedList"
-				icon={<UnorderedListOutlined />}
-				title="Numbered List"
-				{...sharedProps}
-			/>
+			<ToolbarMenu
+				type="blockType"
+				icon={<PicCenterOutlined />}
+				title="Block Type"
+				{...menuProps}
+			>
+				<BlockButton
+					type="title"
+					title="Title"
+					{...sharedProps}
+					icon="Title"
+				/>
+				<BlockButton
+					type="subtitle"
+					title="Subtitle"
+					{...sharedProps}
+					icon="Subtitle"
+				/>
+				<ListButton
+					type="numberedList"
+					icon={<OrderedListOutlined />}
+					title="Numbered List"
+					{...sharedProps}
+				/>
+				<ListButton
+					type="bulletedList"
+					icon={<UnorderedListOutlined />}
+					title="Numbered List"
+					{...sharedProps}
+				/>
+			</ToolbarMenu>
 			<Divider
 				type="vertical"
 				style={{
@@ -235,12 +267,16 @@ const Toolbar: React.FC<IToolbarProps> = ({ selection }) => {
 			<ToolbarButton
 				icon={<UndoOutlined />}
 				title="Undo"
-				action={() => {}}
+				action={() => {
+					editor.undo();
+				}}
 			/>
 			<ToolbarButton
 				icon={<RedoOutlined />}
 				title="Redo"
-				action={() => {}}
+				action={() => {
+					editor.redo();
+				}}
 			/>
 		</div>
 	);

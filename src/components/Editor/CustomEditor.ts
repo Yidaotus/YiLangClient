@@ -9,11 +9,11 @@ import {
 	Location,
 	Node as SlateNode,
 	Transforms,
-	BaseRange,
 } from 'slate';
 import { ReactEditor } from 'slate-react';
+import { HistoryEditor } from 'slate-history';
 
-export type CustomEditor = BaseEditor & ReactEditor;
+export type CustomEditor = BaseEditor & ReactEditor & HistoryEditor;
 
 export const BlockTypes = [
 	'title',

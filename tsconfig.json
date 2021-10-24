@@ -23,7 +23,7 @@
     "noFallthroughCasesInSwitch": true
   },
   "include": [
-    "src",
-    "Document"
+    "custom-types.d.ts",
+    "src/**/*"
   ]
 }

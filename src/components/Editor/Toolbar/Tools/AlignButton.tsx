@@ -1,6 +1,6 @@
 import { AlignValue, getAlign } from '@components/Editor/CustomEditor';
 import React from 'react';
-import { BaseRange, Editor, Transforms } from 'slate';
+import { Editor, Transforms } from 'slate';
 import ToolbarButton, { IToolbarItem } from './ToolbarButton';
 
 const toggleAlign = (
