@@ -34,7 +34,7 @@ const useDictionaryEntry = (
 		}
 	);
 
-	return [isLoading, data?.entry || null];
+	return [isLoading, data || null];
 };
 
 const useDictionaryEntryResolved = (

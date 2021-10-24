@@ -2,7 +2,6 @@ import { IDictionaryEntry } from 'Document/Dictionary';
 import {
 	IAddDictionaryEntryParams,
 	IApiResponse,
-	IDictionaryEntryFetchResponse,
 	IListDictionaryParams,
 	IListDictionaryResult,
 	ISearchDictionaryParams,
@@ -19,15 +18,11 @@ const addDictionaryEntry = async (
 	return response.data.payload as string;
 };
 
-const getEntry = async ({
-	id,
-}: {
-	id: string;
-}): Promise<IDictionaryEntryFetchResponse> => {
-	const response = await ApiService.get<
-		IApiResponse<IDictionaryEntryFetchResponse>
-	>(`dictionary/entries/${id}`);
-	return response.data.payload as IDictionaryEntryFetchResponse;
+const getEntry = async ({ id }: { id: string }): Promise<IDictionaryEntry> => {
+	const response = await ApiService.get<IApiResponse<IDictionaryEntry>>(
+		`dictionary/entries/${id}`
+	);
+	return response.data.payload as IDictionaryEntry;
 };
 
 const listDictionary = async (
