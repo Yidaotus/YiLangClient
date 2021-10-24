@@ -1,13 +1,14 @@
 import './Toolbar.css';
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { useSlateStatic } from 'slate-react';
-import { BaseSelection } from 'slate';
+import { BaseSelection, Transforms } from 'slate';
 import {
 	AlignCenterOutlined,
 	AlignLeftOutlined,
 	AlignRightOutlined,
-	BgColorsOutlined,
+	ArrowDownOutlined,
 	FontColorsOutlined,
+	HighlightOutlined,
 	OrderedListOutlined,
 	RedoOutlined,
 	TranslationOutlined,
@@ -15,6 +16,7 @@ import {
 	UnorderedListOutlined,
 } from '@ant-design/icons';
 import { Divider } from 'antd';
+import useClickOutside from '@hooks/useClickOutside';
 import WordInput from './Modals/WordEditor/WordEditor';
 import AlignButton from './Tools/AlignButton';
 import ListButton from './Tools/ListButton';
@@ -22,6 +24,10 @@ import ToolbarButton from './Tools/ToolbarButton';
 import ToolbarMenu from './Tools/ToolbarMenu';
 import TextColors from './TextColors';
 import ColorButton from './Tools/ColorButton';
+import BlockButton from './Tools/BlockButton';
+import { isNodeAtSelection } from '../CustomEditor';
+import InsertButton from './Tools/InsertButton';
+import ElementButton from './Tools/ElementButton';
 
 export interface IToolbarProps {
 	selection: BaseSelection;
@@ -29,7 +35,13 @@ export interface IToolbarProps {
 
 const Toolbar: React.FC<IToolbarProps> = ({ selection }) => {
 	const editor = useSlateStatic();
+	const toolbarRef = useRef(null);
 	const [menus, setMenus] = useState<Record<string, boolean>>({});
+	const [savedSelection, setSavedSelection] = useState<BaseSelection>(null);
+
+	useClickOutside(toolbarRef, () => {
+		setMenus({});
+	});
 
 	const sharedProps = {
 		editor,
@@ -38,6 +50,7 @@ const Toolbar: React.FC<IToolbarProps> = ({ selection }) => {
 			console.log('something happened!');
 		},
 	};
+
 	const menuProps = {
 		menus,
 		onMenuToggle: (type: string) => {
@@ -45,21 +58,52 @@ const Toolbar: React.FC<IToolbarProps> = ({ selection }) => {
 		},
 	};
 
+	const wordNodeSelected = isNodeAtSelection(
+		editor,
+		editor.selection,
+		'word'
+	);
+
 	return (
-		<div className="toolbar">
+		<div className="toolbar" ref={toolbarRef}>
 			<ToolbarMenu
 				type="wordEditor"
 				icon={<TranslationOutlined />}
 				title="Word Editor"
+				active={wordNodeSelected}
 				{...menuProps}
+				onMenuToggle={() => {
+					if (!wordNodeSelected) {
+						setSavedSelection(selection);
+						menuProps.onMenuToggle('wordEditor');
+					}
+				}}
 			>
 				<WordInput
 					close={() => {
 						menuProps.onMenuToggle('wordEditor');
 					}}
-					selection={selection}
+					selection={savedSelection}
 				/>
 			</ToolbarMenu>
+			<ElementButton
+				type="mark"
+				title="Mark"
+				{...sharedProps}
+				icon={<HighlightOutlined />}
+			/>
+			<BlockButton
+				type="title"
+				title="Title"
+				{...sharedProps}
+				icon="Title"
+			/>
+			<BlockButton
+				type="subtitle"
+				title="Subtitle"
+				{...sharedProps}
+				icon="Subtitle"
+			/>
 			<Divider
 				type="vertical"
 				style={{
@@ -119,7 +163,7 @@ const Toolbar: React.FC<IToolbarProps> = ({ selection }) => {
 			>
 				{Object.entries(TextColors).map(([color, colorProps]) => (
 					<ColorButton
-						color={color}
+						color={colorProps.color}
 						key={color}
 						title={`${colorProps.title} (${
 							colorProps.hotkey || 'No shortcut'
@@ -128,6 +172,58 @@ const Toolbar: React.FC<IToolbarProps> = ({ selection }) => {
 						{...sharedProps}
 					/>
 				))}
+			</ToolbarMenu>
+			<Divider
+				type="vertical"
+				style={{
+					margin: '0 0px !important',
+					borderLeft: '1px solid rgb(0 0 0 / 27%)',
+				}}
+			/>
+			<ToolbarMenu
+				type="glyphs"
+				icon={<ArrowDownOutlined />}
+				title="Font Color"
+				{...menuProps}
+			>
+				<InsertButton text="←" title="Left Arrow" {...sharedProps} />
+				<InsertButton text="→" title="Right Arrow" {...sharedProps} />
+				<InsertButton
+					text="↔"
+					title="Left Right Arrow"
+					{...sharedProps}
+				/>
+				<InsertButton
+					text="⇐"
+					title="Leftwards Double Arrow"
+					{...sharedProps}
+				/>
+				<InsertButton
+					text="⇒"
+					title="Rightwards Double Arrow"
+					{...sharedProps}
+				/>
+				<InsertButton text="…" title="Ellipsis" {...sharedProps} />
+				<InsertButton
+					text="«"
+					title="Double Low Quote"
+					{...sharedProps}
+				/>
+				<InsertButton
+					text="»"
+					title="Double High Quote"
+					{...sharedProps}
+				/>
+				<InsertButton
+					text="„"
+					title="Double Angle Left Quote"
+					{...sharedProps}
+				/>
+				<InsertButton
+					text="”"
+					title="Double Angle Right Quote"
+					{...sharedProps}
+				/>
 			</ToolbarMenu>
 			<Divider
 				type="vertical"

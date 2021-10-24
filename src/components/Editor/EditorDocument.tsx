@@ -38,7 +38,6 @@ const isBoldMarkActive = (editor: Editor): boolean => {
 
 const Element = (props: RenderElementProps) => {
 	const { children, attributes, element } = props;
-
 	switch (element.type) {
 		case 'sentence':
 			return (

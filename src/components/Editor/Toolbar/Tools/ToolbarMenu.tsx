@@ -8,6 +8,7 @@ export interface IToolbarMenuProps {
 	title: string;
 	menus: Record<string, boolean>;
 	onMenuToggle: (type: string) => void;
+	active?: boolean;
 }
 
 const ToolbarMenu: React.FC<IToolbarMenuProps> = ({
@@ -17,16 +18,19 @@ const ToolbarMenu: React.FC<IToolbarMenuProps> = ({
 	menus,
 	onMenuToggle,
 	children,
+	active,
 }) => (
 	<div>
 		<ToolbarButton
 			icon={icon}
 			title={title}
+			active={active}
 			action={() => onMenuToggle(type)}
 		/>
 		<div
 			className={`toolbar_menu menu_${type}`}
 			style={{ display: menus[type] ? 'block' : 'none' }}
+			role="none"
 		>
 			{children}
 		</div>

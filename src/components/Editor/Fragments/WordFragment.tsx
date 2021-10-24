@@ -82,7 +82,7 @@ const WordFragment: React.FC<IWordFragmentData> = ({
 					}}
 				>
 					{dictEntry.key}
-					<div style={gradiantStyle} />
+					<span style={gradiantStyle} />
 				</span>
 			)}
 		</span>

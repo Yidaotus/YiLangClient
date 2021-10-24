@@ -2,7 +2,7 @@
 	width: 100%;
 	margin: auto;
 	display: flex;
-	top: 0px;
+	top: 10px;
 	z-index: 20;
 	position: sticky;
 	flex-direction: row;

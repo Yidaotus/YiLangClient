@@ -210,6 +210,12 @@ const YiEditor: React.FC = () => {
 								editor={editor}
 								value={editorNodes}
 								onChange={(newValue) => {
+									if (editor.selection) {
+										Editor.unhangRange(
+											editor,
+											editor.selection
+										);
+									}
 									setEditorNodes(newValue);
 									setSelection(editor.selection);
 								}}
