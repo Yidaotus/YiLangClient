@@ -22,6 +22,7 @@ import WordsPanel from './WordsPanel/WordsPanel';
 import DictPopupController from './Popups/DictPopupController';
 import Toolbar from './Toolbar/Toolbar';
 import { EditorElement, CustomEditor } from './CustomEditor';
+import WordEditorModal from './Toolbar/Modals/WordEditor/WordEditorModal';
 
 const { TabPane } = Tabs;
 
@@ -52,6 +53,7 @@ const withYiLang = (editor: Editor) => {
 const YiEditor: React.FC = () => {
 	const editorContainer = useRef(null);
 	const [loading, setLoading] = useState<string | null>(null);
+	const [wordEditorVisible, setWordEditorVisible] = useState(false);
 	const currentLanguage = useActiveLanguageConf();
 
 	const save = useCallback(async () => {
@@ -237,7 +239,19 @@ const YiEditor: React.FC = () => {
 											ref={editorContainer}
 											style={{ position: 'relative' }}
 										>
-											<Toolbar selection={selection} />
+											<Toolbar
+												selection={selection}
+												showWordEditor={() =>
+													setWordEditorVisible(true)
+												}
+											/>
+											<WordEditorModal
+												visible={wordEditorVisible}
+												close={() =>
+													setWordEditorVisible(false)
+												}
+												selection={selection}
+											/>
 											<DictPopupController
 												rootElement={editorContainer}
 												selection={selection}

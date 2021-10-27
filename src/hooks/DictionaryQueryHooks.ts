@@ -62,7 +62,7 @@ const defaultValue = {
 };
 
 const useDictionarySearch = (
-	searchTerm: string
+	searchTerm: string | null
 ): [boolean, Array<IDictionaryEntry>] => {
 	const activeLanguage = useActiveLanguageConf();
 
@@ -74,7 +74,7 @@ const useDictionarySearch = (
 			}
 
 			return searchDictionary({
-				key: searchTerm,
+				key: searchTerm || '',
 				lang: activeLanguage.key,
 			});
 		},

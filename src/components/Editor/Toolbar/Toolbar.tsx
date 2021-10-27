@@ -33,13 +33,13 @@ import ElementButton from './Tools/ElementButton';
 
 export interface IToolbarProps {
 	selection: BaseSelection;
+	showWordEditor: () => void;
 }
 
-const Toolbar: React.FC<IToolbarProps> = ({ selection }) => {
+const Toolbar: React.FC<IToolbarProps> = ({ selection, showWordEditor }) => {
 	const editor = useSlateStatic();
 	const toolbarRef = useRef(null);
 	const [menus, setMenus] = useState<Record<string, boolean>>({});
-	const [savedSelection, setSavedSelection] = useState<BaseSelection>(null);
 
 	useClickOutside(toolbarRef, () => {
 		setMenus({});
@@ -75,26 +75,15 @@ const Toolbar: React.FC<IToolbarProps> = ({ selection }) => {
 				e.preventDefault();
 			}}
 		>
-			<ToolbarMenu
-				type="wordEditor"
+			<ToolbarButton
 				icon={<TranslationOutlined />}
-				title="Word Editor"
-				active={wordNodeSelected}
-				{...menuProps}
-				onMenuToggle={async () => {
+				title="wordEditor"
+				action={() => {
 					if (!wordNodeSelected) {
-						setSavedSelection(selection);
-						menuProps.onMenuToggle('wordEditor');
+						showWordEditor();
 					}
 				}}
-			>
-				<WordInput
-					close={() => {
-						menuProps.onMenuToggle('wordEditor');
-					}}
-					selection={savedSelection}
-				/>
-			</ToolbarMenu>
+			/>
 			<ElementButton
 				type="sentence"
 				title="Sentence"

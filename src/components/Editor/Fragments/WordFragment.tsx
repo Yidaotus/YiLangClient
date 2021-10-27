@@ -1,6 +1,8 @@
+import { EditOutlined } from '@ant-design/icons';
 import { useDictionaryEntryResolved } from '@hooks/DictionaryQueryHooks';
+import { Badge } from 'antd';
 import React, { CSSProperties } from 'react';
-import { RenderElementProps } from 'slate-react';
+import { RenderElementProps, useSelected } from 'slate-react';
 import { WordElement } from '../CustomEditor';
 
 export type IWordFragmentData = Omit<RenderElementProps, 'element'> & {
@@ -12,6 +14,7 @@ const WordFragment: React.FC<IWordFragmentData> = ({
 	element,
 	children,
 }) => {
+	const selected = useSelected();
 	const [loadingEntry, dictEntry] = useDictionaryEntryResolved(
 		element.dictId
 	);
