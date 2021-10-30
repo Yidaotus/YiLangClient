@@ -6,4 +6,5 @@
 
 .sub-header {
 	min-height: 700px;
+	position: relative;
 }

@@ -97,12 +97,14 @@ const EntryForm: React.FC<IEntryFormProps> = ({
 					<YiTagsInput createTag={createTag} allTags={allTags} />
 				</Form.Item>
 				<Divider />
-				<Form.Item name="root">
-					<DictionarySelect
-						placeholder="Select a root entry"
-						createRoot={createRoot}
-					/>
-				</Form.Item>
+				{createRoot && (
+					<Form.Item name="root">
+						<DictionarySelect
+							placeholder="Select a root entry"
+							createRoot={createRoot}
+						/>
+					</Form.Item>
+				)}
 			</Form>
 		</div>
 	);

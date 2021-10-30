@@ -14,7 +14,11 @@ import TagForm, {
 } from '@components/DictionaryEntry/TagForm/TagForm';
 import handleError from '@helpers/Error';
 import { useTags, useAddDictionaryTag } from '@hooks/useTags';
-import { useAddDictionaryEntry } from '@hooks/DictionaryQueryHooks';
+import {
+	useAddDictionaryEntry,
+	useDeleteDictionaryEntry,
+	useUpdateDictionaryEntry,
+} from '@hooks/DictionaryQueryHooks';
 import { randomBytes } from 'crypto';
 import EntryForm, {
 	IEntryFormFields,
@@ -22,9 +26,11 @@ import EntryForm, {
 } from '../EntryForm/EntryForm';
 
 export interface IWordInputState {
-	root: string | IDictionaryEntry;
+	entryKey: string | IDictionaryEntry;
 	stateChanged?: (stage: WordEditorMode) => void;
 }
+
+type Optional<T, K extends keyof T> = Pick<Partial<T>, K> & Omit<T, K>;
 
 export type WordEditorMode = 'word' | 'tag' | 'root';
 type WordReducerAction =
@@ -93,7 +99,7 @@ export interface IWordInputRef {
 const WordInput: React.ForwardRefRenderFunction<
 	IWordInputRef,
 	IWordInputState
-> = ({ root, stateChanged }, ref) => {
+> = ({ entryKey, stateChanged }, ref) => {
 	const [wordForm] = Form.useForm<IEntryFormFields>();
 	const [rootForm] = Form.useForm<IEntryFormFields>();
 	const [tagForm] = Form.useForm<ITagFormFields>();
@@ -104,15 +110,16 @@ const WordInput: React.ForwardRefRenderFunction<
 	);
 	const userTags = useTags();
 	const addTag = useAddDictionaryTag();
+	const updateEntry = useUpdateDictionaryEntry();
 	const addEntry = useAddDictionaryEntry();
 
 	useEffect(() => {
-		if (typeof root === 'string') {
-			wordForm.setFieldsValue({ key: root });
+		if (typeof entryKey === 'string') {
+			wordForm.setFieldsValue({ key: entryKey });
 		} else {
-			wordForm.setFieldsValue(root);
+			wordForm.setFieldsValue(entryKey);
 		}
-	}, [root, wordForm]);
+	}, [entryKey, wordForm]);
 
 	const createTagCallback = useCallback(
 		async (tagName: string) => {
@@ -132,9 +139,9 @@ const WordInput: React.ForwardRefRenderFunction<
 	);
 
 	const createRootCallback = useCallback(
-		async (key: string) => {
+		async (initialKey: string) => {
 			try {
-				rootForm.setFieldsValue({ key });
+				rootForm.setFieldsValue({ key: initialKey });
 				dispatchWordEditorState({
 					type: 'pushState',
 					payload: { newState: 'root', stateChanged },
@@ -150,7 +157,10 @@ const WordInput: React.ForwardRefRenderFunction<
 		async (input: IDictionaryEntryInput): Promise<string | null> => {
 			// We have  new root entry
 			try {
-				if (input.root && typeof input.root === 'object') {
+				let rootId;
+				if (input.root && typeof input.root === 'string') {
+					rootId = input.root;
+				} else if (input.root && typeof input.root === 'object') {
 					const newTagsToSave = input.root.tags.filter(
 						(tag): tag is IDictionaryTag => typeof tag === 'object'
 					);
@@ -172,7 +182,7 @@ const WordInput: React.ForwardRefRenderFunction<
 								...createdTagIds,
 							],
 						};
-					addEntry.mutate(rootToCreate);
+					rootId = await addEntry.mutateAsync(rootToCreate);
 				}
 				const newTagsToSave = input.tags.filter(
 					(tag): tag is IDictionaryTag => typeof tag === 'object'
@@ -183,24 +193,34 @@ const WordInput: React.ForwardRefRenderFunction<
 				}
 				const createdTagIds = await Promise.all(tagPromises);
 
-				const entryToCreate: Omit<IDictionaryEntry, 'id' | 'lang'> = {
-					...input,
-					root: undefined,
-					tags: [
-						...input.tags.filter(
-							(tag): tag is string => typeof tag !== 'object'
-						),
-						...createdTagIds,
-					],
-				};
-				const createdId = await addEntry.mutateAsync(entryToCreate);
-				return createdId;
+				const entryToUpsert: Optional<IDictionaryEntry, 'id' | 'lang'> =
+					{
+						...input,
+						root: rootId,
+						tags: [
+							...input.tags.filter(
+								(tag): tag is string => typeof tag !== 'object'
+							),
+							...createdTagIds,
+						],
+					};
+
+				let resultId;
+				if (entryToUpsert.id) {
+					await updateEntry.mutateAsync(
+						entryToUpsert as IDictionaryEntry
+					);
+					resultId = entryToUpsert.id;
+				} else {
+					resultId = await addEntry.mutateAsync(entryToUpsert);
+				}
+				return resultId;
 			} catch (e) {
 				handleError(e);
 			}
 			return null;
 		},
-		[addEntry, addTag]
+		[addEntry, addTag, updateEntry]
 	);
 
 	const finish = useCallback(async () => {
@@ -302,11 +322,12 @@ const WordInput: React.ForwardRefRenderFunction<
 				type: 'popState',
 				payload: { stateChanged },
 			});
+		} else {
+			setCreatedTags([]);
+			tagForm.resetFields();
+			rootForm.resetFields();
+			wordForm.resetFields();
 		}
-		setCreatedTags([]);
-		tagForm.resetFields();
-		rootForm.resetFields();
-		wordForm.resetFields();
 		return isDone;
 	}, [
 		addEntry.isLoading,
@@ -319,7 +340,7 @@ const WordInput: React.ForwardRefRenderFunction<
 	]);
 
 	useImperativeHandle(ref, () => ({ finish, cancel }), [cancel, finish]);
-	const canEditRoot = typeof root === 'string' && root === '';
+	const canEditRoot = typeof entryKey === 'string' && entryKey === '';
 	return (
 		<div>
 			<Spin spinning={addTag.isLoading || addEntry.isLoading}>

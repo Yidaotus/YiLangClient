@@ -31,7 +31,7 @@ export type WordInputResult = Omit<IDictionaryEntry, 'firstSeen' | 'id'>;
 
 export interface IWordInputProps {
 	close: () => void;
-	selection: BaseSelection;
+	key: string;
 }
 
 const { confirm } = Modal;
@@ -50,16 +50,11 @@ function showConfirm(root: string, cancel: () => void, ok: () => void) {
 	});
 }
 
-const WordInput: React.FC<IWordInputProps> = ({ close, selection }) => {
+const WordInput: React.FC<IWordInputProps> = ({ close, key }) => {
 	const editor = useSlateStatic();
 	const dictEntryEdit = useRef<IWordInputRef>(null);
 	const [editMode, setEditMode] = useState<WordEditorMode>('word');
 	const lookupSources: Array<IDictionaryLookupSource> = [];
-	const key = selection
-		? Editor.string(editor, selection, {
-				voids: true,
-		  })
-		: '';
 	const [fetchingRoot, rootInDictionary] = useDictionarySearch(key);
 
 	const cardTitle = useMemo(() => {
@@ -202,7 +197,7 @@ const WordInput: React.FC<IWordInputProps> = ({ close, selection }) => {
 					<div className="word-input-root-form">
 						<DictEntryEdit
 							ref={dictEntryEdit}
-							root={key}
+							entryKey={key}
 							stateChanged={setEditMode}
 						/>
 					</div>

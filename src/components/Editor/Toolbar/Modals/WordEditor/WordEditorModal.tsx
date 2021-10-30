@@ -32,7 +32,7 @@ export type WordInputResult = Omit<IDictionaryEntry, 'firstSeen' | 'id'>;
 export interface IWordInputProps {
 	visible: boolean;
 	close: () => void;
-	selection: BaseSelection;
+	entryKey: string;
 }
 
 const { confirm } = Modal;
@@ -48,31 +48,20 @@ function showConfirm(root: string, cancel: () => void, ok: () => void) {
 		onCancel() {
 			cancel();
 		},
+		centered: true,
 	});
 }
 
 const WordEditorModal: React.FC<IWordInputProps> = ({
 	visible,
 	close,
-	selection,
+	entryKey,
 }) => {
 	const editor = useSlateStatic();
 	const dictEntryEdit = useRef<IWordInputRef>(null);
 	const [editMode, setEditMode] = useState<WordEditorMode>('word');
 	const lookupSources: Array<IDictionaryLookupSource> = [];
-	const [key, setKey] = useState<string>('');
-	useEffect(() => {
-		if (!visible) {
-			setKey(
-				selection
-					? Editor.string(editor, selection, {
-							voids: true,
-					  })
-					: ''
-			);
-		}
-	}, [editor, selection, visible]);
-	const [fetchingRoot, rootInDictionary] = useDictionarySearch(key);
+	const [fetchingRoot, rootInDictionary] = useDictionarySearch(entryKey);
 
 	const cardTitle = useMemo(() => {
 		switch (editMode) {
@@ -92,7 +81,10 @@ const WordEditorModal: React.FC<IWordInputProps> = ({
 			{lookupSources.map((source) => {
 				return (
 					<Menu.Item key={source.name}>
-						<LookupSourceLink source={source} searchTerm={key} />
+						<LookupSourceLink
+							source={source}
+							searchTerm={entryKey}
+						/>
 					</Menu.Item>
 				);
 			})}
@@ -114,7 +106,7 @@ const WordEditorModal: React.FC<IWordInputProps> = ({
 					at: [[0], [editor.children.length - 1]],
 					match: (e) => Text.isText(e),
 				});
-				const searchRegexp = new RegExp(key, 'g');
+				const searchRegexp = new RegExp(entryKey, 'g');
 				for (const [leafMatch, leafPath] of allLeafs) {
 					if (Text.isText(leafMatch)) {
 						const foundRoots = String(leafMatch.text).matchAll(
@@ -145,23 +137,28 @@ const WordEditorModal: React.FC<IWordInputProps> = ({
 				}
 			}
 		},
-		[editor, key]
+		[editor, entryKey]
 	);
 
 	useEffect(() => {
-		const potentialFind = rootInDictionary[0];
-		if (key && potentialFind && potentialFind.key === key) {
-			showConfirm(
-				key,
-				() => {
-					close();
-				},
-				() => {
-					wrapWithWord(potentialFind.id);
-				}
+		if (visible) {
+			const foundInDictionary = rootInDictionary.find(
+				(entry) => entry.key === entryKey
 			);
+			if (foundInDictionary) {
+				showConfirm(
+					entryKey,
+					() => {
+						close();
+					},
+					() => {
+						wrapWithWord(foundInDictionary.id);
+						close();
+					}
+				);
+			}
 		}
-	}, [close, key, rootInDictionary, wrapWithWord]);
+	}, [close, entryKey, rootInDictionary, wrapWithWord, visible]);
 
 	const finish = async () => {
 		if (dictEntryEdit.current) {
@@ -184,7 +181,9 @@ const WordEditorModal: React.FC<IWordInputProps> = ({
 
 	return (
 		<Modal
+			centered
 			visible={visible}
+			closable={false}
 			title={
 				<div className="word-input-head">
 					<ReadOutlined />
@@ -225,7 +224,7 @@ const WordEditorModal: React.FC<IWordInputProps> = ({
 				<div className="word-input-root-form">
 					<DictEntryEdit
 						ref={dictEntryEdit}
-						root={key}
+						entryKey={entryKey}
 						stateChanged={setEditMode}
 					/>
 				</div>
@@ -234,4 +233,4 @@ const WordEditorModal: React.FC<IWordInputProps> = ({
 	);
 };
 
-export default WordEditorModal;
+export default React.memo(WordEditorModal);

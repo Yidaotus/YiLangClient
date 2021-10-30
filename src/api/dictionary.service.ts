@@ -8,6 +8,19 @@ import {
 } from './definitions/api';
 import ApiService from './api.service';
 
+const deleteDictionaryEntry = async (id: string): Promise<void> => {
+	await ApiService.delete<IApiResponse<void>>(`dictionary/entries/${id}`);
+};
+
+const updateDictionaryEntry = async (
+	entryToUpdate: IDictionaryEntry
+): Promise<void> => {
+	await ApiService.post<IApiResponse<void>>(
+		`dictionary/entries/${entryToUpdate.id}`,
+		entryToUpdate
+	);
+};
+
 const addDictionaryEntry = async (
 	addParams: IAddDictionaryEntryParams
 ): Promise<string> => {
@@ -46,4 +59,11 @@ const searchDictionary = async (
 	return entries as Array<IDictionaryEntry>;
 };
 
-export { listDictionary, addDictionaryEntry, getEntry, searchDictionary };
+export {
+	listDictionary,
+	addDictionaryEntry,
+	getEntry,
+	searchDictionary,
+	updateDictionaryEntry,
+	deleteDictionaryEntry,
+};

@@ -6,9 +6,11 @@ import {
 } from 'api/definitions/api';
 import {
 	addDictionaryEntry,
+	deleteDictionaryEntry,
 	getEntry,
 	listDictionary,
 	searchDictionary,
+	updateDictionaryEntry,
 } from 'api/dictionary.service';
 import {
 	IDictionaryEntry,
@@ -22,8 +24,9 @@ import { useTags } from './useTags';
 const useDictionaryEntry = (
 	id: string | null
 ): [boolean, IDictionaryEntry | null] => {
+	const activeLanguage = useActiveLanguageConf();
 	const { data, isLoading } = useQuery(
-		['dictEntries', 'details', id],
+		['dictEntries', 'details', activeLanguage?.key, id],
 		() => {
 			return id ? getEntry({ id }) : null;
 		},
@@ -120,6 +123,63 @@ const useDictionaryEntries = (
 
 	return [isLoading, data || defaultValue];
 };
+const useDeleteDictionaryEntry = () => {
+	const lang = useActiveLanguageConf();
+	const queryClient = useQueryClient();
+
+	return useMutation(
+		(id: string) => {
+			if (!lang) {
+				throw new Error('No Language selected!');
+			}
+			return deleteDictionaryEntry(id);
+		},
+		{
+			onSuccess: (_, id) => {
+				// ✅ refetch the comments list for our blog post
+				queryClient.invalidateQueries(['dictEntries', 'list', lang]);
+				queryClient.invalidateQueries([
+					'dictEntries',
+					'details',
+					lang?.key,
+					id,
+				]);
+			},
+			onError: (response: IApiResponse<void>) => {
+				handleError(response.message);
+			},
+		}
+	);
+};
+const useUpdateDictionaryEntry = () => {
+	const lang = useActiveLanguageConf();
+	//		['dictEntries', 'details', lang, id],
+	const queryClient = useQueryClient();
+
+	return useMutation(
+		(entryToUpdate: IDictionaryEntry) => {
+			if (!lang) {
+				throw new Error('No Language selected!');
+			}
+			return updateDictionaryEntry({ ...entryToUpdate, lang: lang.key });
+		},
+		{
+			onSuccess: (response) => {
+				// ✅ refetch the comments list for our blog post
+				queryClient.invalidateQueries(['dictEntries', 'list', lang]);
+				queryClient.invalidateQueries([
+					'dictEntries',
+					'details',
+					lang?.key,
+					response,
+				]);
+			},
+			onError: (response: IApiResponse<void>) => {
+				handleError(response.message);
+			},
+		}
+	);
+};
 
 const useAddDictionaryEntry = () => {
 	const lang = useActiveLanguageConf();
@@ -140,7 +200,7 @@ const useAddDictionaryEntry = () => {
 				queryClient.invalidateQueries([
 					'dictEntries',
 					'details',
-					lang,
+					lang?.key,
 					response,
 				]);
 			},
@@ -156,5 +216,7 @@ export {
 	useDictionaryEntry,
 	useDictionaryEntryResolved,
 	useAddDictionaryEntry,
+	useDeleteDictionaryEntry,
+	useUpdateDictionaryEntry,
 	useDictionarySearch,
 };

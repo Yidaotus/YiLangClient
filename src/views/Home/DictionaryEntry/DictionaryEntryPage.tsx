@@ -47,16 +47,6 @@ const DictionaryEntryPage: React.FC = () => {
 		Array<IDictionaryEntryResolved>
 	>([]);
 
-	const saveDictEntry = useCallback(
-		async (editResult: IEntryFormFields | null) => {},
-		[]
-	);
-
-	const removeDictEntry = useCallback(async (id: string) => {
-		setLoading(true);
-		setLoading(false);
-	}, []);
-
 	return (
 		<PageHeader
 			className="site-page-header"
@@ -86,8 +76,7 @@ const DictionaryEntryPage: React.FC = () => {
 							>
 								<DictEntryWithEdit
 									dictEntry={entry}
-									saveEntry={saveDictEntry}
-									removeEntry={removeDictEntry}
+									canRemove
 								/>
 							</Card>
 						)}

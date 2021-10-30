@@ -73,7 +73,7 @@ const LanguageConfig: React.FC = () => {
 					onClose={() => {
 						setAddFormVisible(false);
 					}}
-					width="700px"
+					width="600px"
 				>
 					<Card>
 						<LangConfForm form={langConfForm} />

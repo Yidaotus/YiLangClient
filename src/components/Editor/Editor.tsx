@@ -54,6 +54,7 @@ const YiEditor: React.FC = () => {
 	const editorContainer = useRef(null);
 	const [loading, setLoading] = useState<string | null>(null);
 	const [wordEditorVisible, setWordEditorVisible] = useState(false);
+	const [selectedKey, setSelectedKey] = useState('');
 	const currentLanguage = useActiveLanguageConf();
 
 	const save = useCallback(async () => {
@@ -205,8 +206,10 @@ const YiEditor: React.FC = () => {
 		}
 	}, [editor, selection]);
 
-	// If we change our Document we need to check if we have stored caret
-	// and restore if this is the case.
+	const closeWordEditorModal = useCallback(() => {
+		setWordEditorVisible(false);
+	}, [setWordEditorVisible]);
+
 	return (
 		<div>
 			<div>
@@ -241,16 +244,24 @@ const YiEditor: React.FC = () => {
 										>
 											<Toolbar
 												selection={selection}
-												showWordEditor={() =>
-													setWordEditorVisible(true)
-												}
+												showWordEditor={() => {
+													const key = selection
+														? Editor.string(
+																editor,
+																selection,
+																{
+																	voids: true,
+																}
+														  )
+														: '';
+													setSelectedKey(key);
+													setWordEditorVisible(true);
+												}}
 											/>
 											<WordEditorModal
 												visible={wordEditorVisible}
-												close={() =>
-													setWordEditorVisible(false)
-												}
-												selection={selection}
+												close={closeWordEditorModal}
+												entryKey={selectedKey}
 											/>
 											<DictPopupController
 												rootElement={editorContainer}

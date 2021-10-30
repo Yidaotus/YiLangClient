@@ -3,7 +3,6 @@ import useUserConfig from './useUserConfig';
 
 const useLanguageConfigs = (): Array<ILanguageConfig> => {
 	const userConfig = useUserConfig();
-
 	return userConfig?.languageConfigs || [];
 };
 

@@ -1,6 +1,6 @@
 /* eslint-disable react/destructuring-assignment */
 import './DictEntryWithEdit.css';
-import React, { useRef, useState } from 'react';
+import React, { useCallback, useRef, useState } from 'react';
 import { Button, Dropdown, Menu, Modal } from 'antd';
 import {
 	CloseOutlined,
@@ -11,22 +11,22 @@ import {
 	SaveFilled,
 } from '@ant-design/icons';
 import { IDictionaryEntryResolved } from 'Document/Dictionary';
+import { useDeleteDictionaryEntry } from '@hooks/DictionaryQueryHooks';
 import DictionaryEntry from '../DictionaryEntry';
 import DictEntryEdit, { IWordInputRef } from '../DictEntryEdit/DictEntryEdit';
-import { IEntryFormFields } from '../EntryForm/EntryForm';
 
 const { confirm } = Modal;
 
 type IDictEntryWithEditProps = {
 	dictEntry: IDictionaryEntryResolved;
 	canLink?: boolean;
-	saveEntry: (entry: IEntryFormFields) => void;
-	removeEntry?: (entryId: string) => void;
+	canRemove?: boolean;
 };
 
 const DictEntryWithEdit: React.FC<IDictEntryWithEditProps> = (props) => {
-	const { dictEntry, canLink, removeEntry } = props;
+	const { dictEntry, canLink, canRemove } = props;
 	const [editing, setEditing] = useState(false);
+	const deleteEntry = useDeleteDictionaryEntry();
 	const dictEntryEdit = useRef<IWordInputRef>(null);
 
 	const finish = async () => {
@@ -47,6 +47,10 @@ const DictEntryWithEdit: React.FC<IDictEntryWithEditProps> = (props) => {
 		}
 	};
 
+	const remove = useCallback(async () => {
+		await deleteEntry.mutateAsync(dictEntry.id);
+	}, [deleteEntry, dictEntry.id]);
+
 	const showDeleteConfirm = () => {
 		confirm({
 			title: 'Are you sure to delete this entry?',
@@ -56,7 +60,7 @@ const DictEntryWithEdit: React.FC<IDictEntryWithEditProps> = (props) => {
 			okType: 'danger',
 			cancelText: 'No',
 			onOk() {
-				removeEntry?.(dictEntry.id);
+				remove();
 			},
 		});
 	};
@@ -84,7 +88,7 @@ const DictEntryWithEdit: React.FC<IDictEntryWithEditProps> = (props) => {
 	return (
 		<div className="entry-with-edit-container">
 			<div className="entry-with-edit-controlls-top">
-				{removeEntry ? (
+				{canRemove ? (
 					<Dropdown overlay={moreDropdown}>
 						<Button type="text">
 							<MoreOutlined rotate={90} />
@@ -102,7 +106,7 @@ const DictEntryWithEdit: React.FC<IDictEntryWithEditProps> = (props) => {
 			{editing && (
 				<div>
 					<DictEntryEdit
-						root={{
+						entryKey={{
 							...dictEntry,
 							tags: dictEntry.tags.map((tag) => tag.id),
 							root: dictEntry.root,

@@ -1,6 +1,7 @@
+import './WordFragment.css';
 import { EditOutlined } from '@ant-design/icons';
 import { useDictionaryEntryResolved } from '@hooks/DictionaryQueryHooks';
-import { Badge } from 'antd';
+import { Badge, Spin } from 'antd';
 import React, { CSSProperties } from 'react';
 import { RenderElementProps, useSelected } from 'slate-react';
 import { WordElement } from '../CustomEditor';
@@ -74,20 +75,34 @@ const WordFragment: React.FC<IWordFragmentData> = ({
 	return (
 		<span {...attributes}>
 			{children}
-			{dictEntry && (
-				<span
-					data-spelling={dictEntry.spelling}
-					key={dictEntry.id}
-					className={`word-fragment ${dictEntry.spelling && 'kanji'}`}
-					style={{
-						position: 'relative',
-						cursor: 'default',
-					}}
-				>
-					{dictEntry.key}
-					<span style={gradiantStyle} />
-				</span>
-			)}
+			<Spin wrapperClassName="inline-block" spinning={loadingEntry}>
+				{dictEntry && (
+					<span
+						data-spelling={dictEntry.spelling}
+						key={dictEntry.id}
+						className={`word-fragment ${
+							dictEntry.spelling && 'kanji'
+						}`}
+						style={{
+							position: 'relative',
+							cursor: 'default',
+						}}
+					>
+						{dictEntry.key}
+						<span style={gradiantStyle} />
+					</span>
+				)}
+				{!dictEntry && (
+					<span
+						style={{
+							position: 'relative',
+							cursor: 'default',
+						}}
+					>
+						{element.children.map((elem) => elem.text).join('')}
+					</span>
+				)}
+			</Spin>
 		</span>
 	);
 };
