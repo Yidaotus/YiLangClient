@@ -1,4 +1,3 @@
-import { IConfig } from 'Document/Config';
 import {
 	IApiResponse,
 	ILoginResponseData,
@@ -6,7 +5,6 @@ import {
 	ILoginParams,
 	IVerifyEmailParams,
 	IUserResponseData,
-	ISetActiveLangParams,
 } from './definitions/api';
 import ApiService from './api.service';
 
@@ -38,30 +36,4 @@ const verify = async (tokenData: IVerifyEmailParams): Promise<void> => {
 	await ApiService.post<IApiResponse<void>>('user/verify', tokenData);
 };
 
-const fetchConfig = async (): Promise<IConfig> => {
-	const res = await ApiService.get<IApiResponse<IConfig>>('config');
-	return res.data.payload as IConfig;
-};
-
-const saveConfig = async (config: IConfig): Promise<void> => {
-	await ApiService.post<IApiResponse<void>>('config', config);
-};
-
-const updateActiveLanguage = async (
-	langParams: ISetActiveLangParams
-): Promise<void> => {
-	await ApiService.post<IApiResponse<void>>(
-		'config/activeLanguage',
-		langParams
-	);
-};
-
-export {
-	login,
-	register,
-	verify,
-	authorize,
-	fetchConfig,
-	saveConfig,
-	updateActiveLanguage,
-};
+export { login, register, verify, authorize };

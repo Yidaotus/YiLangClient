@@ -36,7 +36,7 @@ const DictionaryList: React.FC = () => {
 	const [paginationOptions, setPaginationOptions] =
 		useState<IListDictionaryParams | null>({
 			excerptLength: 80,
-			lang: selectedLanguage?.key || 'jp',
+			lang: selectedLanguage?.id || 'jp',
 			limit: 20,
 			skip: 0,
 		});
@@ -72,7 +72,7 @@ const DictionaryList: React.FC = () => {
 				filter,
 				sortBy,
 				excerptLength: 80,
-				lang: selectedLanguage?.key,
+				lang: selectedLanguage?.id,
 			});
 		}
 	};

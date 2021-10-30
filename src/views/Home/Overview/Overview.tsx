@@ -17,7 +17,6 @@ const Overview: React.FC = () => {
 	const activeLanguage = useActiveLanguageConf();
 	const [loadingEntries, entries] = useDictionaryEntries({
 		excerptLength: 0,
-		lang: activeLanguage?.key || 'dfl',
 		limit: 3,
 		skip: 0,
 	});

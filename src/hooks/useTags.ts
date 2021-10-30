@@ -1,15 +1,15 @@
 import { addTag, getTags } from 'api/tags.service';
 import { IDictionaryTag } from 'Document/Dictionary';
 import { useMutation, useQuery, useQueryClient } from 'react-query';
-import { useActiveLanguageConf } from './useActiveLanguageConf';
+import { useActiveLanguageConf } from './ConfigQueryHooks';
 
 const useTags = (): Array<IDictionaryTag> => {
 	const lang = useActiveLanguageConf();
 	const { data } = useQuery(
-		['tags', 'list', lang?.key],
-		() => (lang?.key ? getTags(lang?.key) : []),
+		['tags', 'list', lang?.id],
+		() => (lang?.id ? getTags(lang?.id) : []),
 		{
-			enabled: !!lang?.key,
+			enabled: !!lang?.id,
 			refetchOnWindowFocus: false,
 		}
 	);
@@ -22,11 +22,11 @@ const useAddDictionaryTag = () => {
 	//		['dictEntries', 'details', lang, id],
 	const queryClient = useQueryClient();
 	return useMutation(
-		(newTag: IDictionaryTag) => {
+		(newTag: Omit<IDictionaryTag, 'id'>) => {
 			if (!lang) {
 				throw new Error('No Language selected!');
 			}
-			return addTag({ lang: lang.key, tag: newTag });
+			return addTag({ ...newTag, lang: lang.id });
 		},
 		{
 			onSuccess: () => {

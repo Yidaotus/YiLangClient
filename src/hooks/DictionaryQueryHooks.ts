@@ -18,7 +18,7 @@ import {
 } from 'Document/Dictionary';
 import { notUndefined } from 'Document/Utility';
 import { useMutation, useQuery, useQueryClient } from 'react-query';
-import { useActiveLanguageConf } from './useActiveLanguageConf';
+import { useActiveLanguageConf } from './ConfigQueryHooks';
 import { useTags } from './useTags';
 
 const useDictionaryEntry = (
@@ -26,7 +26,7 @@ const useDictionaryEntry = (
 ): [boolean, IDictionaryEntry | null] => {
 	const activeLanguage = useActiveLanguageConf();
 	const { data, isLoading } = useQuery(
-		['dictEntries', 'details', activeLanguage?.key, id],
+		['dictEntries', 'details', activeLanguage?.id, id],
 		() => {
 			return id ? getEntry({ id }) : null;
 		},
@@ -78,7 +78,7 @@ const useDictionarySearch = (
 
 			return searchDictionary({
 				key: searchTerm || '',
-				lang: activeLanguage.key,
+				lang: activeLanguage.id,
 			});
 		},
 		{
@@ -91,7 +91,7 @@ const useDictionarySearch = (
 };
 
 const useDictionaryEntries = (
-	paginationOptions: IListDictionaryParams | null
+	paginationOptions: Omit<IListDictionaryParams, 'lang'> | null
 ): [boolean, IListDictionaryResult] => {
 	const activeLanguage = useActiveLanguageConf();
 	const { data, isLoading } = useQuery(
@@ -111,7 +111,7 @@ const useDictionaryEntries = (
 						skip: paginationOptions.skip,
 						limit: paginationOptions.limit,
 						excerptLength: 80,
-						lang: activeLanguage?.key,
+						lang: activeLanguage.id,
 				  })
 				: defaultValue,
 		{
@@ -141,7 +141,7 @@ const useDeleteDictionaryEntry = () => {
 				queryClient.invalidateQueries([
 					'dictEntries',
 					'details',
-					lang?.key,
+					lang?.id,
 					id,
 				]);
 			},
@@ -161,7 +161,7 @@ const useUpdateDictionaryEntry = () => {
 			if (!lang) {
 				throw new Error('No Language selected!');
 			}
-			return updateDictionaryEntry({ ...entryToUpdate, lang: lang.key });
+			return updateDictionaryEntry({ ...entryToUpdate, lang: lang.id });
 		},
 		{
 			onSuccess: (response) => {
@@ -170,7 +170,7 @@ const useUpdateDictionaryEntry = () => {
 				queryClient.invalidateQueries([
 					'dictEntries',
 					'details',
-					lang?.key,
+					lang?.id,
 					response,
 				]);
 			},
@@ -191,7 +191,7 @@ const useAddDictionaryEntry = () => {
 			if (!lang) {
 				throw new Error('No Language selected!');
 			}
-			return addDictionaryEntry({ ...newEntry, lang: lang.key });
+			return addDictionaryEntry({ ...newEntry, lang: lang.id });
 		},
 		{
 			onSuccess: (response) => {
@@ -200,7 +200,7 @@ const useAddDictionaryEntry = () => {
 				queryClient.invalidateQueries([
 					'dictEntries',
 					'details',
-					lang?.key,
+					lang?.id,
 					response,
 				]);
 			},

@@ -55,7 +55,7 @@ const SettingsPopover: React.FC = () => {
 					cancelText: 'No',
 					onOk() {
 						const languageConfig = availableLanguages.find(
-							(langConf) => langConf.key === configKey
+							(langConf) => langConf.id === configKey
 						);
 						if (languageConfig) {
 							// TODO
@@ -66,7 +66,7 @@ const SettingsPopover: React.FC = () => {
 				});
 			} else {
 				const languageConfig = availableLanguages.find(
-					(langConf) => langConf.key === configKey
+					(langConf) => langConf.id === configKey
 				);
 				if (languageConfig) {
 					// TODO
@@ -82,13 +82,13 @@ const SettingsPopover: React.FC = () => {
 			<div className="settings-language">
 				<TranslationOutlined />
 				<Select
-					defaultValue={selectedLanguage?.key || ''}
-					value={selectedLanguage?.key}
+					defaultValue={selectedLanguage?.id || ''}
+					value={selectedLanguage?.id}
 					onChange={changeLanguage}
 					className="settings-language-select"
 				>
 					{availableLanguages.map((lang) => (
-						<Option key={lang.key} value={lang.key}>
+						<Option key={lang.id} value={lang.id}>
 							{lang.name}
 						</Option>
 					))}

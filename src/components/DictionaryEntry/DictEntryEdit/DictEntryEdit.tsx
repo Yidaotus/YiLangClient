@@ -16,7 +16,6 @@ import handleError from '@helpers/Error';
 import { useTags, useAddDictionaryTag } from '@hooks/useTags';
 import {
 	useAddDictionaryEntry,
-	useDeleteDictionaryEntry,
 	useUpdateDictionaryEntry,
 } from '@hooks/DictionaryQueryHooks';
 import { randomBytes } from 'crypto';
@@ -184,9 +183,14 @@ const WordInput: React.ForwardRefRenderFunction<
 						};
 					rootId = await addEntry.mutateAsync(rootToCreate);
 				}
-				const newTagsToSave = input.tags.filter(
-					(tag): tag is IDictionaryTag => typeof tag === 'object'
-				);
+				const newTagsToSave = input.tags
+					.filter(
+						(tag): tag is IDictionaryTag => typeof tag === 'object'
+					)
+					.map((tag) => {
+						const { id, ...tagWithoutId } = tag;
+						return tagWithoutId;
+					});
 				const tagPromises = [];
 				for (const newTag of newTagsToSave) {
 					tagPromises.push(addTag.mutateAsync(newTag));
@@ -246,7 +250,7 @@ const WordInput: React.ForwardRefRenderFunction<
 				tagForm.resetFields();
 				const cleanedUpTagValues = {
 					...tagValues,
-					id: String(randomBytes(12)),
+					id: String(`etherialTagId${tagValues.name}`),
 					grammarPoint: tagValues.grammarPoint?.name
 						? tagValues.grammarPoint
 						: undefined,

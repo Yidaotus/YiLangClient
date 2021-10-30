@@ -1,9 +1,9 @@
 import { IDictionaryTag } from 'Document/Dictionary';
 
-import { IAddTagParams, IApiResponse } from './definitions/api';
+import { IAddDictionaryTagParams, IApiResponse } from './definitions/api';
 import ApiService from './api.service';
 
-const addTag = async (addParams: IAddTagParams): Promise<string> => {
+const addTag = async (addParams: IAddDictionaryTagParams): Promise<string> => {
 	const response = await ApiService.post<IApiResponse<string>>(
 		'dictionary/tags',
 		addParams

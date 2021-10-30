@@ -90,11 +90,7 @@ export interface IDictionaryEntryFetchResponse {
 	otherExcerpts?: Array<IExcerptedDocumentLink>;
 }
 
-export interface IAddTagParams {
-	lang: string;
-	tag: Omit<IDictionaryTag, 'id' | 'lang'>;
-}
-
+export type IAddDictionaryTagParams = Omit<IDictionaryTag, 'id'>;
 export type IAddDictionaryEntryParams = Omit<IDictionaryEntry, 'id'>;
 
 export interface IDocumentParam {

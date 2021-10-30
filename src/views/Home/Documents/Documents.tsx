@@ -52,7 +52,7 @@ const Documents: React.FC = () => {
 				skip: pageSkip,
 				limit: pageSize,
 				sortBy: 'createdAt',
-				lang: activeLanguage.key,
+				lang: activeLanguage.id,
 			});
 			setExcerpts(result.excerpts);
 			setTotal(result.total);

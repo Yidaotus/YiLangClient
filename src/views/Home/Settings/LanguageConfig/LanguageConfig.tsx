@@ -9,7 +9,13 @@ import LangConfForm from '@components/Settings/LangConfForm/LangConfForm';
 import { Card, Button, Form, Modal, List, PageHeader } from 'antd';
 import { ILanguageConfig } from 'Document/Config';
 import React, { useState } from 'react';
-import { useLanguageConfigs } from '@hooks/useActiveLanguageConf';
+import {
+	useAddLanguageConfig,
+	useLanguageConfigs,
+	useRemoveLanguageConfig,
+	useUpdateConfig,
+	useUpdateLanguageConfig,
+} from '@hooks/ConfigQueryHooks';
 
 const { confirm } = Modal;
 
@@ -18,20 +24,24 @@ const LanguageConfig: React.FC = () => {
 	const [addFormVisible, setAddFormVisible] = useState(false);
 
 	const [langConfForm] = Form.useForm<ILanguageConfig>();
+	const updateLanguageConfig = useUpdateLanguageConfig();
+	const addLanguageConfig = useAddLanguageConfig();
+	const removeLanguageConfig = useRemoveLanguageConfig();
 
-	const saveConfig = (entry: ILanguageConfig) => {
-		if (entry.key) {
-			// TODO
-			// dispatch(updateLanguageConfig(entry));
+	const saveConfig = (configEntry: ILanguageConfig) => {
+		if (configEntry.id) {
+			updateLanguageConfig.mutate({
+				id: configEntry.id,
+				languageConfig: configEntry,
+			});
 		} else {
-			// TODO
-			// dispatch(addLanguageConfig(entry));
+			addLanguageConfig.mutate(configEntry);
 		}
 		langConfForm.resetFields();
 		setAddFormVisible(false);
 	};
 
-	const removeConfig = (key: string) => {
+	const removeConfig = (id: string) => {
 		confirm({
 			title: 'Are you sure delete this language?',
 			icon: <ExclamationCircleOutlined />,
@@ -40,15 +50,14 @@ const LanguageConfig: React.FC = () => {
 			okType: 'danger',
 			cancelText: 'No',
 			onOk() {
-				// TODO
-				// dispatch(removeLanguageConfig(key));
+				removeLanguageConfig.mutate(id);
 			},
 		});
 	};
 
 	const editConfig = (key: string) => {
 		const selectedLanguage = availableLanguages.find(
-			(lang) => lang.key === key
+			(lang) => lang.id === key
 		);
 		if (selectedLanguage) {
 			langConfForm.setFieldsValue(selectedLanguage);
@@ -113,13 +122,13 @@ const LanguageConfig: React.FC = () => {
 							<Button
 								icon={<EditOutlined />}
 								type="link"
-								onClick={() => editConfig(language.key)}
+								onClick={() => editConfig(language.id)}
 							/>,
 							<Button
 								icon={<DeleteOutlined />}
 								danger
 								type="link"
-								onClick={() => removeConfig(language.key)}
+								onClick={() => removeConfig(language.id)}
 							/>,
 						]}
 					>
