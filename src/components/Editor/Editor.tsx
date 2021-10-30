@@ -35,7 +35,11 @@ const withYiLang = (editor: Editor) => {
 		'highlight',
 	];
 
-	const voidTypes: Array<EditorElement['type']> = ['word', 'image'];
+	const voidTypes: Array<EditorElement['type']> = [
+		'word',
+		'image',
+		'wordList',
+	];
 
 	// eslint-disable-next-line no-param-reassign
 	editor.isInline = (element) => {
@@ -189,6 +193,14 @@ const YiEditor: React.FC = () => {
 								text: 'Third',
 							},
 						],
+					},
+				],
+			},
+			{
+				type: 'wordList',
+				children: [
+					{
+						text: '',
 					},
 				],
 			},

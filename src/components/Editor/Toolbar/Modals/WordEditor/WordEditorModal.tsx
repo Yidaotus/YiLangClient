@@ -21,7 +21,14 @@ import DictEntryEdit, {
 	WordEditorMode,
 } from '@components/DictionaryEntry/DictEntryEdit/DictEntryEdit';
 import LookupSourceLink from '@components/LookupSourceLink';
-import { Editor, Transforms, Text } from 'slate';
+import {
+	Editor,
+	Transforms,
+	Text,
+	Element as SlateElement,
+	Path,
+	Range,
+} from 'slate';
 import { useSlateStatic } from 'slate-react';
 import { WordElement } from '@components/Editor/CustomEditor';
 import { useDictionarySearch } from '@hooks/DictionaryQueryHooks';
@@ -93,10 +100,11 @@ const WordEditorModal: React.FC<IWordInputProps> = ({
 
 	const wrapWithWord = useCallback(
 		async (entryId: string) => {
-			if (entryId) {
+			if (entryId && editor.selection) {
 				const vocab: WordElement = {
 					type: 'word',
 					dictId: entryId,
+					isUserInput: true,
 					children: [{ text: '' }],
 				};
 				Transforms.wrapNodes(editor, vocab, {
@@ -108,16 +116,21 @@ const WordEditorModal: React.FC<IWordInputProps> = ({
 				});
 				const searchRegexp = new RegExp(entryKey, 'g');
 				for (const [leafMatch, leafPath] of allLeafs) {
-					if (Text.isText(leafMatch)) {
+					const fillerVocab = { ...vocab, isUserInput: false };
+					if (
+						Text.isText(leafMatch) &&
+						!Range.includes(editor.selection, leafPath)
+					) {
 						const foundRoots = String(leafMatch.text).matchAll(
 							searchRegexp
 						);
 						const foundRoot = foundRoots.next();
+
 						if (foundRoot.value?.index !== undefined) {
 							// we split the node if we found any hits, so we can just wrap the first hit
 							// and continue the loop. Since the loop makes use of the generator function
 							// it will automatically iterate to the next (new)
-							Transforms.wrapNodes(editor, vocab, {
+							Transforms.wrapNodes(editor, fillerVocab, {
 								at: {
 									anchor: {
 										path: leafPath,

@@ -12,6 +12,7 @@ import MarkFragment from './Fragments/MarkFragment';
 import SentenceFragment from './Fragments/SentenceFragment';
 import WordFragment from './Fragments/WordFragment';
 import ImageBlock from './Blocks/Elements/Image/Image';
+import WordList from './Blocks/Elements/WordList/WordList';
 
 // Define a React component to render leaves with bold text.
 const Leaf = ({ attributes, leaf, children }: RenderLeafProps) => {
@@ -110,6 +111,12 @@ const Element = (props: RenderElementProps) => {
 			return <ol {...attributes}>{children}</ol>;
 		case 'bulletedList':
 			return <ul {...attributes}>{children}</ul>;
+		case 'wordList':
+			return (
+				<WordList attributes={attributes} element={element}>
+					{children}
+				</WordList>
+			);
 		case 'blockQuote':
 			return (
 				<blockquote

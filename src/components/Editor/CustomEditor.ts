@@ -81,6 +81,7 @@ export type SentenceElement = {
 export type WordElement = {
 	type: 'word';
 	dictId: string;
+	isUserInput: boolean;
 	children: CustomText[];
 };
 
@@ -93,6 +94,11 @@ export type SubtitleElement = {
 export type TitleElement = {
 	type: 'title';
 	align: AlignValue;
+	children: CustomText[];
+};
+
+export type WordListElement = {
+	type: 'wordList';
 	children: CustomText[];
 };
 
@@ -130,6 +136,7 @@ export type EditorBlockElement =
 	| BulletedListElement
 	| NumberedListElement
 	| ListItemElement
+	| WordListElement
 	| SubtitleElement;
 
 export type EditorInlineElement =
