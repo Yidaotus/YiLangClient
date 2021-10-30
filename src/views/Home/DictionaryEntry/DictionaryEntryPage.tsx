@@ -1,5 +1,5 @@
 import './DictionaryEntryPage.css';
-import React, { useState, useCallback } from 'react';
+import React, { useState } from 'react';
 import {
 	Card,
 	Col,
@@ -13,7 +13,6 @@ import {
 import { useHistory, useParams } from 'react-router-dom';
 import { IExcerptedDocumentLink } from 'Document/Document';
 import DocumentLink from '@components/DictionaryEntry/DocumentLink';
-import { IEntryFormFields } from '@components/DictionaryEntry/EntryForm/EntryForm';
 import DictEntryWithEdit from '@components/DictionaryEntry/DictEntryWithEdit/DictEntryWithEdit';
 import Title from 'antd/lib/typography/Title';
 import DictionaryEntry from '@components/DictionaryEntry/DictionaryEntry';

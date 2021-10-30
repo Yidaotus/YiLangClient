@@ -15,7 +15,7 @@ import { withHistory } from 'slate-history';
 import { ReactEditor, Slate, withReact } from 'slate-react';
 import { createEditor, Descendant, Editor } from 'slate';
 import useSelection from '@hooks/useSelection';
-import { useActiveLanguageConf } from '@hooks/useActiveLanguageConf';
+import { useActiveLanguageConf } from '@hooks/ConfigQueryHooks';
 import usePerstistantState from '@hooks/usePersistantState';
 import EditorDocument from './EditorDocument';
 import WordsPanel from './WordsPanel/WordsPanel';

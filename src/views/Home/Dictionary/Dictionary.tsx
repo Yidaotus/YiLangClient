@@ -7,7 +7,7 @@ import WordInput from '@components/Editor/Toolbar/Modals/WordEditor/WordEditor';
 import TagList from '@components/TagList/TagList';
 import handleError from '@helpers/Error';
 import InnerModal from '@components/InnerModal/InnerModal';
-import { useActiveLanguageConf } from '@hooks/useActiveLanguageConf';
+import { useActiveLanguageConf } from '@hooks/ConfigQueryHooks';
 
 /**
  * Renders the Dictionary into a Table.

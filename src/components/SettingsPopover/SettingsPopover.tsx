@@ -11,7 +11,8 @@ import { useHistory } from 'react-router';
 import {
 	useActiveLanguageConf,
 	useLanguageConfigs,
-} from '@hooks/useActiveLanguageConf';
+	useSetActiveLanguage,
+} from '@hooks/ConfigQueryHooks';
 
 const { Option } = Select;
 const { confirm } = Modal;
@@ -19,6 +20,7 @@ const { confirm } = Modal;
 const SettingsPopover: React.FC = () => {
 	const selectedLanguage = useActiveLanguageConf();
 	const availableLanguages = useLanguageConfigs();
+	const setActiveLanguage = useSetActiveLanguage();
 	const history = useHistory();
 
 	const documentModified = false;
@@ -58,9 +60,7 @@ const SettingsPopover: React.FC = () => {
 							(langConf) => langConf.id === configKey
 						);
 						if (languageConfig) {
-							// TODO
-							// dispatch(resetEditor());
-							// dispatch(selectLanguage(languageConfig));
+							setActiveLanguage.mutate(languageConfig.id);
 						}
 					},
 				});
@@ -69,12 +69,11 @@ const SettingsPopover: React.FC = () => {
 					(langConf) => langConf.id === configKey
 				);
 				if (languageConfig) {
-					// TODO
-					// dispatch(selectLanguage(languageConfig));
+					setActiveLanguage.mutate(languageConfig.id);
 				}
 			}
 		},
-		[availableLanguages]
+		[availableLanguages, setActiveLanguage]
 	);
 
 	return (

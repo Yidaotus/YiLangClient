@@ -28,7 +28,7 @@ const LangConfForm: React.FC<ILangFormProps> = ({ form }) => {
 			className="tag-input-form-container"
 		>
 			<h3>Name</h3>
-			<Form.Item name="key" hidden>
+			<Form.Item name="id" hidden>
 				<Input />
 			</Form.Item>
 			<Form.Item name="name">
@@ -53,6 +53,15 @@ const LangConfForm: React.FC<ILangFormProps> = ({ form }) => {
 					<>
 						{fields.map(({ key, name, fieldKey, ...restField }) => (
 							<div className="source-sub-form" key={key}>
+								<Form.Item
+									{...restField}
+									hidden
+									initialValue="0"
+									name={[name, 'priority']}
+									fieldKey={[fieldKey, 'priority']}
+								>
+									<Input value="0" />
+								</Form.Item>
 								<Form.Item
 									{...restField}
 									name={[name, 'name']}

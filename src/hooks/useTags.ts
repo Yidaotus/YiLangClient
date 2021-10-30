@@ -30,7 +30,7 @@ const useAddDictionaryTag = () => {
 		},
 		{
 			onSuccess: () => {
-				queryClient.invalidateQueries(['tags', 'list', lang]);
+				queryClient.invalidateQueries(['tags', 'list', lang?.id]);
 			},
 			onError: (e) => {
 				throw e;

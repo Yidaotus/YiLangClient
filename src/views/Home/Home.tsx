@@ -25,7 +25,7 @@ import DictionaryEntryPage from 'views/Home/DictionaryEntry/DictionaryEntryPage'
 import { UserOutlined } from '@ant-design/icons';
 import SettingsPopover from '@components/SettingsPopover/SettingsPopover';
 import handleError from '@helpers/Error';
-import { useActiveLanguageConf } from '@hooks/useActiveLanguageConf';
+import { useActiveLanguageConf } from '@hooks/ConfigQueryHooks';
 import Overview from './Overview/Overview';
 import Settings from './Settings/Settings';
 

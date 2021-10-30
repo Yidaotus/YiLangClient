@@ -17,8 +17,8 @@ import { IListDictionaryParams } from 'api/definitions/api';
 import { useHistory } from 'react-router-dom';
 import Link from 'antd/lib/typography/Link';
 import { useTags } from '@hooks/useTags';
-import { useActiveLanguageConf } from '@hooks/useActiveLanguageConf';
 import { useDictionaryEntries } from '@hooks/DictionaryQueryHooks';
+import { useActiveLanguageConf } from '@hooks/ConfigQueryHooks';
 
 type ColumnSearchMap = {
 	[key in keyof IDictionaryEntryResolved]?: string;

@@ -13,7 +13,6 @@ import {
 	useAddLanguageConfig,
 	useLanguageConfigs,
 	useRemoveLanguageConfig,
-	useUpdateConfig,
 	useUpdateLanguageConfig,
 } from '@hooks/ConfigQueryHooks';
 

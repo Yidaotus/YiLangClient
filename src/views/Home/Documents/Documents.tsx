@@ -6,7 +6,7 @@ import { Card, Col, Empty, Pagination, Row, Space, Spin } from 'antd';
 import { useHistory } from 'react-router-dom';
 import DocumentExcerpt from 'components/DocumentExcerpt/DocumentExcerpt';
 import handleError from '@helpers/Error';
-import { useActiveLanguageConf } from '@hooks/useActiveLanguageConf';
+import { useActiveLanguageConf } from '@hooks/ConfigQueryHooks';
 
 /**
  * Renders the Dictionary into a Table.

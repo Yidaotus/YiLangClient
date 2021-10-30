@@ -98,6 +98,7 @@ const useDictionaryEntries = (
 		[
 			'dictEntries',
 			'list',
+			activeLanguage?.id,
 			paginationOptions?.limit,
 			paginationOptions?.skip,
 			paginationOptions?.filter,
@@ -164,14 +165,18 @@ const useUpdateDictionaryEntry = () => {
 			return updateDictionaryEntry({ ...entryToUpdate, lang: lang.id });
 		},
 		{
-			onSuccess: (response) => {
+			onSuccess: (_, entry) => {
 				// ✅ refetch the comments list for our blog post
-				queryClient.invalidateQueries(['dictEntries', 'list', lang]);
+				queryClient.invalidateQueries([
+					'dictEntries',
+					'list',
+					lang?.id,
+				]);
 				queryClient.invalidateQueries([
 					'dictEntries',
 					'details',
 					lang?.id,
-					response,
+					entry.id,
 				]);
 			},
 			onError: (response: IApiResponse<void>) => {
@@ -196,7 +201,11 @@ const useAddDictionaryEntry = () => {
 		{
 			onSuccess: (response) => {
 				// ✅ refetch the comments list for our blog post
-				queryClient.invalidateQueries(['dictEntries', 'list', lang]);
+				queryClient.invalidateQueries([
+					'dictEntries',
+					'list',
+					lang?.id,
+				]);
 				queryClient.invalidateQueries([
 					'dictEntries',
 					'details',

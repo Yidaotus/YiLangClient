@@ -6,9 +6,15 @@ import {
 	updateLanguageConfig,
 	fetchConfig,
 	saveConfig,
+	setActiveLanguage,
 } from 'api/config.service.';
 import { IApiResponse } from 'api/definitions/api';
-import { IConfig, ILanguageConfig } from 'Document/Config';
+import {
+	IConfig,
+	IDictionaryLookupSource,
+	ILanguageConfig,
+} from 'Document/Config';
+import { act } from 'react-dom/test-utils';
 import { useMutation, useQuery, useQueryClient } from 'react-query';
 
 const useUserConfig = (): IConfig | null => {
@@ -37,6 +43,16 @@ const useActiveLanguageConf = (): ILanguageConfig | null => {
 	return activeConfig || null;
 };
 
+const useLookupSources = () => {
+	const activeLanguage = useActiveLanguageConf();
+	let lookupSources: Array<IDictionaryLookupSource> = [];
+	if (activeLanguage) {
+		lookupSources = activeLanguage.lookupSources;
+	}
+
+	return lookupSources;
+};
+
 const useRemoveLanguageConfig = () => {
 	const queryClient = useQueryClient();
 
@@ -45,12 +61,8 @@ const useRemoveLanguageConfig = () => {
 			return removeLanguageConfig(languageConfigId);
 		},
 		{
-			onSuccess: (_, languageConfigId) => {
-				queryClient.invalidateQueries([
-					'dictEntries',
-					languageConfigId,
-				]);
-				queryClient.invalidateQueries(['dictTags', languageConfigId]);
+			onSuccess: () => {
+				queryClient.invalidateQueries(['userConfig']);
 			},
 			onError: (response: IApiResponse<void>) => {
 				handleError(response.message);
@@ -66,14 +78,8 @@ const useAddLanguageConfig = () => {
 			return addLanguageConfig(languageConfig);
 		},
 		{
-			onSuccess: (response) => {
-				queryClient.invalidateQueries(['dictEntries', response]);
-				queryClient.invalidateQueries(['dictTags', response]);
-				queryClient.invalidateQueries([
-					'userConfig',
-					'language',
-					response,
-				]);
+			onSuccess: () => {
+				queryClient.invalidateQueries(['userConfig']);
 			},
 			onError: (response: IApiResponse<void>) => {
 				handleError(response.message);
@@ -96,12 +102,28 @@ const useUpdateLanguageConfig = () => {
 			return updateLanguageConfig({ id, languageConfig });
 		},
 		{
-			onSuccess: (_, languageConfig) => {
-				queryClient.invalidateQueries([
-					'dictEntries',
-					languageConfig.id,
-				]);
-				queryClient.invalidateQueries(['dictTags', languageConfig.id]);
+			onSuccess: () => {
+				queryClient.invalidateQueries(['userConfig']);
+			},
+			onError: (response: IApiResponse<void>) => {
+				handleError(response);
+			},
+		}
+	);
+};
+
+const useSetActiveLanguage = () => {
+	const queryClient = useQueryClient();
+
+	return useMutation(
+		(id: string) => {
+			return setActiveLanguage({ languageId: id });
+		},
+		{
+			onSuccess: () => {
+				queryClient.invalidateQueries(['dictEntries']);
+				queryClient.invalidateQueries(['dictTags']);
+				queryClient.invalidateQueries(['userConfig']);
 			},
 			onError: (response: IApiResponse<void>) => {
 				handleError(response.message);
@@ -121,6 +143,7 @@ const useUpdateConfig = () => {
 			onSuccess: () => {
 				queryClient.invalidateQueries(['dictEntries']);
 				queryClient.invalidateQueries(['dictTags']);
+				queryClient.invalidateQueries(['userConfig']);
 			},
 			onError: (response: IApiResponse<void>) => {
 				handleError(response.message);
@@ -136,5 +159,7 @@ export {
 	useAddLanguageConfig,
 	useUpdateLanguageConfig,
 	useRemoveLanguageConfig,
+	useSetActiveLanguage,
+	useLookupSources,
 	useUpdateConfig,
 };

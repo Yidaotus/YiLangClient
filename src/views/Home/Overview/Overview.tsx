@@ -6,7 +6,7 @@ import DocumentExcerpt from '@components/DocumentExcerpt/DocumentExcerpt';
 import { useHistory } from 'react-router';
 import DictionaryEntry from '@components/DictionaryEntry/DictionaryEntry';
 import handleError from '@helpers/Error';
-import { useActiveLanguageConf } from '@hooks/useActiveLanguageConf';
+import { useActiveLanguageConf } from '@hooks/ConfigQueryHooks';
 import { useDictionaryEntries } from '@hooks/DictionaryQueryHooks';
 
 const excerptsToLoad = 3;

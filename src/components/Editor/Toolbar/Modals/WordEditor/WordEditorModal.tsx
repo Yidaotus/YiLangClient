@@ -21,11 +21,11 @@ import DictEntryEdit, {
 	WordEditorMode,
 } from '@components/DictionaryEntry/DictEntryEdit/DictEntryEdit';
 import LookupSourceLink from '@components/LookupSourceLink';
-import { IDictionaryLookupSource } from 'Document/Config';
-import { Editor, Transforms, Text, BaseSelection } from 'slate';
+import { Editor, Transforms, Text } from 'slate';
 import { useSlateStatic } from 'slate-react';
 import { WordElement } from '@components/Editor/CustomEditor';
 import { useDictionarySearch } from '@hooks/DictionaryQueryHooks';
+import { useLookupSources } from '@hooks/ConfigQueryHooks';
 
 export type WordInputResult = Omit<IDictionaryEntry, 'firstSeen' | 'id'>;
 
@@ -60,8 +60,8 @@ const WordEditorModal: React.FC<IWordInputProps> = ({
 	const editor = useSlateStatic();
 	const dictEntryEdit = useRef<IWordInputRef>(null);
 	const [editMode, setEditMode] = useState<WordEditorMode>('word');
-	const lookupSources: Array<IDictionaryLookupSource> = [];
 	const [fetchingRoot, rootInDictionary] = useDictionarySearch(entryKey);
+	const lookupSources = useLookupSources();
 
 	const cardTitle = useMemo(() => {
 		switch (editMode) {
