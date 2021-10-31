@@ -1,10 +1,11 @@
 import areEqual from 'deep-equal';
-import { useCallback, useState } from 'react';
-import { BaseRange, BaseSelection, Editor } from 'slate';
+import { useCallback, useRef, useState, useEffect } from 'react';
+import { BaseRange, BaseSelection, Editor, Selection } from 'slate';
 
 const useSelection = (
 	editor: Editor
 ): [BaseRange | null, (newSelection: BaseSelection) => void] => {
+	const previousSelection = useRef<Selection>();
 	const [selection, setSelection] = useState(editor.selection);
 	const setSelectionOptimized = useCallback(
 		(newSelection: BaseSelection) => {
@@ -15,6 +16,10 @@ const useSelection = (
 		},
 		[selection, setSelection]
 	);
+
+	useEffect(() => {
+		previousSelection.current = selection;
+	}, [selection]);
 
 	return [selection, setSelectionOptimized];
 };

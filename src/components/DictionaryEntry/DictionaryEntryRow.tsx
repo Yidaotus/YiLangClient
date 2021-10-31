@@ -1,7 +1,7 @@
 import './DictionaryEntryRow.css';
 import React from 'react';
 import { Popover, Tag, Spin, Button } from 'antd';
-import { ExclamationCircleOutlined, SendOutlined } from '@ant-design/icons';
+import { ExclamationCircleOutlined, LinkOutlined } from '@ant-design/icons';
 import { IGrammarPoint, IDictionaryTag } from 'Document/Dictionary';
 import { useDictionaryEntryResolved } from '@hooks/DictionaryQueryHooks';
 import { Editor, Path, Transforms } from 'slate';
@@ -88,6 +88,8 @@ const DictionaryEntryRow: React.FC<IDictEntryRowProps> = (props) => {
 					</span>
 					<Button
 						className="dictentry-col"
+						shape="circle"
+						type="ghost"
 						onMouseUp={(e) => {
 							setTimeout(() => {
 								Transforms.select(editor, path);
@@ -106,7 +108,7 @@ const DictionaryEntryRow: React.FC<IDictEntryRowProps> = (props) => {
 							});
 							e.preventDefault();
 						}}
-						icon={<SendOutlined />}
+						icon={<LinkOutlined />}
 					/>
 				</div>
 			)}

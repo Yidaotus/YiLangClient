@@ -36,7 +36,6 @@ const WordList: React.FC<RenderElementProps> = ({ children, attributes }) => {
 		<div {...attributes}>
 			{children}
 			<div contentEditable={false}>
-				<h2>Words:</h2>
 				{vocabs.map(([v, path]) => (
 					<div className="dictentry-row-wrapper">
 						<DictionaryEntryRow
@@ -47,6 +46,7 @@ const WordList: React.FC<RenderElementProps> = ({ children, attributes }) => {
 						/>
 					</div>
 				))}
+				{vocabs.length < 1 && <span>No words added yet!</span>}
 			</div>
 		</div>
 	);
