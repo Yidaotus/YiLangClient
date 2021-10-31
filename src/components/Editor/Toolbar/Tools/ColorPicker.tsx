@@ -4,7 +4,6 @@ import {
 	MarkElement,
 } from '@components/Editor/CustomEditor';
 import HSLColorPicker from '@components/HSLColorPicker/HSLColorPicker';
-import useClickOutside from '@hooks/useClickOutside';
 import { Button, Tooltip } from 'antd';
 import React, { useCallback, useMemo, useRef, useState } from 'react';
 import { Editor, Transforms, Element as SlateElement } from 'slate';

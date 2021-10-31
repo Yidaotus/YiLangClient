@@ -223,7 +223,12 @@ const YiEditor: React.FC = () => {
 	}, [setWordEditorVisible]);
 
 	return (
-		<div>
+		<div
+			onMouseUp={(e) => {
+				e.preventDefault();
+			}}
+			role="none"
+		>
 			<div>
 				<Spin
 					spinning={!!loading}

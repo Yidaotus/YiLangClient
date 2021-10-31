@@ -72,7 +72,7 @@ const WordFragment: React.FC<IWordFragmentData> = ({
 	}
 
 	return (
-		<span {...attributes} contentEditable={false}>
+		<span {...attributes}>
 			{children}
 			<span contentEditable={false}>
 				<Spin wrapperClassName="inline-block" spinning={loadingEntry}>

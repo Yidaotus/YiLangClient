@@ -1,0 +1,26 @@
+.dictentry-row {
+	display: flex;
+	gap: '10px';
+	width: 100%;
+	border-bottom: solid 1px grey;
+}
+
+.dictentry-row ul {
+	list-style-type: none;
+}
+
+.dictentry-col {
+	width: 100%;
+}
+
+.dictentry-col:last-child {
+	margin-left: auto;
+	padding-left: 5px;
+	padding-right: 5px;
+	width: 50px;
+}
+
+.dictentry-row-wrapper {
+	width: 100%;
+}
+

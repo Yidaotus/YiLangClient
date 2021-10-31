@@ -1,4 +1,5 @@
 import DictionaryEntry from '@components/DictionaryEntry/DictionaryEntry';
+import DictionaryEntryRow from '@components/DictionaryEntry/DictionaryEntryRow';
 import { WordElement } from '@components/Editor/CustomEditor';
 import { Button } from 'antd';
 import React from 'react';
@@ -32,22 +33,22 @@ const WordList: React.FC<RenderElementProps> = ({ children, attributes }) => {
 	}
 
 	return (
-		<span {...attributes} style={{ display: 'flex' }}>
+		<div {...attributes}>
 			{children}
-			{vocabs.map(([v, path]) => (
-				<div>
-					<DictionaryEntry entryId={v.dictId} key={v.dictId} />
-					<Button
-						onMouseDown={(e) => {
-							Transforms.select(editor, path);
-							e.preventDefault();
-						}}
-					>
-						go to
-					</Button>
-				</div>
-			))}
-		</span>
+			<div contentEditable={false}>
+				<h2>Words:</h2>
+				{vocabs.map(([v, path]) => (
+					<div className="dictentry-row-wrapper">
+						<DictionaryEntryRow
+							entryId={v.dictId}
+							key={v.dictId}
+							path={path}
+							editor={editor}
+						/>
+					</div>
+				))}
+			</div>
+		</div>
 	);
 };
 
