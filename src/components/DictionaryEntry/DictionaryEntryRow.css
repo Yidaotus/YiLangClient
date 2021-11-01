@@ -9,6 +9,11 @@
 
 .dictentry-row ul {
 	list-style-type: none;
+	margin-bottom: 0px;
+}
+
+.dictentry-row ul li {
+	margin-bottom: 0px;
 }
 
 .dictentry-col {

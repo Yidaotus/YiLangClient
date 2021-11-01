@@ -35,7 +35,7 @@ const WordList: React.FC<RenderElementProps> = ({ children, attributes }) => {
 	return (
 		<div {...attributes}>
 			{children}
-			<div contentEditable={false}>
+			<div contentEditable={false} style={{ fontSize: '0.95rem' }}>
 				{vocabs.map(([v, path]) => (
 					<div className="dictentry-row-wrapper">
 						<DictionaryEntryRow

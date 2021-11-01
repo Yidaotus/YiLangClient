@@ -89,6 +89,7 @@ const DictionaryEntryRow: React.FC<IDictEntryRowProps> = (props) => {
 					<Button
 						className="dictentry-col"
 						shape="circle"
+						size="small"
 						type="ghost"
 						onMouseUp={(e) => {
 							setTimeout(() => {
