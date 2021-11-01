@@ -346,3 +346,64 @@ export const toggleBlockType = (
 		}
 	);
 };
+
+export const withLayout = (editor: Editor) => {
+	const { normalizeNode } = editor;
+
+	// eslint-disable-next-line no-param-reassign
+	editor.normalizeNode = ([node, path]) => {
+		if (path.length === 0) {
+			if (editor.children.length < 1) {
+				const title: TitleElement = {
+					type: 'title',
+					align: null,
+					children: [{ text: 'Untitled' }],
+				};
+				Transforms.insertNodes(editor, title, { at: path.concat(0) });
+			}
+
+			if (editor.children.length < 2) {
+				const paragraph: ParagraphElement = {
+					type: 'paragraph',
+					align: null,
+					children: [{ text: '' }],
+				};
+				Transforms.insertNodes(editor, paragraph, {
+					at: path.concat(1),
+				});
+			}
+
+			for (const [child, childPath] of SlateNode.children(editor, path)) {
+				const slateIndex = childPath[0];
+				const enforceType = (elementType: EditorElement['type']) => {
+					if (
+						SlateElement.isElement(child) &&
+						child.type !== elementType
+					) {
+						const newProperties: Partial<SlateElement> = {
+							type: elementType,
+						};
+						Transforms.setNodes(editor, newProperties, {
+							at: childPath,
+						});
+					}
+				};
+
+				switch (slateIndex) {
+					case 0:
+						enforceType('title');
+						break;
+					case 1:
+						enforceType('paragraph');
+						break;
+					default:
+						break;
+				}
+			}
+		}
+
+		return normalizeNode([node, path]);
+	};
+
+	return editor;
+};

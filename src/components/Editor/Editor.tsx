@@ -13,21 +13,30 @@ import handleError from '@helpers/Error';
 
 import { withHistory } from 'slate-history';
 import { ReactEditor, Slate, withReact } from 'slate-react';
-import { createEditor, Descendant, Editor } from 'slate';
+import {
+	createEditor,
+	Descendant,
+	Editor,
+	Element as SlateElement,
+	Node as SlateNode,
+	Transforms,
+} from 'slate';
 import useSelection from '@hooks/useSelection';
 import { useActiveLanguageConf } from '@hooks/ConfigQueryHooks';
 import usePerstistantState from '@hooks/usePersistantState';
+import { QueryClient, useQueryClient } from 'react-query';
+import { getEntry } from 'api/dictionary.service';
 import EditorDocument from './EditorDocument';
 import WordsPanel from './WordsPanel/WordsPanel';
 import DictPopupController from './Popups/DictPopupController';
 import Toolbar from './Toolbar/Toolbar';
-import { EditorElement, CustomEditor } from './CustomEditor';
+import { EditorElement, CustomEditor, withLayout } from './CustomEditor';
 import WordEditorModal from './Toolbar/Modals/WordEditor/WordEditorModal';
 
 const { TabPane } = Tabs;
 
 const withYiLang = (editor: Editor) => {
-	const { isInline, isVoid } = editor;
+	const { isInline, isVoid, normalizeNode } = editor;
 	const inlineTypes: Array<EditorElement['type']> = [
 		'word',
 		'mark',
@@ -51,6 +60,29 @@ const withYiLang = (editor: Editor) => {
 		return voidTypes.includes(element.type) ? true : isVoid(element);
 	};
 
+	/* 
+	editor.normalizeNode = async (entry) => {
+		// If the element is a paragraph, ensure its children are valid.
+
+		if (entry) {
+			const [node, path] = entry;
+			if (SlateElement.isElement(node) && node.type === 'word') {
+				const id = node.dictId;
+				const dictEntry = await queryClient.fetchQuery(
+					['dictEntries', 'details', activeLanguage, id],
+					() => {
+						return id ? getEntry({ id }) : null;
+					}
+				);
+				if (!dictEntry) {
+					Transforms.unwrapNodes(editor, { at: path });
+				}
+			}
+		}
+		// Fall back to the original `normalizeNode` to enforce other constraints.
+		normalizeNode(entry);
+	}; */
+
 	return editor;
 };
 
@@ -58,7 +90,9 @@ const YiEditor: React.FC = () => {
 	const editorContainer = useRef(null);
 	const [loading, setLoading] = useState<string | null>(null);
 	const [wordEditorVisible, setWordEditorVisible] = useState(false);
+	const activeLanguage = useActiveLanguageConf();
 	const [selectedKey, setSelectedKey] = useState('');
+	const queryClient = useQueryClient();
 	const currentLanguage = useActiveLanguageConf();
 
 	const save = useCallback(async () => {
@@ -113,7 +147,9 @@ const YiEditor: React.FC = () => {
 
 	const editor = useMemo(
 		() =>
-			withReact(withHistory(withYiLang(createEditor()))) as CustomEditor,
+			withReact(
+				withYiLang(withLayout(withHistory(createEditor())))
+			) as CustomEditor,
 		[]
 	);
 	const [selection, setSelection] = useSelection(editor);
@@ -241,10 +277,20 @@ const YiEditor: React.FC = () => {
 								editor={editor}
 								value={editorNodes}
 								onChange={(newValue) => {
-									if (newValue !== editorNodes) {
+									const isAstChange = editor.operations.some(
+										(op) => op.type !== 'set_selection'
+									);
+									const isSelectionChanged =
+										editor.operations.some(
+											(op) => op.type === 'set_selection'
+										);
+									if (isSelectionChanged) {
+										setSelection(editor.selection);
+									}
+									if (isAstChange) {
+										// TODO all examples always set newValue? Bug?
 										setEditorNodes(newValue);
 									}
-									setSelection(editor.selection);
 								}}
 							>
 								<Tabs
