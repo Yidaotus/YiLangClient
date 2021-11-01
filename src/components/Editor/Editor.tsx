@@ -278,7 +278,6 @@ const YiEditor: React.FC = () => {
 											<WordEditorModal
 												visible={wordEditorVisible}
 												close={closeWordEditorModal}
-												entryKey={selectedKey}
 											/>
 											<DictPopupController
 												rootElement={editorContainer}

@@ -14,7 +14,6 @@ import {
 	ReadOutlined,
 	StopOutlined,
 	RollbackOutlined,
-	QuestionCircleOutlined,
 } from '@ant-design/icons';
 import DictEntryEdit, {
 	IWordInputRef,
@@ -33,54 +32,20 @@ export type WordInputResult = Omit<IDictionaryEntry, 'firstSeen' | 'id'>;
 export interface IWordInputProps {
 	visible: boolean;
 	close: () => void;
-	entryKey: string;
 }
 
-const { confirm } = Modal;
-
-const WordEditorModal: React.FC<IWordInputProps> = ({
-	visible,
-	close,
-	entryKey,
-}) => {
+const WordEditorModal: React.FC<IWordInputProps> = ({ visible, close }) => {
 	const editor = useSlateStatic();
 	const visibleBefore = usePrevious(visible);
 	const dictEntryEdit = useRef<IWordInputRef>(null);
 	const [editMode, setEditMode] = useState<WordEditorMode>('word');
 	const [savedSelection, setSavedSelection] = useState<Selection>();
+	const [entryKey, setEntryKey] = useState('');
+	const [entryInDictionary, setEntryInDictionary] =
+		useState<IDictionaryEntry>();
 	const [fetchingRoot, rootInDictionary] = useDictionarySearch(entryKey);
 	const [markOtherInstances, setMarkOtherInstances] = useState(true);
 	const lookupSources = useLookupSources();
-
-	const showConfirm = useCallback(
-		(root: string, cancel: () => void, ok: () => void) => {
-			confirm({
-				title: 'Insert word with found entry?',
-				icon: <QuestionCircleOutlined />,
-				content: (
-					<div>
-						<div>{`${root} is already in your dictionary! Do you want to insert it?`}</div>
-						<Checkbox
-							checked={markOtherInstances}
-							onChange={(e) => {
-								setMarkOtherInstances(!markOtherInstances);
-							}}
-						>
-							Mark all instances
-						</Checkbox>
-					</div>
-				),
-				onOk() {
-					ok();
-				},
-				onCancel() {
-					cancel();
-				},
-				centered: true,
-			});
-		},
-		[markOtherInstances]
-	);
 
 	const cardTitle = useMemo(() => {
 		switch (editMode) {
@@ -170,35 +135,25 @@ const WordEditorModal: React.FC<IWordInputProps> = ({
 	);
 
 	useEffect(() => {
-		if (visible && !visibleBefore) {
+		if (visible && !visibleBefore && editor.selection) {
 			setSavedSelection(editor.selection);
-
-			const foundInDictionary = rootInDictionary.find(
-				(entry) => entry.key === entryKey
-			);
-			if (foundInDictionary) {
-				showConfirm(
-					entryKey,
-					() => {
-						close();
-					},
-					() => {
-						wrapWithWord(foundInDictionary.id);
-						close();
-					}
-				);
-			}
+			const key = Editor.string(editor, editor.selection, {
+				voids: true,
+			});
+			setEntryKey(key);
 		}
-	}, [
-		close,
-		entryKey,
-		rootInDictionary,
-		wrapWithWord,
-		visible,
-		showConfirm,
-		visibleBefore,
-		editor.selection,
-	]);
+	}, [editor, editor.selection, visible, visibleBefore]);
+
+	useEffect(() => {
+		const foundInDictionary = rootInDictionary.find(
+			(entry) => entry.key === entryKey
+		);
+		if (foundInDictionary) {
+			setEntryInDictionary(foundInDictionary);
+		} else {
+			setEntryInDictionary(undefined);
+		}
+	}, [entryKey, rootInDictionary]);
 
 	const finish = async () => {
 		if (dictEntryEdit.current) {
@@ -208,6 +163,10 @@ const WordEditorModal: React.FC<IWordInputProps> = ({
 				close();
 			}
 		}
+		if (entryInDictionary) {
+			wrapWithWord(entryInDictionary.id);
+			close();
+		}
 	};
 
 	const cancel = () => {
@@ -216,6 +175,9 @@ const WordEditorModal: React.FC<IWordInputProps> = ({
 			if (isDone) {
 				close();
 			}
+		}
+		if (entryInDictionary) {
+			close();
 		}
 	};
 
@@ -262,14 +224,22 @@ const WordEditorModal: React.FC<IWordInputProps> = ({
 		>
 			<Spin spinning={fetchingRoot}>
 				<div className="word-input-root-form">
-					<DictEntryEdit
-						ref={dictEntryEdit}
-						entryKey={entryKey}
-						stateChanged={setEditMode}
-					/>
+					{entryInDictionary ? (
+						<span>
+							{entryInDictionary.key} already found in Dictionary.
+							Use found entry instead?
+						</span>
+					) : (
+						<DictEntryEdit
+							ref={dictEntryEdit}
+							entryKey={entryKey}
+							stateChanged={setEditMode}
+						/>
+					)}
 					<Checkbox
+						style={{ marginLeft: 'auto' }}
 						checked={markOtherInstances}
-						onChange={(e) => {
+						onChange={() => {
 							setMarkOtherInstances(!markOtherInstances);
 						}}
 					>
