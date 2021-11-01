@@ -3,7 +3,7 @@ import {
 	EditorInlineElement,
 	isNodeInSelection,
 } from '@components/Editor/CustomEditor';
-import { Editor, Transforms, Element as SlateElement } from 'slate';
+import { Editor, Transforms, Element as SlateElement, Range } from 'slate';
 import ToolbarButton, { IToolbarItem } from './ToolbarButton';
 
 export interface IToolbarWrapperItem extends IToolbarItem {
@@ -47,6 +47,10 @@ const ElementButton: React.FC<IToolbarWrapperItem> = ({
 				}
 				onChange();
 			}}
+			enabled={
+				isActive ||
+				(!!editor.selection && !Range.isCollapsed(editor.selection))
+			}
 			active={isActive}
 			icon={icon}
 		/>

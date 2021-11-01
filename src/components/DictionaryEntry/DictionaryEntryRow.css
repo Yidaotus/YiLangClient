@@ -7,9 +7,30 @@
 	padding-bottom: 5px;
 }
 
+.dictentry-spelling::before {
+	content: '(';
+}
+
+.dictentry-spelling::after {
+	content: ')';
+}
+
+.dictentry-comment {
+	color: grey;
+}
+
+.dictentry-spelling {
+	font-size: 0.8em;
+	color: grey;
+	margin-left: 5px;
+}
+
 .dictentry-row ul {
 	list-style-type: none;
 	margin-bottom: 0px;
+	padding-left: 0px;
+	display: flex;
+	flex-wrap: wrap;
 }
 
 .dictentry-row ul li {
@@ -17,6 +38,7 @@
 }
 
 .dictentry-col {
+	margin-left: 5px;
 	width: 100%;
 }
 
@@ -30,4 +52,3 @@
 .dictentry-row-wrapper {
 	width: 100%;
 }
-

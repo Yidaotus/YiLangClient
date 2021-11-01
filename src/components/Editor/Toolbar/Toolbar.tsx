@@ -1,7 +1,7 @@
 import './Toolbar.css';
 import React, { useRef, useState } from 'react';
 import { useSlateStatic } from 'slate-react';
-import { BaseSelection } from 'slate';
+import { BaseSelection, Range as SlateRange } from 'slate';
 import {
 	AlignCenterOutlined,
 	AlignLeftOutlined,
@@ -30,6 +30,7 @@ import BlockButton from './Tools/BlockButton';
 import { isNodeAtSelection } from '../CustomEditor';
 import InsertButton from './Tools/InsertButton';
 import ElementButton from './Tools/ElementButton';
+import WordButton from './Tools/WordButton';
 
 export interface IToolbarProps {
 	selection: BaseSelection;
@@ -75,15 +76,7 @@ const Toolbar: React.FC<IToolbarProps> = ({ selection, showWordEditor }) => {
 				e.preventDefault();
 			}}
 		>
-			<ToolbarButton
-				icon={<TranslationOutlined />}
-				title="wordEditor"
-				action={() => {
-					if (!wordNodeSelected) {
-						showWordEditor();
-					}
-				}}
-			/>
+			<WordButton showWordEditor={showWordEditor} {...sharedProps} />
 			<ElementButton
 				type="sentence"
 				title="Sentence"

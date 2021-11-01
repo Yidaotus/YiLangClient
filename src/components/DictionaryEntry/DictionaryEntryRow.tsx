@@ -1,11 +1,16 @@
 import './DictionaryEntryRow.css';
 import React from 'react';
 import { Popover, Tag, Spin, Button } from 'antd';
-import { ExclamationCircleOutlined, LinkOutlined } from '@ant-design/icons';
+import {
+	BookOutlined,
+	ExclamationCircleOutlined,
+	LinkOutlined,
+} from '@ant-design/icons';
 import { IGrammarPoint, IDictionaryTag } from 'Document/Dictionary';
 import { useDictionaryEntryResolved } from '@hooks/DictionaryQueryHooks';
 import { Editor, Path, Transforms } from 'slate';
 import { ReactEditor } from 'slate-react';
+import { useHistory } from 'react-router';
 
 type IDictEntryRowProps = {
 	editor: Editor;
@@ -60,6 +65,7 @@ const EntryTag: React.FC<{ tag: IDictionaryTag }> = ({ tag }) => {
 const DictionaryEntryRow: React.FC<IDictEntryRowProps> = (props) => {
 	const { entryId, path, editor } = props;
 	const [loading, entryResolved] = useDictionaryEntryResolved(entryId);
+	const history = useHistory();
 
 	return (
 		<>
@@ -68,12 +74,16 @@ const DictionaryEntryRow: React.FC<IDictEntryRowProps> = (props) => {
 					<span className="dictentry-col">
 						{entryResolved.key}
 						{entryResolved.spelling && (
-							<span>({entryResolved.spelling})</span>
+							<span className="dictentry-spelling">
+								{entryResolved.spelling}
+							</span>
 						)}
 					</span>
-					<span className="dictentry-col">
-						{entryResolved.comment}
-					</span>
+					{entryResolved.comment && (
+						<span className="dictentry-col dictentry-comment">
+							{entryResolved.comment}
+						</span>
+					)}
 					<span className="dictentry-col">
 						{entryResolved.translations.join(', ')}
 					</span>
@@ -86,6 +96,16 @@ const DictionaryEntryRow: React.FC<IDictEntryRowProps> = (props) => {
 							))}
 						</ul>
 					</span>
+					<Button
+						className="dictentry-col"
+						shape="circle"
+						size="small"
+						type="ghost"
+						onMouseUp={() => {
+							history.push(`dictionary/${entryResolved.id}`);
+						}}
+						icon={<BookOutlined />}
+					/>
 					<Button
 						className="dictentry-col"
 						shape="circle"
