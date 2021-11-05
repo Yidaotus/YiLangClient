@@ -26,7 +26,7 @@ const useAddDictionaryTag = () => {
 			if (!lang) {
 				throw new Error('No Language selected!');
 			}
-			return addTag({ ...newTag, lang: lang.id });
+			return addTag({ ...newTag, lang: lang.id }, lang.id);
 		},
 		{
 			onSuccess: () => {

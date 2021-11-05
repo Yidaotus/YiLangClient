@@ -66,7 +66,7 @@ const DocumentExcerpt: React.FC<IDocumentExcerptProps> = ({
 				<Meta
 					title={
 						<Link onClick={() => selectDocument(excerpt.id)}>
-							{excerpt.title}
+							{excerpt.title || 'Doc'}
 						</Link>
 					}
 					description={excerpt.updatedAt.toLocaleString()}

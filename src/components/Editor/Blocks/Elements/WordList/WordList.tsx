@@ -1,16 +1,11 @@
-import DictionaryEntry from '@components/DictionaryEntry/DictionaryEntry';
 import DictionaryEntryRow from '@components/DictionaryEntry/DictionaryEntryRow';
 import { WordElement } from '@components/Editor/CustomEditor';
-import { Button } from 'antd';
 import React from 'react';
 import {
-	Editor,
 	Element as SlateElement,
-	ElementEntry,
 	Node as SlateNode,
 	NodeEntry,
 	Path,
-	Transforms,
 } from 'slate';
 import { RenderElementProps, useSlate } from 'slate-react';
 

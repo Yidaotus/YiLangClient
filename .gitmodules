@@ -3,4 +3,4 @@
 	url = https://github.com/Yidaotus/YiLang-API.git
 [submodule "src/Document"]
 	path = src/Document
-	url = git@github.com:Yidaotus/YiLang_Document.git
+	url = https://github.com/Yidaotus/YiLang_Document.git

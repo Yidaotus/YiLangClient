@@ -1,4 +1,4 @@
-import { IConfig, ILanguageConfig } from 'Document/Config';
+import { IConfig, IEditorConfig, ILanguageConfig } from 'Document/Config';
 import { IApiResponse, ISetActiveLangParams } from './definitions/api';
 import ApiService from './api.service';
 
@@ -30,6 +30,14 @@ const addLanguageConfig = async (
 	return response.data.payload as string;
 };
 
+const updateEditorConfig = async ({
+	editorConfig,
+}: {
+	editorConfig: Partial<IEditorConfig>;
+}): Promise<void> => {
+	await ApiService.post<IApiResponse<void>>('config/editor/', editorConfig);
+};
+
 const updateLanguageConfig = async ({
 	id,
 	languageConfig,
@@ -54,4 +62,5 @@ export {
 	addLanguageConfig,
 	removeLanguageConfig,
 	updateLanguageConfig,
+	updateEditorConfig,
 };

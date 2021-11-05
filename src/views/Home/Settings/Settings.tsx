@@ -1,9 +1,14 @@
 import './Settings.css';
-import { TranslationOutlined, UserOutlined } from '@ant-design/icons';
+import {
+	EditOutlined,
+	TranslationOutlined,
+	UserOutlined,
+} from '@ant-design/icons';
 import { PageHeader, Tabs } from 'antd';
 import React from 'react';
 import { useHistory } from 'react-router';
 import LanguageConfig from './LanguageConfig/LanguageConfig';
+import EditorConfig from './EditorConfig/EditorConfig';
 
 const { TabPane } = Tabs;
 
@@ -34,11 +39,21 @@ const Settings: React.FC = () => {
 				<TabPane
 					tab={
 						<span>
+							<EditOutlined /> Editor
+						</span>
+					}
+					key="2"
+				>
+					<EditorConfig />
+				</TabPane>
+				<TabPane
+					tab={
+						<span>
 							<TranslationOutlined />
 							Languages
 						</span>
 					}
-					key="2"
+					key="3"
 					style={{ height: '100%' }}
 				>
 					<LanguageConfig />

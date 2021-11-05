@@ -1,5 +1,4 @@
-import { IDocument } from 'Document/Document';
-
+import { IDocumentSerialized } from 'Document/Document';
 import {
 	IApiResponse,
 	IListDocumentResult,
@@ -11,15 +10,38 @@ const remove = async (id: string): Promise<void> => {
 	await ApiService.delete<IApiResponse<void>>(`documents/${id}`);
 };
 
-const save = async (document: IDocument): Promise<void> => {
-	await ApiService.post<IApiResponse<void>>('documents', document);
+const create = async (
+	document: Omit<
+		IDocumentSerialized,
+		'id' | 'createdAt' | 'updatedAt' | 'title'
+	>
+): Promise<string> => {
+	const res = await ApiService.post<IApiResponse<string>>(
+		'documents',
+		document
+	);
+	return res.data.payload as string;
 };
 
-const getDocument = async (id: string): Promise<IDocument> => {
-	const response = await ApiService.get<IApiResponse<IDocument>>(
+const update = async (
+	id: string,
+	// TODO serialized doc should not be partial use other helper
+	document: Partial<
+		Omit<
+			IDocumentSerialized,
+			'id' | 'createdAt' | 'updatedAt' | 'serializedDocument'
+		>
+	> &
+		Pick<IDocumentSerialized, 'serializedDocument'>
+): Promise<void> => {
+	await ApiService.post<IApiResponse<void>>(`documents/${id}`, document);
+};
+
+const getDocument = async (id: string): Promise<IDocumentSerialized> => {
+	const response = await ApiService.get<IApiResponse<IDocumentSerialized>>(
 		`documents/${id}`
 	);
-	return response.data.payload as IDocument;
+	return response.data.payload as IDocumentSerialized;
 };
 
 const listDocuments = async (
@@ -41,4 +63,4 @@ const listDocuments = async (
 	} as IListDocumentResult;
 };
 
-export { save, getDocument, listDocuments, remove };
+export { create, update, getDocument, listDocuments, remove };

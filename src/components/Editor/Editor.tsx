@@ -7,30 +7,29 @@ import React, {
 	useState,
 } from 'react';
 
-import { Tabs, Spin, notification } from 'antd';
+import { Tabs, Spin, Button } from 'antd';
 
 import handleError from '@helpers/Error';
 
 import { withHistory } from 'slate-history';
 import { ReactEditor, Slate, withReact } from 'slate-react';
-import {
-	createEditor,
-	Descendant,
-	Editor,
-	Element as SlateElement,
-	Node as SlateNode,
-	Transforms,
-} from 'slate';
+import { createEditor, Descendant, Editor } from 'slate';
 import useSelection from '@hooks/useSelection';
 import { useActiveLanguageConf } from '@hooks/ConfigQueryHooks';
-import usePerstistantState from '@hooks/usePersistantState';
-import { QueryClient, useQueryClient } from 'react-query';
-import { getEntry } from 'api/dictionary.service';
+import { useQueryClient } from 'react-query';
+import { useParams } from 'react-router-dom';
+import useDebouncedCallback from '@hooks/useDebounceCallback';
 import EditorDocument from './EditorDocument';
 import WordsPanel from './WordsPanel/WordsPanel';
 import DictPopupController from './Popups/DictPopupController';
 import Toolbar from './Toolbar/Toolbar';
 import { EditorElement, CustomEditor, withLayout } from './CustomEditor';
+import {
+	create as createDocumentService,
+	update as updateDocumentService,
+	remove as removeDocumentService,
+	getDocument as getDocumentService,
+} from '../../api/document.service';
 import WordEditorModal from './Toolbar/Modals/WordEditor/WordEditorModal';
 
 const { TabPane } = Tabs;
@@ -86,64 +85,17 @@ const withYiLang = (editor: Editor) => {
 	return editor;
 };
 
+const AVERAGE_ACTIONS_PER_COMMAND = 4;
+const SAVE_EVERY_ACTIONS = 5 * AVERAGE_ACTIONS_PER_COMMAND;
+const UPDATE_DEBOUNCE_TIME = 5000;
+
 const YiEditor: React.FC = () => {
 	const editorContainer = useRef(null);
 	const [loading, setLoading] = useState<string | null>(null);
+	const [actionCount, setActionCount] = useState(0);
 	const [wordEditorVisible, setWordEditorVisible] = useState(false);
 	const activeLanguage = useActiveLanguageConf();
-	const [selectedKey, setSelectedKey] = useState('');
-	const queryClient = useQueryClient();
-	const currentLanguage = useActiveLanguageConf();
-
-	const save = useCallback(async () => {
-		setLoading('Saving Dictionary');
-		try {
-			setLoading('Saving Dictionary');
-			// await dispatch(saveDictionary());
-			setLoading('Saving Tags');
-			// await dispatch(saveTags());
-			setLoading('Saving Document');
-			// await dispatch(saveDocument());
-			notification.open({
-				message: 'Done',
-				description: 'Document saved',
-				type: 'success',
-			});
-		} catch (e) {
-			handleError(e);
-		}
-		setLoading(null);
-	}, []);
-
-	const createEditorDocument = useCallback(async () => {
-		try {
-			// await dispatch(loadDocument({ type: 'new' }));
-			notification.open({
-				message: 'Done',
-				description: 'New Document created',
-				type: 'success',
-			});
-		} catch (e) {
-			handleError(e);
-		}
-	}, []);
-
-	const resetEditorDocument = useCallback(async () => {
-		try {
-			// dispatch(resetEditor());
-			// dispatch(resetDictionary());
-			if (currentLanguage) {
-				// await dispatch(fetchTags(currentLanguage.key));
-			}
-			notification.open({
-				message: 'Done',
-				description: 'Editor Reset',
-				type: 'success',
-			});
-		} catch (e) {
-			handleError(e);
-		}
-	}, [currentLanguage]);
+	const { id } = useParams<{ id: string }>();
 
 	const editor = useMemo(
 		() =>
@@ -154,94 +106,67 @@ const YiEditor: React.FC = () => {
 	);
 	const [selection, setSelection] = useSelection(editor);
 
-	const [editorNodes, setEditorNodes] = usePerstistantState<Descendant[]>(
-		'editor',
-		[
-			{
-				type: 'title',
-				align: null,
-				children: [
-					{
-						text: 'イチゴの中はどうなっている？',
-					},
-				],
-			},
-			{
-				type: 'subtitle',
-				align: null,
-				children: [
-					{
-						text: 'イチゴの中はどうなっている？',
-					},
-				],
-			},
-			{
-				type: 'image',
-				align: null,
-				src: 'https://www.nhk.or.jp/das/image/D0005110/D0005110342_00000_C_001.jpg',
-				caption: 'lul123',
-				children: [{ text: '' }],
-			},
-			{
-				type: 'blockQuote',
-				align: null,
-				children: [
-					{
-						text: 'Lorem ipsum dolar sit!',
-					},
-				],
-			},
-			{
-				type: 'paragraph',
-				align: null,
-				children: [
-					{
-						text: '今回のミカタは「中を見てみる」。イチゴの中はどうなっているか、街の人に聞いてみました。まず、男の子。「こんな感じだ と思います。まわりが赤くなって、中に粒（つぶ）がある」。中にツブツブ？　続いて女の子。',
-					},
-					{
-						text: '真ん中が白っぽくて空洞（くうどう）になっていて、まわりは赤い」。中に空洞？　若い女の人は、「真ん中が真っ白で、徐々（じょじょ）に赤くなっていく感じ」。真ん中は白い？　みんながかいたイチゴの中。中にツブツブ、中に空洞、真ん中が白い、スジがある…。実際はどうなっているのでしょう。',
-					},
-				],
-			},
-			{
-				type: 'bulletedList',
-				children: [
-					{
-						type: 'listItem',
-						children: [
-							{
-								text: 'First',
-							},
-						],
-					},
-					{
-						type: 'listItem',
-						children: [
-							{
-								text: 'Second',
-							},
-						],
-					},
-					{
-						type: 'listItem',
-						children: [
-							{
-								text: 'Third',
-							},
-						],
-					},
-				],
-			},
-			{
-				type: 'wordList',
-				children: [
-					{
-						text: '',
-					},
-				],
-			},
-		]
-	);
+	const [editorNodes, setEditorNodes] = useState<Array<Descendant>>([]);
+
+	useEffect(() => {
+		const fetch = async () => {
+			try {
+				setLoading('Fetching Document');
+				const doc = await getDocumentService(id);
+				setLoading('Decoding Document');
+				const deserializedDocument = JSON.parse(
+					doc.serializedDocument
+				) as Descendant[];
+				setEditorNodes(deserializedDocument);
+			} catch (error) {
+				handleError(error);
+			} finally {
+				setLoading(null);
+			}
+		};
+		fetch();
+	}, [id, setEditorNodes]);
+
+	const deleteDocument = useCallback(async () => {
+		try {
+			setLoading('Deleting Document');
+			await removeDocumentService(id);
+		} catch (error) {
+			handleError(error);
+		} finally {
+			setLoading(null);
+		}
+	}, [id]);
+
+	// TODO throttle!
+	const updateDocument = useCallback(async () => {
+		if (activeLanguage) {
+			try {
+				setLoading('Saving Document');
+				const title = Editor.string(editor, [0]);
+				const serializedDocument = JSON.stringify(editorNodes);
+				await updateDocumentService(id, {
+					title,
+					serializedDocument,
+				});
+				setLoading('Saving Document');
+			} catch (error) {
+				handleError(error);
+			} finally {
+				setLoading(null);
+			}
+		}
+	}, [activeLanguage, editor, editorNodes, id]);
+
+	const createDocument = useCallback(async () => {
+		if (activeLanguage) {
+			const serializedDocument = JSON.stringify(editorNodes);
+			const newDocId = await createDocumentService({
+				lang: activeLanguage.id,
+				serializedDocument,
+			});
+		}
+	}, [activeLanguage, editorNodes]);
 
 	useEffect(() => {
 		if (selection) {
@@ -253,6 +178,39 @@ const YiEditor: React.FC = () => {
 			}
 		}
 	}, [editor, selection]);
+
+	useEffect(() => {
+		if (actionCount >= SAVE_EVERY_ACTIONS) {
+			updateDocument();
+			setActionCount(0);
+		}
+	}, [actionCount, updateDocument]);
+
+	const onEditorChange = useCallback(
+		(newValue) => {
+			const isAstChange = editor.operations.some(
+				(op) => op.type !== 'set_selection'
+			);
+			const isSelectionChanged = editor.operations.some(
+				(op) => op.type === 'set_selection'
+			);
+			if (isSelectionChanged) {
+				setSelection(editor.selection);
+			}
+			if (isAstChange) {
+				// TODO all examples always set newValue? Bug?
+				setEditorNodes(newValue);
+				setActionCount(
+					(count) =>
+						count +
+						editor.operations.filter(
+							(op) => op.type !== 'set_selection'
+						).length
+				);
+			}
+		},
+		[editor.operations, editor.selection, setSelection]
+	);
 
 	const closeWordEditorModal = useCallback(() => {
 		setWordEditorVisible(false);
@@ -276,22 +234,7 @@ const YiEditor: React.FC = () => {
 							<Slate
 								editor={editor}
 								value={editorNodes}
-								onChange={(newValue) => {
-									const isAstChange = editor.operations.some(
-										(op) => op.type !== 'set_selection'
-									);
-									const isSelectionChanged =
-										editor.operations.some(
-											(op) => op.type === 'set_selection'
-										);
-									if (isSelectionChanged) {
-										setSelection(editor.selection);
-									}
-									if (isAstChange) {
-										// TODO all examples always set newValue? Bug?
-										setEditorNodes(newValue);
-									}
-								}}
+								onChange={onEditorChange}
 							>
 								<Tabs
 									defaultActiveKey="1"
@@ -308,16 +251,6 @@ const YiEditor: React.FC = () => {
 											<Toolbar
 												selection={selection}
 												showWordEditor={() => {
-													const key = selection
-														? Editor.string(
-																editor,
-																selection,
-																{
-																	voids: true,
-																}
-														  )
-														: '';
-													setSelectedKey(key);
 													setWordEditorVisible(true);
 												}}
 											/>
@@ -336,6 +269,15 @@ const YiEditor: React.FC = () => {
 										<WordsPanel />
 									</TabPane>
 									<TabPane tab="Debug" key="3">
+										<Button onClick={createDocument}>
+											Create
+										</Button>
+										<Button onClick={updateDocument}>
+											Update
+										</Button>
+										<Button onClick={deleteDocument}>
+											Delete
+										</Button>
 										<pre>
 											{JSON.stringify(
 												editor.children,

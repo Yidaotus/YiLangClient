@@ -8,32 +8,45 @@ import {
 } from './definitions/api';
 import ApiService from './api.service';
 
-const deleteDictionaryEntry = async (id: string): Promise<void> => {
-	await ApiService.delete<IApiResponse<void>>(`dictionary/entries/${id}`);
+const deleteDictionaryEntry = async (
+	id: string,
+	language: string
+): Promise<void> => {
+	await ApiService.delete<IApiResponse<void>>(
+		`dictionary/${language}/entries/${id}`
+	);
 };
 
 const updateDictionaryEntry = async (
-	entryToUpdate: IDictionaryEntry
+	entryToUpdate: IDictionaryEntry,
+	language: string
 ): Promise<void> => {
 	await ApiService.post<IApiResponse<void>>(
-		`dictionary/entries/${entryToUpdate.id}`,
+		`dictionary/${language}/entries/${entryToUpdate.id}`,
 		entryToUpdate
 	);
 };
 
 const addDictionaryEntry = async (
-	addParams: IAddDictionaryEntryParams
+	addParams: IAddDictionaryEntryParams,
+	language: string
 ): Promise<string> => {
 	const response = await ApiService.post<IApiResponse<string>>(
-		`dictionary/entries`,
+		`dictionary/${language}/entries`,
 		addParams
 	);
 	return response.data.payload as string;
 };
 
-const getEntry = async ({ id }: { id: string }): Promise<IDictionaryEntry> => {
+const getEntry = async ({
+	id,
+	language,
+}: {
+	id: string;
+	language: string;
+}): Promise<IDictionaryEntry> => {
 	const response = await ApiService.get<IApiResponse<IDictionaryEntry>>(
-		`dictionary/entries/${id}`
+		`dictionary/${language}/entries/${id}`
 	);
 	return response.data.payload as IDictionaryEntry;
 };
@@ -42,7 +55,7 @@ const listDictionary = async (
 	listParams: IListDictionaryParams
 ): Promise<IListDictionaryResult> => {
 	const response = await ApiService.post<IApiResponse<IListDictionaryResult>>(
-		'dictionary/entries/list',
+		`dictionary/${listParams.lang}/entries/list`,
 		listParams
 	);
 	const list = response.data.payload;
@@ -54,7 +67,7 @@ const searchDictionary = async (
 ): Promise<Array<IDictionaryEntry>> => {
 	const response = await ApiService.post<
 		IApiResponse<Array<IDictionaryEntry>>
-	>(`dictionary/entries/search`, searchParams);
+	>(`dictionary/${searchParams.lang}/entries/search`, searchParams);
 	const entries = response.data.payload;
 	return entries as Array<IDictionaryEntry>;
 };

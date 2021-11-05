@@ -40,7 +40,7 @@ const HomeView: React.FC = () => {
 	const locationMap = {
 		home: `${url}`,
 		user: `${url}/settings`,
-		editor: `${url}/editor`,
+		editor: `${url}/editor/:id`,
 		dicitonary: `${url}/dictionary`,
 		documents: `${url}/docs`,
 		dicitonaryEntry: `${url}/dictionary/:entryId`,
