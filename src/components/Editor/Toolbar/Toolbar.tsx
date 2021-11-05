@@ -1,7 +1,7 @@
 import './Toolbar.css';
 import React, { useRef, useState } from 'react';
 import { useSlateStatic } from 'slate-react';
-import { BaseSelection, Editor, Range as SlateRange } from 'slate';
+import { BaseSelection, Range as SlateRange } from 'slate';
 import {
 	AlignCenterOutlined,
 	AlignLeftOutlined,
@@ -30,7 +30,6 @@ import ToolbarMenu from './Tools/ToolbarMenu';
 import TextColors from './TextColors';
 import ColorButton from './Tools/ColorButton';
 import BlockButton from './Tools/BlockButton';
-import { isNodeAtSelection } from '../CustomEditor';
 import InsertButton from './Tools/InsertButton';
 import ElementButton from './Tools/ElementButton';
 import InputWrapperButton from './Tools/InputWrapperButton';
@@ -69,12 +68,6 @@ const Toolbar: React.FC<IToolbarProps> = ({
 			setMenus({ [type]: !menus[type] });
 		},
 	};
-
-	const wordNodeSelected = isNodeAtSelection(
-		editor,
-		editor.selection,
-		'word'
-	);
 
 	const lookupButtonActive =
 		!!editor.selection && !SlateRange.isCollapsed(editor.selection);
@@ -122,13 +115,7 @@ const Toolbar: React.FC<IToolbarProps> = ({
 				{...menuProps}
 			>
 				{lookupSources.map((luSource) => (
-					<LookupSourceButton
-						source={luSource}
-						searchTerm={Editor.string(
-							editor,
-							editor.selection || []
-						)}
-					/>
+					<LookupSourceButton source={luSource} />
 				))}
 			</ToolbarMenu>
 			<Divider
