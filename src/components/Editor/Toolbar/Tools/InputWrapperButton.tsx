@@ -1,24 +1,25 @@
 import React from 'react';
 import { isNodeInSelection } from '@components/Editor/CustomEditor';
 import { Editor, Transforms, Element as SlateElement, Range } from 'slate';
-import { TranslationOutlined } from '@ant-design/icons';
 import ToolbarButton from './ToolbarButton';
 
-export interface IWordButtonProps {
+export interface IInputWrapperButtonProps {
 	editor: Editor;
 	onChange: () => void;
-	showWordEditor: () => void;
+	type: SlateElement['type'];
+	title: string;
+	icon: React.ReactNode;
+	showInput: () => void;
 }
 
-const WordButton: React.FC<IWordButtonProps> = ({
+const InputWrapperButton: React.FC<IInputWrapperButtonProps> = ({
 	editor,
 	onChange,
-	showWordEditor,
+	type,
+	title,
+	icon,
+	showInput,
 }): JSX.Element => {
-	const type = 'word';
-	const title = 'Word';
-	const icon = <TranslationOutlined />;
-
 	const isActive = isNodeInSelection(editor, editor.selection, type);
 
 	return (
@@ -32,7 +33,7 @@ const WordButton: React.FC<IWordButtonProps> = ({
 						voids: true,
 					});
 				} else {
-					showWordEditor();
+					showInput();
 				}
 				onChange();
 			}}
@@ -46,4 +47,4 @@ const WordButton: React.FC<IWordButtonProps> = ({
 	);
 };
 
-export default WordButton;
+export default InputWrapperButton;

@@ -8,7 +8,9 @@ export interface IToolbarMenuProps {
 	title: string;
 	menus: Record<string, boolean>;
 	onMenuToggle: (type: string) => void;
+	flow?: 'vertical' | 'horizontal';
 	active?: boolean;
+	enabled?: boolean;
 }
 
 const ToolbarMenu: React.FC<IToolbarMenuProps> = ({
@@ -19,6 +21,8 @@ const ToolbarMenu: React.FC<IToolbarMenuProps> = ({
 	onMenuToggle,
 	children,
 	active,
+	enabled = true,
+	flow = 'horizontal',
 }) => (
 	<div>
 		<ToolbarButton
@@ -26,10 +30,14 @@ const ToolbarMenu: React.FC<IToolbarMenuProps> = ({
 			title={title}
 			active={active}
 			action={() => onMenuToggle(type)}
+			enabled={enabled}
 		/>
 		<div
 			className={`toolbar_menu menu_${type}`}
-			style={{ display: menus[type] ? 'block' : 'none' }}
+			style={{
+				display: menus[type] ? 'flex' : 'none',
+				flexDirection: flow === 'horizontal' ? 'row' : 'column',
+			}}
 			role="none"
 		>
 			{menus[type] && children}

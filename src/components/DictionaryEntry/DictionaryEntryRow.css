@@ -1,6 +1,6 @@
 .dictentry-row {
 	display: flex;
-	gap: '10px';
+	gap: 10px 10px;
 	width: 100%;
 	border-bottom: solid 1px grey;
 	padding-top: 5px;
@@ -27,14 +27,14 @@
 
 .dictentry-row ul {
 	list-style-type: none;
-	margin-bottom: 0px;
-	padding-left: 0px;
+	margin-bottom: 0;
+	padding-left: 0;
 	display: flex;
 	flex-wrap: wrap;
 }
 
 .dictentry-row ul li {
-	margin-bottom: 0px;
+	margin-bottom: 0;
 }
 
 .dictentry-col {
@@ -49,6 +49,3 @@
 	width: 50px;
 }
 
-.dictentry-row-wrapper {
-	width: 100%;
-}

@@ -27,8 +27,6 @@ import { useDictionarySearch } from '@hooks/DictionaryQueryHooks';
 import { useLookupSources } from '@hooks/ConfigQueryHooks';
 import usePrevious from '@hooks/usePreviousState';
 
-export type WordInputResult = Omit<IDictionaryEntry, 'firstSeen' | 'id'>;
-
 export interface IWordInputProps {
 	visible: boolean;
 	close: () => void;
@@ -62,21 +60,16 @@ const WordEditorModal: React.FC<IWordInputProps> = ({ visible, close }) => {
 
 	const menu = (
 		<Menu>
-			{lookupSources.map((source) => {
-				return (
-					<Menu.Item key={source.name}>
-						<LookupSourceLink
-							source={source}
-							searchTerm={entryKey}
-						/>
-					</Menu.Item>
-				);
-			})}
+			{lookupSources.map((source) => (
+				<Menu.Item key={source.name}>
+					<LookupSourceLink source={source} searchTerm={entryKey} />
+				</Menu.Item>
+			))}
 		</Menu>
 	);
 
 	const wrapWithWord = useCallback(
-		async (entryId: string) => {
+		(entryId: string) => {
 			if (entryId && savedSelection) {
 				const vocab: WordElement = {
 					type: 'word',
@@ -159,12 +152,12 @@ const WordEditorModal: React.FC<IWordInputProps> = ({ visible, close }) => {
 		if (dictEntryEdit.current) {
 			const editResult = await dictEntryEdit.current.finish();
 			if (editResult.isDone && editResult.entryId) {
-				wrapWithWord(editResult.entryId);
+				await wrapWithWord(editResult.entryId);
 				close();
 			}
 		}
 		if (entryInDictionary) {
-			wrapWithWord(entryInDictionary.id);
+			await wrapWithWord(entryInDictionary.id);
 			close();
 		}
 	};

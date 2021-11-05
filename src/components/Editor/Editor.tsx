@@ -7,30 +7,23 @@ import React, {
 	useState,
 } from 'react';
 
-import { Tabs, Spin, notification } from 'antd';
+import { notification, Spin, Tabs } from 'antd';
 
 import handleError from '@helpers/Error';
 
 import { withHistory } from 'slate-history';
 import { ReactEditor, Slate, withReact } from 'slate-react';
-import {
-	createEditor,
-	Descendant,
-	Editor,
-	Element as SlateElement,
-	Node as SlateNode,
-	Transforms,
-} from 'slate';
+import { createEditor, Descendant, Editor } from 'slate';
 import useSelection from '@hooks/useSelection';
 import { useActiveLanguageConf } from '@hooks/ConfigQueryHooks';
 import usePerstistantState from '@hooks/usePersistantState';
-import { QueryClient, useQueryClient } from 'react-query';
-import { getEntry } from 'api/dictionary.service';
+import { useQueryClient } from 'react-query';
+import SentenceEditorModal from '@editor/Toolbar/Modals/SentenceEditor/SentenceEditorModal';
 import EditorDocument from './EditorDocument';
 import WordsPanel from './WordsPanel/WordsPanel';
 import DictPopupController from './Popups/DictPopupController';
 import Toolbar from './Toolbar/Toolbar';
-import { EditorElement, CustomEditor, withLayout } from './CustomEditor';
+import { CustomEditor, EditorElement, withLayout } from './CustomEditor';
 import WordEditorModal from './Toolbar/Modals/WordEditor/WordEditorModal';
 
 const { TabPane } = Tabs;
@@ -90,6 +83,7 @@ const YiEditor: React.FC = () => {
 	const editorContainer = useRef(null);
 	const [loading, setLoading] = useState<string | null>(null);
 	const [wordEditorVisible, setWordEditorVisible] = useState(false);
+	const [sentenceEditorVisible, setSentenceEditorVisible] = useState(false);
 	const activeLanguage = useActiveLanguageConf();
 	const [selectedKey, setSelectedKey] = useState('');
 	const queryClient = useQueryClient();
@@ -254,6 +248,10 @@ const YiEditor: React.FC = () => {
 		}
 	}, [editor, selection]);
 
+	const closeSentenceEditorModal = useCallback(() => {
+		setSentenceEditorVisible(false);
+	}, [setSentenceEditorVisible]);
+
 	const closeWordEditorModal = useCallback(() => {
 		setWordEditorVisible(false);
 	}, [setWordEditorVisible]);
@@ -307,23 +305,22 @@ const YiEditor: React.FC = () => {
 										>
 											<Toolbar
 												selection={selection}
+												showSentenceEditor={() => {
+													setSentenceEditorVisible(
+														true
+													);
+												}}
 												showWordEditor={() => {
-													const key = selection
-														? Editor.string(
-																editor,
-																selection,
-																{
-																	voids: true,
-																}
-														  )
-														: '';
-													setSelectedKey(key);
 													setWordEditorVisible(true);
 												}}
 											/>
 											<WordEditorModal
 												visible={wordEditorVisible}
 												close={closeWordEditorModal}
+											/>
+											<SentenceEditorModal
+												visible={sentenceEditorVisible}
+												close={closeSentenceEditorModal}
 											/>
 											<DictPopupController
 												rootElement={editorContainer}

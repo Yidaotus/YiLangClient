@@ -1,7 +1,7 @@
 import './Toolbar.css';
 import React, { useRef, useState } from 'react';
 import { useSlateStatic } from 'slate-react';
-import { BaseSelection, Range as SlateRange } from 'slate';
+import { BaseSelection, Editor, Range as SlateRange } from 'slate';
 import {
 	AlignCenterOutlined,
 	AlignLeftOutlined,
@@ -16,10 +16,13 @@ import {
 	TranslationOutlined,
 	UndoOutlined,
 	UnorderedListOutlined,
+	SearchOutlined,
 } from '@ant-design/icons';
 import { Divider } from 'antd';
 import useClickOutside from '@hooks/useClickOutside';
-import WordInput from './Modals/WordEditor/WordEditor';
+import { useLookupSources } from '@hooks/ConfigQueryHooks';
+import LookupSourceButton from '@components/LookupSourceButton';
+
 import AlignButton from './Tools/AlignButton';
 import ListButton from './Tools/ListButton';
 import ToolbarButton from './Tools/ToolbarButton';
@@ -30,17 +33,23 @@ import BlockButton from './Tools/BlockButton';
 import { isNodeAtSelection } from '../CustomEditor';
 import InsertButton from './Tools/InsertButton';
 import ElementButton from './Tools/ElementButton';
-import WordButton from './Tools/WordButton';
+import InputWrapperButton from './Tools/InputWrapperButton';
 
 export interface IToolbarProps {
 	selection: BaseSelection;
 	showWordEditor: () => void;
+	showSentenceEditor: () => void;
 }
 
-const Toolbar: React.FC<IToolbarProps> = ({ selection, showWordEditor }) => {
+const Toolbar: React.FC<IToolbarProps> = ({
+	selection,
+	showWordEditor,
+	showSentenceEditor,
+}) => {
 	const editor = useSlateStatic();
 	const toolbarRef = useRef(null);
 	const [menus, setMenus] = useState<Record<string, boolean>>({});
+	const lookupSources = useLookupSources();
 
 	useClickOutside(toolbarRef, () => {
 		setMenus({});
@@ -67,6 +76,9 @@ const Toolbar: React.FC<IToolbarProps> = ({ selection, showWordEditor }) => {
 		'word'
 	);
 
+	const lookupButtonActive =
+		!!editor.selection && !SlateRange.isCollapsed(editor.selection);
+
 	return (
 		<div
 			className="toolbar"
@@ -76,16 +88,18 @@ const Toolbar: React.FC<IToolbarProps> = ({ selection, showWordEditor }) => {
 				e.preventDefault();
 			}}
 		>
-			<WordButton showWordEditor={showWordEditor} {...sharedProps} />
-			<ElementButton
+			<InputWrapperButton
+				showInput={showWordEditor}
+				icon={<TranslationOutlined />}
+				title="Word"
+				type="word"
+				{...sharedProps}
+			/>
+			<InputWrapperButton
+				showInput={showSentenceEditor}
 				type="sentence"
 				title="Sentence"
 				icon={<LineOutlined />}
-				createElement={() => ({
-					type: 'sentence',
-					translation: '',
-					children: [],
-				})}
 				{...sharedProps}
 			/>
 			<ElementButton
@@ -99,6 +113,24 @@ const Toolbar: React.FC<IToolbarProps> = ({ selection, showWordEditor }) => {
 				})}
 				{...sharedProps}
 			/>
+			<ToolbarMenu
+				flow="vertical"
+				type="lookup"
+				icon={<SearchOutlined />}
+				title="Lookup Word"
+				enabled={lookupButtonActive}
+				{...menuProps}
+			>
+				{lookupSources.map((luSource) => (
+					<LookupSourceButton
+						source={luSource}
+						searchTerm={Editor.string(
+							editor,
+							editor.selection || []
+						)}
+					/>
+				))}
+			</ToolbarMenu>
 			<Divider
 				type="vertical"
 				style={{
