@@ -28,14 +28,7 @@ const Documents: React.FC = () => {
 
 	const fetchDocumentAndSwitch = useCallback(
 		async (id: string) => {
-			setLoading('Loading Document');
-			try {
-				// await dispatch(loadDocument({ type: 'load', id }));
-				history.push('/home/editor/new');
-			} catch (e) {
-				handleError(e);
-			}
-			setLoading(null);
+			history.push(`/home/editor/${id}`);
 		},
 		[history]
 	);

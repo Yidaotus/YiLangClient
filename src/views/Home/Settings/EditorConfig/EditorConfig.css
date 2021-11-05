@@ -1,0 +1,10 @@
+.add-form-actions {
+	display: flex;
+	align-items: baseline;
+	justify-content: space-between;
+}
+
+.sub-header {
+	min-height: 700px;
+	position: relative;
+}

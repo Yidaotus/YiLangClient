@@ -28,7 +28,9 @@ const useDictionaryEntry = (
 	const { data, isLoading } = useQuery(
 		['dictEntries', 'details', activeLanguage?.id, id],
 		() => {
-			return id ? getEntry({ id }) : null;
+			return id && activeLanguage
+				? getEntry({ id, language: activeLanguage.id })
+				: null;
 		},
 		{
 			enabled: !!id,
@@ -133,7 +135,7 @@ const useDeleteDictionaryEntry = () => {
 			if (!lang) {
 				throw new Error('No Language selected!');
 			}
-			return deleteDictionaryEntry(id);
+			return deleteDictionaryEntry(id, lang.id);
 		},
 		{
 			onSuccess: (_, id) => {
@@ -162,7 +164,12 @@ const useUpdateDictionaryEntry = () => {
 			if (!lang) {
 				throw new Error('No Language selected!');
 			}
-			return updateDictionaryEntry({ ...entryToUpdate, lang: lang.id });
+			return updateDictionaryEntry(
+				{
+					...entryToUpdate,
+				},
+				lang.id
+			);
 		},
 		{
 			onSuccess: (_, entry) => {
@@ -196,7 +203,7 @@ const useAddDictionaryEntry = () => {
 			if (!lang) {
 				throw new Error('No Language selected!');
 			}
-			return addDictionaryEntry({ ...newEntry, lang: lang.id });
+			return addDictionaryEntry({ ...newEntry, lang: lang.id }, lang.id);
 		},
 		{
 			onSuccess: (response) => {

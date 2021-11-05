@@ -1,10 +1,10 @@
 import React from 'react';
 import { Button, Input, Form } from 'antd';
-import { ISentence } from 'Document/Dictionary';
+import { IDictionarySentence } from 'Document/Dictionary';
 
 interface ISentenceEditorProps {
 	root: string;
-	addSentenceCallback(sentence: ISentence): void;
+	addSentenceCallback(sentence: IDictionarySentence): void;
 }
 
 const SentenceEditor: React.FC<ISentenceEditorProps> = (
@@ -16,6 +16,9 @@ const SentenceEditor: React.FC<ISentenceEditorProps> = (
 			name="basic"
 			onFinish={(values) => {
 				addSentenceCallback({
+					// @TODO
+					id: 'lul',
+					lang: 'lul2',
 					content: root,
 					translation: values.translation,
 				});

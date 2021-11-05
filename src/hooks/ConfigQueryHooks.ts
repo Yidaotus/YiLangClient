@@ -1,9 +1,9 @@
 import handleError from '@helpers/Error';
-import LanguageConfig from '@views/Home/Settings/LanguageConfig/LanguageConfig';
 import {
 	removeLanguageConfig,
 	addLanguageConfig,
 	updateLanguageConfig,
+	updateEditorConfig,
 	fetchConfig,
 	saveConfig,
 	setActiveLanguage,
@@ -12,9 +12,9 @@ import { IApiResponse } from 'api/definitions/api';
 import {
 	IConfig,
 	IDictionaryLookupSource,
+	IEditorConfig,
 	ILanguageConfig,
 } from 'Document/Config';
-import { act } from 'react-dom/test-utils';
 import { useMutation, useQuery, useQueryClient } from 'react-query';
 
 const useUserConfig = (): IConfig | null => {
@@ -28,6 +28,11 @@ const useUserConfig = (): IConfig | null => {
 const useLanguageConfigs = (): Array<ILanguageConfig> => {
 	const userConfig = useUserConfig();
 	return userConfig?.languageConfigs || [];
+};
+
+const useEditorConfig = (): IEditorConfig | null => {
+	const userConfig = useUserConfig();
+	return userConfig?.editorConfig || null;
 };
 
 const useActiveLanguageConf = (): ILanguageConfig | null => {
@@ -70,6 +75,7 @@ const useRemoveLanguageConfig = () => {
 		}
 	);
 };
+
 const useAddLanguageConfig = () => {
 	const queryClient = useQueryClient();
 
@@ -83,6 +89,24 @@ const useAddLanguageConfig = () => {
 			},
 			onError: (response: IApiResponse<void>) => {
 				handleError(response.message);
+			},
+		}
+	);
+};
+
+const useUpdateEditorConfig = () => {
+	const queryClient = useQueryClient();
+
+	return useMutation(
+		({ editorConfig }: { editorConfig: Partial<IEditorConfig> }) => {
+			return updateEditorConfig({ editorConfig });
+		},
+		{
+			onSuccess: () => {
+				queryClient.invalidateQueries(['userConfig']);
+			},
+			onError: (response: IApiResponse<void>) => {
+				handleError(response);
 			},
 		}
 	);
@@ -162,4 +186,6 @@ export {
 	useSetActiveLanguage,
 	useLookupSources,
 	useUpdateConfig,
+	useUpdateEditorConfig,
+	useEditorConfig,
 };
