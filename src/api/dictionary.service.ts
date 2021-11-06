@@ -1,7 +1,9 @@
-import { IDictionaryEntry } from 'Document/Dictionary';
+import { IDictionaryEntry, IDictionarySentence } from 'Document/Dictionary';
 import {
 	IAddDictionaryEntryParams,
+	IAddDictionarySentenceParams,
 	IApiResponse,
+	ILinkSentenceWordParams,
 	IListDictionaryParams,
 	IListDictionaryResult,
 	ISearchDictionaryParams,
@@ -27,6 +29,37 @@ const updateDictionaryEntry = async (
 	);
 };
 
+const addDictionarySentence = async (
+	addParams: IAddDictionarySentenceParams,
+	language: string
+): Promise<string> => {
+	const response = await ApiService.post<IApiResponse<string>>(
+		`dictionary/${language}/sentences`,
+		addParams
+	);
+	return response.data.payload as string;
+};
+
+const unlinkSentenceWord = async (
+	addParams: ILinkSentenceWordParams,
+	language: string
+): Promise<void> => {
+	await ApiService.delete<IApiResponse<string>>(
+		`dictionary/${language}/unlink`,
+		{ data: addParams }
+	);
+};
+
+const linkSentenceWord = async (
+	addParams: ILinkSentenceWordParams,
+	language: string
+): Promise<void> => {
+	await ApiService.post<IApiResponse<string>>(
+		`dictionary/${language}/link`,
+		addParams
+	);
+};
+
 const addDictionaryEntry = async (
 	addParams: IAddDictionaryEntryParams,
 	language: string
@@ -36,6 +69,32 @@ const addDictionaryEntry = async (
 		addParams
 	);
 	return response.data.payload as string;
+};
+
+const getSentence = async ({
+	sentenceId,
+	language,
+}: {
+	sentenceId: string;
+	language: string;
+}) => {
+	const response = await ApiService.get<IApiResponse<IDictionarySentence>>(
+		`dictionary/${language}/sentences/sentenceId}`
+	);
+	return response.data.payload as IDictionarySentence;
+};
+
+const getSentencesByWord = async ({
+	wordId,
+	language,
+}: {
+	wordId: string;
+	language: string;
+}): Promise<Array<IDictionarySentence>> => {
+	const response = await ApiService.get<
+		IApiResponse<Array<IDictionarySentence>>
+	>(`dictionary/${language}/sentences/byWord/${wordId}`);
+	return response.data.payload as Array<IDictionarySentence>;
 };
 
 const getEntry = async ({
@@ -79,4 +138,9 @@ export {
 	searchDictionary,
 	updateDictionaryEntry,
 	deleteDictionaryEntry,
+	addDictionarySentence,
+	linkSentenceWord,
+	unlinkSentenceWord,
+	getSentencesByWord,
+	getSentence,
 };

@@ -22,7 +22,7 @@ import DictEntryEdit, {
 import LookupSourceLink from '@components/LookupSourceLink';
 import { Editor, Transforms, Text, Range, Selection } from 'slate';
 import { useSlateStatic } from 'slate-react';
-import { WordElement } from '@components/Editor/CustomEditor';
+import { CustomText, WordElement } from '@components/Editor/CustomEditor';
 import { useDictionarySearch } from '@hooks/DictionaryQueryHooks';
 import { useLookupSources } from '@hooks/ConfigQueryHooks';
 import usePrevious from '@hooks/usePreviousState';
@@ -84,17 +84,14 @@ const WordEditorModal: React.FC<IWordInputProps> = ({ visible, close }) => {
 				if (!markOtherInstances) {
 					return;
 				}
-				const allLeafs = Editor.nodes(editor, {
+				const allLeaves = Editor.nodes(editor, {
 					at: [[0], [editor.children.length - 1]],
-					match: (e) => Text.isText(e),
+					match: (e): e is CustomText => Text.isText(e),
 				});
 				const searchRegexp = new RegExp(entryKey, 'g');
-				for (const [leafMatch, leafPath] of allLeafs) {
+				for (const [leafMatch, leafPath] of allLeaves) {
 					const fillerVocab = { ...vocab, isUserInput: false };
-					if (
-						Text.isText(leafMatch) &&
-						!Range.includes(savedSelection, leafPath)
-					) {
+					if (!Range.includes(savedSelection, leafPath)) {
 						const foundRoots = String(leafMatch.text).matchAll(
 							searchRegexp
 						);

@@ -1,4 +1,8 @@
-import { IDictionaryEntry, IDictionaryTag } from 'Document/Dictionary';
+import {
+	IDictionaryEntry,
+	IDictionarySentence,
+	IDictionaryTag,
+} from 'Document/Dictionary';
 import { IExcerptedDocumentLink } from 'Document/Document';
 
 export type DictionaryEntryField =
@@ -91,7 +95,16 @@ export interface IDictionaryEntryFetchResponse {
 }
 
 export type IAddDictionaryTagParams = Omit<IDictionaryTag, 'id'>;
-export type IAddDictionaryEntryParams = Omit<IDictionaryEntry, 'id'>;
+export type IAddDictionaryEntryParams = Omit<IDictionaryEntry, 'id' | 'lang'>;
+export type IAddDictionarySentenceParams = Omit<
+	IDictionarySentence,
+	'id' | 'lang'
+>;
+
+export type ILinkSentenceWordParams = {
+	wordId: string;
+	sentenceId: string;
+};
 
 export interface IDocumentParam {
 	document: string;

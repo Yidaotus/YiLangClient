@@ -1,25 +1,72 @@
 import handleError from '@helpers/Error';
 import {
 	IApiResponse,
+	ILinkSentenceWordParams,
 	IListDictionaryParams,
 	IListDictionaryResult,
 } from 'api/definitions/api';
 import {
 	addDictionaryEntry,
+	addDictionarySentence,
 	deleteDictionaryEntry,
 	getEntry,
+	getSentence,
+	getSentencesByWord,
+	linkSentenceWord,
 	listDictionary,
 	searchDictionary,
+	unlinkSentenceWord,
 	updateDictionaryEntry,
 } from 'api/dictionary.service';
 import {
 	IDictionaryEntry,
 	IDictionaryEntryResolved,
+	IDictionarySentence,
 } from 'Document/Dictionary';
 import { notUndefined } from 'Document/Utility';
 import { useMutation, useQuery, useQueryClient } from 'react-query';
 import { useActiveLanguageConf } from './ConfigQueryHooks';
 import { useTags } from './useTags';
+
+const useDictionarySentence = (
+	sentenceId: string | null
+): [boolean, IDictionarySentence | null] => {
+	const activeLanguage = useActiveLanguageConf();
+	const { data, isLoading } = useQuery(
+		['sentences', 'byWord', activeLanguage?.id, sentenceId],
+		() => {
+			return sentenceId && activeLanguage
+				? getSentence({ sentenceId, language: activeLanguage.id })
+				: null;
+		},
+		{
+			enabled: !!sentenceId,
+			refetchOnWindowFocus: false,
+		}
+	);
+
+	return [isLoading, data || null];
+};
+
+const useDictionarySentencesByWord = (
+	wordId: string | null
+): [boolean, Array<IDictionarySentence>] => {
+	const activeLanguage = useActiveLanguageConf();
+	const { data, isLoading } = useQuery(
+		['sentences', 'byWord', activeLanguage?.id, wordId],
+		() => {
+			return wordId && activeLanguage
+				? getSentencesByWord({ wordId, language: activeLanguage.id })
+				: null;
+		},
+		{
+			enabled: !!wordId,
+			refetchOnWindowFocus: false,
+		}
+	);
+
+	return [isLoading, data || []];
+};
 
 const useDictionaryEntry = (
 	id: string | null
@@ -154,6 +201,7 @@ const useDeleteDictionaryEntry = () => {
 		}
 	);
 };
+
 const useUpdateDictionaryEntry = () => {
 	const lang = useActiveLanguageConf();
 	//		['dictEntries', 'details', lang, id],
@@ -193,6 +241,73 @@ const useUpdateDictionaryEntry = () => {
 	);
 };
 
+const useAddDictionarySentence = () => {
+	const lang = useActiveLanguageConf();
+	//		['dictEntries', 'details', lang, id],
+	const queryClient = useQueryClient();
+
+	return useMutation(
+		(newSentence: Omit<IDictionarySentence, 'id' | 'lang'>) => {
+			if (!lang) {
+				throw new Error('No Language selected!');
+			}
+			return addDictionarySentence(newSentence, lang.id);
+		},
+		{
+			onSuccess: (response) => {
+				queryClient.invalidateQueries(['sentences']);
+			},
+			onError: (response: IApiResponse<void>) => {
+				handleError(response.message);
+			},
+		}
+	);
+};
+
+const useUnlinkWordSentence = () => {
+	const lang = useActiveLanguageConf();
+	const queryClient = useQueryClient();
+
+	return useMutation(
+		(newLink: ILinkSentenceWordParams) => {
+			if (!lang) {
+				throw new Error('No Language selected!');
+			}
+			return unlinkSentenceWord(newLink, lang.id);
+		},
+		{
+			onSuccess: (response) => {
+				queryClient.invalidateQueries(['sentences']);
+			},
+			onError: (response: IApiResponse<void>) => {
+				handleError(response.message);
+			},
+		}
+	);
+};
+
+const useLinkWordSentence = () => {
+	const lang = useActiveLanguageConf();
+	const queryClient = useQueryClient();
+
+	return useMutation(
+		(newLink: ILinkSentenceWordParams) => {
+			if (!lang) {
+				throw new Error('No Language selected!');
+			}
+			return linkSentenceWord(newLink, lang.id);
+		},
+		{
+			onSuccess: (response) => {
+				queryClient.invalidateQueries(['sentences']);
+			},
+			onError: (response: IApiResponse<void>) => {
+				handleError(response.message);
+			},
+		}
+	);
+};
+
 const useAddDictionaryEntry = () => {
 	const lang = useActiveLanguageConf();
 	//		['dictEntries', 'details', lang, id],
@@ -203,7 +318,7 @@ const useAddDictionaryEntry = () => {
 			if (!lang) {
 				throw new Error('No Language selected!');
 			}
-			return addDictionaryEntry({ ...newEntry, lang: lang.id }, lang.id);
+			return addDictionaryEntry(newEntry, lang.id);
 		},
 		{
 			onSuccess: (response) => {
@@ -235,4 +350,9 @@ export {
 	useDeleteDictionaryEntry,
 	useUpdateDictionaryEntry,
 	useDictionarySearch,
+	useAddDictionarySentence,
+	useLinkWordSentence,
+	useUnlinkWordSentence,
+	useDictionarySentencesByWord,
+	useDictionarySentence,
 };

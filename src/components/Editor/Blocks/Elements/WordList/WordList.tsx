@@ -65,6 +65,7 @@ const WordList: React.FC<RenderElementProps> = ({ children, attributes }) => {
 				{sentences.map(([s, spath]) => (
 					<div className="sentence-row">
 						<p>{SlateNode.string(s)}</p>
+						<p>{s.translation}</p>
 						<Button
 							className="dictentry-col"
 							shape="circle"

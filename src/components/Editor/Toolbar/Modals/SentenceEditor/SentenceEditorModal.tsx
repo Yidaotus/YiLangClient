@@ -2,10 +2,15 @@ import './SentenceEditorModal.css';
 import React, { useCallback, useEffect, useState } from 'react';
 import { Button, Modal, Input } from 'antd';
 import { SaveOutlined, StopOutlined } from '@ant-design/icons';
-import { Editor, Transforms, Selection } from 'slate';
+import { Editor, Transforms, Selection, Element as SlateElement } from 'slate';
 import { useSlateStatic } from 'slate-react';
-import { SentenceElement } from '@components/Editor/CustomEditor';
+import { SentenceElement, WordElement } from '@components/Editor/CustomEditor';
 import usePrevious from '@hooks/usePreviousState';
+import {
+	useAddDictionarySentence,
+	useLinkWordSentence,
+} from '@hooks/DictionaryQueryHooks';
+import { IDictionarySentence } from '../../../../../Document/Dictionary';
 
 export interface ISentenceModalProps {
 	visible: boolean;
@@ -21,14 +26,17 @@ const SentenceEditorModal: React.FC<ISentenceModalProps> = ({
 	const [savedSelection, setSavedSelection] = useState<Selection>();
 	const [sentenceKey, setSentenceKey] = useState('');
 	const [translationInput, setTranslationInput] = useState('');
+	const addDictionarySentence = useAddDictionarySentence();
+	const linkWordSentence = useLinkWordSentence();
 
 	const wrapWithSentence = useCallback(
-		(translation: string) => {
+		({ translation, id }: { translation: string; id: string }) => {
 			if (savedSelection) {
 				const sentence: SentenceElement = {
 					type: 'sentence',
 					translation,
 					children: [{ text: '' }],
+					sentenceId: id,
 				};
 				Transforms.wrapNodes(editor, sentence, {
 					split: true,
@@ -37,6 +45,36 @@ const SentenceEditorModal: React.FC<ISentenceModalProps> = ({
 			}
 		},
 		[editor, savedSelection]
+	);
+
+	const linkInnerWords = useCallback(
+		(sentenceId: string) => {
+			if (savedSelection) {
+				const wordNodes = Editor.nodes(editor, {
+					at: savedSelection,
+					mode: 'all',
+					match: (node): node is WordElement =>
+						SlateElement.isElement(node) && node.type === 'word',
+				});
+				for (const [wordNode, wordPath] of wordNodes) {
+					linkWordSentence.mutate({
+						wordId: wordNode.dictId,
+						sentenceId,
+					});
+				}
+			}
+		},
+		[editor, linkWordSentence, savedSelection]
+	);
+
+	const saveSentence = useCallback(
+		async (sentence: Omit<IDictionarySentence, 'id' | 'lang'>) => {
+			const sentenceId = await addDictionarySentence.mutateAsync(
+				sentence
+			);
+			return sentenceId;
+		},
+		[addDictionarySentence]
 	);
 
 	useEffect(() => {
@@ -49,9 +87,14 @@ const SentenceEditorModal: React.FC<ISentenceModalProps> = ({
 		}
 	}, [editor, editor.selection, visible, visibleBefore]);
 
-	const finish = () => {
+	const finish = async () => {
 		setTranslationInput('');
-		wrapWithSentence(translationInput);
+		const newSentenceId = await saveSentence({
+			content: sentenceKey,
+			translation: translationInput,
+		});
+		await linkInnerWords(newSentenceId);
+		wrapWithSentence({ translation: translationInput, id: newSentenceId });
 		close();
 	};
 

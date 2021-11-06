@@ -17,7 +17,11 @@ import DictEntryWithEdit from '@components/DictionaryEntry/DictEntryWithEdit/Dic
 import Title from 'antd/lib/typography/Title';
 import DictionaryEntry from '@components/DictionaryEntry/DictionaryEntry';
 import { IDictionaryEntryResolved } from 'Document/Dictionary';
-import { useDictionaryEntryResolved } from '@hooks/DictionaryQueryHooks';
+import {
+	useDictionaryEntryResolved,
+	useDictionarySentence,
+	useDictionarySentencesByWord,
+} from '@hooks/DictionaryQueryHooks';
 
 interface IDictionaryEntryViewParams {
 	entryId: string;
@@ -45,6 +49,10 @@ const DictionaryEntryPage: React.FC = () => {
 	const [subDictEntries, setSubDictEntries] = useState<
 		Array<IDictionaryEntryResolved>
 	>([]);
+	const [sentencesLoading, sentences] = useDictionarySentencesByWord(entryId);
+	const [firstSeenLoading, firstSeen] = useDictionarySentence(
+		entry?.firstSeen?.sentenceId || null
+	);
 
 	return (
 		<PageHeader
@@ -136,6 +144,46 @@ const DictionaryEntryPage: React.FC = () => {
 						)}
 					</Col>
 				</Row>
+				{firstSeen && (
+					<Row>
+						<Col span={24}>
+							<Spin spinning={firstSeenLoading}>
+								<p>{firstSeen.content}</p>
+								<p>{firstSeen.translation}</p>
+							</Spin>
+						</Col>
+					</Row>
+				)}
+				{sentences && (
+					<Row>
+						<Col span={24}>
+							<Spin spinning={sentencesLoading}>
+								<List
+									style={{ backgroundColor: 'white' }}
+									header={
+										<Title
+											level={3}
+											style={{ marginBottom: '0px' }}
+										>
+											Sentences
+										</Title>
+									}
+									bordered
+									size="small"
+									dataSource={sentences}
+									renderItem={(sentence) => (
+										<List.Item>
+											<span className="ellipsed">
+												<p>{sentence.content}</p>
+												<p>{sentence.translation}</p>
+											</span>
+										</List.Item>
+									)}
+								/>
+							</Spin>
+						</Col>
+					</Row>
+				)}
 				{excerptLink && (
 					<Row>
 						<Col span={24}>
