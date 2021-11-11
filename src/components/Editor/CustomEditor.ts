@@ -62,6 +62,26 @@ export type BlockQuoteElement = {
 	children: CustomText[];
 };
 
+export type DialogLineSpeech = {
+	type: 'dialogLineSpeech';
+	children: CustomText[];
+};
+
+export type DialogLineActor = {
+	type: 'dialogLineActor';
+	children: CustomText[];
+};
+
+export type DialogLine = {
+	type: 'dialogLine';
+	children: [DialogLineActor, DialogLineSpeech];
+};
+
+export type DialogElement = {
+	type: 'dialog';
+	children: DialogLine[];
+};
+
 export type NumberedListElement = {
 	type: 'numberedList';
 	children: ListItemElement[];
@@ -138,6 +158,10 @@ export type EditorBlockElement =
 	| NumberedListElement
 	| ListItemElement
 	| WordListElement
+	| DialogElement
+	| DialogLine
+	| DialogLineActor
+	| DialogLineSpeech
 	| SubtitleElement;
 
 export type EditorInlineElement =

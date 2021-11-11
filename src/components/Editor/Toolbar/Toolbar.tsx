@@ -1,7 +1,14 @@
 import './Toolbar.css';
 import React, { useRef, useState } from 'react';
 import { useSlateStatic } from 'slate-react';
-import { BaseSelection, Range as SlateRange } from 'slate';
+import {
+	BaseSelection,
+	Editor,
+	Element as SlateElement,
+	Node as SlateNode,
+	Range as SlateRange,
+	Transforms,
+} from 'slate';
 import {
 	AlignCenterOutlined,
 	AlignLeftOutlined,
@@ -22,6 +29,11 @@ import { Divider } from 'antd';
 import useClickOutside from '@hooks/useClickOutside';
 import { useLookupSources } from '@hooks/ConfigQueryHooks';
 import LookupSourceButton from '@components/LookupSourceButton';
+import {
+	DialogElement,
+	EditorElement,
+	toggleBlockType,
+} from '@editor/CustomEditor';
 
 import AlignButton from './Tools/AlignButton';
 import ListButton from './Tools/ListButton';
@@ -81,6 +93,135 @@ const Toolbar: React.FC<IToolbarProps> = ({
 				e.preventDefault();
 			}}
 		>
+			<ToolbarButton
+				title="333333"
+				action={() => {
+					if (editor.selection) {
+						const currentTexts: Array<[string, string]> = [];
+						const [start, end] = SlateRange.edges(editor.selection);
+						const startTopLevelBlockIndex = start.path[0];
+						const endTopLevelBlockIndex = end.path[0];
+
+						let currentLevelIndex = startTopLevelBlockIndex;
+						while (currentLevelIndex <= endTopLevelBlockIndex) {
+							const text = Editor.string(editor, [
+								currentLevelIndex,
+							]);
+							if (text) {
+								const splits = text.split(':');
+								if (splits.length === 2) {
+									currentTexts.push([splits[0], splits[1]]);
+								} else {
+									currentTexts.push(['', text]);
+								}
+							}
+							currentLevelIndex++;
+						}
+
+						Transforms.removeNodes(editor);
+						Transforms.move(editor, { reverse: true });
+
+						const dialogNode: DialogElement = {
+							type: 'dialog',
+							children: currentTexts.map(([actor, speech]) => ({
+								type: 'dialogLine',
+								children: [
+									{
+										type: 'dialogLineActor',
+										children: [{ text: actor }],
+									},
+									{
+										type: 'dialogLineSpeech',
+										children: [{ text: speech }],
+									},
+								],
+							})),
+						};
+						Transforms.insertNodes(editor, dialogNode, {
+							at: [startTopLevelBlockIndex],
+						});
+						console.log(currentTexts);
+					}
+				}}
+				enabled
+				icon="DEBUG3"
+			/>
+			<ToolbarButton
+				title="DEBUG2"
+				action={() => {
+					if (editor.selection) {
+						Transforms.unwrapNodes(editor, {
+							match: (n) =>
+								!Editor.isEditor(n) &&
+								SlateElement.isElement(n) &&
+								n.type === 'dialog',
+							split: true,
+						});
+						toggleBlockType(editor, 'paragraph', true);
+						const [parent, parentPath] = Editor.parent(
+							editor,
+							editor.selection
+						);
+						const topLevel = editor.selection.anchor.path[0];
+						const text = Editor.string(editor, [topLevel]);
+						Transforms.removeNodes(editor, { at: [topLevel] });
+						Transforms.insertNodes(
+							editor,
+							{
+								type: 'paragraph',
+								align: 'left',
+								children: [{ text }],
+							},
+							{ at: [topLevel] }
+						);
+						Transforms.move(editor, { reverse: true });
+					}
+				}}
+				enabled
+				icon="DEBUG2"
+			/>
+			<ToolbarButton
+				title="DEBUG"
+				action={() => {
+					const dialogNode: DialogElement = {
+						type: 'dialog',
+						children: [
+							{
+								type: 'dialogLine',
+								children: [
+									{
+										type: 'dialogLineActor',
+										children: [{ text: 'Mikasa' }],
+									},
+									{
+										type: 'dialogLineSpeech',
+										children: [
+											{ text: 'Hey its me Mikasa' },
+										],
+									},
+								],
+							},
+							{
+								type: 'dialogLine',
+								children: [
+									{
+										type: 'dialogLineActor',
+										children: [{ text: 'Robert' }],
+									},
+									{
+										type: 'dialogLineSpeech',
+										children: [{ text: 'And Im Robert!' }],
+									},
+								],
+							},
+						],
+					};
+					Transforms.insertNodes(editor, dialogNode);
+				}}
+				enabled
+				active
+				icon="DEBUG"
+			/>
 			<InputWrapperButton
 				showInput={showWordEditor}
 				icon={<TranslationOutlined />}
@@ -156,6 +297,12 @@ const Toolbar: React.FC<IToolbarProps> = ({
 				title="Block Type"
 				{...menuProps}
 			>
+				<BlockButton
+					type="dialog"
+					title="Dialog"
+					{...sharedProps}
+					icon="Dialog"
+				/>
 				<BlockButton
 					type="title"
 					title="Title"

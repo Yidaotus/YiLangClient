@@ -105,6 +105,30 @@ const Element = (props: RenderElementProps) => {
 					{children}
 				</MarkFragment>
 			);
+		case 'dialog':
+			return (
+				<div className="dialog-container" {...attributes}>
+					{children}
+				</div>
+			);
+		case 'dialogLine':
+			return (
+				<div className="dialog-line" {...attributes}>
+					{children}
+				</div>
+			);
+		case 'dialogLineActor':
+			return (
+				<div className="dialog-line-actor" {...attributes}>
+					{children}
+				</div>
+			);
+		case 'dialogLineSpeech':
+			return (
+				<div className="dialog-line-speech" {...attributes}>
+					{children}
+				</div>
+			);
 		case 'listItem':
 			return <li {...attributes}>{children}</li>;
 		case 'numberedList':

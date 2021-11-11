@@ -22,3 +22,28 @@
 .editor-options-panel > * {
 	margin-left: 5px;
 }
+
+.dialog-container {
+	margin-right: 20px;
+	margin-left: 20px;
+}
+
+.dialog-line {
+	display: flex;
+	flex-direction: row;
+	flex-wrap: nowrap;
+	justify-content: center;
+	align-content: stretch;
+	align-items: flex-start;
+}
+
+.dialog-line-actor {
+	font-weight: bold;
+	margin-right: 20px;
+	width: 33%;
+	text-align: right;
+}
+
+.dialog-line-speech {
+	width: 66%;
+}
