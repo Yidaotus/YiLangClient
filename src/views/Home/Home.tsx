@@ -19,6 +19,7 @@ import {
 	Badge,
 	Popover,
 } from 'antd';
+import { useActiveDocument } from '@hooks/useUserContext';
 import Dictionary from 'views/Home/Dictionary/Dictionary';
 import Documents from 'views/Home/Documents/Documents';
 import DictionaryEntryPage from 'views/Home/DictionaryEntry/DictionaryEntryPage';
@@ -30,6 +31,7 @@ import Overview from './Overview/Overview';
 import Settings from './Settings/Settings';
 
 const HomeView: React.FC = () => {
+	const [activeDocument, changeActiveDocument] = useActiveDocument();
 	const [loading, setLoading] = useState<string | null>(null);
 
 	const { url } = useRouteMatch();
@@ -91,8 +93,11 @@ const HomeView: React.FC = () => {
 								Home
 							</NavLink>
 						</Menu.Item>
-						<Menu.Item key={locationMap.editor}>
-							<NavLink href="#" to={locationMap.editor}>
+						<Menu.Item key={`${url}/editor/${activeDocument}`}>
+							<NavLink
+								href="#"
+								to={`${url}/editor/${activeDocument}`}
+							>
 								Editor
 							</NavLink>
 						</Menu.Item>

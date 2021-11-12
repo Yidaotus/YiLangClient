@@ -1,10 +1,7 @@
-import handleError from '@helpers/Error';
 import { Spin } from 'antd';
-import { LS_TOKEN_POINTER } from 'api/api.service';
 import { authorize } from 'api/user.service';
 import { IConfig } from 'Document/Config';
-import { useEffect } from 'hoist-non-react-statics/node_modules/@types/react';
-import React, { useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import { useQuery } from 'react-query';
 
 export enum Role {
@@ -30,7 +27,16 @@ export interface IUserState {
 	editorSettings: IEditorSettings;
 }
 
-export const UserContext = React.createContext<IUser | null>(null);
+export interface IUserContext {
+	user: IUser | null;
+	activeDocument: string | null;
+	changeActiveDocument: (docId: string) => void;
+}
+export const UserContext = React.createContext<IUserContext>({
+	user: null,
+	activeDocument: null,
+	changeActiveDocument: () => {},
+});
 
 const UserProvider: React.FC = ({ children }) => {
 	const user = useQuery(['user'], authorize, {
@@ -38,6 +44,14 @@ const UserProvider: React.FC = ({ children }) => {
 		cacheTime: Infinity,
 		refetchOnWindowFocus: false,
 	});
+	const [activeDocument, setActiveDocument] = useState<string | null>(null);
+
+	const changeActiveDocument = useCallback(
+		(docId: string) => {
+			setActiveDocument(docId);
+		},
+		[setActiveDocument]
+	);
 
 	return (
 		<>
@@ -45,7 +59,13 @@ const UserProvider: React.FC = ({ children }) => {
 				<Spin tip="Checking user credentials" />
 			) : (
 				<UserContext.Provider
-					value={user.data ? { ...user.data, role: Role.USER } : null}
+					value={{
+						user: user.data
+							? { ...user.data, role: Role.USER }
+							: null,
+						activeDocument,
+						changeActiveDocument,
+					}}
 				>
 					{children}
 				</UserContext.Provider>

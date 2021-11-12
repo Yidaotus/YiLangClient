@@ -7,6 +7,7 @@ import { useHistory } from 'react-router-dom';
 import DocumentExcerpt from 'components/DocumentExcerpt/DocumentExcerpt';
 import handleError from '@helpers/Error';
 import { useActiveLanguageConf } from '@hooks/ConfigQueryHooks';
+import { useActiveDocument } from '@hooks/useUserContext';
 
 /**
  * Renders the Dictionary into a Table.
@@ -23,14 +24,16 @@ const Documents: React.FC = () => {
 	const [pageSkip, setPageSkip] = useState(0);
 	const [currentPage, setCurrentPage] = useState(1);
 	const [excerpts, setExcerpts] = useState<Array<IDocumentExcerpt>>([]);
+	const [activeDocument, changeActiveDocument] = useActiveDocument();
 
 	const activeLanguage = useActiveLanguageConf();
 
 	const fetchDocumentAndSwitch = useCallback(
 		async (id: string) => {
+			changeActiveDocument(id);
 			history.push(`/home/editor/${id}`);
 		},
-		[history]
+		[history, changeActiveDocument]
 	);
 
 	const fetchData = useCallback(async () => {

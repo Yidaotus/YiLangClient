@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import { Redirect } from 'react-router-dom';
 import { Button, Col, Row, Spin } from 'antd';
 import RegisterForm from 'components/Login/RegisterFormAnt';
-import useAuth from '@hooks/useAuth';
+import { useUserContext } from '@hooks/useUserContext';
 import { LS_TOKEN_POINTER } from 'api/api.service';
 import { useQueryClient } from 'react-query';
 import { login, register } from 'api/user.service';
@@ -23,7 +23,7 @@ export interface ILoginData {
 
 const LoginView: React.FC = () => {
 	const queryClient = useQueryClient();
-	const user = useAuth();
+	const user = useUserContext();
 
 	const [isLoading, setIsLoading] = useState(false);
 	const [errors, setErrors] = useState(new Array<string>());
