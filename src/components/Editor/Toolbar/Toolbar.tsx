@@ -1,14 +1,7 @@
 import './Toolbar.css';
 import React, { useRef, useState } from 'react';
 import { useSlateStatic } from 'slate-react';
-import {
-	BaseSelection,
-	Editor,
-	Element as SlateElement,
-	Node as SlateNode,
-	Range as SlateRange,
-	Transforms,
-} from 'slate';
+import { BaseSelection, Range as SlateRange } from 'slate';
 import {
 	AlignCenterOutlined,
 	AlignLeftOutlined,
@@ -29,11 +22,6 @@ import { Divider } from 'antd';
 import useClickOutside from '@hooks/useClickOutside';
 import { useLookupSources } from '@hooks/ConfigQueryHooks';
 import LookupSourceButton from '@components/LookupSourceButton';
-import {
-	DialogElement,
-	EditorElement,
-	toggleBlockType,
-} from '@editor/CustomEditor';
 import DialogButton from '@editor/Toolbar/Tools/DialogButton';
 
 import AlignButton from './Tools/AlignButton';
@@ -94,6 +82,8 @@ const Toolbar: React.FC<IToolbarProps> = ({
 				e.preventDefault();
 			}}
 		>
+			{/*
+				
 			<ToolbarButton
 				title="DEBUG"
 				action={() => {}}
@@ -101,6 +91,7 @@ const Toolbar: React.FC<IToolbarProps> = ({
 				active
 				icon="DEBUG"
 			/>
+				 */}
 			<InputWrapperButton
 				showInput={showWordEditor}
 				icon={<TranslationOutlined />}
@@ -121,7 +112,7 @@ const Toolbar: React.FC<IToolbarProps> = ({
 				icon={<HighlightOutlined />}
 				createElement={() => ({
 					type: 'mark',
-					color: 'green',
+					color: '#FFB30F',
 					children: [],
 				})}
 				{...sharedProps}

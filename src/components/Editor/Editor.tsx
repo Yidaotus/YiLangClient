@@ -13,16 +13,7 @@ import handleError from '@helpers/Error';
 
 import { withHistory } from 'slate-history';
 import { ReactEditor, Slate, withReact } from 'slate-react';
-import {
-	createEditor,
-	Descendant,
-	Editor,
-	Element as SlateElement,
-	Node as SlateNode,
-	Point,
-	Range,
-	Transforms,
-} from 'slate';
+import { createEditor, Descendant, Editor } from 'slate';
 import useSelection from '@hooks/useSelection';
 import { useActiveLanguageConf } from '@hooks/ConfigQueryHooks';
 import { useParams } from 'react-router-dom';
@@ -34,9 +25,6 @@ import Toolbar from './Toolbar/Toolbar';
 import {
 	EditorElement,
 	CustomEditor,
-	withLayout,
-	DialogElement,
-	DialogLine,
 	withDialog,
 	withList,
 } from './CustomEditor';
