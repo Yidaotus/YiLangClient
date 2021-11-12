@@ -56,6 +56,7 @@ const ListButton: React.FC<IListButtonProps> = ({
 				return onChange();
 			}}
 			active={selectedBlockType === type}
+			enabled={selectedBlockType !== 'multiple'}
 		/>
 	);
 };

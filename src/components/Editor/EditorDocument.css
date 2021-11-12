@@ -40,10 +40,10 @@
 .dialog-line-actor {
 	font-weight: bold;
 	margin-right: 20px;
-	width: 33%;
+	width: 200px;
 	text-align: right;
 }
 
 .dialog-line-speech {
-	width: 66%;
+	flex-grow: 1;
 }

@@ -37,6 +37,8 @@ import {
 	withLayout,
 	DialogElement,
 	DialogLine,
+	withDialog,
+	withList,
 } from './CustomEditor';
 import {
 	create as createDocumentService,
@@ -47,147 +49,6 @@ import {
 import WordEditorModal from './Toolbar/Modals/WordEditor/WordEditorModal';
 
 const { TabPane } = Tabs;
-
-const withDialog = (editor: Editor) => {
-	const { deleteBackward, insertBreak, normalizeNode } = editor;
-
-	// eslint-disable-next-line no-param-reassign
-	editor.normalizeNode = (entry) => {
-		const [node, path] = entry;
-		// merge dialog nodes
-		if (SlateElement.isElement(node) && node.type === 'dialog') {
-			const nextNode = Editor.next(editor, { at: path });
-			if (nextNode) {
-				const [nextNodeElement, nextNodePath] = nextNode;
-				if (
-					SlateElement.isElement(nextNodeElement) &&
-					nextNodeElement.type === 'dialog'
-				) {
-					// merge
-					Transforms.mergeNodes(editor, { at: nextNodePath });
-				}
-			}
-		}
-		// Fall back to the original `normalizeNode` to enforce other constraints.
-		normalizeNode(entry);
-	};
-
-	// eslint-disable-next-line no-param-reassign
-	editor.deleteBackward = (unit) => {
-		const { selection } = editor;
-
-		if (selection && Range.isCollapsed(selection)) {
-			const [dialogSpeechElement] = Editor.nodes(editor, {
-				match: (n) =>
-					!Editor.isEditor(n) &&
-					SlateElement.isElement(n) &&
-					n.type === 'dialogLineSpeech',
-			});
-			if (dialogSpeechElement) {
-				const [, cellPath] = dialogSpeechElement;
-				const start = Editor.start(editor, cellPath);
-
-				if (Point.equals(selection.anchor, start)) {
-					Transforms.move(editor, { reverse: true });
-					return;
-				}
-			}
-
-			const [dialogActorElement] = Editor.nodes(editor, {
-				match: (n) =>
-					!Editor.isEditor(n) &&
-					SlateElement.isElement(n) &&
-					n.type === 'dialogLineActor',
-			});
-
-			if (dialogActorElement) {
-				const [, cellPath] = dialogActorElement;
-				const start = Editor.start(editor, cellPath);
-
-				if (Point.equals(selection.anchor, start)) {
-					const [dialogLineParent] = Editor.nodes(editor, {
-						mode: 'highest',
-						match: (n) =>
-							!Editor.isEditor(n) &&
-							SlateElement.isElement(n) &&
-							n.type === 'dialogLine',
-					});
-
-					if (dialogLineParent) {
-						const [, path] = dialogLineParent;
-						Transforms.removeNodes(editor, { at: path });
-						return;
-					}
-				}
-			}
-		}
-
-		deleteBackward(unit);
-	};
-
-	// eslint-disable-next-line no-param-reassign
-	editor.insertBreak = () => {
-		const { selection } = editor;
-
-		if (selection) {
-			const [dialogSpeechElement] = Editor.nodes(editor, {
-				mode: 'highest',
-				match: (n) =>
-					!Editor.isEditor(n) &&
-					SlateElement.isElement(n) &&
-					n.type === 'dialogLineSpeech',
-			});
-			const [dialogActorElement] = Editor.nodes(editor, {
-				mode: 'highest',
-				match: (n) =>
-					!Editor.isEditor(n) &&
-					SlateElement.isElement(n) &&
-					n.type === 'dialogLineActor',
-			});
-
-			if (dialogSpeechElement) {
-				const [, speechPath] = dialogSpeechElement;
-				const dialogLineNode: DialogLine = {
-					type: 'dialogLine',
-					children: [
-						{
-							type: 'dialogLineActor',
-							children: [{ text: '' }],
-						},
-						{
-							type: 'dialogLineSpeech',
-							children: [{ text: '' }],
-						},
-					],
-				};
-				const [, parentPath] = Editor.parent(editor, speechPath);
-				parentPath.splice(
-					parentPath.length - 1,
-					1,
-					parentPath[parentPath.length - 1] + 1
-				);
-				Transforms.insertNodes(editor, dialogLineNode, {
-					at: parentPath,
-				});
-				Transforms.select(editor, Editor.start(editor, parentPath));
-				return;
-			}
-
-			if (dialogActorElement && Range.isCollapsed(selection)) {
-				const [, actorPath] = dialogActorElement;
-				const end = Editor.end(editor, actorPath);
-				if (Point.equals(selection.anchor, end)) {
-					Transforms.move(editor);
-					return;
-				}
-			}
-		}
-
-		insertBreak();
-	};
-
-	return editor;
-};
 
 const withYiLang = (editor: Editor) => {
 	const { isInline, isVoid, normalizeNode } = editor;
@@ -256,7 +117,7 @@ const YiEditor: React.FC = () => {
 	const editor = useMemo(
 		() =>
 			withReact(
-				withYiLang(withDialog(withHistory(createEditor())))
+				withYiLang(withList(withDialog(withHistory(createEditor()))))
 			) as CustomEditor,
 		[]
 	);
