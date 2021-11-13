@@ -18,11 +18,11 @@ import {
 	UnorderedListOutlined,
 	SearchOutlined,
 } from '@ant-design/icons';
-import { Divider } from 'antd';
 import useClickOutside from '@hooks/useClickOutside';
 import { useLookupSources } from '@hooks/ConfigQueryHooks';
 import LookupSourceButton from '@components/LookupSourceButton';
 import DialogButton from '@editor/Toolbar/Tools/DialogButton';
+import { Divider } from '@blueprintjs/core';
 
 import AlignButton from './Tools/AlignButton';
 import ListButton from './Tools/ListButton';
@@ -94,7 +94,7 @@ const Toolbar: React.FC<IToolbarProps> = ({
 				 */}
 			<InputWrapperButton
 				showInput={showWordEditor}
-				icon={<TranslationOutlined />}
+				icon="translate"
 				title="Word"
 				type="word"
 				{...sharedProps}
@@ -103,13 +103,13 @@ const Toolbar: React.FC<IToolbarProps> = ({
 				showInput={showSentenceEditor}
 				type="sentence"
 				title="Sentence"
-				icon={<LineOutlined />}
+				icon="paragraph"
 				{...sharedProps}
 			/>
 			<ElementButton
 				type="mark"
 				title="Mark"
-				icon={<HighlightOutlined />}
+				icon="annotation"
 				createElement={() => ({
 					type: 'mark',
 					color: '#FFB30F',
@@ -120,7 +120,7 @@ const Toolbar: React.FC<IToolbarProps> = ({
 			<ToolbarMenu
 				flow="vertical"
 				type="lookup"
-				icon={<SearchOutlined />}
+				icon="search-text"
 				title="Lookup Word"
 				enabled={lookupButtonActive}
 				{...menuProps}
@@ -129,80 +129,62 @@ const Toolbar: React.FC<IToolbarProps> = ({
 					<LookupSourceButton source={luSource} />
 				))}
 			</ToolbarMenu>
-			<Divider
-				type="vertical"
-				style={{
-					margin: '0 0px !important',
-					borderLeft: '1px solid rgb(0 0 0 / 27%)',
-				}}
-			/>
+			<Divider />
 			<AlignButton
 				align="left"
-				icon={<AlignLeftOutlined />}
+				icon="align-left"
 				title="Left Align"
 				{...sharedProps}
 			/>
 			<AlignButton
 				align="center"
-				icon={<AlignCenterOutlined />}
+				icon="align-center"
 				title="Center Align"
 				{...sharedProps}
 			/>
 			<AlignButton
 				align="right"
-				icon={<AlignRightOutlined />}
+				icon="align-right"
 				title="Right Align"
 				{...sharedProps}
 			/>
-			<Divider
-				type="vertical"
-				style={{
-					margin: '0 0px !important',
-					borderLeft: '1px solid rgb(0 0 0 / 27%)',
-				}}
-			/>
+			<Divider />
 			<ToolbarMenu
 				type="blockType"
-				icon={<PicCenterOutlined />}
+				icon="vertical-distribution"
 				title="Block Type"
 				{...menuProps}
 			>
-				<DialogButton icon="Dialog" title="Dialog" {...sharedProps} />
+				<DialogButton icon="circle" title="Dialog" {...sharedProps} />
 				<BlockButton
 					type="title"
 					title="Title"
 					{...sharedProps}
-					icon="Title"
+					icon="header"
 				/>
 				<BlockButton
 					type="subtitle"
 					title="Subtitle"
 					{...sharedProps}
-					icon="Subtitle"
+					icon="header-two"
 				/>
 				<ListButton
 					type="numberedList"
-					icon={<OrderedListOutlined />}
+					icon="numbered-list"
 					title="Numbered List"
 					{...sharedProps}
 				/>
 				<ListButton
 					type="bulletedList"
-					icon={<UnorderedListOutlined />}
+					icon="list"
 					title="Numbered List"
 					{...sharedProps}
 				/>
 			</ToolbarMenu>
-			<Divider
-				type="vertical"
-				style={{
-					margin: '0 0px !important',
-					borderLeft: '1px solid rgb(0 0 0 / 27%)',
-				}}
-			/>
+			<Divider />
 			<ToolbarMenu
 				type="color"
-				icon={<FontColorsOutlined />}
+				icon="highlight"
 				title="Font Color"
 				{...menuProps}
 			>
@@ -218,16 +200,10 @@ const Toolbar: React.FC<IToolbarProps> = ({
 					/>
 				))}
 			</ToolbarMenu>
-			<Divider
-				type="vertical"
-				style={{
-					margin: '0 0px !important',
-					borderLeft: '1px solid rgb(0 0 0 / 27%)',
-				}}
-			/>
+			<Divider />
 			<ToolbarMenu
 				type="glyphs"
-				icon={<ArrowDownOutlined />}
+				icon="arrow-down"
 				title="Font Color"
 				{...menuProps}
 			>
@@ -270,22 +246,16 @@ const Toolbar: React.FC<IToolbarProps> = ({
 					{...sharedProps}
 				/>
 			</ToolbarMenu>
-			<Divider
-				type="vertical"
-				style={{
-					margin: '0 0px !important',
-					borderLeft: '1px solid rgb(0 0 0 / 27%)',
-				}}
-			/>
+			<Divider />
 			<ToolbarButton
-				icon={<UndoOutlined />}
+				icon="undo"
 				title="Undo"
 				action={() => {
 					editor.undo();
 				}}
 			/>
 			<ToolbarButton
-				icon={<RedoOutlined />}
+				icon="redo"
 				title="Redo"
 				action={() => {
 					editor.redo();

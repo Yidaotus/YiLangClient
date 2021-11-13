@@ -1,6 +1,6 @@
 import './Dictionary.css';
 import React, { useRef, useState } from 'react';
-import DictionaryList from '@components/DictionaryList/DictionaryList';
+import DictionaryTable from '@components/DictionaryList/DictionaryTable';
 import { Button, Col, Empty, notification, PageHeader, Row } from 'antd';
 import { PlusOutlined } from '@ant-design/icons';
 import WordInput from '@components/Editor/Toolbar/Modals/WordEditor/WordEditor';
@@ -56,7 +56,7 @@ const Dictionary: React.FC = () => {
 						<div
 							style={{ position: 'relative', minHeight: '500px' }}
 						>
-							{activeLanguage && <DictionaryList />}
+							{activeLanguage && <DictionaryTable />}
 							{!activeLanguage && (
 								<Empty
 									image={Empty.PRESENTED_IMAGE_SIMPLE}

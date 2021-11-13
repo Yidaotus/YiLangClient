@@ -1,38 +1,44 @@
 import './Home.css';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
-	Switch,
-	Route,
-	NavLink,
 	useRouteMatch,
 	useHistory,
+	NavLink,
+	Switch,
+	Route,
 } from 'react-router-dom';
 
-import Editor from 'views/Home/Editor/Yitext';
-import {
-	Menu,
-	Col,
-	Row,
-	notification,
-	Spin,
-	Avatar,
-	Badge,
-	Popover,
-} from 'antd';
 import { useActiveDocument } from '@hooks/useUserContext';
-import Dictionary from 'views/Home/Dictionary/Dictionary';
-import Documents from 'views/Home/Documents/Documents';
-import DictionaryEntryPage from 'views/Home/DictionaryEntry/DictionaryEntryPage';
-import { UserOutlined } from '@ant-design/icons';
-import SettingsPopover from '@components/SettingsPopover/SettingsPopover';
 import handleError from '@helpers/Error';
 import { useActiveLanguageConf } from '@hooks/ConfigQueryHooks';
-import Overview from './Overview/Overview';
-import Settings from './Settings/Settings';
+import {
+	Navbar,
+	Button,
+	Alignment,
+	Spinner,
+	Intent,
+	Overlay,
+} from '@blueprintjs/core';
+import { Popover2 } from '@blueprintjs/popover2';
+import SettingsPopover from '@components/SettingsPopover/SettingsPopover';
+import Overview from '@views/Home/Overview/Overview';
+import Documents from '@views/Home/Documents/Documents';
+import DictionaryEntryPage from '@views/Home/DictionaryEntry/DictionaryEntryPage';
+import Dictionary from '@views/Home/Dictionary/Dictionary';
+import Editor from '@editor/Editor';
+import AppToaster from '@components/Toaster';
+import Settings from '@views/Home/Settings/Settings';
+import useClickOutside from '@hooks/useClickOutside';
 
 const HomeView: React.FC = () => {
 	const [activeDocument, changeActiveDocument] = useActiveDocument();
+	const [settingsPopoverOpen, setSettingsPopoverOpen] = useState(false);
 	const [loading, setLoading] = useState<string | null>(null);
+	const contentRef = useRef<HTMLDivElement>(null);
+	const settingsRef = useRef(null);
+	useClickOutside(settingsRef, () => {
+		setSettingsPopoverOpen(false);
+	});
 
 	const { url } = useRouteMatch();
 	const { location } = useHistory();
@@ -53,10 +59,9 @@ const HomeView: React.FC = () => {
 		const init = async () => {
 			setLoading('Initializing');
 			try {
-				notification.open({
-					message: 'Done',
-					description: `YiLang initialized`,
-					type: 'success',
+				AppToaster.show({
+					message: `YiLang initialized`,
+					intent: Intent.SUCCESS,
 				});
 			} catch (e: unknown) {
 				handleError(e);
@@ -68,95 +73,115 @@ const HomeView: React.FC = () => {
 
 	useEffect(() => {
 		if (activeLanguage) {
-			notification.open({
-				message: 'Done',
-				description: `YiLang initialized for ${activeLanguage.name}!`,
-				type: 'success',
+			AppToaster.show({
+				message: `YiLang initialized for ${activeLanguage.name}!`,
+				intent: Intent.SUCCESS,
 			});
 		}
 	}, [activeLanguage]);
 
 	return (
 		<div className="yi-layout">
-			<header className="yi-header">
-				<NavLink href="#" to={locationMap.home}>
-					<img
-						alt="YiLang.png"
-						src="/yilang.png"
-						className="yi-logo"
-					/>
-				</NavLink>
-				<div className="yi-header-links">
-					<Menu mode="horizontal" selectedKeys={[location.pathname]}>
-						<Menu.Item key={locationMap.home}>
+			<header>
+				<Navbar>
+					<Navbar.Group align={Alignment.LEFT}>
+						<Navbar.Heading>
 							<NavLink href="#" to={locationMap.home}>
-								Home
+								<img
+									alt="YiLang.png"
+									src="/yilang.png"
+									className="yi-logo"
+								/>
 							</NavLink>
-						</Menu.Item>
-						<Menu.Item key={`${url}/editor/${activeDocument}`}>
-							<NavLink
-								href="#"
-								to={`${url}/editor/${activeDocument}`}
-							>
-								Editor
-							</NavLink>
-						</Menu.Item>
-						<Menu.Item key={locationMap.dicitonary}>
-							<NavLink href="#" to={locationMap.dicitonary}>
-								Dictionary
-							</NavLink>
-						</Menu.Item>
-						<Menu.Item key={locationMap.documents}>
-							<NavLink href="#" to={locationMap.documents}>
-								Documents
-							</NavLink>
-						</Menu.Item>
-						<Menu.Item key={locationMap.user}>
-							<Popover
-								placement="bottomRight"
-								arrowPointAtCenter
-								content={<SettingsPopover />}
-								trigger="click"
-							>
-								<Badge count={0}>
-									<Avatar
-										shape="circle"
-										icon={<UserOutlined />}
+						</Navbar.Heading>
+					</Navbar.Group>
+					<Navbar.Group align={Alignment.RIGHT}>
+						<NavLink href="#" to={locationMap.home}>
+							<Button
+								className="bp3-minimal"
+								icon="home"
+								text="Home"
+							/>
+						</NavLink>
+						<NavLink
+							href="#"
+							to={`${url}/editor/${activeDocument}`}
+						>
+							<Button
+								className="bp3-minimal"
+								icon="edit"
+								text="Editor"
+							/>
+						</NavLink>
+						<NavLink href="#" to={locationMap.dicitonary}>
+							<Button
+								className="bp3-minimal"
+								icon="book"
+								text="Dictionary"
+							/>
+						</NavLink>
+						<NavLink href="#" to={locationMap.documents}>
+							<Button
+								className="bp3-minimal"
+								icon="document"
+								text="Documents"
+							/>
+						</NavLink>
+						<Navbar.Divider />
+						<Popover2
+							placement="bottom"
+							content={
+								<div ref={settingsRef}>
+									<SettingsPopover
+										closePopover={() => {
+											setSettingsPopoverOpen(false);
+										}}
 									/>
-								</Badge>
-							</Popover>
-						</Menu.Item>
-					</Menu>
-				</div>
+								</div>
+							}
+							onInteraction={() => {}}
+							enforceFocus={false}
+							isOpen={settingsPopoverOpen}
+						>
+							<Button
+								className="bp3-minimal"
+								icon="user"
+								text=""
+								onClick={() => {
+									setSettingsPopoverOpen((open) => !open);
+								}}
+							/>
+						</Popover2>
+					</Navbar.Group>
+				</Navbar>
 			</header>
 
-			<main className="yi-content">
-				<Spin spinning={!!loading} tip={loading || ''}>
-					<Row justify="center" align="top">
-						<Col style={{ width: '1024px' }}>
-							<Switch>
-								<Route path={locationMap.home} exact>
-									<Overview />
-								</Route>
-								<Route path={locationMap.documents}>
-									<Documents />
-								</Route>
-								<Route path={locationMap.dicitonaryEntry}>
-									<DictionaryEntryPage />
-								</Route>
-								<Route path={locationMap.dicitonary}>
-									<Dictionary />
-								</Route>
-								<Route path={locationMap.editor}>
-									<Editor />
-								</Route>
-								<Route path={locationMap.settings}>
-									<Settings />
-								</Route>
-							</Switch>
-						</Col>
-					</Row>
-				</Spin>
+			<main className="yi-layout">
+				<div className="yi-content" ref={contentRef}>
+					<Overlay isOpen={!!loading} usePortal={false}>
+						<Spinner />
+					</Overlay>
+					<Switch>
+						<Route path={locationMap.home} exact>
+							<Overview />
+						</Route>
+						<Route path={locationMap.documents}>
+							<Documents />
+						</Route>
+						<Route path={locationMap.dicitonaryEntry}>
+							<DictionaryEntryPage />
+						</Route>
+						<Route path={locationMap.dicitonary}>
+							<Dictionary />
+						</Route>
+						<Route path={locationMap.editor}>
+							<Editor />
+						</Route>
+						<Route path={locationMap.settings}>
+							<Settings />
+						</Route>
+					</Switch>
+				</div>
 			</main>
 			<footer className="yi-footer-container">
 				<div className="yi-footer">YiLang!</div>

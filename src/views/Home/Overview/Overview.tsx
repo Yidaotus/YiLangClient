@@ -1,6 +1,5 @@
 import './Overview.css';
 import React, { useCallback, useState } from 'react';
-import { Card, Col, Empty, Row, Space, Spin } from 'antd';
 import { IDocumentExcerpt } from 'api/definitions/api';
 import DocumentExcerpt from '@components/DocumentExcerpt/DocumentExcerpt';
 import { useHistory } from 'react-router';
@@ -8,6 +7,7 @@ import DictionaryEntry from '@components/DictionaryEntry/DictionaryEntry';
 import handleError from '@helpers/Error';
 import { useActiveLanguageConf } from '@hooks/ConfigQueryHooks';
 import { useDictionaryEntries } from '@hooks/DictionaryQueryHooks';
+import { Card, Divider, Elevation, Overlay, Spinner } from '@blueprintjs/core';
 
 const excerptsToLoad = 3;
 const Overview: React.FC = () => {
@@ -38,93 +38,54 @@ const Overview: React.FC = () => {
 
 	return (
 		<div>
-			<Spin spinning={loading}>
-				<Row gutter={24}>
-					<Col span={16}>
-						<Card title="Latest documents">
-							{activeLanguage && (
-								<Space
-									direction="vertical"
-									style={{ width: '100%' }}
-								>
-									{!loadingExcerpts &&
-										excerpts.length > 0 &&
-										excerpts.map((excerpt) => (
-											<DocumentExcerpt
-												key={excerpt.id}
-												excerpt={excerpt}
-												selectDocument={
-													fetchDocumentAndSwitch
-												}
-											/>
-										))}
-									{loadingExcerpts && (
-										<>
-											<Card loading />
-											<Card loading />
-											<Card loading />
-										</>
-									)}
-									{!loadingExcerpts &&
-										excerpts.length < 1 && (
-											<Empty
-												image={
-													Empty.PRESENTED_IMAGE_SIMPLE
-												}
-											/>
-										)}
-								</Space>
-							)}
-							{!activeLanguage && (
-								<Empty
-									image={Empty.PRESENTED_IMAGE_SIMPLE}
-									imageStyle={{
-										height: 50,
-									}}
-									description="No language selected!"
-								/>
-							)}
-						</Card>
-					</Col>
-					<Col span={8}>
-						<Card title="Latest Entries">
-							{activeLanguage &&
-								!loadingEntries &&
-								entries.total > 0 &&
-								entries.entries.map((entry) => (
-									<DictionaryEntry
-										key={entry.id}
-										entryId={entry.id}
-										canLink
-									/>
-								))}
-							{activeLanguage && loadingEntries && (
-								<>
-									<Card loading />
-									<Card loading />
-									<Card loading />
-								</>
-							)}
-							{activeLanguage &&
-								!loadingEntries &&
-								entries.total < 1 && (
-									<Empty
-										image={Empty.PRESENTED_IMAGE_SIMPLE}
-									/>
+			<Overlay isOpen={!!loading} usePortal={false}>
+				<Spinner />
+			</Overlay>
+			<div>
+				<div>
+					<Card title="Latest documents">
+						{activeLanguage && (
+							<div style={{ width: '100%' }}>
+								{!loadingExcerpts &&
+									excerpts.length > 0 &&
+									excerpts.map((excerpt) => (
+										<DocumentExcerpt
+											key={excerpt.id}
+											excerpt={excerpt}
+											selectDocument={
+												fetchDocumentAndSwitch
+											}
+										/>
+									))}
+								{!loadingExcerpts && excerpts.length < 1 && (
+									<span>No Excerpts</span>
 								)}
-							{!activeLanguage && (
-								<Empty
-									image={Empty.PRESENTED_IMAGE_SIMPLE}
-									imageStyle={{
-										height: 50,
-									}}
-									description="No language selected!"
+							</div>
+						)}
+						{!activeLanguage && <span>No language selected!</span>}
+					</Card>
+				</div>
+				<div>
+					<Card elevation={Elevation.TWO}>
+						<h2 className="bp3-heading">Latest Entries</h2>
+						<Divider />
+						{activeLanguage &&
+							!loadingEntries &&
+							entries.total > 0 &&
+							entries.entries.map((entry) => (
+								<DictionaryEntry
+									key={entry.id}
+									entryId={entry.id}
+									canLink
 								/>
-							)}
-						</Card>
-					</Col>
-				</Row>
-			</Spin>
+							))}
+						{activeLanguage &&
+							!loadingEntries &&
+							entries.total < 1 && <span>No Entries</span>}
+						{!activeLanguage && <span>No language selected!</span>}
+					</Card>
+				</div>
+			</div>
 		</div>
 	);
 };

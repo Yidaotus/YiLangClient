@@ -1,10 +1,11 @@
 import './ToolbarMenu.css';
 import React from 'react';
+import { IconName } from '@blueprintjs/core';
 import ToolbarButton from './ToolbarButton';
 
 export interface IToolbarMenuProps {
 	type: string;
-	icon: React.ReactNode;
+	icon: IconName;
 	title: string;
 	menus: Record<string, boolean>;
 	onMenuToggle: (type: string) => void;

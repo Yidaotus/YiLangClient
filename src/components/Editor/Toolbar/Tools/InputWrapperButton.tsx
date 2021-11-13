@@ -1,5 +1,6 @@
 import React from 'react';
 import { isNodeInSelection } from '@components/Editor/CustomEditor';
+import { IconName } from '@blueprintjs/core';
 import { Editor, Transforms, Element as SlateElement, Range } from 'slate';
 import ToolbarButton from './ToolbarButton';
 
@@ -8,7 +9,7 @@ export interface IInputWrapperButtonProps {
 	onChange: () => void;
 	type: SlateElement['type'];
 	title: string;
-	icon: React.ReactNode;
+	icon: IconName;
 	showInput: () => void;
 }
 

@@ -1,5 +1,5 @@
-import { Button } from 'antd';
 import React from 'react';
+import { Button, IconName, Intent } from '@blueprintjs/core';
 
 const toolbarItemTypes = ['Wrapper', 'Dropdown', 'Action'] as const;
 export type ToolbarItemType = typeof toolbarItemTypes[number];
@@ -7,7 +7,8 @@ export type ToolbarItemType = typeof toolbarItemTypes[number];
 export interface IToolbarItem {
 	title: string;
 	enabled?: boolean;
-	icon?: React.ReactNode;
+	icon?: IconName;
+	text?: React.ReactNode;
 	tooltip?: string;
 	active?: boolean;
 	className?: string;
@@ -20,20 +21,22 @@ export interface IToolbarButtonProps extends IToolbarItem {
 const ToolbarButton: React.FC<IToolbarButtonProps> = ({
 	enabled = true,
 	icon,
+	text,
 	tooltip,
 	active,
 	action,
 	className,
 }) => (
 	<Button
-		className={`button ${className}`}
-		type={active ? 'primary' : 'default'}
-		size="large"
+		className={`bp3-minimal button ${className}`}
+		large
+		intent={active ? Intent.PRIMARY : Intent.NONE}
+		icon={icon}
 		onMouseUp={action}
 		title={tooltip}
 		disabled={!enabled}
 	>
-		{icon}
+		{text}
 	</Button>
 );
 

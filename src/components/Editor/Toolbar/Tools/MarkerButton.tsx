@@ -4,7 +4,6 @@ import ToolbarButton from './ToolbarButton';
 
 export interface IColorButtonProps {
 	color: string;
-	icon: React.ReactNode;
 	title: string;
 	editor: Editor;
 	onChange: () => void;
@@ -12,7 +11,6 @@ export interface IColorButtonProps {
 
 const ColorButton: React.FC<IColorButtonProps> = ({
 	color,
-	icon,
 	title,
 	editor,
 	onChange,
@@ -21,7 +19,7 @@ const ColorButton: React.FC<IColorButtonProps> = ({
 
 	return (
 		<ToolbarButton
-			icon={
+			text={
 				<span
 					style={{
 						width: '20px',

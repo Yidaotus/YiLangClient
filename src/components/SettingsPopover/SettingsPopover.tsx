@@ -1,103 +1,109 @@
 import './SettingsPopover.css';
-import React, { useCallback } from 'react';
-import { Select, Modal, Divider, Button } from 'antd';
-import {
-	ExclamationCircleOutlined,
-	LogoutOutlined,
-	SettingOutlined,
-	TranslationOutlined,
-} from '@ant-design/icons';
+import React, { useCallback, useRef, useState } from 'react';
 import { useHistory } from 'react-router';
 import {
 	useActiveLanguageConf,
 	useLanguageConfigs,
 	useSetActiveLanguage,
 } from '@hooks/ConfigQueryHooks';
+import useClickOutside from '@hooks/useClickOutside';
+import {
+	Alert,
+	Button,
+	Divider,
+	Icon,
+	Intent,
+	MenuItem,
+} from '@blueprintjs/core';
+import { ItemRenderer, Select } from '@blueprintjs/select';
+import { ILanguageConfig } from '../../Document/Config';
 
-const { Option } = Select;
-const { confirm } = Modal;
+const LanguageSelect = Select.ofType<ILanguageConfig>();
 
-const SettingsPopover: React.FC = () => {
-	const selectedLanguage = useActiveLanguageConf();
+export const renderLanguageConfig: ItemRenderer<ILanguageConfig> = (
+	config,
+	{ handleClick, modifiers, query }
+) => {
+	if (!modifiers.matchesPredicate) {
+		return null;
+	}
+	return (
+		<MenuItem
+			active={modifiers.active}
+			disabled={modifiers.disabled}
+			key={config.id}
+			onClick={handleClick}
+			text={config.name}
+		/>
+	);
+};
+
+const SettingsPopover: React.FC<{ closePopover: () => void }> = ({
+	closePopover,
+}) => {
+	const activeLanguage = useActiveLanguageConf();
+	const popoverRef = useRef(null);
+	useClickOutside(popoverRef, () => {});
+	const [selectedLanguage, setSelectedLanguage] =
+		useState<ILanguageConfig | null>(null);
+	const [changeLanguageAlertOpen, setChangeLanguageAlertOpen] =
+		useState(false);
 	const availableLanguages = useLanguageConfigs();
 	const setActiveLanguage = useSetActiveLanguage();
 	const history = useHistory();
 
 	const documentModified = false;
 	const logoutConfirm = useCallback(() => {
-		if (documentModified) {
-			confirm({
-				title: 'Unsaved Document',
-				icon: <ExclamationCircleOutlined />,
-				content: `The current document was modified but not saved. Logging out without saving?`,
-				okText: 'Yes',
-				okType: 'primary',
-				cancelText: 'No',
-				onOk() {
-					// TODO
-					// dispatch(logout());
-				},
-			});
-		} else {
-			// TODO
-			// dispatch(logout());
-		}
-	}, [documentModified]);
+		// dispatch(logout());
+	}, []);
 
-	const changeLanguage = useCallback(
-		(configKey: string) => {
-			const documentLoaded = false;
-			if (documentLoaded) {
-				confirm({
-					title: 'Changing language',
-					icon: <ExclamationCircleOutlined />,
-					content: `This will reset the currently loaded Document. Continue?`,
-					okText: 'Yes',
-					okType: 'primary',
-					cancelText: 'No',
-					onOk() {
-						const languageConfig = availableLanguages.find(
-							(langConf) => langConf.id === configKey
-						);
-						if (languageConfig) {
-							setActiveLanguage.mutate(languageConfig.id);
-						}
-					},
-				});
-			} else {
-				const languageConfig = availableLanguages.find(
-					(langConf) => langConf.id === configKey
-				);
-				if (languageConfig) {
-					setActiveLanguage.mutate(languageConfig.id);
-				}
+	const changeLanguage = useCallback(() => {
+		if (selectedLanguage) {
+			const languageConfig = availableLanguages.find(
+				(langConf) => langConf.id === selectedLanguage.id
+			);
+			if (languageConfig) {
+				setActiveLanguage.mutate(languageConfig.id);
 			}
-		},
-		[availableLanguages, setActiveLanguage]
-	);
+		}
+		closePopover();
+	}, [availableLanguages, setActiveLanguage, selectedLanguage, closePopover]);
 
 	return (
-		<div className="settings-popover">
+		<div className="settings-popover" ref={popoverRef}>
+			<Alert
+				cancelButtonText="Cancel"
+				confirmButtonText="Change language"
+				icon="translate"
+				intent={Intent.DANGER}
+				isOpen={changeLanguageAlertOpen}
+				onCancel={() => setChangeLanguageAlertOpen(false)}
+				onConfirm={changeLanguage}
+			>
+				<p>This will reset the currently loaded Document. Continue? </p>
+			</Alert>
 			<div className="settings-language">
-				<TranslationOutlined />
-				<Select
-					defaultValue={selectedLanguage?.id || ''}
-					value={selectedLanguage?.id}
-					onChange={changeLanguage}
+				<Icon icon="translate" />
+				<LanguageSelect
+					itemRenderer={renderLanguageConfig}
+					onItemSelect={(item) => {
+						setSelectedLanguage(item);
+						setChangeLanguageAlertOpen(true);
+					}}
+					items={availableLanguages}
+					popoverProps={{ minimal: true, usePortal: false }}
 					className="settings-language-select"
+					filterable={false}
 				>
-					{availableLanguages.map((lang) => (
-						<Option key={lang.id} value={lang.id}>
-							{lang.name}
-						</Option>
-					))}
-				</Select>
+					<Button
+						text={selectedLanguage?.name || 'note selected!'}
+						rightIcon="double-caret-vertical"
+					/>
+				</LanguageSelect>
 			</div>
-			<Divider style={{ marginTop: '12px', marginBottom: '12px' }} />
+			<Divider />
 			<Button
-				type="default"
-				icon={<SettingOutlined />}
-				style={{ width: '100%' }}
+				icon="settings"
 				onClick={() => {
 					history.push(`/home/settings`);
 				}}
@@ -106,9 +112,8 @@ const SettingsPopover: React.FC = () => {
 			</Button>
 			<Divider style={{ marginTop: '12px', marginBottom: '12px' }} />
 			<Button
-				danger
-				type="default"
-				icon={<LogoutOutlined />}
+				intent={Intent.DANGER}
+				icon="log-out"
 				style={{ width: '100%' }}
 				onClick={logoutConfirm}
 			>

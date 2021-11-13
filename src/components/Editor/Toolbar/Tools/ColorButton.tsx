@@ -1,5 +1,6 @@
 import React from 'react';
 import { Editor } from 'slate';
+import { Icon } from '@blueprintjs/core';
 import ToolbarButton from './ToolbarButton';
 
 export interface IColorButtonProps {
@@ -21,16 +22,7 @@ const ColorButton: React.FC<IColorButtonProps> = ({
 
 	return (
 		<ToolbarButton
-			icon={
-				<span
-					style={{
-						width: '20px',
-						height: '20px',
-						backgroundColor: color,
-						borderRadius: '5px',
-					}}
-				/>
-			}
+			text={<Icon icon="tint" color={color} />}
 			title={title}
 			action={() => {
 				if (selectionColor === color) {

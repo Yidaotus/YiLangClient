@@ -30,7 +30,7 @@ const INITIAL_PAGE_SIZE = 2;
  *
  * Let's the user filter tags, and search other columns
  */
-const DictionaryList: React.FC = () => {
+const DictionaryTable: React.FC = () => {
 	const [pageSize, setPageSize] = useState(10);
 	const selectedLanguage = useActiveLanguageConf();
 	const [paginationOptions, setPaginationOptions] =
@@ -313,4 +313,4 @@ const DictionaryList: React.FC = () => {
 	);
 };
 
-export default DictionaryList;
+export default DictionaryTable;

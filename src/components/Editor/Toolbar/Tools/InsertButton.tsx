@@ -16,7 +16,7 @@ const InsertButton: React.FC<IInsertButtonProps> = ({
 }) => (
 	<ToolbarButton
 		title={title}
-		icon={text}
+		text={text}
 		action={() => {
 			Editor.insertText(editor, text);
 			onChange();
