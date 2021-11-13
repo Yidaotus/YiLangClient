@@ -18,6 +18,11 @@ import {
 	Spinner,
 	Intent,
 	Overlay,
+	PopoverInteractionKind,
+	Tabs,
+	Tab,
+	Icon,
+	IconName,
 } from '@blueprintjs/core';
 import { Popover2 } from '@blueprintjs/popover2';
 import SettingsPopover from '@components/SettingsPopover/SettingsPopover';
@@ -28,17 +33,30 @@ import Dictionary from '@views/Home/Dictionary/Dictionary';
 import Editor from '@editor/Editor';
 import AppToaster from '@components/Toaster';
 import Settings from '@views/Home/Settings/Settings';
-import useClickOutside from '@hooks/useClickOutside';
+
+interface INavButtonProps {
+	to: string;
+	icon: IconName;
+	text: string;
+}
+const NavButton: React.FC<INavButtonProps> = ({ to, icon, text }) => (
+	<NavLink href="#" to={to}>
+		<span
+			style={{
+				display: 'flex',
+				alignItems: 'center',
+			}}
+		>
+			<Icon icon={icon} />
+			<span style={{ marginLeft: '5px' }}>{text}</span>
+		</span>
+	</NavLink>
+);
 
 const HomeView: React.FC = () => {
 	const [activeDocument, changeActiveDocument] = useActiveDocument();
-	const [settingsPopoverOpen, setSettingsPopoverOpen] = useState(false);
 	const [loading, setLoading] = useState<string | null>(null);
 	const contentRef = useRef<HTMLDivElement>(null);
-	const settingsRef = useRef(null);
-	useClickOutside(settingsRef, () => {
-		setSettingsPopoverOpen(false);
-	});
 
 	const { url } = useRouteMatch();
 	const { location } = useHistory();
@@ -96,61 +114,64 @@ const HomeView: React.FC = () => {
 						</Navbar.Heading>
 					</Navbar.Group>
 					<Navbar.Group align={Alignment.RIGHT}>
-						<NavLink href="#" to={locationMap.home}>
-							<Button
-								className="bp3-minimal"
-								icon="home"
-								text="Home"
-							/>
-						</NavLink>
-						<NavLink
-							href="#"
-							to={`${url}/editor/${activeDocument}`}
+						<Tabs
+							animate
+							id="navbar"
+							large
+							selectedTabId={location.pathname}
 						>
-							<Button
-								className="bp3-minimal"
-								icon="edit"
-								text="Editor"
+							<Tab
+								id={locationMap.home}
+								title={
+									<NavButton
+										to={locationMap.home}
+										icon="home"
+										text="Home"
+									/>
+								}
 							/>
-						</NavLink>
-						<NavLink href="#" to={locationMap.dicitonary}>
-							<Button
-								className="bp3-minimal"
-								icon="book"
-								text="Dictionary"
+							<Tab
+								id={locationMap.editor}
+								title={
+									<NavButton
+										to={`${url}/editor/${activeDocument}`}
+										icon="edit"
+										text="Editor"
+									/>
+								}
 							/>
-						</NavLink>
-						<NavLink href="#" to={locationMap.documents}>
-							<Button
-								className="bp3-minimal"
-								icon="document"
-								text="Documents"
+							<Tab
+								id={locationMap.dicitonary}
+								title={
+									<NavButton
+										to={locationMap.dicitonary}
+										icon="book"
+										text="Dictionary"
+									/>
+								}
 							/>
-						</NavLink>
+							<Tab
+								id={locationMap.documents}
+								title={
+									<NavButton
+										to={locationMap.documents}
+										icon="document"
+										text="Documents"
+									/>
+								}
+							/>
+						</Tabs>
 						<Navbar.Divider />
 						<Popover2
-							placement="bottom"
-							content={
-								<div ref={settingsRef}>
-									<SettingsPopover
-										closePopover={() => {
-											setSettingsPopoverOpen(false);
-										}}
-									/>
-								</div>
-							}
-							onInteraction={() => {}}
-							enforceFocus={false}
-							isOpen={settingsPopoverOpen}
+							interactionKind={PopoverInteractionKind.CLICK}
+							content={<SettingsPopover />}
+							modifiers={{
+								arrow: { enabled: true },
+								flip: { enabled: true },
+								preventOverflow: { enabled: true },
+							}}
 						>
-							<Button
-								className="bp3-minimal"
-								icon="user"
-								text=""
-								onClick={() => {
-									setSettingsPopoverOpen((open) => !open);
-								}}
-							/>
+							<Button minimal icon="user" tabIndex={0} />
 						</Popover2>
 					</Navbar.Group>
 				</Navbar>

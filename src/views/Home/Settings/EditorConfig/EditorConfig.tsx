@@ -1,17 +1,37 @@
 import './EditorConfig.css';
-import { Form, PageHeader, Input, Button, Switch } from 'antd';
 import { IEditorConfig } from 'Document/Config';
 import React, { useEffect } from 'react';
+import {
+	Divider,
+	Colors,
+	Switch,
+	NumericInput,
+	Button,
+	FormGroup,
+	Label,
+	Intent,
+} from '@blueprintjs/core';
 import {
 	useEditorConfig,
 	useUpdateEditorConfig,
 } from '@hooks/ConfigQueryHooks';
+import { SubmitHandler, useForm, Controller } from 'react-hook-form';
 
-const LanguageConfig: React.FC = () => {
+const LanguageConfigPanel: React.FC = () => {
 	const currentConfig = useEditorConfig();
-
-	const [editorConfForm] = Form.useForm<IEditorConfig>();
 	const updateEditorConfig = useUpdateEditorConfig();
+	const { control, handleSubmit, reset, setValue } = useForm<IEditorConfig>({
+		defaultValues: {
+			autoSave: true,
+			saveEveryNActions: 15,
+		},
+	});
+
+	useEffect(() => {
+		if (currentConfig) {
+			reset(currentConfig);
+		}
+	}, [currentConfig, reset]);
 
 	const saveConfig = (newConfig: IEditorConfig) => {
 		const newConfigWithoutNullishValues = Object.fromEntries(
@@ -22,42 +42,50 @@ const LanguageConfig: React.FC = () => {
 				editorConfig: newConfigWithoutNullishValues,
 			});
 		}
-		editorConfForm.resetFields();
+		reset();
 	};
 
-	useEffect(() => {
-		editorConfForm.setFieldsValue({ ...currentConfig });
-	}, [currentConfig, editorConfForm]);
-
 	return (
-		<PageHeader
-			className="sub-header"
-			title="Editor Configuration"
-			subTitle="Change your editor settings"
-			ghost={false}
-		>
-			<Form form={editorConfForm} layout="vertical" onFinish={saveConfig}>
-				<Form.Item
+		<div className="sub-header">
+			<h2 className="bp3-heading">Editor Configuration</h2>
+			<h3 className="bp3-heading" style={{ color: Colors.DARK_GRAY5 }}>
+				Change your editor settings
+			</h3>
+			<Divider />
+			<form onSubmit={handleSubmit(saveConfig)}>
+				<Controller
 					name="autoSave"
-					label="Auto save"
-					valuePropName="checked"
-				>
-					<Switch />
-				</Form.Item>
-				<Form.Item
-					name="saveEveryNActions"
-					label="Auto save every n actions"
-				>
-					<Input type="number" />
-				</Form.Item>
-				<Form.Item wrapperCol={{ offset: 8, span: 16 }}>
-					<Button type="primary" htmlType="submit">
-						Save
-					</Button>
-				</Form.Item>
-			</Form>
-		</PageHeader>
+					control={control}
+					defaultValue=""
+					render={({ value, onChange }) => (
+						<Switch
+							value={value}
+							onChange={onChange}
+							label="Auto save"
+							id="auto-save"
+						/>
+					)}
+				/>
+				<Label>
+					Save every N actions
+					<Controller
+						name="saveEveryNActions"
+						control={control}
+						render={({ value, onChange }) => (
+							<NumericInput
+								value={value}
+								onValueChange={onChange}
+								placeholder="Save every n actions"
+							/>
+						)}
+					/>
+				</Label>
+				<Button type="submit" minimal intent={Intent.PRIMARY}>
+					Save
+				</Button>
+			</form>
+		</div>
 	);
 };
 
-export default LanguageConfig;
+export default LanguageConfigPanel;

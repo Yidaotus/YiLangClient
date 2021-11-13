@@ -2,17 +2,8 @@ import './DocumentExcerpt.css';
 
 import React from 'react';
 import { IDocumentExcerpt } from 'api/definitions/api';
-import { Button, Card, Dropdown, Menu, Modal } from 'antd';
-import {
-	DeleteOutlined,
-	EditOutlined,
-	ExclamationCircleOutlined,
-	MoreOutlined,
-} from '@ant-design/icons';
-import Meta from 'antd/lib/card/Meta';
-import Link from 'antd/lib/typography/Link';
-
-const { confirm } = Modal;
+import { Button, Card, Intent, Menu, Position } from '@blueprintjs/core';
+import { Popover2 } from '@blueprintjs/popover2';
 
 interface IDocumentExcerptProps {
 	excerpt: IDocumentExcerpt;
@@ -30,59 +21,45 @@ const DocumentExcerpt: React.FC<IDocumentExcerptProps> = ({
 	selectDocument,
 	removeDocument,
 }) => {
-	const showDeleteConfirm = () => {
-		confirm({
-			title: 'Are you sure to delete this document?',
-			icon: <ExclamationCircleOutlined />,
-			content: `Deleted documents can't be recovered!`,
-			okText: 'Yes',
-			okType: 'danger',
-			cancelText: 'No',
-			onOk() {
-				removeDocument?.(excerpt.id);
-			},
-		});
-	};
+	// removeDocument?.(excerpt.id);
 
 	const moreDropdown = (
 		<Menu>
-			<Menu.Item key="1" icon={<EditOutlined />} onClick={() => {}}>
-				Edit
-			</Menu.Item>
+			<Menu.Item key="1" icon="edit" text="Edit" />
+			<Menu.Divider />
 			<Menu.Item
 				key="2"
-				icon={<DeleteOutlined />}
-				onClick={showDeleteConfirm}
-				danger
-			>
-				Delete
-			</Menu.Item>
+				icon="trash"
+				onClick={() => {}}
+				text="Remove"
+				intent={Intent.DANGER}
+			/>
 		</Menu>
 	);
 
 	return (
-		<Card
-			title={
-				<Meta
-					title={
-						<Link onClick={() => selectDocument(excerpt.id)}>
-							{excerpt.title || 'Doc'}
-						</Link>
-					}
-					description={excerpt.updatedAt.toLocaleString()}
-				/>
-			}
-			key={excerpt.id}
-			extra={
-				removeDocument && (
-					<Dropdown overlay={moreDropdown}>
-						<Button type="text">
-							<MoreOutlined rotate={90} />
-						</Button>
-					</Dropdown>
-				)
-			}
-		>
+		<Card key={excerpt.id}>
+			<div style={{ display: 'flex', alignItems: 'baseline' }}>
+				<h5 className="bp3-heading">
+					<a
+						onClick={() => selectDocument(excerpt.id)}
+						role="link"
+						onKeyDown={() => {}}
+						tabIndex={0}
+					>
+						{excerpt.title || 'Doc'}
+					</a>
+				</h5>
+				<div style={{ marginLeft: 'auto' }}>
+					<Popover2
+						content={moreDropdown}
+						position={Position.RIGHT_TOP}
+						placement="bottom"
+					>
+						<Button icon="more" minimal />
+					</Popover2>
+				</div>
+			</div>
 			<p>{excerpt.excerpt}</p>
 		</Card>
 	);

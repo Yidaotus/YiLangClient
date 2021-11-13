@@ -2,12 +2,12 @@ import './Documents.css';
 import React, { useEffect, useState, useCallback } from 'react';
 import { IDocumentExcerpt } from 'api/definitions/api';
 import { listDocuments } from 'api/document.service';
-import { Card, Col, Empty, Pagination, Row, Space, Spin } from 'antd';
 import { useHistory } from 'react-router-dom';
 import DocumentExcerpt from 'components/DocumentExcerpt/DocumentExcerpt';
 import handleError from '@helpers/Error';
 import { useActiveLanguageConf } from '@hooks/ConfigQueryHooks';
 import { useActiveDocument } from '@hooks/useUserContext';
+import ReactPaginate from 'react-paginate';
 
 /**
  * Renders the Dictionary into a Table.
@@ -79,61 +79,36 @@ const Documents: React.FC = () => {
 
 	return (
 		<>
-			<Row>
-				<Col span={24}>
-					{activeLanguage && (
-						<Spin
-							size="large"
-							spinning={!!loading}
-							tip={loading || ''}
-						>
-							<Space
-								direction="vertical"
-								style={{ width: '100%' }}
-							>
-								{!loading &&
-									excerpts.length > 0 &&
-									excerpts.map((excerpt) => (
-										<DocumentExcerpt
-											key={excerpt.id}
-											excerpt={excerpt}
-											selectDocument={
-												fetchDocumentAndSwitch
-											}
-											removeDocument={removeDocument}
-										/>
-									))}
-								{loading && <Card loading />}
-								{!loading && excerpts.length < 1 && (
-									<Empty
-										image={Empty.PRESENTED_IMAGE_SIMPLE}
-									/>
-								)}
-							</Space>
-						</Spin>
-					)}
-					{!activeLanguage && (
-						<Empty
-							image={Empty.PRESENTED_IMAGE_SIMPLE}
-							imageStyle={{
-								height: 50,
-							}}
-							description="No language selected!"
-						/>
-					)}
-				</Col>
-			</Row>
-			<Row justify="center" style={{ marginTop: '15px' }}>
-				<Pagination
-					pageSize={pageSize}
-					total={total}
-					current={currentPage}
-					onChange={(page, currentPageSize) => {
-						setPageSkip((page - 1) * (currentPageSize || pageSize));
-						setCurrentPage(page);
+			<div>
+				<div className="excerpt-list">
+					{activeLanguage &&
+						!loading &&
+						excerpts.length > 0 &&
+						excerpts.map((excerpt) => (
+							<DocumentExcerpt
+								key={excerpt.id}
+								excerpt={excerpt}
+								selectDocument={fetchDocumentAndSwitch}
+								removeDocument={removeDocument}
+							/>
+						))}
+					{!activeLanguage && <span> No language selected!</span>}
+				</div>
+			</div>
+			<div>
+				<ReactPaginate
+					marginPagesDisplayed={100}
+					breakLabel="..."
+					nextLabel="next >"
+					onPageChange={(pageEvent) => {
+						setPageSkip(pageEvent.selected * pageSize);
+						setCurrentPage(pageEvent.selected);
 					}}
+					pageRangeDisplayed={5}
+					pageCount={Math.ceil(total / pageSize)}
+					previousLabel="< previous"
 				/>
-			</Row>
+			</div>
 		</>
 	);
 };

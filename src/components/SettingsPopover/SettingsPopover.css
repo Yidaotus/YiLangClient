@@ -1,5 +1,8 @@
 .settings-popover {
 	width: 200px;
+	background-color: white;
+	border-radius: 2px;
+	padding: 5px;
 }
 
 .settings-language {
