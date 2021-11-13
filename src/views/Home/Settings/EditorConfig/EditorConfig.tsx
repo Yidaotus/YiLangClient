@@ -16,11 +16,12 @@ import {
 	useUpdateEditorConfig,
 } from '@hooks/ConfigQueryHooks';
 import { SubmitHandler, useForm, Controller } from 'react-hook-form';
+import PageHeader from '@components/PageHeader/PageHeader';
 
 const LanguageConfigPanel: React.FC = () => {
 	const currentConfig = useEditorConfig();
 	const updateEditorConfig = useUpdateEditorConfig();
-	const { control, handleSubmit, reset, setValue } = useForm<IEditorConfig>({
+	const { control, handleSubmit, reset } = useForm<IEditorConfig>({
 		defaultValues: {
 			autoSave: true,
 			saveEveryNActions: 15,
@@ -46,11 +47,11 @@ const LanguageConfigPanel: React.FC = () => {
 	};
 
 	return (
-		<div className="sub-header">
-			<h2 className="bp3-heading">Editor Configuration</h2>
-			<h3 className="bp3-heading" style={{ color: Colors.DARK_GRAY5 }}>
-				Change your editor settings
-			</h3>
+		<div className="editor-config-panel">
+			<PageHeader
+				title="Editor Configuration"
+				subtitle="Change your editor settings"
+			/>
 			<Divider />
 			<form onSubmit={handleSubmit(saveConfig)}>
 				<Controller
@@ -59,7 +60,7 @@ const LanguageConfigPanel: React.FC = () => {
 					defaultValue=""
 					render={({ value, onChange }) => (
 						<Switch
-							value={value}
+							checked={value}
 							onChange={onChange}
 							label="Auto save"
 							id="auto-save"

@@ -1,12 +1,6 @@
 import './LanguageConfig.css';
-import {
-	DeleteOutlined,
-	EditOutlined,
-	ExclamationCircleOutlined,
-} from '@ant-design/icons';
 import InnerModal from '@components/InnerModal/InnerModal';
 import LangConfForm from '@components/Settings/LangConfForm/LangConfForm';
-import { Card, Button, Form, Modal, List, PageHeader } from 'antd';
 import { ILanguageConfig } from 'Document/Config';
 import React, { useState } from 'react';
 import {
@@ -15,19 +9,31 @@ import {
 	useRemoveLanguageConfig,
 	useUpdateLanguageConfig,
 } from '@hooks/ConfigQueryHooks';
+import PageHeader from '@components/PageHeader/PageHeader';
+import { Alert, Button, Card, Classes, Intent } from '@blueprintjs/core';
+import { useForm } from 'react-hook-form';
 
-const { confirm } = Modal;
+const defaultConfig = {
+	id: undefined,
+	name: '',
+	lookupSources: [],
+};
 
 const LanguageConfig: React.FC = () => {
 	const availableLanguages = useLanguageConfigs();
 	const [addFormVisible, setAddFormVisible] = useState(false);
+	const [currentLanguageContext, setCurrentLanguageContext] = useState<
+		string | null
+	>(null);
 
-	const [langConfForm] = Form.useForm<ILanguageConfig>();
+	const languageFormContext = useForm<ILanguageConfig>();
+	const { reset, handleSubmit } = languageFormContext;
 	const updateLanguageConfig = useUpdateLanguageConfig();
 	const addLanguageConfig = useAddLanguageConfig();
 	const removeLanguageConfig = useRemoveLanguageConfig();
 
 	const saveConfig = (configEntry: ILanguageConfig) => {
+		console.log(configEntry);
 		if (configEntry.id) {
 			updateLanguageConfig.mutate({
 				id: configEntry.id,
@@ -36,22 +42,8 @@ const LanguageConfig: React.FC = () => {
 		} else {
 			addLanguageConfig.mutate(configEntry);
 		}
-		langConfForm.resetFields();
+		reset(defaultConfig);
 		setAddFormVisible(false);
-	};
-
-	const removeConfig = (id: string) => {
-		confirm({
-			title: 'Are you sure delete this language?',
-			icon: <ExclamationCircleOutlined />,
-			content: 'Deleted languages can not be recovered!',
-			okText: 'Yes',
-			okType: 'danger',
-			cancelText: 'No',
-			onOk() {
-				removeLanguageConfig.mutate(id);
-			},
-		});
 	};
 
 	const editConfig = (key: string) => {
@@ -59,23 +51,40 @@ const LanguageConfig: React.FC = () => {
 			(lang) => lang.id === key
 		);
 		if (selectedLanguage) {
-			langConfForm.setFieldsValue(selectedLanguage);
+			reset(selectedLanguage);
 			setAddFormVisible(true);
 		}
 	};
 
 	return (
-		<PageHeader
-			className="sub-header"
-			title="Language Configurations"
-			subTitle="Change your language settings"
-			ghost={false}
-			extra={
-				<Button type="primary" onClick={() => setAddFormVisible(true)}>
-					Add language
-				</Button>
-			}
-		>
+		<div>
+			<Alert
+				confirmButtonText="Delete"
+				intent={Intent.DANGER}
+				icon="trash"
+				isOpen={!!currentLanguageContext}
+				onClose={() => setCurrentLanguageContext(null)}
+				onConfirm={() => {
+					if (currentLanguageContext) {
+						removeLanguageConfig.mutate(currentLanguageContext);
+						setCurrentLanguageContext(null);
+					}
+				}}
+			>
+				<p>Forever gone!</p>
+			</Alert>
+			<PageHeader
+				title="Language Configurations"
+				subtitle="Change your language settings"
+				options={
+					<Button
+						intent={Intent.PRIMARY}
+						onClick={() => setAddFormVisible(true)}
+					>
+						Add language
+					</Button>
+				}
+			/>
 			{addFormVisible && (
 				<InnerModal
 					onClose={() => {
@@ -84,63 +93,65 @@ const LanguageConfig: React.FC = () => {
 					width="600px"
 				>
 					<Card>
-						<LangConfForm form={langConfForm} />
-						<div className="add-form-actions">
-							<Button
-								onClick={async () => {
-									const newConf =
-										await langConfForm.validateFields();
-									saveConfig(newConf);
-								}}
-								type="primary"
-							>
-								Save
-							</Button>
-							<Button
-								onClick={() => {
-									langConfForm.resetFields();
-									setAddFormVisible(false);
-								}}
-								danger
-								type="primary"
-							>
-								Cancel
-							</Button>
-						</div>
+						<form onSubmit={handleSubmit(saveConfig)}>
+							<LangConfForm {...languageFormContext} />
+							<div className="add-form-actions">
+								<Button
+									onClick={() => {
+										handleSubmit(saveConfig);
+									}}
+									type="submit"
+									intent={Intent.PRIMARY}
+								>
+									Save
+								</Button>
+								<Button
+									onClick={() => {
+										reset(defaultConfig);
+										setAddFormVisible(false);
+									}}
+									intent={Intent.DANGER}
+								>
+									Cancel
+								</Button>
+							</div>
+						</form>
 					</Card>
 				</InnerModal>
 			)}
 
-			<List
-				size="default"
-				bordered
-				dataSource={availableLanguages}
-				renderItem={(language) => (
-					<List.Item
-						actions={[
-							<Button
-								icon={<EditOutlined />}
-								type="link"
-								onClick={() => editConfig(language.id)}
-							/>,
-							<Button
-								icon={<DeleteOutlined />}
-								danger
-								type="link"
-								onClick={() => removeConfig(language.id)}
-							/>,
-						]}
-					>
-						<List.Item.Meta
+			<div>
+				{availableLanguages.map((language) => (
+					<Card>
+						<PageHeader
 							title={language.name}
-							description={language.lookupSources
+							subtitle={language.lookupSources
 								.map((luSource) => luSource.name)
 								.join(', ')}
+							options={
+								<div>
+									<Button
+										icon="edit"
+										minimal
+										onClick={() => editConfig(language.id)}
+									/>
+									<Button
+										icon="trash"
+										intent={Intent.DANGER}
+										minimal
+										onClick={() =>
+											setCurrentLanguageContext(
+												language.id
+											)
+										}
+									/>
+								</div>
+							}
 						/>
-					</List.Item>
-				)}
-			/>
-		</PageHeader>
+					</Card>
+				))}
+			</div>
+		</div>
 	);
 };
 

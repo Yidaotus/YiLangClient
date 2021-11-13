@@ -16,6 +16,7 @@ const Settings: React.FC = () => (
 			id="SettingsTabs"
 			key="SettingsTabs"
 			renderActiveTabPanelOnly
+			className="panel-container"
 		>
 			<Tab
 				title={
@@ -27,6 +28,7 @@ const Settings: React.FC = () => (
 				id="1"
 				key="1"
 				panel={<span>Account</span>}
+				panelClassName="full-width"
 			/>
 			<Tab
 				title={
@@ -38,6 +40,7 @@ const Settings: React.FC = () => (
 				id="2"
 				key="2"
 				panel={<EditorConfigPanel />}
+				panelClassName="full-width"
 			/>
 			<Tab
 				title={
@@ -49,6 +52,7 @@ const Settings: React.FC = () => (
 				id="3"
 				key="3"
 				panel={<LanguageConfigPanel />}
+				panelClassName="full-width"
 			/>
 			<Tabs.Expander />
 		</Tabs>

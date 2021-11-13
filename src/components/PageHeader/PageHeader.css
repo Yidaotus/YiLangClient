@@ -1,0 +1,16 @@
+.page-header-container {
+	display: flex;
+	flex-direction: row;
+	align-items: baseline;
+	width: 100%;
+}
+.page-header-title {
+}
+
+.page-header-subtitle {
+	margin-left: 15px;
+}
+
+.page-header-options {
+	margin-left: auto;
+}

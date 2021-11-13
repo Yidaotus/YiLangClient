@@ -4,3 +4,11 @@
 	border-radius: 2px;
     padding: 15px;
 }
+
+.full-width {
+	width: 100%;
+}
+
+.panel-container {
+	width: 100%;
+}

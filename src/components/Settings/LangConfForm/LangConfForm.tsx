@@ -1,118 +1,103 @@
 import './LangConfForm.css';
-import {
-	InfoCircleOutlined,
-	MinusCircleOutlined,
-	PlusOutlined,
-} from '@ant-design/icons';
-import {
-	Button,
-	Divider,
-	Form,
-	FormInstance,
-	Input,
-	Space,
-	Tooltip,
-} from 'antd';
-import { ILanguageConfig } from 'Document/Config';
 import React from 'react';
+import { Controller, useFieldArray, UseFormMethods } from 'react-hook-form';
+import { Button, InputGroup, Label } from '@blueprintjs/core';
+import { InfoCircleOutlined } from '@ant-design/icons';
+import { Tooltip2 } from '@blueprintjs/popover2';
+import { ILanguageConfig } from '../../../Document/Config';
 
-interface ILangFormProps {
-	form: FormInstance<ILanguageConfig>;
-}
+type ILangFormProps = UseFormMethods<ILanguageConfig>;
 
-const LangConfForm: React.FC<ILangFormProps> = ({ form }) => {
+const LangConfForm: React.FC<ILangFormProps> = ({ control, register }) => {
+	const { fields, append, remove } = useFieldArray<
+		ILanguageConfig['lookupSources'][0]
+	>({
+		control,
+		name: 'lookupSources',
+	});
 	return (
-		<Form
-			form={form}
-			layout="vertical"
-			className="tag-input-form-container"
-		>
+		<>
 			<h3>Name</h3>
-			<Form.Item name="id" hidden>
-				<Input />
-			</Form.Item>
-			<Form.Item name="name">
-				<Input placeholder="Language name" />
-			</Form.Item>
-			<Divider />
-			<Space align="baseline">
-				<h3>Lookup Sources</h3>
-				<Tooltip
-					placement="bottom"
-					title='
+			<input hidden {...register('id')} />
+			<Label>
+				Language Name
+				<Controller
+					name="name"
+					control={control}
+					defaultValue=""
+					render={({ value, onChange }) => (
+						<InputGroup
+							large
+							onChange={onChange}
+							placeholder="Name"
+							value={value}
+						/>
+					)}
+				/>
+			</Label>
+			<h3>Lookup Sources</h3>
+			<Tooltip2
+				placement="bottom"
+				content='
 						To create a lookup source enter a name and the URL for
 						the source. Important: replace the search string with
 						"&#123;&#125;". YiLang will substitude
 						"&#123;&#125;" with the given search string.'
-				>
-					<InfoCircleOutlined />
-				</Tooltip>
-			</Space>
-			<Form.List name="lookupSources">
-				{(fields, { add, remove }) => (
-					<>
-						{fields.map(({ key, name, fieldKey, ...restField }) => (
-							<div className="source-sub-form" key={key}>
-								<Form.Item
-									{...restField}
-									hidden
-									initialValue="0"
-									name={[name, 'priority']}
-									fieldKey={[fieldKey, 'priority']}
-								>
-									<Input value="0" />
-								</Form.Item>
-								<Form.Item
-									{...restField}
-									name={[name, 'name']}
-									fieldKey={[fieldKey, 'name']}
-									rules={[
-										{
-											required: true,
-											message: 'Missing name',
-										},
-									]}
-								>
-									<Input placeholder="Name" />
-								</Form.Item>
-								<Form.Item
-									{...restField}
-									name={[name, 'source']}
-									fieldKey={[fieldKey, 'source']}
-									rules={[
-										{
-											required: true,
-											message: 'Missing source',
-										},
-										{
-											pattern: new RegExp('{}'),
-											message:
-												'Source must contain the {} placeholder',
-										},
-									]}
-									style={{ flexGrow: 1 }}
-								>
-									<Input placeholder="Source" />
-								</Form.Item>
-								<MinusCircleOutlined
-									onClick={() => remove(name)}
-								/>
-							</div>
-						))}
-						<Form.Item>
-							<Button
-								type="dashed"
-								onClick={() => add()}
-								block
-								icon={<PlusOutlined />}
-							>
-								Add Source
-							</Button>
-						</Form.Item>
-					</>
-				)}
-			</Form.List>
-		</Form>
+			>
+				<InfoCircleOutlined />
+			</Tooltip2>
+			{fields.map((field, index) => (
+				<div className="source-sub-form" key={field.id}>
+					<Controller
+						name={`lookupSources.${index}.priority`}
+						defaultValue={field.priority}
+						control={control}
+						render={({ value, onChange }) => (
+							<input hidden onChange={onChange} value={value} />
+						)}
+					/>
+					<Controller
+						name={`lookupSources.${index}.name`}
+						defaultValue={field.name}
+						control={control}
+						render={({ value, onChange }) => (
+							<InputGroup
+								large
+								onChange={onChange}
+								placeholder="Name"
+								value={value}
+							/>
+						)}
+					/>
+					<Controller
+						name={`lookupSources.${index}.source`}
+						defaultValue={field.source}
+						control={control}
+						render={({ value, onChange }) => (
+							<InputGroup
+								large
+								onChange={onChange}
+								placeholder="Name"
+								value={value}
+							/>
+						)}
+					/>
+					<Button
+						icon="minus"
+						minimal
+						onClick={() => remove(index)}
+					/>
+				</div>
+			))}
+			<Button
+				fill
+				minimal
+				onClick={() => append({ name: '', source: '', priority: 0 })}
+				icon="plus"
+			>
+				Add Source
+			</Button>
+		</>
 	);
 };
 
