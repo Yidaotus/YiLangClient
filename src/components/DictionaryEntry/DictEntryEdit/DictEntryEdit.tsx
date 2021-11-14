@@ -7,18 +7,18 @@ import React, {
 	forwardRef,
 	useState,
 } from 'react';
-import { Form, Spin } from 'antd';
+import { useForm } from 'react-hook-form';
 import { IDictionaryEntry, IDictionaryTag } from 'Document/Dictionary';
 import TagForm, {
 	ITagFormFields,
 } from '@components/DictionaryEntry/TagForm/TagForm';
 import handleError from '@helpers/Error';
 import { useTags, useAddDictionaryTag } from '@hooks/useTags';
+import { Spinner } from '@blueprintjs/core';
 import {
 	useAddDictionaryEntry,
 	useUpdateDictionaryEntry,
 } from '@hooks/DictionaryQueryHooks';
-import { randomBytes } from 'crypto';
 import EntryForm, {
 	IEntryFormFields,
 	IDictionaryEntryInput,
@@ -99,9 +99,9 @@ const WordInput: React.ForwardRefRenderFunction<
 	IWordInputRef,
 	IWordInputState
 > = ({ entryKey, stateChanged }, ref) => {
-	const [wordForm] = Form.useForm<IEntryFormFields>();
-	const [rootForm] = Form.useForm<IEntryFormFields>();
-	const [tagForm] = Form.useForm<ITagFormFields>();
+	const wordForm = useForm<IEntryFormFields>();
+	const rootForm = useForm<IEntryFormFields>();
+	const tagForm = useForm<ITagFormFields>();
 	const [createdTags, setCreatedTags] = useState<Array<IDictionaryTag>>([]);
 	const [wordEditorState, dispatchWordEditorState] = useReducer(
 		wordStateReducer,
@@ -114,18 +114,16 @@ const WordInput: React.ForwardRefRenderFunction<
 
 	useEffect(() => {
 		if (typeof entryKey === 'string') {
-			wordForm.setFieldsValue({ key: entryKey });
+			wordForm.setValue('key', entryKey);
 		} else {
-			wordForm.setFieldsValue(entryKey);
+			wordForm.reset(entryKey);
 		}
 	}, [entryKey, wordForm]);
 
 	const createTagCallback = useCallback(
-		async (tagName: string) => {
+		(tagName: string) => {
 			try {
-				tagForm.setFieldsValue({
-					name: tagName,
-				});
+				tagForm.setValue('name', tagName);
 				dispatchWordEditorState({
 					type: 'pushState',
 					payload: { newState: 'tag', stateChanged },
@@ -133,6 +131,12 @@ const WordInput: React.ForwardRefRenderFunction<
 			} catch (e) {
 				handleError(e);
 			}
+			const fakeTag: IDictionaryTag = {
+				id: 'fakse',
+				name: 'fakse',
+				lang: 'fake',
+			};
+			return fakeTag;
 		},
 		[stateChanged, tagForm]
 	);
@@ -140,7 +144,7 @@ const WordInput: React.ForwardRefRenderFunction<
 	const createRootCallback = useCallback(
 		async (initialKey: string) => {
 			try {
-				rootForm.setFieldsValue({ key: initialKey });
+				rootForm.setValue('key', initialKey);
 				dispatchWordEditorState({
 					type: 'pushState',
 					payload: { newState: 'root', stateChanged },
@@ -234,71 +238,81 @@ const WordInput: React.ForwardRefRenderFunction<
 		}
 		if (wordEditorState.currentState === 'word') {
 			try {
-				const wordFormData = await wordForm.validateFields();
-				const entryId = await saveEntry(wordFormData);
-				result = { isDone: true, entryId };
-				setCreatedTags([]);
-				tagForm.resetFields();
-				rootForm.resetFields();
-				wordForm.resetFields();
+				const correct = await wordForm.trigger();
+				if (correct) {
+					const wordFormData = wordForm.getValues();
+					const entryId = await saveEntry(wordFormData);
+					result = { isDone: true, entryId };
+					setCreatedTags([]);
+					tagForm.reset();
+					rootForm.reset();
+					wordForm.reset();
+				}
 			} catch (e) {
 				// The forms will show appropriate erros themselfes.
 			}
 		} else if (wordEditorState.currentState === 'tag') {
 			try {
-				const tagValues = await tagForm.validateFields();
-				tagForm.resetFields();
-				const cleanedUpTagValues = {
-					...tagValues,
-					id: String(`etherialTagId${tagValues.name}`),
-					grammarPoint: tagValues.grammarPoint?.name
-						? tagValues.grammarPoint
-						: undefined,
-				};
-				setCreatedTags((currentTags) => [
-					...currentTags,
-					cleanedUpTagValues,
-				]);
-				if (wordEditorState.stateHistory.length > 0) {
-					const previousState =
-						wordEditorState.stateHistory[
-							wordEditorState.stateHistory.length - 1
-						];
-					let targetForm;
-					if (previousState === 'word') {
-						targetForm = wordForm;
-					} else {
-						targetForm = rootForm;
+				const correct = await tagForm.trigger();
+				if (correct) {
+					const tagValues = await tagForm.getValues();
+					tagForm.reset();
+					const cleanedUpTagValues = {
+						...tagValues,
+						id: String(`etherialTagId${tagValues.name}`),
+						grammarPoint: tagValues.grammarPoint?.name
+							? tagValues.grammarPoint
+							: undefined,
+					};
+					setCreatedTags((currentTags) => [
+						...currentTags,
+						cleanedUpTagValues,
+					]);
+					if (wordEditorState.stateHistory.length > 0) {
+						const previousState =
+							wordEditorState.stateHistory[
+								wordEditorState.stateHistory.length - 1
+							];
+						let targetForm;
+						if (previousState === 'word') {
+							targetForm = wordForm;
+						} else {
+							targetForm = rootForm;
+						}
+						targetForm.trigger();
+						const currentFormValues = targetForm.getValues();
+						targetForm.reset({
+							...currentFormValues,
+							tags: [
+								...(currentFormValues.tags || []),
+								cleanedUpTagValues,
+							],
+						});
 					}
-					const currentFormValues = targetForm.getFieldsValue(true);
-					targetForm.setFieldsValue({
-						...currentFormValues,
-						tags: [
-							...(currentFormValues.tags || []),
-							cleanedUpTagValues,
-						],
+					dispatchWordEditorState({
+						type: 'popState',
+						payload: { stateChanged },
 					});
 				}
-				dispatchWordEditorState({
-					type: 'popState',
-					payload: { stateChanged },
-				});
 			} catch (e) {
 				// The forms will show appropriate erros themselfes.
 			}
 		} else {
 			try {
-				const rootValues = await rootForm.validateFields();
-				rootForm.resetFields();
-				const currentWordFormValues = wordForm.getFieldsValue(true);
-				wordForm.setFieldsValue({
-					...currentWordFormValues,
-					root: { ...rootValues },
-				});
-				dispatchWordEditorState({
-					type: 'popState',
-					payload: { stateChanged },
-				});
+				const correct = await rootForm.trigger();
+				if (correct) {
+					const rootValues = rootForm.getValues();
+					rootForm.reset();
+					const currentWordFormValues = wordForm.getValues();
+					wordForm.reset({
+						...currentWordFormValues,
+						root: { ...rootValues },
+					});
+					dispatchWordEditorState({
+						type: 'popState',
+						payload: { stateChanged },
+					});
+				}
 			} catch (e) {
 				// The forms will show appropriate erros themselfes.
 			}
@@ -328,9 +342,9 @@ const WordInput: React.ForwardRefRenderFunction<
 			});
 		} else {
 			setCreatedTags([]);
-			tagForm.resetFields();
-			rootForm.resetFields();
-			wordForm.resetFields();
+			tagForm.reset();
+			rootForm.reset();
+			wordForm.reset();
 		}
 		return isDone;
 	}, [
@@ -347,27 +361,27 @@ const WordInput: React.ForwardRefRenderFunction<
 	const canEditRoot = typeof entryKey === 'string' && entryKey === '';
 	return (
 		<div>
-			<Spin spinning={addTag.isLoading || addEntry.isLoading}>
-				{wordEditorState.currentState === 'word' && (
-					<EntryForm
-						form={wordForm}
-						canEditRoot={canEditRoot}
-						createTag={createTagCallback}
-						createRoot={createRootCallback}
-						allTags={[...userTags, ...createdTags]}
-					/>
-				)}
-				{wordEditorState.currentState === 'root' && (
-					<EntryForm
-						form={rootForm}
-						createTag={createTagCallback}
-						allTags={[...userTags, ...createdTags]}
-					/>
-				)}
-				{wordEditorState.currentState === 'tag' && (
-					<TagForm form={tagForm} />
-				)}
-			</Spin>
+			{(addTag.isLoading || addEntry.isLoading) && <Spinner />}
+			{wordEditorState.currentState === 'word' && (
+				<EntryForm
+					form={wordForm}
+					canEditRoot={canEditRoot}
+					createTag={createTagCallback}
+					createRoot={createRootCallback}
+					allTags={[...userTags, ...createdTags]}
+				/>
+			)}
+			{wordEditorState.currentState === 'root' && (
+				<EntryForm
+					form={rootForm}
+					createTag={createTagCallback}
+					allTags={[...userTags, ...createdTags]}
+				/>
+			)}
+			{wordEditorState.currentState === 'tag' && (
+				<span>nope</span>
+				// <TagForm form={tagForm} />
+			)}
 		</div>
 	);
 };

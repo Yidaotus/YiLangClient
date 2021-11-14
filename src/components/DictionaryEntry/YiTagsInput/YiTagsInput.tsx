@@ -1,129 +1,97 @@
 import './YiTagsInput.css';
 
-import { Button, Divider, Empty, Select, SelectProps, Tag } from 'antd';
-import React, { useState, useCallback } from 'react';
+import React, { useState } from 'react';
 import { IDictionaryTag } from 'Document/Dictionary';
-import { OptionProps } from 'antd/lib/select';
+import {
+	ItemRenderer,
+	MultiSelect,
+	MultiSelectProps,
+} from '@blueprintjs/select';
+import {
+	Button,
+	MenuItem,
+	NonIdealState,
+	Position,
+	Tag,
+} from '@blueprintjs/core';
 
 export interface YiTagsInputProps
-	extends SelectProps<Array<IDictionaryTag | string>> {
+	extends Partial<MultiSelectProps<IDictionaryTag>> {
 	allTags: Array<IDictionaryTag>;
-	createTag?: (input: string) => void;
+	createTag?: (input: string) => IDictionaryTag;
+	values: Array<IDictionaryTag>;
+	onSelectTag: (tag: IDictionaryTag) => void;
+	onRemoveTag: (tag: IDictionaryTag) => void;
 }
+
+const TagMultiSelect = MultiSelect.ofType<IDictionaryTag>();
 
 const YiTagsInput: React.FC<YiTagsInputProps> = ({
 	allTags,
 	createTag,
-	value,
-	defaultValue,
-	...passProps
+	values,
+	onSelectTag,
+	onRemoveTag,
 }) => {
-	const [currentInput, setCurrentInput] = useState('');
+	const [query, setQuery] = useState('');
 
-	const dropDownRender = useCallback(
-		(menu: React.ReactElement) => {
-			const visibleOptions = menu.props.options;
-			const hasAvaliableOptions = visibleOptions.length > 0;
-			const foundExactMatch = visibleOptions.find(
-				(option: OptionProps) =>
-					option.name.toLowerCase() === currentInput.toLowerCase()
-			);
-			return (
-				<div>
-					{hasAvaliableOptions && menu}
-					{!hasAvaliableOptions && (
-						<Empty
-							image={Empty.PRESENTED_IMAGE_SIMPLE}
-							description={
-								currentInput.length > 0 ? (
-									<span>{currentInput} not found</span>
-								) : (
-									<span>No Tags found</span>
-								)
-							}
-							imageStyle={{
-								height: 50,
-							}}
-						/>
-					)}
-					{!foundExactMatch && currentInput.length > 0 && (
-						<div className="dropdown-addon">
-							<Divider style={{ margin: '4px 0' }} />
-							<Button
-								size="middle"
-								type="primary"
-								onClick={() => {
-									createTag?.(currentInput);
-								}}
-							>
-								{`Create ${currentInput}`}
-							</Button>
-						</div>
-					)}
-				</div>
-			);
-		},
-		[createTag, currentInput]
-	);
+	const tagRenderer = (tag: IDictionaryTag) => {
+		return <Tag color={tag.color || 'default'}>{tag.name}</Tag>;
+	};
 
-	const tagRenderer = ({
+	const isSelected = (tag: IDictionaryTag) => {
+		return values.indexOf(tag) > -1;
+	};
+
+	const dropDownRenderer: ItemRenderer<IDictionaryTag> = (
 		tag,
-		onClose,
-		closable,
-	}: {
-		tag: IDictionaryTag;
-		onClose: () => void;
-		closable: boolean;
-	}) => {
+		{ modifiers, handleClick }
+	) => {
+		if (!modifiers.matchesPredicate || isSelected(tag)) {
+			return null;
+		}
 		return (
-			<Tag
-				color={tag.color || 'default'}
-				closable={closable}
-				onClose={onClose}
-			>
-				{tag.name}
-			</Tag>
+			<MenuItem
+				active={modifiers.active}
+				key={tag.id}
+				label={tag.name}
+				onClick={handleClick}
+				text={tag.name}
+				shouldDismissPopover={false}
+			/>
 		);
 	};
 
 	return (
-		<Select
-			{...passProps}
-			value={value?.map((tag) =>
-				typeof tag === 'object' ? tag.id : tag
-			)}
-			tagRender={(renderProps) => {
-				const tag = allTags.find(
-					(storeTag) => storeTag.id === renderProps.value.toString()
-				);
-				if (tag) {
-					const { onClose, closable } = renderProps;
-					return tagRenderer({
-						tag,
-						onClose,
-						closable,
-					});
-				}
-				return <></>;
-			}}
-			autoClearSearchValue
-			notFoundContent={<></>}
-			optionFilterProp="name"
-			filterOption
-			onSelect={() => setCurrentInput('')}
-			onSearch={(val) => setCurrentInput(val)}
-			searchValue={currentInput}
-			mode="multiple"
+		<TagMultiSelect
+			query={query}
+			onQueryChange={setQuery}
+			itemRenderer={dropDownRenderer}
+			tagRenderer={tagRenderer}
 			placeholder="Tags"
-			allowClear
-			dropdownRender={dropDownRender}
-		>
-			{allTags.map((tag) => (
-				<Select.Option name={tag.name} key={tag.id} value={tag.id}>
-					{tag.name}
-				</Select.Option>
-			))}
-		</Select>
+			items={allTags}
+			resetOnSelect
+			onItemSelect={onSelectTag}
+			itemPredicate={(input, tag) =>
+				tag.name.toLocaleLowerCase().includes(input.toLocaleLowerCase())
+			}
+			selectedItems={values}
+			onRemove={onRemoveTag}
+			fill
+			popoverProps={{
+				minimal: true,
+				usePortal: false,
+				wrapperTagName: 'div',
+				fill: true,
+			}}
+			noResults={
+				query && (
+					<Button onClick={() => createTag?.(query)}>
+						Create {query}
+					</Button>
+				)
+			}
+		/>
 	);
 };
 

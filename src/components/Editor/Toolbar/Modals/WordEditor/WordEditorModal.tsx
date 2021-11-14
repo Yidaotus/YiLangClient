@@ -6,7 +6,6 @@ import React, {
 	useRef,
 	useState,
 } from 'react';
-import { Button, Dropdown, Menu, Spin, Modal, Checkbox } from 'antd';
 import { IDictionaryEntry } from 'Document/Dictionary';
 import {
 	SearchOutlined,
@@ -26,6 +25,16 @@ import { CustomText, WordElement } from '@components/Editor/CustomEditor';
 import { useDictionarySearch } from '@hooks/DictionaryQueryHooks';
 import { useLookupSources } from '@hooks/ConfigQueryHooks';
 import usePrevious from '@hooks/usePreviousState';
+import {
+	Button,
+	Checkbox,
+	Classes,
+	Dialog,
+	Menu,
+	Position,
+	Spinner,
+} from '@blueprintjs/core';
+import { Popover2 } from '@blueprintjs/popover2';
 
 export interface IWordInputProps {
 	visible: boolean;
@@ -61,9 +70,15 @@ const WordEditorModal: React.FC<IWordInputProps> = ({ visible, close }) => {
 	const menu = (
 		<Menu>
 			{lookupSources.map((source) => (
-				<Menu.Item key={source.name}>
-					<LookupSourceLink source={source} searchTerm={entryKey} />
-				</Menu.Item>
+				<Menu.Item
+					key={source.name}
+					text={
+						<LookupSourceLink
+							source={source}
+							searchTerm={entryKey}
+						/>
+					}
+				/>
 			))}
 		</Menu>
 	);
@@ -172,26 +187,47 @@ const WordEditorModal: React.FC<IWordInputProps> = ({ visible, close }) => {
 	};
 
 	return (
-		<Modal
-			centered
-			visible={visible}
-			closable={false}
+		<Dialog
+			isOpen={visible}
 			title={
 				<div className="word-input-head">
 					<ReadOutlined />
 					{cardTitle}
-					<Dropdown overlay={menu} placement="bottomCenter">
-						<Button
-							shape="circle"
-							size="small"
-							type="primary"
-							icon={<SearchOutlined />}
-						/>
-					</Dropdown>
+					<Popover2 content={menu} position={Position.BOTTOM}>
+						<Button icon="search" minimal />
+					</Popover2>
 				</div>
 			}
-			footer={[
-				editMode === 'word' ? (
+			onClose={close}
+		>
+			{fetchingRoot && <Spinner />}
+			<div className={`word-input-root-form ${Classes.DIALOG_BODY}`}>
+				{entryInDictionary ? (
+					<span>
+						{entryInDictionary.key} already found in Dictionary. Use
+						found entry instead?
+					</span>
+				) : (
+					<DictEntryEdit
+						ref={dictEntryEdit}
+						entryKey={entryKey}
+						stateChanged={setEditMode}
+					/>
+				)}
+				<Checkbox
+					style={{ marginLeft: 'auto' }}
+					checked={markOtherInstances}
+					onChange={() => {
+						setMarkOtherInstances(!markOtherInstances);
+					}}
+				>
+					Mark all instances
+				</Checkbox>
+			</div>
+			<div
+				className={`word-input-root-form ${Classes.DIALOG_FOOTER_ACTIONS}`}
+			>
+				{editMode === 'word' ? (
 					<Button
 						icon={<StopOutlined />}
 						key="discard"
@@ -203,41 +239,15 @@ const WordEditorModal: React.FC<IWordInputProps> = ({ visible, close }) => {
 						key="discard"
 						onClick={cancel}
 					/>
-				),
+				)}
 				<Button
 					icon={<SaveOutlined />}
 					key="save"
 					onClick={() => finish()}
-				/>,
-			]}
-			onCancel={close}
-		>
-			<Spin spinning={fetchingRoot}>
-				<div className="word-input-root-form">
-					{entryInDictionary ? (
-						<span>
-							{entryInDictionary.key} already found in Dictionary.
-							Use found entry instead?
-						</span>
-					) : (
-						<DictEntryEdit
-							ref={dictEntryEdit}
-							entryKey={entryKey}
-							stateChanged={setEditMode}
-						/>
-					)}
-					<Checkbox
-						style={{ marginLeft: 'auto' }}
-						checked={markOtherInstances}
-						onChange={() => {
-							setMarkOtherInstances(!markOtherInstances);
-						}}
-					>
-						Mark all instances
-					</Checkbox>
-				</div>
-			</Spin>
-		</Modal>
+				/>
+				,
+			</div>
+		</Dialog>
 	);
 };
 

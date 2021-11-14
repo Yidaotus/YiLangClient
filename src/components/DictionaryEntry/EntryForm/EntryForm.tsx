@@ -1,11 +1,12 @@
 import './EntryForm.css';
 import React from 'react';
-import { Divider, Form, Input } from 'antd';
 import { IDictionaryEntry, IDictionaryTag } from 'Document/Dictionary';
 import { FormInstance, RuleObject } from 'antd/lib/form';
 import DictionarySelect from '@components/DictionaryEntry/DictionarySelect/DictionarySelect';
-import YiSelect from '@components/DictionaryEntry/YiSelect';
 import YiTagsInput from '@components/DictionaryEntry/YiTagsInput/YiTagsInput';
+import { Controller, UseFormMethods } from 'react-hook-form';
+import { Divider, InputGroup, Label, TagInput } from '@blueprintjs/core';
+import { MultiSelect } from '@blueprintjs/select';
 
 export type IDictionaryEntryInput = Omit<
 	IDictionaryEntry,
@@ -17,8 +18,8 @@ export type IDictionaryEntryInput = Omit<
 };
 export type IEntryFormFields = IDictionaryEntryInput;
 export interface IEntryFormProps {
-	form: FormInstance<IEntryFormFields>;
-	createTag?: (tagName: string) => void;
+	form: UseFormMethods<IDictionaryEntryInput>;
+	createTag?: (tagName: string) => IDictionaryTag;
 	createRoot?: (key: string) => void;
 	allTags: Array<IDictionaryTag>;
 	canEditRoot?: boolean;
@@ -45,67 +46,101 @@ const EntryForm: React.FC<IEntryFormProps> = ({
 }) => {
 	return (
 		<div>
-			<Form form={form} layout="vertical" className="word-root-form">
-				<Form.Item name="id" hidden>
-					<Input />
-				</Form.Item>
-				<Form.Item name="key" className="key">
-					<Input
-						className="key-autocomplete"
-						autoFocus
-						disabled={!canEditRoot}
-						allowClear
-						placeholder="Entry"
-					/>
-				</Form.Item>
-				<Form.Item name="spelling">
-					<Input
-						autoComplete="off"
-						placeholder="Spelling"
-						allowClear
-					/>
-				</Form.Item>
-				<Form.Item
+			<form className="word-root-form">
+				<input hidden {...form.register('id')} />
+				<Controller
+					name="key"
+					control={form.control}
+					defaultValue=""
+					render={({ value, onChange }) => (
+						<InputGroup
+							onChange={onChange}
+							placeholder="Key"
+							value={value}
+							fill
+							disabled={!canEditRoot}
+						/>
+					)}
+				/>
+				<Controller
+					name="spelling"
+					control={form.control}
+					defaultValue=""
+					render={({ value, onChange }) => (
+						<InputGroup
+							onChange={onChange}
+							placeholder="Spelling"
+							fill
+							value={value}
+						/>
+					)}
+				/>
+				<Controller
 					name="translations"
-					rules={[
-						{
-							required: true,
-							message: '',
-							type: 'array',
-						},
-						{
-							validator: arrayLengthValidator(1),
-						},
-					]}
-					required
-				>
-					<YiSelect
-						mode="tags"
-						placeholder="Translation(s)"
-						allowClear
-						notFoundContent=""
-					/>
-				</Form.Item>
-				<Form.Item name="comment">
-					<Input
-						autoComplete="off"
-						placeholder="Comment"
-						allowClear
-					/>
-				</Form.Item>
-				<Form.Item name="tags" initialValue={[]}>
-					<YiTagsInput createTag={createTag} allTags={allTags} />
-				</Form.Item>
+					control={form.control}
+					defaultValue={[]}
+					render={({ value, onChange }) => (
+						<TagInput
+							fill
+							values={value}
+							onChange={onChange}
+							placeholder="Translation(s)"
+						/>
+					)}
+				/>
+				<Controller
+					name="comment"
+					control={form.control}
+					defaultValue=""
+					render={({ value, onChange }) => (
+						<InputGroup
+							onChange={onChange}
+							placeholder="Comment"
+							value={value}
+							fill
+						/>
+					)}
+				/>
+				<Controller
+					name="tags"
+					control={form.control}
+					defaultValue={[]}
+					render={({ value, onChange }) => (
+						<YiTagsInput
+							createTag={createTag}
+							allTags={allTags}
+							values={value}
+							onSelectTag={(tag) => {
+								onChange([...value, tag]);
+							}}
+							onRemoveTag={(tag) => {
+								onChange(
+									value.filter(
+										(vTag: IDictionaryTag) =>
+											vTag.id !== tag.id
+									)
+								);
+							}}
+						/>
+					)}
+				/>
 				<Divider />
 				{createRoot && (
-					<Form.Item name="root">
-						<DictionarySelect
-							placeholder="Select a root entry"
-							createRoot={createRoot}
-						/>
-					</Form.Item>
+					<Controller
+						name="root"
+						control={form.control}
+						defaultValue=""
+						render={({ value, onChange }) => (
+							<DictionarySelect
+								value={value}
+								onChange={onChange}
+								placeholder="Select a root entry"
+								createRoot={createRoot}
+							/>
+						)}
+					/>
 				)}
-			</Form>
+			</form>
 		</div>
 	);
 };

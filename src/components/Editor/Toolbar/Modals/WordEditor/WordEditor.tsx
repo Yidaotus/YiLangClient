@@ -6,7 +6,6 @@ import React, {
 	useRef,
 	useState,
 } from 'react';
-import { Button, Dropdown, Menu, Card, Spin, Modal } from 'antd';
 import { IDictionaryEntry } from 'Document/Dictionary';
 import {
 	SearchOutlined,
@@ -26,6 +25,8 @@ import { Editor, Transforms, Text, BaseSelection } from 'slate';
 import { useSlateStatic } from 'slate-react';
 import { WordElement } from '@components/Editor/CustomEditor';
 import { useDictionarySearch } from '@hooks/DictionaryQueryHooks';
+import { Button, Card, Menu, Position, Spinner } from '@blueprintjs/core';
+import { Popover2 } from '@blueprintjs/popover2';
 
 export type WordInputResult = Omit<IDictionaryEntry, 'firstSeen' | 'id'>;
 
@@ -34,10 +35,8 @@ export interface IWordInputProps {
 	key: string;
 }
 
-const { confirm } = Modal;
-
 function showConfirm(root: string, cancel: () => void, ok: () => void) {
-	confirm({
+	/*	confirm({
 		title: 'Insert word with found entry?',
 		icon: <QuestionCircleOutlined />,
 		content: `${root} is already in your dictionary! Do you want to insert it?`,
@@ -48,6 +47,8 @@ function showConfirm(root: string, cancel: () => void, ok: () => void) {
 			cancel();
 		},
 	});
+		
+ */
 }
 
 const WordInput: React.FC<IWordInputProps> = ({ close, key }) => {
@@ -168,42 +169,31 @@ const WordInput: React.FC<IWordInputProps> = ({ close, key }) => {
 
 	return (
 		<div className="word-input-container" style={{ width: '300px' }}>
-			<Spin spinning={fetchingRoot}>
-				<Card
-					color="green"
-					title={
-						<div className="word-input-head">
-							<ReadOutlined />
-							{cardTitle}
-							<Dropdown overlay={menu} placement="bottomCenter">
-								<Button
-									shape="circle"
-									size="small"
-									type="primary"
-									icon={<SearchOutlined />}
-								/>
-							</Dropdown>
-						</div>
-					}
-					actions={[
-						editMode === 'word' ? (
-							<StopOutlined key="discard" onClick={cancel} />
-						) : (
-							<RollbackOutlined key="discard" onClick={cancel} />
-						),
-						<SaveOutlined key="save" onClick={() => finish()} />,
-					]}
-					bodyStyle={{ padding: '12px' }}
-				>
-					<div className="word-input-root-form">
-						<DictEntryEdit
-							ref={dictEntryEdit}
-							entryKey={key}
-							stateChanged={setEditMode}
-						/>
-					</div>
-				</Card>
-			</Spin>
+			{fetchingRoot && <Spinner />}
+			<Card>
+				<div className="word-input-head">
+					<ReadOutlined />
+					{cardTitle}
+					<Popover2 content={menu} position={Position.BOTTOM}>
+						<Button icon="search" />
+					</Popover2>
+				</div>
+				<div className="word-input-root-form">
+					<DictEntryEdit
+						ref={dictEntryEdit}
+						entryKey={key}
+						stateChanged={setEditMode}
+					/>
+				</div>
+				<div>
+					{editMode === 'word' ? (
+						<StopOutlined key="discard" onClick={cancel} />
+					) : (
+						<RollbackOutlined key="discard" onClick={cancel} />
+					)}
+					<SaveOutlined key="save" onClick={() => finish()} />,
+				</div>
+			</Card>
 		</div>
 	);
 };

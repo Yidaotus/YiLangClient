@@ -98,6 +98,7 @@ const HomeView: React.FC = () => {
 		}
 	}, [activeLanguage]);
 
+	const activeTabId = location.pathname.split('/').slice(1, 3).join('-');
 	return (
 		<div className="yi-layout">
 			<header>
@@ -118,7 +119,7 @@ const HomeView: React.FC = () => {
 							animate
 							id="navbar"
 							large
-							selectedTabId={location.pathname}
+							selectedTabId={activeTabId}
 						>
 							<Tab
 								id={locationMap.home}
@@ -130,18 +131,26 @@ const HomeView: React.FC = () => {
 									/>
 								}
 							/>
+							{activeDocument && (
+								<Tab
+									id={locationMap.editor
+										.split('/')
+										.slice(1, 3)
+										.join('-')}
+									title={
+										<NavButton
+											to={`${url}/editor/${activeDocument}`}
+											icon="edit"
+											text="Editor"
+										/>
+									}
+								/>
+							)}
 							<Tab
-								id={locationMap.editor}
-								title={
-									<NavButton
-										to={`${url}/editor/${activeDocument}`}
-										icon="edit"
-										text="Editor"
-									/>
-								}
-							/>
-							<Tab
-								id={locationMap.dicitonary}
+								id={locationMap.dicitonary
+									.split('/')
+									.slice(1, 3)
+									.join('-')}
 								title={
 									<NavButton
 										to={locationMap.dicitonary}
@@ -151,7 +160,10 @@ const HomeView: React.FC = () => {
 								}
 							/>
 							<Tab
-								id={locationMap.documents}
+								id={locationMap.documents
+									.split('/')
+									.slice(1, 3)
+									.join('-')}
 								title={
 									<NavButton
 										to={locationMap.documents}

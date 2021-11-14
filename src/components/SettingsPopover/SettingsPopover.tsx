@@ -69,6 +69,7 @@ const SettingsPopover: React.FC = () => {
 					items={availableLanguages}
 					popoverProps={{ minimal: true, usePortal: false }}
 					className="settings-language-select"
+					matchTargetWidth
 					filterable={false}
 					fill
 				>
