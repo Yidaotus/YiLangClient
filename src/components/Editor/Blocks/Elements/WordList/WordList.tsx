@@ -52,7 +52,7 @@ const WordList: React.FC<RenderElementProps> = ({ children, attributes }) => {
 			{children}
 			<div contentEditable={false} style={{ fontSize: '0.95rem' }}>
 				{vocabs.map(([v, path]) => (
-					<div className="dictentry-row-wrapper">
+					<div className="dictentry-row-wrapper" key={v.dictId}>
 						<DictionaryEntryRow
 							entryId={v.dictId}
 							key={v.dictId}
@@ -63,7 +63,7 @@ const WordList: React.FC<RenderElementProps> = ({ children, attributes }) => {
 				))}
 				{vocabs.length < 1 && <span>No words added yet!</span>}
 				{sentences.map(([s, spath]) => (
-					<div className="sentence-row">
+					<div className="sentence-row" key={s.sentenceId}>
 						<p>{SlateNode.string(s)}</p>
 						<p>{s.translation}</p>
 						<Button

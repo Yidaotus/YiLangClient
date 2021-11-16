@@ -105,14 +105,7 @@ const DictEntryWithEdit: React.FC<IDictEntryWithEditProps> = (props) => {
 			</div>
 			{editing && (
 				<div>
-					<DictEntryEdit
-						entryKey={{
-							...dictEntry,
-							tags: dictEntry.tags.map((tag) => tag.id),
-							root: dictEntry.root,
-						}}
-						ref={dictEntryEdit}
-					/>
+					<DictEntryEdit entryKey={dictEntry} ref={dictEntryEdit} />
 					<div className="entry-with-edit-controlls-bottom">
 						<Button onClick={cancel} icon={<CloseOutlined />}>
 							Cancel

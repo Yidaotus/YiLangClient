@@ -7,6 +7,6 @@
 	display: grid;
 }
 
-.dropdown-addon button {
-	width: 98%;
+.dropdown-container {
+	width: 460px;
 }

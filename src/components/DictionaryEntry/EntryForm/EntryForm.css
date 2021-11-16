@@ -1,5 +1,8 @@
-.word-root-form .ant-form-item {
-	margin-bottom: 6px;
+.word-form > * + * {
+	margin-bottom: 0.5rem;
+}
+.word-form-key {
+	font-size: 2em;
 }
 
 .key-autocomplete input {

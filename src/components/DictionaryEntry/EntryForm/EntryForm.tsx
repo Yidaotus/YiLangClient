@@ -1,41 +1,27 @@
 import './EntryForm.css';
 import React from 'react';
 import { IDictionaryEntry, IDictionaryTag } from 'Document/Dictionary';
-import { FormInstance, RuleObject } from 'antd/lib/form';
 import DictionarySelect from '@components/DictionaryEntry/DictionarySelect/DictionarySelect';
 import YiTagsInput from '@components/DictionaryEntry/YiTagsInput/YiTagsInput';
 import { Controller, UseFormMethods } from 'react-hook-form';
 import { Divider, InputGroup, Label, TagInput } from '@blueprintjs/core';
-import { MultiSelect } from '@blueprintjs/select';
+import { IDictionaryTagInput } from '@components/DictionaryEntry/TagForm/TagForm';
 
 export type IDictionaryEntryInput = Omit<
 	IDictionaryEntry,
-	'firstSeen' | 'id' | 'tags' | 'root'
+	'firstSeen' | 'id' | 'tags' | 'root' | 'lang'
 > & {
-	id?: string;
-	tags: Array<IDictionaryTag | string>;
-	root: string | IEntryFormFields;
+	tags: Array<IDictionaryTag | Omit<IDictionaryTag, 'id'>>;
+	root?: IDictionaryEntry | IDictionaryEntryInput;
 };
-export type IEntryFormFields = IDictionaryEntryInput;
+
 export interface IEntryFormProps {
 	form: UseFormMethods<IDictionaryEntryInput>;
-	createTag?: (tagName: string) => IDictionaryTag;
+	createTag?: (tagName: string) => void;
 	createRoot?: (key: string) => void;
-	allTags: Array<IDictionaryTag>;
+	allTags: Array<Omit<IDictionaryTag, 'id'> & { id?: string }>;
 	canEditRoot?: boolean;
 }
-
-const arrayLengthValidator =
-	(size: number) => (_: RuleObject, value: Array<string>) => {
-		if (value && value.length >= size) {
-			return Promise.resolve();
-		}
-		return Promise.reject(
-			new Error(
-				`Please enter at least ${size} value${size > 1 ? 's' : ''}!`
-			)
-		);
-	};
 
 const EntryForm: React.FC<IEntryFormProps> = ({
 	form,
@@ -46,8 +32,8 @@ const EntryForm: React.FC<IEntryFormProps> = ({
 }) => {
 	return (
 		<div>
-			<form className="word-root-form">
-				<input hidden {...form.register('id')} />
+			<form className="word-form">
+				<input hidden defaultValue="" {...form.register('id')} />
 				<Controller
 					name="key"
 					control={form.control}
@@ -59,6 +45,7 @@ const EntryForm: React.FC<IEntryFormProps> = ({
 							value={value}
 							fill
 							disabled={!canEditRoot}
+							large
 						/>
 					)}
 				/>
@@ -85,6 +72,8 @@ const EntryForm: React.FC<IEntryFormProps> = ({
 							values={value}
 							onChange={onChange}
 							placeholder="Translation(s)"
+							separator=";"
+							addOnPaste
 						/>
 					)}
 				/>

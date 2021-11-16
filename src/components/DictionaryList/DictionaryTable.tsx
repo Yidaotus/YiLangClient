@@ -288,6 +288,7 @@ const DictionaryTable: React.FC = () => {
 			columns={columns}
 			dataSource={paginatedEntries.entries.map((entry) => ({
 				...entry,
+				root: undefined,
 				tags: entry.tags
 					.map((tagId) => tags.find((tag) => tag.id === tagId))
 					.filter(notUndefined),
