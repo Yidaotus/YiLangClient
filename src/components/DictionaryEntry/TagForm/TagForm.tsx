@@ -1,6 +1,6 @@
 import './TagForm.css';
 import { IDictionaryTag, IGrammarPoint } from 'Document/Dictionary';
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import YiColorPickerField from '@components/DictionaryEntry/YiColorPickerField/YiColorPickerField';
 import { Controller, useFieldArray, UseFormMethods } from 'react-hook-form';
 import { Button, InputGroup, Switch } from '@blueprintjs/core';

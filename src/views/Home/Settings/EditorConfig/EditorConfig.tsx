@@ -3,11 +3,9 @@ import { IEditorConfig } from 'Document/Config';
 import React, { useEffect } from 'react';
 import {
 	Divider,
-	Colors,
 	Switch,
 	NumericInput,
 	Button,
-	FormGroup,
 	Label,
 	Intent,
 } from '@blueprintjs/core';
@@ -15,7 +13,7 @@ import {
 	useEditorConfig,
 	useUpdateEditorConfig,
 } from '@hooks/ConfigQueryHooks';
-import { SubmitHandler, useForm, Controller } from 'react-hook-form';
+import { useForm, Controller } from 'react-hook-form';
 import PageHeader from '@components/PageHeader/PageHeader';
 
 const LanguageConfigPanel: React.FC = () => {
@@ -57,11 +55,14 @@ const LanguageConfigPanel: React.FC = () => {
 				<Controller
 					name="autoSave"
 					control={control}
-					defaultValue=""
+					defaultValue
 					render={({ value, onChange }) => (
 						<Switch
 							checked={value}
-							onChange={onChange}
+							onChange={() => {
+								onChange(!value);
+							}}
+							large
 							label="Auto save"
 							id="auto-save"
 						/>

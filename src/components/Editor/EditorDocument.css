@@ -31,7 +31,6 @@
 .dialog-line {
 	display: flex;
 	flex-direction: row;
-	flex-wrap: nowrap;
 	justify-content: center;
 	align-content: stretch;
 	align-items: flex-start;
@@ -40,8 +39,10 @@
 .dialog-line-actor {
 	font-weight: bold;
 	margin-right: 20px;
-	width: 200px;
 	text-align: right;
+	width: 130px;
+	min-width: 130px;
+	max-width: 130px;
 }
 
 .dialog-line-speech {

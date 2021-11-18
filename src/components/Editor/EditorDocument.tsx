@@ -119,7 +119,10 @@ const Element = (props: RenderElementProps) => {
 			);
 		case 'dialogLineActor':
 			return (
-				<div className="dialog-line-actor" {...attributes}>
+				<div
+					className="dialog-line-actor .bp3-text-overflow-ellipsis"
+					{...attributes}
+				>
 					{children}
 				</div>
 			);
@@ -169,50 +172,6 @@ const EditorDocument: React.FC = () => {
 
 	const renderElement = useCallback((props) => <Element {...props} />, []);
 	const editor = useSlateStatic();
-
-	/*
-	const vocab = useMemo(() => {
-		const vocabs: Set<string> = new Set();
-
-		if (editorNodes.length > 0) {
-			const vocabNodes = Editor.nodes(editor, {
-				match: (n) => SlateElement.isElement(n) && n.type === 'word',
-				at: [[0], [editor.children.length - 1]],
-			});
-			if (vocabNodes) {
-				for (const [vocabNode] of vocabNodes) {
-					vocabs.add(SlateNode.string(vocabNode));
-				}
-			}
-		}
-
-		return vocabs;
-	}, [editor, editorNodes.length]);
-
-	const sentences = useMemo(() => {
-		const sentencesInEditor: Array<string> = [];
-		for (const currentNode of editorNodes) {
-			const sentenceFragments = SlateNode.elements(currentNode, {
-				pass: ([node]) =>
-					SlateElement.isElement(node) && node.type === 'sentence',
-			});
-
-			if (sentenceFragments) {
-				for (const [sentenceFragment] of sentenceFragments) {
-					if (
-						SlateElement.isElement(sentenceFragment) &&
-						sentenceFragment.type === 'sentence'
-					) {
-						sentencesInEditor.push(
-							SlateNode.string(sentenceFragment)
-						);
-					}
-				}
-			}
-		}
-		return sentencesInEditor;
-	}, [editorNodes]);
-	*/
 
 	return (
 		<div style={{ position: 'relative', fontSize: '1.3em' }}>

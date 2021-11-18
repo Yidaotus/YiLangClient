@@ -2,7 +2,15 @@ import './DocumentExcerpt.css';
 
 import React from 'react';
 import { IDocumentExcerpt } from 'api/definitions/api';
-import { Button, Card, Intent, Menu, Position } from '@blueprintjs/core';
+import {
+	Button,
+	Card,
+	Divider,
+	Intent,
+	Menu,
+	MenuItem,
+	Position,
+} from '@blueprintjs/core';
 import { Popover2 } from '@blueprintjs/popover2';
 
 interface IDocumentExcerptProps {
@@ -21,16 +29,16 @@ const DocumentExcerpt: React.FC<IDocumentExcerptProps> = ({
 	selectDocument,
 	removeDocument,
 }) => {
-	// removeDocument?.(excerpt.id);
-
 	const moreDropdown = (
 		<Menu>
-			<Menu.Item key="1" icon="edit" text="Edit" />
-			<Menu.Divider />
-			<Menu.Item
+			<MenuItem key="1" icon="edit" text="Edit" />
+			<Divider />
+			<MenuItem
 				key="2"
 				icon="trash"
-				onClick={() => {}}
+				onClick={() => {
+					removeDocument?.(excerpt.id);
+				}}
 				text="Remove"
 				intent={Intent.DANGER}
 			/>
@@ -51,11 +59,7 @@ const DocumentExcerpt: React.FC<IDocumentExcerptProps> = ({
 					</a>
 				</h5>
 				<div style={{ marginLeft: 'auto' }}>
-					<Popover2
-						content={moreDropdown}
-						position={Position.RIGHT_TOP}
-						placement="bottom"
-					>
+					<Popover2 content={moreDropdown} placement="bottom">
 						<Button icon="more" minimal />
 					</Popover2>
 				</div>

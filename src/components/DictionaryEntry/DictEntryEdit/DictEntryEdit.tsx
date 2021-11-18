@@ -6,6 +6,7 @@ import React, {
 	useImperativeHandle,
 	forwardRef,
 	useState,
+	useRef,
 } from 'react';
 import { useForm } from 'react-hook-form';
 import {
@@ -29,6 +30,7 @@ import EntryForm, { IDictionaryEntryInput } from '../EntryForm/EntryForm';
 export interface IWordInputState {
 	entryKey: string | IDictionaryEntryResolved;
 	stateChanged?: (stage: WordEditorMode) => void;
+	root?: IDictionaryEntryResolved;
 }
 
 type Optional<T, K extends keyof T> = Pick<Partial<T>, K> & Omit<T, K>;
@@ -98,8 +100,8 @@ export interface IWordInputRef {
 }
 
 const isOldRoot = (
-	input: IDictionaryEntryInput | IDictionaryEntry
-): input is IDictionaryEntry => {
+	input: IDictionaryEntryInput | IDictionaryEntryResolved
+): input is IDictionaryEntryResolved => {
 	return 'id' in input && input.id !== undefined;
 };
 
@@ -115,7 +117,8 @@ const isPersistedTag = (
 const WordInput: React.ForwardRefRenderFunction<
 	IWordInputRef,
 	IWordInputState
-> = ({ entryKey, stateChanged }, ref) => {
+> = ({ entryKey, stateChanged, root }, ref) => {
+	const initialLoad = useRef(true);
 	const wordForm = useForm<IDictionaryEntryInput>();
 	const rootForm = useForm<IDictionaryEntryInput>();
 	const tagForm = useForm<IDictionaryTagInput>({
@@ -134,12 +137,15 @@ const WordInput: React.ForwardRefRenderFunction<
 	const addEntry = useAddDictionaryEntry();
 
 	useEffect(() => {
-		if (typeof entryKey === 'string') {
-			wordForm.setValue('key', entryKey);
-		} else {
-			wordForm.reset({ ...entryKey, root: undefined });
+		if (initialLoad.current) {
+			if (typeof entryKey === 'string') {
+				wordForm.setValue('key', entryKey);
+			} else {
+				wordForm.reset({ ...entryKey, root: root || undefined });
+			}
+			initialLoad.current = false;
 		}
-	}, [entryKey, wordForm]);
+	}, [entryKey, root, wordForm]);
 
 	const createTagCallback = useCallback(
 		(tagName: string) => {

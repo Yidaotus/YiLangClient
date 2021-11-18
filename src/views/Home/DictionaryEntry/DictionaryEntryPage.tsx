@@ -1,20 +1,9 @@
 import './DictionaryEntryPage.css';
 import React, { useState } from 'react';
-import {
-	Card,
-	Col,
-	Divider,
-	List,
-	PageHeader,
-	Row,
-	Skeleton,
-	Spin,
-} from 'antd';
 import { useHistory, useParams } from 'react-router-dom';
 import { IExcerptedDocumentLink } from 'Document/Document';
 import DocumentLink from '@components/DictionaryEntry/DocumentLink';
 import DictEntryWithEdit from '@components/DictionaryEntry/DictEntryWithEdit/DictEntryWithEdit';
-import Title from 'antd/lib/typography/Title';
 import DictionaryEntry from '@components/DictionaryEntry/DictionaryEntry';
 import { IDictionaryEntryResolved } from 'Document/Dictionary';
 import {
@@ -22,6 +11,8 @@ import {
 	useDictionarySentence,
 	useDictionarySentencesByWord,
 } from '@hooks/DictionaryQueryHooks';
+import PageHeader from '@components/PageHeader/PageHeader';
+import { Card, Divider, Spinner } from '@blueprintjs/core';
 
 interface IDictionaryEntryViewParams {
 	entryId: string;
@@ -55,201 +46,72 @@ const DictionaryEntryPage: React.FC = () => {
 	);
 
 	return (
-		<PageHeader
-			className="site-page-header"
-			onBack={() => {
-				history.goBack();
-			}}
-			title="Dictionary"
-			subTitle="Everything dictionary"
-			ghost={false}
-		>
-			<Spin spinning={loading}>
-				<Row gutter={16}>
-					<Col span={24}>
-						{loading && <Skeleton loading />}
-						{!loading && entry && (
-							<Card
-								size="small"
-								title={
-									<Title
-										level={3}
-										style={{ marginBottom: '0px' }}
-									>
-										Entry
-									</Title>
-								}
-								bordered
-							>
-								<DictEntryWithEdit
-									dictEntry={entry}
-									canRemove
-								/>
-							</Card>
-						)}
-					</Col>
-				</Row>
-				<Divider />
-				<Row gutter={12}>
-					<Col span={12}>
-						{rootEntry && (
-							<List
-								style={{ backgroundColor: 'white' }}
-								header={
-									<Title
-										level={3}
-										style={{ marginBottom: '0px' }}
-									>
-										Root
-									</Title>
-								}
-								bordered
-								size="small"
-								dataSource={[rootEntry]}
-								renderItem={(entryItem) => (
-									<List.Item>
-										<DictionaryEntry
-											entryId={entryItem.id}
-											canLink
-										/>
-									</List.Item>
-								)}
+		<div>
+			<PageHeader title="Dictionary" subtitle="Everything dictionary" />
+			{loading && <Spinner />}
+			<div>
+				<div>
+					{loadingMain && <Spinner />}
+					{entry && (
+						<Card title="Entry">
+							<DictEntryWithEdit
+								dictEntry={entry}
+								canRemove
+								root={rootEntry || undefined}
 							/>
-						)}
-					</Col>
-					<Col span={12}>
-						{subDictEntries.length > 0 && (
-							<List
-								style={{ backgroundColor: 'white' }}
-								header={
-									<Title
-										level={3}
-										style={{ marginBottom: '0px' }}
-									>
-										Subentries
-									</Title>
-								}
-								bordered
-								size="small"
-								dataSource={subDictEntries}
-								renderItem={(entryItem) => (
-									<List.Item>
-										<DictionaryEntry
-											entryId={entryItem.id}
-											canLink
-										/>
-									</List.Item>
-								)}
-							/>
-						)}
-					</Col>
-				</Row>
-				{firstSeen && (
-					<Row>
-						<Col span={24}>
-							<Spin spinning={firstSeenLoading}>
-								<p>{firstSeen.content}</p>
-								<p>{firstSeen.translation}</p>
-							</Spin>
-						</Col>
-					</Row>
-				)}
-				{sentences && (
-					<Row>
-						<Col span={24}>
-							<Spin spinning={sentencesLoading}>
-								<List
-									style={{ backgroundColor: 'white' }}
-									header={
-										<Title
-											level={3}
-											style={{ marginBottom: '0px' }}
-										>
-											Sentences
-										</Title>
-									}
-									bordered
-									size="small"
-									dataSource={sentences}
-									renderItem={(sentence) => (
-										<List.Item>
-											<span className="ellipsed">
-												<p>{sentence.content}</p>
-												<p>{sentence.translation}</p>
-											</span>
-										</List.Item>
-									)}
-								/>
-							</Spin>
-						</Col>
-					</Row>
-				)}
-				{excerptLink && (
-					<Row>
-						<Col span={24}>
-							<Divider />
-							<List
-								style={{ backgroundColor: 'white' }}
-								header={
-									<Title
-										level={3}
-										style={{ marginBottom: '0px' }}
-									>
-										First seen
-									</Title>
-								}
-								bordered
-								size="small"
-								dataSource={[excerptLink]}
-								renderItem={(excerpt) => (
-									<List.Item>
-										<span className="ellipsed">
-											<DocumentLink
-												link={excerpt.link}
-												excerpt={excerpt.excerpt}
-												word={entry?.key || ''}
-											/>
-										</span>
-									</List.Item>
-								)}
-							/>
-						</Col>
-					</Row>
-				)}
-				{additionalExcerpts.length > 0 && (
-					<Row>
-						<Col span={24}>
-							<Divider />
-							<List
-								style={{ backgroundColor: 'white' }}
-								header={
-									<Title
-										level={3}
-										style={{ marginBottom: '0px' }}
-									>
-										Also seen in
-									</Title>
-								}
-								bordered
-								size="small"
-								dataSource={additionalExcerpts}
-								renderItem={(excerpt) => (
-									<List.Item>
-										<span className="ellipsed">
-											<DocumentLink
-												link={excerpt.link}
-												excerpt={excerpt.excerpt}
-												word={entry?.key || ''}
-											/>
-										</span>
-									</List.Item>
-								)}
-							/>
-						</Col>
-					</Row>
-				)}
-			</Spin>
-		</PageHeader>
+						</Card>
+					)}
+				</div>
+			</div>
+			<Divider />
+			<div>
+				<div>
+					{rootEntry && (
+						<DictionaryEntry entryId={rootEntry.id} canLink />
+					)}
+				</div>
+				<div>
+					{subDictEntries.length > 0 &&
+						subDictEntries.map((entryItem) => (
+							<DictionaryEntry entryId={entryItem.id} canLink />
+						))}
+				</div>
+			</div>
+			{firstSeen && (
+				<div>
+					firstSeenLoading && <Spinner />
+					<p>{firstSeen.content}</p>
+					<p>{firstSeen.translation}</p>
+				</div>
+			)}
+			{sentences &&
+				sentences.map((sentence) => (
+					<span className="ellipsed">
+						<p>{sentence.content}</p>
+						<p>{sentence.translation}</p>
+					</span>
+				))}
+
+			{excerptLink && (
+				<span className="ellipsed">
+					<DocumentLink
+						link={excerptLink.link}
+						excerpt={excerptLink.excerpt}
+						word={entry?.key || ''}
+					/>
+				</span>
+			)}
+			{additionalExcerpts.length > 0 &&
+				additionalExcerpts.map((excerpt) => (
+					<span className="ellipsed">
+						<DocumentLink
+							link={excerpt.link}
+							excerpt={excerpt.excerpt}
+							word={entry?.key || ''}
+						/>
+					</span>
+				))}
+		</div>
 	);
 };
 

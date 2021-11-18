@@ -1,7 +1,5 @@
 import './SentenceEditorModal.css';
 import React, { useCallback, useEffect, useState } from 'react';
-import { Button, Modal, Input } from 'antd';
-import { SaveOutlined, StopOutlined } from '@ant-design/icons';
 import { Editor, Transforms, Selection, Element as SlateElement } from 'slate';
 import { useSlateStatic } from 'slate-react';
 import { SentenceElement, WordElement } from '@components/Editor/CustomEditor';
@@ -10,6 +8,7 @@ import {
 	useAddDictionarySentence,
 	useLinkWordSentence,
 } from '@hooks/DictionaryQueryHooks';
+import { Button, Classes, Dialog, InputGroup } from '@blueprintjs/core';
 import { IDictionarySentence } from '../../../../../Document/Dictionary';
 
 export interface ISentenceModalProps {
@@ -104,36 +103,33 @@ const SentenceEditorModal: React.FC<ISentenceModalProps> = ({
 	};
 
 	return (
-		<Modal
-			centered
-			visible={visible}
-			closable={false}
+		<Dialog
+			isOpen={visible}
 			title={<div className="sentence-input-head">Sentence Editor</div>}
-			footer={[
-				<Button
-					icon={<StopOutlined />}
-					key="discard"
-					onClick={cancel}
-				/>,
-				<Button
-					icon={<SaveOutlined />}
-					key="save"
-					onClick={() => finish()}
-				/>,
-			]}
-			onCancel={close}
+			onClose={close}
 		>
-			<div className="sentence-input-form">
-				<p>{sentenceKey}</p>
-				<Input
-					placeholder="Translation..."
-					value={translationInput}
-					onChange={(e) => {
-						setTranslationInput(e.target.value);
-					}}
-				/>
+			<div className={Classes.DIALOG_BODY}>
+				<div className="sentence-input-form">
+					<p>{sentenceKey}</p>
+					<InputGroup
+						placeholder="Translation..."
+						value={translationInput}
+						onChange={(e) => {
+							setTranslationInput(e.target.value);
+						}}
+						onKeyDown={(e) => {
+							if (e.key === 'Enter') {
+								finish();
+							}
+						}}
+					/>
+				</div>
+				<div className={Classes.DIALOG_FOOTER_ACTIONS}>
+					<Button icon="stop" key="discard" onClick={cancel} />
+					<Button icon="saved" key="save" onClick={() => finish()} />
+				</div>
 			</div>
-		</Modal>
+		</Dialog>
 	);
 };
 

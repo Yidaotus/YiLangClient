@@ -18,6 +18,11 @@ import useSelection from '@hooks/useSelection';
 import { useActiveLanguageConf } from '@hooks/ConfigQueryHooks';
 import { useParams } from 'react-router-dom';
 import SentenceEditorModal from '@editor/Toolbar/Modals/SentenceEditor/SentenceEditorModal';
+import {
+	useEditorDocument,
+	useUpdateEditorDocument,
+} from '@hooks/DocumentQueryHooks';
+import { Intent, Position, Spinner, Toaster } from '@blueprintjs/core';
 import EditorDocument from './EditorDocument';
 import WordsPanel from './WordsPanel/WordsPanel';
 import DictPopupController from './Popups/DictPopupController';
@@ -28,15 +33,17 @@ import {
 	withDialog,
 	withList,
 } from './CustomEditor';
-import {
-	create as createDocumentService,
-	update as updateDocumentService,
-	remove as removeDocumentService,
-	getDocument as getDocumentService,
-} from '../../api/document.service';
+import { create as createDocumentService } from '../../api/document.service';
 import WordEditorModal from './Toolbar/Modals/WordEditor/WordEditorModal';
 
 const { TabPane } = Tabs;
+
+const SavingToaster = Toaster.create({
+	className: 'recipe-toaster',
+	position: Position.BOTTOM_RIGHT,
+	canEscapeKeyClear: false,
+	maxToasts: 1,
+});
 
 const withYiLang = (editor: Editor) => {
 	const { isInline, isVoid, normalizeNode } = editor;
@@ -96,11 +103,14 @@ const UPDATE_DEBOUNCE_TIME = 5000;
 const YiEditor: React.FC = () => {
 	const editorContainer = useRef(null);
 	const [loading, setLoading] = useState<string | null>(null);
+	const [savingIndicator, setSavingIndicator] = useState(false);
 	const [actionCount, setActionCount] = useState(0);
 	const [wordEditorVisible, setWordEditorVisible] = useState(false);
 	const [sentenceEditorVisible, setSentenceEditorVisible] = useState(false);
 	const activeLanguage = useActiveLanguageConf();
 	const { id } = useParams<{ id: string }>();
+	const updateEditorDocument = useUpdateEditorDocument();
+	const [loadingDocument, dbDocument] = useEditorDocument(id);
 
 	const editor = useMemo(
 		() =>
@@ -116,13 +126,12 @@ const YiEditor: React.FC = () => {
 	useEffect(() => {
 		const fetch = async () => {
 			try {
-				setLoading('Fetching Document');
-				const doc = await getDocumentService(id);
-				setLoading('Decoding Document');
-				const deserializedDocument = JSON.parse(
-					doc.serializedDocument
-				) as Descendant[];
-				setEditorNodes(deserializedDocument);
+				if (dbDocument) {
+					const deserializedDocument = JSON.parse(
+						dbDocument.serializedDocument
+					) as Descendant[];
+					setEditorNodes(deserializedDocument);
+				}
 			} catch (error) {
 				handleError(error);
 			} finally {
@@ -130,48 +139,41 @@ const YiEditor: React.FC = () => {
 			}
 		};
 		fetch();
-	}, [id, setEditorNodes]);
+	}, [dbDocument, setEditorNodes]);
 
 	const deleteDocument = useCallback(async () => {
 		try {
 			setLoading('Deleting Document');
-			await removeDocumentService(id);
+			// await removeDocumentService(id);
 		} catch (error) {
 			handleError(error);
 		} finally {
 			setLoading(null);
 		}
-	}, [id]);
+	}, []);
 
 	// TODO throttle!
 	const updateDocument = useCallback(async () => {
 		if (activeLanguage) {
 			try {
-				setLoading('Saving Document');
+				setSavingIndicator(true);
 				const title = Editor.string(editor, [0]);
 				const serializedDocument = JSON.stringify(editorNodes);
-				await updateDocumentService(id, {
+				await updateEditorDocument.mutateAsync({
+					id,
 					title,
 					serializedDocument,
 				});
-				setLoading('Saving Document');
+				setTimeout(() => {
+					setSavingIndicator(false);
+				}, 2000);
 			} catch (error) {
 				handleError(error);
 			} finally {
 				setLoading(null);
 			}
 		}
-	}, [activeLanguage, editor, editorNodes, id]);
-
-	const createDocument = useCallback(async () => {
-		if (activeLanguage) {
-			const serializedDocument = JSON.stringify(editorNodes);
-			const newDocId = await createDocumentService({
-				lang: activeLanguage.id,
-				serializedDocument,
-			});
-		}
-	}, [activeLanguage, editorNodes]);
+	}, [activeLanguage, editor, editorNodes, id, updateEditorDocument]);
 
 	useEffect(() => {
 		if (selection) {
@@ -190,7 +192,7 @@ const YiEditor: React.FC = () => {
 
 	useEffect(() => {
 		if (actionCount >= SAVE_EVERY_ACTIONS) {
-			// updateDocument();
+			updateDocument();
 			setActionCount(0);
 		}
 	}, [actionCount, updateDocument]);
@@ -232,6 +234,12 @@ const YiEditor: React.FC = () => {
 			}}
 			role="none"
 		>
+			{savingIndicator && (
+				<div className="saving-indicator-container">
+					<Spinner intent={Intent.PRIMARY} size={20} />
+					<span>Saving document...</span>
+				</div>
+			)}
 			<div>
 				<Spin
 					spinning={!!loading}
@@ -287,9 +295,6 @@ const YiEditor: React.FC = () => {
 										<WordsPanel />
 									</TabPane>
 									<TabPane tab="Debug" key="3">
-										<Button onClick={createDocument}>
-											Create
-										</Button>
 										<Button onClick={updateDocument}>
 											Update
 										</Button>

@@ -102,7 +102,9 @@ const DictionaryEntryRow: React.FC<IDictEntryRowProps> = (props) => {
 						size="small"
 						type="ghost"
 						onMouseUp={() => {
-							history.push(`dictionary/${entryResolved.id}`);
+							history.push(
+								`/home/dictionary/${entryResolved.id}`
+							);
 						}}
 						icon={<BookOutlined />}
 					/>

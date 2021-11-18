@@ -1,18 +1,21 @@
 import './EntryForm.css';
 import React from 'react';
-import { IDictionaryEntry, IDictionaryTag } from 'Document/Dictionary';
+import {
+	IDictionaryEntry,
+	IDictionaryEntryResolved,
+	IDictionaryTag,
+} from 'Document/Dictionary';
 import DictionarySelect from '@components/DictionaryEntry/DictionarySelect/DictionarySelect';
 import YiTagsInput from '@components/DictionaryEntry/YiTagsInput/YiTagsInput';
 import { Controller, UseFormMethods } from 'react-hook-form';
-import { Divider, InputGroup, Label, TagInput } from '@blueprintjs/core';
-import { IDictionaryTagInput } from '@components/DictionaryEntry/TagForm/TagForm';
+import { Divider, InputGroup, TagInput } from '@blueprintjs/core';
 
 export type IDictionaryEntryInput = Omit<
 	IDictionaryEntry,
 	'firstSeen' | 'id' | 'tags' | 'root' | 'lang'
 > & {
 	tags: Array<IDictionaryTag | Omit<IDictionaryTag, 'id'>>;
-	root?: IDictionaryEntry | IDictionaryEntryInput;
+	root?: IDictionaryEntryResolved | IDictionaryEntryInput;
 };
 
 export interface IEntryFormProps {

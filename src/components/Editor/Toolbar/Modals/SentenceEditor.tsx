@@ -1,6 +1,6 @@
-import React from 'react';
-import { Button, Input, Form } from 'antd';
+import React, { useState } from 'react';
 import { IDictionarySentence } from 'Document/Dictionary';
+import { Button, InputGroup } from '@blueprintjs/core';
 
 interface ISentenceEditorProps {
 	root: string;
@@ -10,36 +10,27 @@ interface ISentenceEditorProps {
 const SentenceEditor: React.FC<ISentenceEditorProps> = (
 	props: ISentenceEditorProps
 ) => {
+	const [translation, setTranslation] = useState('');
 	const { root, addSentenceCallback } = props;
 	return (
-		<Form
+		<form
 			name="basic"
-			onFinish={(values) => {
+			onSubmit={() => {
 				addSentenceCallback({
 					// @TODO
 					id: 'lul',
 					lang: 'lul2',
 					content: root,
-					translation: values.translation,
+					translation,
 				});
 			}}
 		>
-			<Form.Item
-				label="Translation"
-				name="translation"
-				rules={[
-					{
-						required: true,
-						message: 'Please add a translation!',
-					},
-				]}
-			>
-				<Input />
-			</Form.Item>
-			<Button type="primary" htmlType="submit">
-				Save Sentence
-			</Button>
-		</Form>
+			<InputGroup
+				value={translation}
+				onChange={(e) => setTranslation(e.target.value)}
+			/>
+			<Button type="submit">Save Sentence</Button>
+		</form>
 	);
 };
 

@@ -6,16 +6,8 @@ import {
 	IDictionaryEntryResolved,
 } from 'Document/Dictionary';
 import { useDictionarySearch } from '@hooks/DictionaryQueryHooks';
-import {
-	Button,
-	Divider,
-	Menu,
-	MenuItem,
-	NonIdealState,
-	Spinner,
-} from '@blueprintjs/core';
-import { ItemRenderer, Select, Suggest } from '@blueprintjs/select';
-import { setNestedObjectValues } from 'formik';
+import { Button, Divider, Menu, MenuItem } from '@blueprintjs/core';
+import { ItemRenderer, Suggest } from '@blueprintjs/select';
 
 export interface IRootSelectProps {
 	value: IDictionaryEntry;
@@ -58,7 +50,7 @@ const DictionarySelect: React.FC<IRootSelectProps> = ({
 			<MenuItem
 				active={modifiers.active}
 				key={entry.id || entry.key}
-				label={entry.key}
+				label={entry.translations.join(',')}
 				onClick={handleClick}
 				text={entry.key}
 				shouldDismissPopover={false}

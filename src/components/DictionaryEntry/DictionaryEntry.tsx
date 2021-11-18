@@ -1,11 +1,11 @@
 /* eslint-disable react/destructuring-assignment */
 import './DictionaryEntry.css';
 import React from 'react';
-import { Popover, Tag, Button, Spin } from 'antd';
-import { ExclamationCircleOutlined } from '@ant-design/icons';
 import { IGrammarPoint, IDictionaryTag } from 'Document/Dictionary';
 import { useHistory } from 'react-router';
 import { useDictionaryEntryResolved } from '@hooks/DictionaryQueryHooks';
+import { Button, Spinner, Tag } from '@blueprintjs/core';
+import { Popover2 } from '@blueprintjs/popover2';
 
 type IDictEntryProps = {
 	entryId: string;
@@ -32,24 +32,24 @@ export const GrammarPoint: React.FC<{ point: IGrammarPoint; color?: string }> =
 const EntryTag: React.FC<{ tag: IDictionaryTag }> = ({ tag }) => {
 	const tagItem = (
 		<Tag
-			icon={tag.grammarPoint && <ExclamationCircleOutlined />}
-			color={tag.color || 'blue'}
+			icon={tag.grammarPoint && 'info-sign'}
+			style={{ backgroundColor: tag.color || 'blue', marginLeft: '5px' }}
 			key={tag.name}
 		>
 			{tag.name}
 		</Tag>
 	);
 	return tag.grammarPoint ? (
-		<Popover
+		<Popover2
 			content={
 				<GrammarPoint point={tag.grammarPoint} color={tag.color} />
 			}
-			trigger="click"
+			interactionKind="click"
 			className="clickable-tag"
 			placement="bottom"
 		>
 			{tagItem}
-		</Popover>
+		</Popover2>
 	) : (
 		tagItem
 	);
@@ -68,8 +68,7 @@ const DictionaryEntry: React.FC<IDictEntryProps> = (props) => {
 						{canLink ? (
 							<h1 className="dictentry-head-item">
 								<Button
-									type="link"
-									size="large"
+									minimal
 									onClick={() => {
 										history.push(
 											`/home/dictionary/${entryResolved.id}`
@@ -102,7 +101,7 @@ const DictionaryEntry: React.FC<IDictEntryProps> = (props) => {
 					</ul>
 				</div>
 			)}
-			{loading && <Spin tip="Fetching Entry" />}
+			{loading && <Spinner />}
 			{!loading && !entryResolved && <span>ERROR</span>}
 		</>
 	);

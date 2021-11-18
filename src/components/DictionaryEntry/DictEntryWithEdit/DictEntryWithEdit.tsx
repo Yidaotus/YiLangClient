@@ -1,30 +1,22 @@
 /* eslint-disable react/destructuring-assignment */
 import './DictEntryWithEdit.css';
 import React, { useCallback, useRef, useState } from 'react';
-import { Button, Dropdown, Menu, Modal } from 'antd';
-import {
-	CloseOutlined,
-	DeleteOutlined,
-	EditOutlined,
-	ExclamationCircleOutlined,
-	MoreOutlined,
-	SaveFilled,
-} from '@ant-design/icons';
 import { IDictionaryEntryResolved } from 'Document/Dictionary';
 import { useDeleteDictionaryEntry } from '@hooks/DictionaryQueryHooks';
+import { Popover2 } from '@blueprintjs/popover2';
+import { Button, Intent, Menu, MenuItem } from '@blueprintjs/core';
 import DictionaryEntry from '../DictionaryEntry';
 import DictEntryEdit, { IWordInputRef } from '../DictEntryEdit/DictEntryEdit';
 
-const { confirm } = Modal;
-
 type IDictEntryWithEditProps = {
 	dictEntry: IDictionaryEntryResolved;
+	root?: IDictionaryEntryResolved;
 	canLink?: boolean;
 	canRemove?: boolean;
 };
 
 const DictEntryWithEdit: React.FC<IDictEntryWithEditProps> = (props) => {
-	const { dictEntry, canLink, canRemove } = props;
+	const { dictEntry, canLink, canRemove, root } = props;
 	const [editing, setEditing] = useState(false);
 	const deleteEntry = useDeleteDictionaryEntry();
 	const dictEntryEdit = useRef<IWordInputRef>(null);
@@ -51,37 +43,21 @@ const DictEntryWithEdit: React.FC<IDictEntryWithEditProps> = (props) => {
 		await deleteEntry.mutateAsync(dictEntry.id);
 	}, [deleteEntry, dictEntry.id]);
 
-	const showDeleteConfirm = () => {
-		confirm({
-			title: 'Are you sure to delete this entry?',
-			icon: <ExclamationCircleOutlined />,
-			content: `Deleted entries can't be recovered!`,
-			okText: 'Yes',
-			okType: 'danger',
-			cancelText: 'No',
-			onOk() {
-				remove();
-			},
-		});
-	};
-
 	const moreDropdown = (
 		<Menu>
-			<Menu.Item
+			<MenuItem
 				key="1"
-				icon={<EditOutlined />}
+				icon="edit"
 				onClick={() => setEditing((editState) => !editState)}
-			>
-				Edit
-			</Menu.Item>
-			<Menu.Item
+				text="Edit"
+			/>
+			<MenuItem
 				key="2"
-				icon={<DeleteOutlined />}
-				onClick={showDeleteConfirm}
-				danger
-			>
-				Delete
-			</Menu.Item>
+				icon="delete"
+				onClick={remove}
+				intent={Intent.DANGER}
+				text="Remove"
+			/>
 		</Menu>
 	);
 
@@ -89,32 +65,30 @@ const DictEntryWithEdit: React.FC<IDictEntryWithEditProps> = (props) => {
 		<div className="entry-with-edit-container">
 			<div className="entry-with-edit-controlls-top">
 				{canRemove ? (
-					<Dropdown overlay={moreDropdown}>
-						<Button type="text">
-							<MoreOutlined rotate={90} />
-						</Button>
-					</Dropdown>
+					<Popover2 content={moreDropdown} placement="bottom">
+						<Button minimal outlined icon="more" />
+					</Popover2>
 				) : (
 					<Button
-						type="text"
-						size="small"
-						icon={<EditOutlined />}
+						minimal
+						outlined
+						icon="edit"
 						onClick={() => setEditing((editState) => !editState)}
 					/>
 				)}
 			</div>
 			{editing && (
 				<div>
-					<DictEntryEdit entryKey={dictEntry} ref={dictEntryEdit} />
+					<DictEntryEdit
+						entryKey={dictEntry}
+						ref={dictEntryEdit}
+						root={root}
+					/>
 					<div className="entry-with-edit-controlls-bottom">
-						<Button onClick={cancel} icon={<CloseOutlined />}>
+						<Button onClick={cancel} icon="stop">
 							Cancel
 						</Button>
-						<Button
-							type="primary"
-							onClick={finish}
-							icon={<SaveFilled />}
-						>
+						<Button onClick={finish} icon="floppy-disk">
 							Save
 						</Button>
 					</div>

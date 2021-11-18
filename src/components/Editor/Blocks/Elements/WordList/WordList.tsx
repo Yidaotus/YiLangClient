@@ -48,7 +48,12 @@ const WordList: React.FC<RenderElementProps> = ({ children, attributes }) => {
 	}
 
 	return (
-		<div {...attributes}>
+		<div
+			{...attributes}
+			onDragStart={(e) => {
+				e.preventDefault();
+			}}
+		>
 			{children}
 			<div contentEditable={false} style={{ fontSize: '0.95rem' }}>
 				{vocabs.map(([v, path]) => (

@@ -31,7 +31,7 @@ const YiTagsInput: React.FC<YiTagsInputProps> = ({
 	const [query, setQuery] = useState('');
 
 	const tagRenderer = (tag: IStagedDictionaryTag) => {
-		return <Tag color={tag.color || 'default'}>{tag.name}</Tag>;
+		return <span>{tag.name}</span>;
 	};
 
 	const isSelected = (tag: IStagedDictionaryTag) => {
