@@ -136,7 +136,7 @@ body {
 	font-weight: 400;
 }
 
-.saving-indicator-container > div {
+.saving-indicator-container > *:first-child {
 	margin-right: 10px;
 }
 
@@ -148,7 +148,7 @@ body {
 	display: flex;
 	z-index: 10;
 	align-items: center;
-	justify-content: center;
+	justify-content: baseline;
 	background-color: #e0e9f0;
 	border: 1px solid #495664;
 	border-radius: 5px;

@@ -1,23 +1,7 @@
 import './Toolbar.css';
 import React, { useRef, useState } from 'react';
 import { useSlateStatic } from 'slate-react';
-import { BaseSelection, Range as SlateRange } from 'slate';
-import {
-	AlignCenterOutlined,
-	AlignLeftOutlined,
-	AlignRightOutlined,
-	ArrowDownOutlined,
-	FontColorsOutlined,
-	HighlightOutlined,
-	LineOutlined,
-	OrderedListOutlined,
-	PicCenterOutlined,
-	RedoOutlined,
-	TranslationOutlined,
-	UndoOutlined,
-	UnorderedListOutlined,
-	SearchOutlined,
-} from '@ant-design/icons';
+import { BaseSelection, Editor, Range as SlateRange } from 'slate';
 import useClickOutside from '@hooks/useClickOutside';
 import { useLookupSources } from '@hooks/ConfigQueryHooks';
 import LookupSourceButton from '@components/LookupSourceButton';
@@ -39,12 +23,14 @@ export interface IToolbarProps {
 	selection: BaseSelection;
 	showWordEditor: () => void;
 	showSentenceEditor: () => void;
+	updateDocument: () => void;
 }
 
 const Toolbar: React.FC<IToolbarProps> = ({
 	selection,
 	showWordEditor,
 	showSentenceEditor,
+	updateDocument,
 }) => {
 	const editor = useSlateStatic();
 	const toolbarRef = useRef(null);
@@ -259,6 +245,13 @@ const Toolbar: React.FC<IToolbarProps> = ({
 				title="Redo"
 				action={() => {
 					editor.redo();
+				}}
+			/>
+			<ToolbarButton
+				icon="floppy-disk"
+				title="Save"
+				action={() => {
+					updateDocument();
 				}}
 			/>
 		</div>

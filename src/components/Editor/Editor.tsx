@@ -22,7 +22,7 @@ import {
 	useEditorDocument,
 	useUpdateEditorDocument,
 } from '@hooks/DocumentQueryHooks';
-import { Intent, Position, Spinner, Toaster } from '@blueprintjs/core';
+import { Icon, Intent, Position, Spinner, Toaster } from '@blueprintjs/core';
 import EditorDocument from './EditorDocument';
 import WordsPanel from './WordsPanel/WordsPanel';
 import DictPopupController from './Popups/DictPopupController';
@@ -96,14 +96,16 @@ const withYiLang = (editor: Editor) => {
 	return editor;
 };
 
-const AVERAGE_ACTIONS_PER_COMMAND = 4;
+const AVERAGE_ACTIONS_PER_COMMAND = 15;
 const SAVE_EVERY_ACTIONS = 5 * AVERAGE_ACTIONS_PER_COMMAND;
 const UPDATE_DEBOUNCE_TIME = 5000;
+
+export type SavingState = 'LOADING' | 'SUCCESS' | 'ERROR' | 'IDLE';
 
 const YiEditor: React.FC = () => {
 	const editorContainer = useRef(null);
 	const [loading, setLoading] = useState<string | null>(null);
-	const [savingIndicator, setSavingIndicator] = useState(false);
+	const [savingIndicator, setSavingIndicator] = useState<SavingState>('IDLE');
 	const [actionCount, setActionCount] = useState(0);
 	const [wordEditorVisible, setWordEditorVisible] = useState(false);
 	const [sentenceEditorVisible, setSentenceEditorVisible] = useState(false);
@@ -156,7 +158,7 @@ const YiEditor: React.FC = () => {
 	const updateDocument = useCallback(async () => {
 		if (activeLanguage) {
 			try {
-				setSavingIndicator(true);
+				setSavingIndicator('LOADING');
 				const title = Editor.string(editor, [0]);
 				const serializedDocument = JSON.stringify(editorNodes);
 				await updateEditorDocument.mutateAsync({
@@ -164,10 +166,16 @@ const YiEditor: React.FC = () => {
 					title,
 					serializedDocument,
 				});
+
+				// Hacky but feels beter for the user to actually see the saving process
 				setTimeout(() => {
-					setSavingIndicator(false);
+					setSavingIndicator('SUCCESS');
+					setTimeout(() => {
+						setSavingIndicator('IDLE');
+					}, 2000);
 				}, 2000);
 			} catch (error) {
+				setSavingIndicator('ERROR');
 				handleError(error);
 			} finally {
 				setLoading(null);
@@ -234,10 +242,26 @@ const YiEditor: React.FC = () => {
 			}}
 			role="none"
 		>
-			{savingIndicator && (
+			{savingIndicator !== 'IDLE' && (
 				<div className="saving-indicator-container">
-					<Spinner intent={Intent.PRIMARY} size={20} />
-					<span>Saving document...</span>
+					{savingIndicator === 'LOADING' && (
+						<>
+							<Spinner intent={Intent.PRIMARY} size={20} />
+							<span>Saving document...</span>
+						</>
+					)}
+					{savingIndicator === 'ERROR' && (
+						<>
+							<Icon intent={Intent.WARNING} icon="error" />
+							<span> Something went wrong!</span>
+						</>
+					)}
+					{savingIndicator === 'SUCCESS' && (
+						<>
+							<Icon intent={Intent.SUCCESS} icon="tick" />
+							<span> Document saved</span>
+						</>
+					)}
 				</div>
 			)}
 			<div>
@@ -275,6 +299,7 @@ const YiEditor: React.FC = () => {
 												showWordEditor={() => {
 													setWordEditorVisible(true);
 												}}
+												updateDocument={updateDocument}
 											/>
 											<WordEditorModal
 												visible={wordEditorVisible}
