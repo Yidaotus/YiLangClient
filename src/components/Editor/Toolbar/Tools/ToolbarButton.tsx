@@ -28,25 +28,23 @@ const ToolbarButton: React.FC<IToolbarButtonProps> = ({
 	action,
 	className,
 }) => (
-	<Popover2>
-		<Tooltip2
-			content={tooltip}
-			openOnTargetFocus
-			hoverOpenDelay={200}
-			position="bottom"
+	<Tooltip2
+		content={tooltip}
+		openOnTargetFocus
+		hoverOpenDelay={200}
+		position="bottom"
+	>
+		<AnchorButton
+			className={`bp3-minimal button ${className}`}
+			large
+			intent={active ? Intent.PRIMARY : Intent.NONE}
+			icon={icon}
+			onMouseUp={action}
+			disabled={!enabled}
 		>
-			<AnchorButton
-				className={`bp3-minimal button ${className}`}
-				large
-				intent={active ? Intent.PRIMARY : Intent.NONE}
-				icon={icon}
-				onMouseUp={action}
-				disabled={!enabled}
-			>
-				{text}
-			</AnchorButton>
-		</Tooltip2>
-	</Popover2>
+			{text}
+		</AnchorButton>
+	</Tooltip2>
 );
 
 export default ToolbarButton;
