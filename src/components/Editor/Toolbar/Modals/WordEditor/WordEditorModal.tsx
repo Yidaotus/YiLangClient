@@ -17,7 +17,7 @@ import DictEntryEdit, {
 	IWordInputRef,
 	WordEditorMode,
 } from '@components/DictionaryEntry/DictEntryEdit/DictEntryEdit';
-import LookupSourceLink from '@components/LookupSourceLink';
+import { ILookupSourceLinkProps } from '@components/LookupSourceLink';
 import { Editor, Transforms, Text, Range, Selection } from 'slate';
 import { useSlateStatic } from 'slate-react';
 import { CustomText, WordElement } from '@components/Editor/CustomEditor';
@@ -30,6 +30,7 @@ import {
 	Classes,
 	Dialog,
 	Menu,
+	MenuItem,
 	Position,
 	Spinner,
 } from '@blueprintjs/core';
@@ -39,6 +40,10 @@ export interface IWordInputProps {
 	visible: boolean;
 	close: (restoreSelection: boolean) => void;
 }
+
+const formatURL = ({ source, searchTerm }: ILookupSourceLinkProps): string =>
+	source.source.replace('{}', searchTerm);
+const target = '_blank';
 
 const WordEditorModal: React.FC<IWordInputProps> = ({ visible, close }) => {
 	const editor = useSlateStatic();
@@ -69,14 +74,13 @@ const WordEditorModal: React.FC<IWordInputProps> = ({ visible, close }) => {
 	const menu = (
 		<Menu>
 			{lookupSources.map((source) => (
-				<Menu.Item
+				<MenuItem
 					key={source.name}
-					text={
-						<LookupSourceLink
-							source={source}
-							searchTerm={entryKey}
-						/>
-					}
+					text={source.name}
+					onClick={() => {
+						const url = formatURL({ source, searchTerm: entryKey });
+						window.open(url, target);
+					}}
 				/>
 			))}
 		</Menu>
