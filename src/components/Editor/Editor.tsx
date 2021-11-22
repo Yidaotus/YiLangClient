@@ -13,7 +13,7 @@ import handleError from '@helpers/Error';
 
 import { withHistory } from 'slate-history';
 import { ReactEditor, Slate, withReact } from 'slate-react';
-import { createEditor, Descendant, Editor } from 'slate';
+import { BaseRange, createEditor, Descendant, Editor, Transforms } from 'slate';
 import useSelection from '@hooks/useSelection';
 import { useActiveLanguageConf } from '@hooks/ConfigQueryHooks';
 import { useParams } from 'react-router-dom';
@@ -108,6 +108,9 @@ const YiEditor: React.FC = () => {
 	const [savingIndicator, setSavingIndicator] = useState<SavingState>('IDLE');
 	const [actionCount, setActionCount] = useState(0);
 	const [wordEditorVisible, setWordEditorVisible] = useState(false);
+	const [savedSelection, setSavedSelection] = useState<BaseRange | null>(
+		null
+	);
 	const [sentenceEditorVisible, setSentenceEditorVisible] = useState(false);
 	const activeLanguage = useActiveLanguageConf();
 	const { id } = useParams<{ id: string }>();
@@ -231,9 +234,15 @@ const YiEditor: React.FC = () => {
 		[editor.operations, editor.selection, setSelection]
 	);
 
-	const closeWordEditorModal = useCallback(() => {
-		setWordEditorVisible(false);
-	}, [setWordEditorVisible]);
+	const closeWordEditorModal = useCallback(
+		(restoreSelection = false) => {
+			setWordEditorVisible(false);
+			if (savedSelection && restoreSelection) {
+				Transforms.select(editor, savedSelection);
+			}
+		},
+		[editor, savedSelection]
+	);
 
 	return (
 		<div
@@ -297,6 +306,9 @@ const YiEditor: React.FC = () => {
 													);
 												}}
 												showWordEditor={() => {
+													setSavedSelection(
+														editor.selection
+													);
 													setWordEditorVisible(true);
 												}}
 												updateDocument={updateDocument}

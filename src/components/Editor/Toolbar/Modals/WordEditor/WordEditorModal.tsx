@@ -37,7 +37,7 @@ import { Popover2 } from '@blueprintjs/popover2';
 
 export interface IWordInputProps {
 	visible: boolean;
-	close: () => void;
+	close: (restoreSelection: boolean) => void;
 }
 
 const WordEditorModal: React.FC<IWordInputProps> = ({ visible, close }) => {
@@ -115,21 +115,23 @@ const WordEditorModal: React.FC<IWordInputProps> = ({ visible, close }) => {
 							// we split the node if we found any hits, so we can just wrap the first hit
 							// and continue the loop. Since the loop makes use of the generator function
 							// it will automatically iterate to the next (new)
-							Transforms.wrapNodes(editor, fillerVocab, {
-								at: {
-									anchor: {
-										path: leafPath,
-										offset: foundRoot.value.index,
-									},
-									focus: {
-										path: leafPath,
-										offset:
-											foundRoot.value.index +
-											foundRoot.value[0].length,
-									},
+							const nodeLocation = {
+								anchor: {
+									path: leafPath,
+									offset: foundRoot.value.index,
 								},
+								focus: {
+									path: leafPath,
+									offset:
+										foundRoot.value.index +
+										foundRoot.value[0].length,
+								},
+							};
+							Transforms.wrapNodes(editor, fillerVocab, {
+								at: nodeLocation,
 								split: true,
 							});
+							Transforms.select(editor, nodeLocation);
 						}
 					}
 				}
@@ -164,12 +166,12 @@ const WordEditorModal: React.FC<IWordInputProps> = ({ visible, close }) => {
 			const editResult = await dictEntryEdit.current.finish();
 			if (editResult.isDone && editResult.entryId) {
 				await wrapWithWord(editResult.entryId);
-				close();
+				close(false);
 			}
 		}
 		if (entryInDictionary) {
 			await wrapWithWord(entryInDictionary.id);
-			close();
+			close(false);
 		}
 	};
 
@@ -177,11 +179,11 @@ const WordEditorModal: React.FC<IWordInputProps> = ({ visible, close }) => {
 		if (dictEntryEdit.current) {
 			const isDone = dictEntryEdit.current.cancel();
 			if (isDone) {
-				close();
+				close(false);
 			}
 		}
 		if (entryInDictionary) {
-			close();
+			close(false);
 		}
 	};
 
@@ -197,7 +199,10 @@ const WordEditorModal: React.FC<IWordInputProps> = ({ visible, close }) => {
 					</Popover2>
 				</div>
 			}
-			onClose={close}
+			onClose={() => close(true)}
+			canEscapeKeyClose
+			canOutsideClickClose={false}
+			shouldReturnFocusOnClose={false}
 		>
 			{fetchingRoot && <Spinner />}
 			<div className={`word-input-root-form ${Classes.DIALOG_BODY}`}>
