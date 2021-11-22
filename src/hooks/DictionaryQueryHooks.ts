@@ -334,6 +334,7 @@ const useAddDictionaryEntry = () => {
 					lang?.id,
 					response,
 				]);
+				queryClient.invalidateQueries(['dictEntries', 'search']);
 			},
 			onError: (response: IApiResponse<void>) => {
 				handleError(response.message);
