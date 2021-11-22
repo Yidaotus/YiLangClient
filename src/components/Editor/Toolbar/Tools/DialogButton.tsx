@@ -1,8 +1,6 @@
 import {
-	BulletedListElement,
 	DialogElement,
 	getTextBlockStyle,
-	NumberedListElement,
 	toggleBlockType,
 } from '@components/Editor/CustomEditor';
 import React from 'react';
@@ -62,6 +60,10 @@ const DialogButton: React.FC<IDialogButtonProps> = ({
 
 						Transforms.removeNodes(editor);
 						Transforms.move(editor, { reverse: true });
+
+						if (currentTexts.length < 1) {
+							currentTexts.push(['Actor', 'Text']);
+						}
 
 						const dialogNode: DialogElement = {
 							type: 'dialog',
