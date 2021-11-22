@@ -77,6 +77,7 @@ const EntryForm: React.FC<IEntryFormProps> = ({
 							placeholder="Translation(s)"
 							separator=";"
 							addOnPaste
+							addOnBlur
 						/>
 					)}
 				/>
