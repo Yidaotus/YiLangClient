@@ -8,7 +8,6 @@ import React, {
 } from 'react';
 import { IDictionaryEntry } from 'Document/Dictionary';
 import {
-	SearchOutlined,
 	SaveOutlined,
 	ReadOutlined,
 	StopOutlined,

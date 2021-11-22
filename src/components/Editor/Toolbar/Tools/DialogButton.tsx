@@ -31,6 +31,7 @@ const DialogButton: React.FC<IDialogButtonProps> = ({
 		<ToolbarButton
 			icon={icon}
 			title={title}
+			tooltip={title}
 			action={() => {
 				if (editor.selection) {
 					if (!inDialog) {

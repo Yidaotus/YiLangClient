@@ -24,6 +24,7 @@ const WrapperItem: React.FC<IToolbarWrapperItem> = ({
 
 	return (
 		<ToolbarButton
+			tooltip={title}
 			title={title}
 			action={() => {
 				toggleBlockType(editor, type);

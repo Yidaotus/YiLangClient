@@ -30,6 +30,7 @@ const ListButton: React.FC<IListButtonProps> = ({
 		<ToolbarButton
 			icon={icon}
 			title={title}
+			tooltip={title}
 			action={() => {
 				if (inList && selectedBlockType === type) {
 					Transforms.unwrapNodes(editor, {

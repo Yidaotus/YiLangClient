@@ -141,6 +141,12 @@ const Toolbar: React.FC<IToolbarProps> = ({
 				title="Block Type"
 				{...menuProps}
 			>
+				<BlockButton
+					type="wordList"
+					title="Words and Sentences"
+					{...sharedProps}
+					icon="git-repo"
+				/>
 				<DialogButton icon="circle" title="Dialog" {...sharedProps} />
 				<BlockButton
 					type="title"
@@ -235,6 +241,7 @@ const Toolbar: React.FC<IToolbarProps> = ({
 			<Divider />
 			<ToolbarButton
 				icon="undo"
+				tooltip="undo"
 				title="Undo"
 				action={() => {
 					editor.undo();
@@ -243,6 +250,7 @@ const Toolbar: React.FC<IToolbarProps> = ({
 			<ToolbarButton
 				icon="redo"
 				title="Redo"
+				tooltip="Redo"
 				action={() => {
 					editor.redo();
 				}}
@@ -250,6 +258,7 @@ const Toolbar: React.FC<IToolbarProps> = ({
 			<ToolbarButton
 				icon="floppy-disk"
 				title="Save"
+				tooltip="Save"
 				action={() => {
 					updateDocument();
 				}}

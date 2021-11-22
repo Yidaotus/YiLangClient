@@ -26,6 +26,7 @@ const InputWrapperButton: React.FC<IInputWrapperButtonProps> = ({
 	return (
 		<ToolbarButton
 			title={title}
+			tooltip={title}
 			action={() => {
 				if (isActive) {
 					Transforms.unwrapNodes(editor, {

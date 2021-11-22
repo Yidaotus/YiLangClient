@@ -42,6 +42,7 @@ const AlignButton: React.FC<IAlignButtonProps> = ({
 		<ToolbarButton
 			icon={icon}
 			title={title}
+			tooltip={title}
 			action={() => {
 				toggleAlign(editor, currentAlign, align);
 				return onChange();

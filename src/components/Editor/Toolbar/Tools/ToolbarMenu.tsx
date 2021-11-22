@@ -32,6 +32,7 @@ const ToolbarMenu: React.FC<IToolbarMenuProps> = ({
 			active={active}
 			action={() => onMenuToggle(type)}
 			enabled={enabled}
+			tooltip={title}
 		/>
 		<div
 			className={`toolbar_menu menu_${type}`}

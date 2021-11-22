@@ -26,6 +26,7 @@ const ElementButton: React.FC<IToolbarWrapperItem> = ({
 	return (
 		<ToolbarButton
 			title={title}
+			tooltip={title}
 			action={() => {
 				if (isActive) {
 					Transforms.unwrapNodes(editor, {

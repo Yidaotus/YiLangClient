@@ -1,5 +1,6 @@
 import React from 'react';
-import { Button, IconName, Intent } from '@blueprintjs/core';
+import { AnchorButton, IconName, Intent } from '@blueprintjs/core';
+import { Popover2, Tooltip2 } from '@blueprintjs/popover2';
 
 const toolbarItemTypes = ['Wrapper', 'Dropdown', 'Action'] as const;
 export type ToolbarItemType = typeof toolbarItemTypes[number];
@@ -27,17 +28,25 @@ const ToolbarButton: React.FC<IToolbarButtonProps> = ({
 	action,
 	className,
 }) => (
-	<Button
-		className={`bp3-minimal button ${className}`}
-		large
-		intent={active ? Intent.PRIMARY : Intent.NONE}
-		icon={icon}
-		onMouseUp={action}
-		title={tooltip}
-		disabled={!enabled}
-	>
-		{text}
-	</Button>
+	<Popover2>
+		<Tooltip2
+			content={tooltip}
+			openOnTargetFocus
+			hoverOpenDelay={200}
+			position="bottom"
+		>
+			<AnchorButton
+				className={`bp3-minimal button ${className}`}
+				large
+				intent={active ? Intent.PRIMARY : Intent.NONE}
+				icon={icon}
+				onMouseUp={action}
+				disabled={!enabled}
+			>
+				{text}
+			</AnchorButton>
+		</Tooltip2>
+	</Popover2>
 );
 
 export default ToolbarButton;
