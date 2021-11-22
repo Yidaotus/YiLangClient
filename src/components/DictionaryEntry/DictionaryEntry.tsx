@@ -42,10 +42,12 @@ const EntryTag: React.FC<{ tag: IDictionaryTag }> = ({ tag }) => {
 	return tag.grammarPoint ? (
 		<Popover2
 			content={
-				<GrammarPoint point={tag.grammarPoint} color={tag.color} />
+				<div style={{ padding: '10px' }}>
+					<GrammarPoint point={tag.grammarPoint} color={tag.color} />
+				</div>
 			}
 			interactionKind="click"
-			className="clickable-tag"
+			className="clickable-tag pt-popover-content-sizing"
 			placement="bottom"
 		>
 			{tagItem}
