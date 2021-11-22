@@ -118,7 +118,9 @@ const WordInput: React.ForwardRefRenderFunction<
 	IWordInputRef,
 	IWordInputState
 > = ({ entryKey, stateChanged, root }, ref) => {
-	const initialLoad = useRef(true);
+	const previousEntryKey = useRef<string | IDictionaryEntryResolved | null>(
+		null
+	);
 	const wordForm = useForm<IDictionaryEntryInput>();
 	const rootForm = useForm<IDictionaryEntryInput>();
 	const tagForm = useForm<IDictionaryTagInput>({
@@ -137,13 +139,19 @@ const WordInput: React.ForwardRefRenderFunction<
 	const addEntry = useAddDictionaryEntry();
 
 	useEffect(() => {
-		if (initialLoad.current) {
+		if (previousEntryKey.current !== entryKey) {
 			if (typeof entryKey === 'string') {
-				wordForm.setValue('key', entryKey);
+				wordForm.reset({
+					key: entryKey,
+					comment: '',
+					tags: [],
+					translations: [],
+					root: undefined,
+				});
 			} else {
 				wordForm.reset({ ...entryKey, root: root || undefined });
 			}
-			initialLoad.current = false;
+			previousEntryKey.current = entryKey;
 		}
 	}, [entryKey, root, wordForm]);
 
