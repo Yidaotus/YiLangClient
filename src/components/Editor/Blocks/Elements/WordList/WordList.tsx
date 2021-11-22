@@ -9,12 +9,18 @@ import {
 	Path,
 	Transforms,
 } from 'slate';
-import { ReactEditor, RenderElementProps, useSlate } from 'slate-react';
+import {
+	ReactEditor,
+	RenderElementProps,
+	useSelected,
+	useSlate,
+} from 'slate-react';
 import { Button } from 'antd';
 import { LinkOutlined } from '@ant-design/icons';
 
 const WordList: React.FC<RenderElementProps> = ({ children, attributes }) => {
 	const editor = useSlate();
+	const selected = useSelected();
 
 	const vocabs: Array<[WordElement, Path]> = [];
 	const sentences: Array<[SentenceElement, Path]> = [];
@@ -53,9 +59,15 @@ const WordList: React.FC<RenderElementProps> = ({ children, attributes }) => {
 			onDragStart={(e) => {
 				e.preventDefault();
 			}}
+			style={{
+				backgroundColor: selected ? '#92837410' : 'inherit',
+				padding: '5px',
+				borderRadius: '5px',
+			}}
 		>
 			{children}
 			<div contentEditable={false} style={{ fontSize: '0.95rem' }}>
+				<h3 className="bp3-heading">Added Words</h3>
 				{vocabs.map(([v, path]) => (
 					<div className="dictentry-row-wrapper" key={v.dictId}>
 						<DictionaryEntryRow
@@ -67,6 +79,7 @@ const WordList: React.FC<RenderElementProps> = ({ children, attributes }) => {
 					</div>
 				))}
 				{vocabs.length < 1 && <span>No words added yet!</span>}
+				<h3 className="bp3-heading">Added Sentences</h3>
 				{sentences.map(([s, spath]) => (
 					<div className="sentence-row" key={s.sentenceId}>
 						<p>{SlateNode.string(s)}</p>
