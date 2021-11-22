@@ -48,6 +48,7 @@ const EntryTag: React.FC<{ tag: IDictionaryTag }> = ({ tag }) => {
 			}
 			interactionKind="click"
 			className="clickable-tag pt-popover-content-sizing"
+			portalClassName="popover-class"
 			placement="bottom"
 		>
 			{tagItem}
