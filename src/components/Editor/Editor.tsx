@@ -186,17 +186,6 @@ const YiEditor: React.FC = () => {
 		}
 	}, [activeLanguage, editor, editorNodes, id, updateEditorDocument]);
 
-	useEffect(() => {
-		if (selection) {
-			const range = ReactEditor.toDOMRange(editor, selection);
-			const domSelection = document.getSelection();
-			if (domSelection?.isCollapsed && !range.collapsed) {
-				document.getSelection()?.removeAllRanges();
-				document.getSelection()?.addRange(range);
-			}
-		}
-	}, [editor, selection]);
-
 	const closeSentenceEditorModal = useCallback(() => {
 		setSentenceEditorVisible(false);
 	}, [setSentenceEditorVisible]);
