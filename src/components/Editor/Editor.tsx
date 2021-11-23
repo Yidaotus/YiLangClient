@@ -162,7 +162,7 @@ const YiEditor: React.FC = () => {
 		if (activeLanguage) {
 			try {
 				setSavingIndicator('LOADING');
-				const title = Editor.string(editor, [0]);
+				const title = Editor.string(editor, [0], { voids: true });
 				const serializedDocument = JSON.stringify(editorNodes);
 				await updateEditorDocument.mutateAsync({
 					id,
@@ -176,7 +176,7 @@ const YiEditor: React.FC = () => {
 					setTimeout(() => {
 						setSavingIndicator('IDLE');
 					}, 2000);
-				}, 2000);
+				}, 1000);
 			} catch (error) {
 				setSavingIndicator('ERROR');
 				handleError(error);

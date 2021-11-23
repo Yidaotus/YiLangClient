@@ -93,7 +93,7 @@ const WordEditorModal: React.FC<IWordInputProps> = ({ visible, close }) => {
 					type: 'word',
 					dictId: entryId,
 					isUserInput: true,
-					children: [{ text: '' }],
+					children: [{ text: entryKey }],
 				};
 				Transforms.wrapNodes(editor, vocab, {
 					split: true,
