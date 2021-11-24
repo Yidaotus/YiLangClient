@@ -7,22 +7,20 @@ import React, {
 	useState,
 } from 'react';
 
-import { Tabs, Spin, Button } from 'antd';
-
 import handleError from '@helpers/Error';
 
 import { withHistory } from 'slate-history';
-import { ReactEditor, Slate, withReact } from 'slate-react';
+import { Slate, withReact } from 'slate-react';
 import { BaseRange, createEditor, Descendant, Editor, Transforms } from 'slate';
 import useSelection from '@hooks/useSelection';
 import { useActiveLanguageConf } from '@hooks/ConfigQueryHooks';
-import { useParams } from 'react-router-dom';
+import { Prompt, useParams } from 'react-router-dom';
 import SentenceEditorModal from '@editor/Toolbar/Modals/SentenceEditor/SentenceEditorModal';
 import {
 	useEditorDocument,
 	useUpdateEditorDocument,
 } from '@hooks/DocumentQueryHooks';
-import { Icon, Intent, Position, Spinner, Toaster } from '@blueprintjs/core';
+import { Button, Icon, Intent, Spinner, Tab, Tabs } from '@blueprintjs/core';
 import EditorDocument from './EditorDocument';
 import WordsPanel from './WordsPanel/WordsPanel';
 import DictPopupController from './Popups/DictPopupController';
@@ -33,20 +31,10 @@ import {
 	withDialog,
 	withList,
 } from './CustomEditor';
-import { create as createDocumentService } from '../../api/document.service';
 import WordEditorModal from './Toolbar/Modals/WordEditor/WordEditorModal';
 
-const { TabPane } = Tabs;
-
-const SavingToaster = Toaster.create({
-	className: 'recipe-toaster',
-	position: Position.BOTTOM_RIGHT,
-	canEscapeKeyClear: false,
-	maxToasts: 1,
-});
-
 const withYiLang = (editor: Editor) => {
-	const { isInline, isVoid, normalizeNode } = editor;
+	const { isInline, isVoid } = editor;
 	const inlineTypes: Array<EditorElement['type']> = [
 		'word',
 		'mark',
@@ -70,48 +58,24 @@ const withYiLang = (editor: Editor) => {
 		return voidTypes.includes(element.type) ? true : isVoid(element);
 	};
 
-	/* 
-	editor.normalizeNode = async (entry) => {
-		// If the element is a paragraph, ensure its children are valid.
-
-		if (entry) {
-			const [node, path] = entry;
-			if (SlateElement.isElement(node) && node.type === 'word') {
-				const id = node.dictId;
-				const dictEntry = await queryClient.fetchQuery(
-					['dictEntries', 'details', activeLanguage, id],
-					() => {
-						return id ? getEntry({ id }) : null;
-					}
-				);
-				if (!dictEntry) {
-					Transforms.unwrapNodes(editor, { at: path });
-				}
-			}
-		}
-		// Fall back to the original `normalizeNode` to enforce other constraints.
-		normalizeNode(entry);
-	}; */
-
 	return editor;
 };
 
 const AVERAGE_ACTIONS_PER_COMMAND = 15;
 const SAVE_EVERY_ACTIONS = 5 * AVERAGE_ACTIONS_PER_COMMAND;
-const UPDATE_DEBOUNCE_TIME = 5000;
 
 export type SavingState = 'LOADING' | 'SUCCESS' | 'ERROR' | 'IDLE';
 
 const YiEditor: React.FC = () => {
 	const editorContainer = useRef(null);
-	const [loading, setLoading] = useState<string | null>(null);
 	const [savingIndicator, setSavingIndicator] = useState<SavingState>('IDLE');
 	const [actionCount, setActionCount] = useState(0);
 	const [wordEditorVisible, setWordEditorVisible] = useState(false);
+	const [sentenceEditorVisible, setSentenceEditorVisible] = useState(false);
+	const [isEditorDirty, setIsEditorDirty] = useState(false);
 	const [savedSelection, setSavedSelection] = useState<BaseRange | null>(
 		null
 	);
-	const [sentenceEditorVisible, setSentenceEditorVisible] = useState(false);
 	const activeLanguage = useActiveLanguageConf();
 	const { id } = useParams<{ id: string }>();
 	const updateEditorDocument = useUpdateEditorDocument();
@@ -125,7 +89,6 @@ const YiEditor: React.FC = () => {
 		[]
 	);
 	const [selection, setSelection] = useSelection(editor);
-
 	const [editorNodes, setEditorNodes] = useState<Array<Descendant>>([]);
 
 	useEffect(() => {
@@ -139,8 +102,6 @@ const YiEditor: React.FC = () => {
 				}
 			} catch (error) {
 				handleError(error);
-			} finally {
-				setLoading(null);
 			}
 		};
 		fetch();
@@ -148,12 +109,9 @@ const YiEditor: React.FC = () => {
 
 	const deleteDocument = useCallback(async () => {
 		try {
-			setLoading('Deleting Document');
 			// await removeDocumentService(id);
 		} catch (error) {
 			handleError(error);
-		} finally {
-			setLoading(null);
 		}
 	}, []);
 
@@ -181,7 +139,7 @@ const YiEditor: React.FC = () => {
 				setSavingIndicator('ERROR');
 				handleError(error);
 			} finally {
-				setLoading(null);
+				setIsEditorDirty(false);
 			}
 		}
 	}, [activeLanguage, editor, editorNodes, id, updateEditorDocument]);
@@ -211,6 +169,7 @@ const YiEditor: React.FC = () => {
 			if (isAstChange) {
 				// TODO all examples always set newValue? Bug?
 				setEditorNodes(newValue);
+				setIsEditorDirty(true);
 				setActionCount(
 					(count) =>
 						count +
@@ -240,6 +199,10 @@ const YiEditor: React.FC = () => {
 			}}
 			role="none"
 		>
+			<Prompt
+				message="There are unsaved changes, which will be lost. Please safe before!"
+				when={isEditorDirty}
+			/>
 			{savingIndicator !== 'IDLE' && (
 				<div className="saving-indicator-container">
 					{savingIndicator === 'LOADING' && (
@@ -263,26 +226,20 @@ const YiEditor: React.FC = () => {
 				</div>
 			)}
 			<div>
-				<Spin
-					spinning={!!loading}
-					size="large"
-					tip={loading || undefined}
-				>
-					<div>
-						<div className="editor-container">
-							<Slate
-								editor={editor}
-								value={editorNodes}
-								onChange={onEditorChange}
-							>
-								<Tabs
-									defaultActiveKey="1"
-									centered
-									tabBarStyle={{
-										position: 'sticky',
-									}}
-								>
-									<TabPane tab="Document" key="1">
+				{!!loadingDocument && <Spinner />}
+				<div>
+					<div className="editor-container">
+						<Slate
+							editor={editor}
+							value={editorNodes}
+							onChange={onEditorChange}
+						>
+							<Tabs>
+								<Tab
+									title="Document"
+									key="1"
+									id="1"
+									panel={
 										<div
 											ref={editorContainer}
 											style={{ position: 'relative' }}
@@ -316,30 +273,40 @@ const YiEditor: React.FC = () => {
 											/>
 											<EditorDocument />
 										</div>
-									</TabPane>
-									<TabPane tab="Elements" key="2">
-										<WordsPanel />
-									</TabPane>
-									<TabPane tab="Debug" key="3">
-										<Button onClick={updateDocument}>
-											Update
-										</Button>
-										<Button onClick={deleteDocument}>
-											Delete
-										</Button>
-										<pre>
-											{JSON.stringify(
-												editor.children,
-												null,
-												2
-											)}
-										</pre>
-									</TabPane>
-								</Tabs>
-							</Slate>
-						</div>
+									}
+								/>
+								<Tab
+									title="Elements"
+									key="2"
+									id="2"
+									panel={<WordsPanel />}
+								/>
+								<Tab
+									title="Debug"
+									key="3"
+									id="3"
+									panel={
+										<div>
+											<Button onClick={updateDocument}>
+												Update
+											</Button>
+											<Button onClick={deleteDocument}>
+												Delete
+											</Button>
+											<pre>
+												{JSON.stringify(
+													editor.children,
+													null,
+													2
+												)}
+											</pre>
+										</div>
+									}
+								/>
+							</Tabs>
+						</Slate>
 					</div>
-				</Spin>
+				</div>
 			</div>
 		</div>
 	);

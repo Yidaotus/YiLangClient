@@ -39,7 +39,11 @@ const ToolbarButton: React.FC<IToolbarButtonProps> = ({
 			large
 			intent={active ? Intent.PRIMARY : Intent.NONE}
 			icon={icon}
-			onMouseUp={action}
+			onMouseUp={() => {
+				if (enabled) {
+					action();
+				}
+			}}
 			disabled={!enabled}
 		>
 			{text}
