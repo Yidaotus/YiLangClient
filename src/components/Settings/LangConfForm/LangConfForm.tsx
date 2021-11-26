@@ -35,17 +35,19 @@ const LangConfForm: React.FC<ILangFormProps> = ({ control, register }) => {
 					)}
 				/>
 			</Label>
-			<h3>Lookup Sources</h3>
-			<Tooltip2
-				placement="bottom"
-				content='
+			<div className="lu-title">
+				<h3>Lookup Sources</h3>
+				<Tooltip2
+					placement="bottom"
+					content='
 						To create a lookup source enter a name and the URL for
 						the source. Important: replace the search string with
 						"&#123;&#125;". YiLang will substitude
 						"&#123;&#125;" with the given search string.'
-			>
-				<InfoCircleOutlined />
-			</Tooltip2>
+				>
+					<InfoCircleOutlined />
+				</Tooltip2>
+			</div>
 			{fields.map((field, index) => (
 				<div className="source-sub-form" key={field.id}>
 					<Controller
@@ -79,6 +81,8 @@ const LangConfForm: React.FC<ILangFormProps> = ({ control, register }) => {
 								onChange={onChange}
 								placeholder="Name"
 								value={value}
+								className="input-grow"
+								style={{ flexGrow: 1 }}
 							/>
 						)}
 					/>
@@ -94,6 +98,7 @@ const LangConfForm: React.FC<ILangFormProps> = ({ control, register }) => {
 				minimal
 				onClick={() => append({ name: '', source: '', priority: 0 })}
 				icon="plus"
+				className="lu-add"
 			>
 				Add Source
 			</Button>
