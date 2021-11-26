@@ -49,7 +49,10 @@ const DictPopupController: React.FC<IDictPopupControllerProps> = ({
 			parentElement={rootElement}
 			relativeBounding={relativeBounding}
 		>
-			<DictPopup entry={entry} rootEntry={rootEntry} />
+			<DictPopup
+				entry={entry}
+				rootEntry={entry?.root ? rootEntry : null}
+			/>
 		</Floating>
 	);
 };
