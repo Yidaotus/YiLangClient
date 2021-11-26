@@ -1,4 +1,5 @@
 import handleError from '@helpers/Error';
+import { queryKeyFactory } from '@helpers/queryHelper';
 import {
 	IApiResponse,
 	ILinkSentenceWordParams,
@@ -28,19 +29,23 @@ import { useMutation, useQuery, useQueryClient } from 'react-query';
 import { useActiveLanguageConf } from './ConfigQueryHooks';
 import { useTags } from './useTags';
 
+const dictSentencesKeys = queryKeyFactory('sentences');
+const dictEntryKeys = queryKeyFactory('entries');
+
 const useDictionarySentence = (
-	sentenceId: string | null
+	sentenceId: string | undefined
 ): [boolean, IDictionarySentence | null] => {
 	const activeLanguage = useActiveLanguageConf();
 	const { data, isLoading } = useQuery(
-		['sentences', 'byWord', activeLanguage?.id, sentenceId],
+		dictSentencesKeys(activeLanguage?.id).list(sentenceId),
 		() => {
-			return sentenceId && activeLanguage
-				? getSentence({ sentenceId, language: activeLanguage.id })
-				: null;
+			if (!sentenceId || !activeLanguage) {
+				throw new Error('no sentence / language selected!');
+			}
+			return getSentence({ sentenceId, language: activeLanguage.id });
 		},
 		{
-			enabled: !!sentenceId,
+			enabled: !!sentenceId && !!activeLanguage,
 			refetchOnWindowFocus: false,
 		}
 	);
@@ -49,18 +54,19 @@ const useDictionarySentence = (
 };
 
 const useDictionarySentencesByWord = (
-	wordId: string | null
+	wordId: string | undefined
 ): [boolean, Array<IDictionarySentence>] => {
 	const activeLanguage = useActiveLanguageConf();
 	const { data, isLoading } = useQuery(
-		['sentences', 'byWord', activeLanguage?.id, wordId],
+		dictSentencesKeys(activeLanguage?.id).by('Word', wordId),
 		() => {
-			return wordId && activeLanguage
-				? getSentencesByWord({ wordId, language: activeLanguage.id })
-				: null;
+			if (!wordId || !activeLanguage) {
+				throw new Error('no id / language selected!');
+			}
+			return getSentencesByWord({ wordId, language: activeLanguage.id });
 		},
 		{
-			enabled: !!wordId,
+			enabled: !!wordId && !!activeLanguage,
 			refetchOnWindowFocus: false,
 		}
 	);
@@ -69,18 +75,19 @@ const useDictionarySentencesByWord = (
 };
 
 const useDictionaryEntry = (
-	id: string | null
+	id: string | undefined
 ): [boolean, IDictionaryEntry | null] => {
 	const activeLanguage = useActiveLanguageConf();
 	const { data, isLoading } = useQuery(
-		['dictEntries', 'details', activeLanguage?.id, id],
+		dictEntryKeys(activeLanguage?.id).detail(id),
 		() => {
-			return id && activeLanguage
-				? getEntry({ id, language: activeLanguage.id })
-				: null;
+			if (!id || !activeLanguage) {
+				throw new Error('no id / language selected!');
+			}
+			return getEntry({ id, language: activeLanguage.id });
 		},
 		{
-			enabled: !!id,
+			enabled: !!id && !!activeLanguage,
 			keepPreviousData: true,
 			refetchOnWindowFocus: false,
 		}
@@ -90,7 +97,7 @@ const useDictionaryEntry = (
 };
 
 const useDictionaryEntryResolved = (
-	id: string | null
+	id: string | undefined
 ): [boolean, IDictionaryEntryResolved | null] => {
 	const [loading, entry] = useDictionaryEntry(id);
 	const tags = useTags();
@@ -114,17 +121,16 @@ const defaultValue = {
 };
 
 const useDictionarySearch = (
-	searchTerm: string | null
+	searchTerm: string | undefined
 ): [boolean, Array<IDictionaryEntry>] => {
 	const activeLanguage = useActiveLanguageConf();
 
 	const { data, isLoading } = useQuery(
-		['dictEntries', 'search', searchTerm],
+		dictEntryKeys(activeLanguage?.id).list(searchTerm),
 		() => {
-			if (!activeLanguage) {
-				throw new Error('No language selected!');
+			if (!activeLanguage || !searchTerm) {
+				throw new Error('No language / searchterm selected!');
 			}
-
 			return searchDictionary({
 				key: searchTerm || '',
 				lang: activeLanguage.id,
@@ -132,7 +138,7 @@ const useDictionarySearch = (
 		},
 		{
 			staleTime: 60000,
-			enabled: !!searchTerm,
+			enabled: !!searchTerm && !!activeLanguage,
 		}
 	);
 
@@ -140,19 +146,16 @@ const useDictionarySearch = (
 };
 
 const useDictionaryEntries = (
-	paginationOptions: Omit<IListDictionaryParams, 'lang'> | null
+	paginationOptions: Omit<IListDictionaryParams, 'lang'> | undefined
 ): [boolean, IListDictionaryResult] => {
 	const activeLanguage = useActiveLanguageConf();
 	const { data, isLoading } = useQuery(
-		[
-			'dictEntries',
-			'list',
-			activeLanguage?.id,
-			paginationOptions?.limit,
-			paginationOptions?.skip,
-			paginationOptions?.filter,
-			paginationOptions?.sortBy,
-		],
+		dictEntryKeys(activeLanguage?.id).list({
+			limit: paginationOptions?.limit,
+			skip: paginationOptions?.skip,
+			filter: paginationOptions?.filter,
+			sortBy: paginationOptions?.sortBy,
+		}),
 		() =>
 			paginationOptions && activeLanguage
 				? listDictionary({
@@ -165,7 +168,7 @@ const useDictionaryEntries = (
 				  })
 				: defaultValue,
 		{
-			enabled: !!paginationOptions,
+			enabled: !!paginationOptions && !!activeLanguage,
 			keepPreviousData: true,
 			staleTime: 60000,
 		}
@@ -174,29 +177,24 @@ const useDictionaryEntries = (
 	return [isLoading, data || defaultValue];
 };
 const useDeleteDictionaryEntry = () => {
-	const lang = useActiveLanguageConf();
+	const activeLanugage = useActiveLanguageConf();
 	const queryClient = useQueryClient();
 
 	return useMutation(
 		(id: string) => {
-			if (!lang) {
+			if (!activeLanugage) {
 				throw new Error('No Language selected!');
 			}
-			return deleteDictionaryEntry(id, lang.id);
+			return deleteDictionaryEntry(id, activeLanugage.id);
 		},
 		{
 			onSuccess: (_, id) => {
-				queryClient.invalidateQueries([
-					'dictEntries',
-					'list',
-					lang?.id,
-				]);
-				queryClient.invalidateQueries([
-					'dictEntries',
-					'details',
-					lang?.id,
-					id,
-				]);
+				queryClient.invalidateQueries(
+					dictEntryKeys(activeLanugage?.id).lists()
+				);
+				queryClient.invalidateQueries(
+					dictEntryKeys(activeLanugage?.id).detail(id)
+				);
 			},
 			onError: (response: IApiResponse<void>) => {
 				handleError(response);
@@ -206,36 +204,29 @@ const useDeleteDictionaryEntry = () => {
 };
 
 const useUpdateDictionaryEntry = () => {
-	const lang = useActiveLanguageConf();
-	//		['dictEntries', 'details', lang, id],
+	const activeLanugage = useActiveLanguageConf();
 	const queryClient = useQueryClient();
 
 	return useMutation(
 		(entryToUpdate: IDictionaryEntry) => {
-			if (!lang) {
+			if (!activeLanugage) {
 				throw new Error('No Language selected!');
 			}
 			return updateDictionaryEntry(
 				{
 					...entryToUpdate,
 				},
-				lang.id
+				activeLanugage.id
 			);
 		},
 		{
-			onSuccess: (_, entry) => {
-				// ✅ refetch the comments list for our blog post
-				queryClient.invalidateQueries([
-					'dictEntries',
-					'list',
-					lang?.id,
-				]);
-				queryClient.invalidateQueries([
-					'dictEntries',
-					'details',
-					lang?.id,
-					entry.id,
-				]);
+			onSuccess: (_, { id }) => {
+				queryClient.invalidateQueries(
+					dictEntryKeys(activeLanugage?.id).lists()
+				);
+				queryClient.invalidateQueries(
+					dictEntryKeys(activeLanugage?.id).detail(id)
+				);
 			},
 			onError: (response: IApiResponse<void>) => {
 				handleError(response);
@@ -245,20 +236,22 @@ const useUpdateDictionaryEntry = () => {
 };
 
 const useAddDictionarySentence = () => {
-	const lang = useActiveLanguageConf();
+	const activeLanugage = useActiveLanguageConf();
 	//		['dictEntries', 'details', lang, id],
 	const queryClient = useQueryClient();
 
 	return useMutation(
 		(newSentence: Omit<IDictionarySentence, 'id' | 'lang'>) => {
-			if (!lang) {
+			if (!activeLanugage) {
 				throw new Error('No Language selected!');
 			}
-			return addDictionarySentence(newSentence, lang.id);
+			return addDictionarySentence(newSentence, activeLanugage.id);
 		},
 		{
-			onSuccess: (response) => {
-				queryClient.invalidateQueries(['sentences']);
+			onSuccess: () => {
+				queryClient.invalidateQueries(
+					dictSentencesKeys(activeLanugage?.id).lists()
+				);
 			},
 			onError: (response: IApiResponse<void>) => {
 				handleError(response);
@@ -268,20 +261,18 @@ const useAddDictionarySentence = () => {
 };
 
 const useUnlinkWordSentence = () => {
-	const lang = useActiveLanguageConf();
+	const activeLanugage = useActiveLanguageConf();
 	const queryClient = useQueryClient();
 
 	return useMutation(
 		(newLink: ILinkSentenceWordParams) => {
-			if (!lang) {
+			if (!activeLanugage) {
 				throw new Error('No Language selected!');
 			}
-			return unlinkSentenceWord(newLink, lang.id);
+			return unlinkSentenceWord(newLink, activeLanugage.id);
 		},
 		{
-			onSuccess: (response) => {
-				queryClient.invalidateQueries(['sentences']);
-			},
+			onSuccess: () => {},
 			onError: (response: IApiResponse<void>) => {
 				handleError(response);
 			},
@@ -290,20 +281,17 @@ const useUnlinkWordSentence = () => {
 };
 
 const useLinkWordSentence = () => {
-	const lang = useActiveLanguageConf();
-	const queryClient = useQueryClient();
+	const activeLanugage = useActiveLanguageConf();
 
 	return useMutation(
 		(newLink: ILinkSentenceWordParams) => {
-			if (!lang) {
+			if (!activeLanugage) {
 				throw new Error('No Language selected!');
 			}
-			return linkSentenceWord(newLink, lang.id);
+			return linkSentenceWord(newLink, activeLanugage.id);
 		},
 		{
-			onSuccess: (response) => {
-				queryClient.invalidateQueries(['sentences']);
-			},
+			onSuccess: () => {},
 			onError: (response: IApiResponse<void>) => {
 				handleError(response);
 			},
@@ -312,31 +300,22 @@ const useLinkWordSentence = () => {
 };
 
 const useAddDictionaryEntry = () => {
-	const lang = useActiveLanguageConf();
+	const activeLanugage = useActiveLanguageConf();
 	//		['dictEntries', 'details', lang, id],
 	const queryClient = useQueryClient();
 
 	return useMutation(
 		(newEntry: Omit<IDictionaryEntry, 'id' | 'lang'>) => {
-			if (!lang) {
+			if (!activeLanugage) {
 				throw new Error('No Language selected!');
 			}
-			return addDictionaryEntry(newEntry, lang.id);
+			return addDictionaryEntry(newEntry, activeLanugage.id);
 		},
 		{
-			onSuccess: (response) => {
-				// ✅ refetch the comments list for our blog post
-				queryClient.invalidateQueries([
-					'dictEntries',
-					'list',
-					lang?.id,
-				]);
-				queryClient.invalidateQueries([
-					'dictEntries',
-					'details',
-					lang?.id,
-					response,
-				]);
+			onSuccess: () => {
+				queryClient.invalidateQueries(
+					dictEntryKeys(activeLanugage?.id).lists()
+				);
 				queryClient.invalidateQueries(['dictEntries', 'search']);
 			},
 			onError: (response: IApiResponse<void>) => {

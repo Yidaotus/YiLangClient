@@ -34,15 +34,13 @@ const DictionaryEntryPage: React.FC = () => {
 	const history = useHistory();
 	const { entryId } = useParams<IDictionaryEntryViewParams>();
 	const [loadingMain, entry] = useDictionaryEntryResolved(entryId);
-	const [loadingRoot, rootEntry] = useDictionaryEntryResolved(
-		entry?.root || null
-	);
+	const [loadingRoot, rootEntry] = useDictionaryEntryResolved(entry?.root);
 	const [subDictEntries, setSubDictEntries] = useState<
 		Array<IDictionaryEntryResolved>
 	>([]);
 	const [sentencesLoading, sentences] = useDictionarySentencesByWord(entryId);
 	const [firstSeenLoading, firstSeen] = useDictionarySentence(
-		entry?.firstSeen?.sentenceId || null
+		entry?.firstSeen?.sentenceId
 	);
 
 	const afterRemove = useCallback(() => {

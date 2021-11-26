@@ -1,4 +1,5 @@
 import handleError from '@helpers/Error';
+import { queryKeyFactory } from '@helpers/queryHelper';
 import {
 	IApiResponse,
 	IListDocumentResult,
@@ -15,15 +16,17 @@ import { IDocumentSerialized } from 'Document/Document';
 import { useQueryClient, useMutation, useQuery } from 'react-query';
 import { useActiveLanguageConf } from './ConfigQueryHooks';
 
+const documentKeys = queryKeyFactory('documents');
+
 const useEditorDocument = (
-	id: string
+	id: string | undefined
 ): [boolean, IDocumentSerialized | null] => {
 	const activeLanguage = useActiveLanguageConf();
 	const { data, isLoading } = useQuery(
-		['documents', activeLanguage?.id, id],
+		documentKeys(activeLanguage?.id).detail(id),
 		() => {
-			if (!activeLanguage) {
-				throw new Error('No Language selected!');
+			if (!id || !activeLanguage) {
+				throw new Error('No language selected!');
 			}
 			return getDocument({
 				id,
@@ -31,7 +34,7 @@ const useEditorDocument = (
 			});
 		},
 		{
-			enabled: !!id,
+			enabled: !!id && !!activeLanguage,
 			keepPreviousData: true,
 			refetchOnWindowFocus: false,
 		}
@@ -50,26 +53,25 @@ const useListDocuments = (
 ): [boolean, IListDocumentResult] => {
 	const activeLanguage = useActiveLanguageConf();
 	const { data, isLoading } = useQuery(
-		[
-			'documents',
-			activeLanguage?.id,
-			'list',
-			paginationOptions?.limit,
-			paginationOptions?.skip,
-			paginationOptions?.sortBy,
-		],
-		() =>
-			paginationOptions && activeLanguage
-				? listDocuments({
-						sortBy: paginationOptions.sortBy,
-						skip: paginationOptions.skip,
-						limit: paginationOptions.limit,
-						excerptLength: 80,
-						lang: activeLanguage.id,
-				  })
-				: defaultValue,
+		documentKeys(activeLanguage?.id).list({
+			limit: paginationOptions?.limit,
+			skip: paginationOptions?.skip,
+			sortBy: paginationOptions?.sortBy,
+		}),
+		() => {
+			if (!activeLanguage || !paginationOptions) {
+				throw new Error('No Language/Pagination selected!');
+			}
+			return listDocuments({
+				sortBy: paginationOptions.sortBy,
+				skip: paginationOptions.skip,
+				limit: paginationOptions.limit,
+				excerptLength: 80,
+				lang: activeLanguage.id,
+			});
+		},
 		{
-			enabled: !!paginationOptions,
+			enabled: !!paginationOptions && !!activeLanguage,
 			keepPreviousData: true,
 			staleTime: 60000,
 		}
@@ -79,7 +81,7 @@ const useListDocuments = (
 };
 
 const useUpdateEditorDocument = () => {
-	const lang = useActiveLanguageConf();
+	const activeLanguage = useActiveLanguageConf();
 	const queryClient = useQueryClient();
 
 	return useMutation(
@@ -92,19 +94,23 @@ const useUpdateEditorDocument = () => {
 			title: string;
 			serializedDocument: string;
 		}) => {
-			if (!lang) {
-				throw new Error('No Language selected!');
+			if (!activeLanguage) {
+				throw new Error('No language selected!');
 			}
 			return update({
 				id,
-				language: lang.id,
+				language: activeLanguage.id,
 				document: { title, serializedDocument },
 			});
 		},
 		{
 			onSuccess: (_, { id }) => {
-				queryClient.invalidateQueries(['documents', lang?.id, 'list']);
-				queryClient.invalidateQueries(['documents', lang?.id, id]);
+				queryClient.invalidateQueries(
+					documentKeys(activeLanguage?.id).lists()
+				);
+				queryClient.invalidateQueries(
+					documentKeys(activeLanguage?.id).detail(id)
+				);
 			},
 			onError: (response: IApiResponse<void>) => {
 				handleError(response);
@@ -114,19 +120,21 @@ const useUpdateEditorDocument = () => {
 };
 
 const useCreateDocument = () => {
-	const lang = useActiveLanguageConf();
+	const activeLanguage = useActiveLanguageConf();
 	const queryClient = useQueryClient();
 
 	return useMutation(
 		() => {
-			if (!lang) {
+			if (!activeLanguage) {
 				throw new Error('No Language selected!');
 			}
-			return create(lang.id);
+			return create(activeLanguage.id);
 		},
 		{
 			onSuccess: () => {
-				queryClient.invalidateQueries(['documents', lang?.id, 'list']);
+				queryClient.invalidateQueries(
+					documentKeys(activeLanguage?.id).lists()
+				);
 			},
 			onError: (response: IApiResponse<void>) => {
 				handleError(response);
@@ -136,20 +144,24 @@ const useCreateDocument = () => {
 };
 
 const useDeleteEditorDocument = () => {
-	const lang = useActiveLanguageConf();
+	const activeLanguage = useActiveLanguageConf();
 	const queryClient = useQueryClient();
 
 	return useMutation(
 		(id: string) => {
-			if (!lang) {
+			if (!activeLanguage) {
 				throw new Error('No Language selected!');
 			}
-			return remove({ id, language: lang.id });
+			return remove({ id, language: activeLanguage.id });
 		},
 		{
 			onSuccess: (_, id) => {
-				queryClient.invalidateQueries(['documents', lang?.id, 'list']);
-				queryClient.invalidateQueries(['documents', lang?.id, id]);
+				queryClient.invalidateQueries(
+					documentKeys(activeLanguage?.id).lists()
+				);
+				queryClient.invalidateQueries(
+					documentKeys(activeLanguage?.id).detail(id)
+				);
 			},
 			onError: (response: IApiResponse<void>) => {
 				handleError(response);

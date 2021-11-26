@@ -34,7 +34,7 @@ const DictionaryTable: React.FC = () => {
 	const [pageSize, setPageSize] = useState(10);
 	const selectedLanguage = useActiveLanguageConf();
 	const [paginationOptions, setPaginationOptions] =
-		useState<IListDictionaryParams | null>({
+		useState<IListDictionaryParams>({
 			excerptLength: 80,
 			lang: selectedLanguage?.id || 'jp',
 			limit: 20,
