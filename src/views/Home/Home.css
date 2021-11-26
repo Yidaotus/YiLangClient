@@ -14,14 +14,14 @@
 
 .yi-content {
 	flex-grow: 1;
+	max-width: 1200px;
+	width: 100%;
 	padding: 50px 50px;
-	width: 1200px;
 	align-self: center;
 }
 
 .yi-layout {
 	min-height: 100vh;
-	width: 100%;
 	display: flex;
 	flex-direction: column;
 	background-color: #90b0ca26;
