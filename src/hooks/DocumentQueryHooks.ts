@@ -107,7 +107,7 @@ const useUpdateEditorDocument = () => {
 				queryClient.invalidateQueries(['documents', lang?.id, id]);
 			},
 			onError: (response: IApiResponse<void>) => {
-				handleError(response.message);
+				handleError(response);
 			},
 		}
 	);
@@ -129,7 +129,7 @@ const useCreateDocument = () => {
 				queryClient.invalidateQueries(['documents', lang?.id, 'list']);
 			},
 			onError: (response: IApiResponse<void>) => {
-				handleError(response.message);
+				handleError(response);
 			},
 		}
 	);
@@ -152,7 +152,7 @@ const useDeleteEditorDocument = () => {
 				queryClient.invalidateQueries(['documents', lang?.id, id]);
 			},
 			onError: (response: IApiResponse<void>) => {
-				handleError(response.message);
+				handleError(response);
 			},
 		}
 	);

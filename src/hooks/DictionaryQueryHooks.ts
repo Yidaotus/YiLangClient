@@ -196,7 +196,7 @@ const useDeleteDictionaryEntry = () => {
 				]);
 			},
 			onError: (response: IApiResponse<void>) => {
-				handleError(response.message);
+				handleError(response);
 			},
 		}
 	);
@@ -235,7 +235,7 @@ const useUpdateDictionaryEntry = () => {
 				]);
 			},
 			onError: (response: IApiResponse<void>) => {
-				handleError(response.message);
+				handleError(response);
 			},
 		}
 	);
@@ -258,7 +258,7 @@ const useAddDictionarySentence = () => {
 				queryClient.invalidateQueries(['sentences']);
 			},
 			onError: (response: IApiResponse<void>) => {
-				handleError(response.message);
+				handleError(response);
 			},
 		}
 	);
@@ -280,7 +280,7 @@ const useUnlinkWordSentence = () => {
 				queryClient.invalidateQueries(['sentences']);
 			},
 			onError: (response: IApiResponse<void>) => {
-				handleError(response.message);
+				handleError(response);
 			},
 		}
 	);
@@ -302,7 +302,7 @@ const useLinkWordSentence = () => {
 				queryClient.invalidateQueries(['sentences']);
 			},
 			onError: (response: IApiResponse<void>) => {
-				handleError(response.message);
+				handleError(response);
 			},
 		}
 	);
@@ -337,7 +337,7 @@ const useAddDictionaryEntry = () => {
 				queryClient.invalidateQueries(['dictEntries', 'search']);
 			},
 			onError: (response: IApiResponse<void>) => {
-				handleError(response.message);
+				handleError(response);
 			},
 		}
 	);

@@ -70,7 +70,7 @@ const useRemoveLanguageConfig = () => {
 				queryClient.invalidateQueries(['userConfig']);
 			},
 			onError: (response: IApiResponse<void>) => {
-				handleError(response.message);
+				handleError(response);
 			},
 		}
 	);
@@ -88,7 +88,7 @@ const useAddLanguageConfig = () => {
 				queryClient.invalidateQueries(['userConfig']);
 			},
 			onError: (response: IApiResponse<void>) => {
-				handleError(response.message);
+				handleError(response);
 			},
 		}
 	);
@@ -150,7 +150,7 @@ const useSetActiveLanguage = () => {
 				queryClient.invalidateQueries(['userConfig']);
 			},
 			onError: (response: IApiResponse<void>) => {
-				handleError(response.message);
+				handleError(response);
 			},
 		}
 	);
@@ -170,7 +170,7 @@ const useUpdateConfig = () => {
 				queryClient.invalidateQueries(['userConfig']);
 			},
 			onError: (response: IApiResponse<void>) => {
-				handleError(response.message);
+				handleError(response);
 			},
 		}
 	);
