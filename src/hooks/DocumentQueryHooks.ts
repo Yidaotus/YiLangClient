@@ -13,7 +13,6 @@ import {
 } from 'api/document.service';
 import { IDocumentSerialized } from 'Document/Document';
 import { useQueryClient, useMutation, useQuery } from 'react-query';
-import { Descendant } from 'slate';
 import { useActiveLanguageConf } from './ConfigQueryHooks';
 
 const useEditorDocument = (
@@ -21,7 +20,7 @@ const useEditorDocument = (
 ): [boolean, IDocumentSerialized | null] => {
 	const activeLanguage = useActiveLanguageConf();
 	const { data, isLoading } = useQuery(
-		['dictEntries', 'details', activeLanguage?.id, id],
+		['documents', activeLanguage?.id, id],
 		() => {
 			if (!activeLanguage) {
 				throw new Error('No Language selected!');
@@ -103,7 +102,7 @@ const useUpdateEditorDocument = () => {
 			});
 		},
 		{
-			onSuccess: (_, id) => {
+			onSuccess: (_, { id }) => {
 				queryClient.invalidateQueries(['documents', lang?.id, 'list']);
 				queryClient.invalidateQueries(['documents', lang?.id, id]);
 			},
