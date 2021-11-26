@@ -13,10 +13,16 @@ type IDictEntryWithEditProps = {
 	root?: IDictionaryEntryResolved;
 	canLink?: boolean;
 	canRemove?: boolean;
+	removeCallback?: () => void;
 };
 
-const DictEntryWithEdit: React.FC<IDictEntryWithEditProps> = (props) => {
-	const { dictEntry, canLink, canRemove, root } = props;
+const DictEntryWithEdit: React.FC<IDictEntryWithEditProps> = ({
+	dictEntry,
+	canLink,
+	canRemove,
+	root,
+	removeCallback,
+}) => {
 	const [editing, setEditing] = useState(false);
 	const deleteEntry = useDeleteDictionaryEntry();
 	const dictEntryEdit = useRef<IWordInputRef>(null);
@@ -41,7 +47,8 @@ const DictEntryWithEdit: React.FC<IDictEntryWithEditProps> = (props) => {
 
 	const remove = useCallback(async () => {
 		await deleteEntry.mutateAsync(dictEntry.id);
-	}, [deleteEntry, dictEntry.id]);
+		removeCallback?.();
+	}, [deleteEntry, dictEntry.id, removeCallback]);
 
 	const moreDropdown = (
 		<Menu>

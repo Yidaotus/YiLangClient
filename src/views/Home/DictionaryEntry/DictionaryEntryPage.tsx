@@ -1,5 +1,5 @@
 import './DictionaryEntryPage.css';
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { useHistory, useParams } from 'react-router-dom';
 import { IExcerptedDocumentLink } from 'Document/Document';
 import DocumentLink from '@components/DictionaryEntry/DocumentLink';
@@ -12,7 +12,7 @@ import {
 	useDictionarySentencesByWord,
 } from '@hooks/DictionaryQueryHooks';
 import PageHeader from '@components/PageHeader/PageHeader';
-import { Card, Divider, Spinner } from '@blueprintjs/core';
+import { Card, Divider, NonIdealState, Spinner } from '@blueprintjs/core';
 
 interface IDictionaryEntryViewParams {
 	entryId: string;
@@ -45,6 +45,10 @@ const DictionaryEntryPage: React.FC = () => {
 		entry?.firstSeen?.sentenceId || null
 	);
 
+	const afterRemove = useCallback(() => {
+		history.goBack();
+	}, [history]);
+
 	return (
 		<div>
 			<PageHeader title="Dictionary" subtitle="Everything dictionary" />
@@ -58,8 +62,16 @@ const DictionaryEntryPage: React.FC = () => {
 								dictEntry={entry}
 								canRemove
 								root={rootEntry || undefined}
+								removeCallback={afterRemove}
 							/>
 						</Card>
+					)}
+					{!entry && !loadingMain && (
+						<NonIdealState
+							icon="error"
+							description="Entry not found"
+							title="Error"
+						/>
 					)}
 				</div>
 			</div>

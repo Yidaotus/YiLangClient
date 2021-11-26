@@ -186,8 +186,11 @@ const useDeleteDictionaryEntry = () => {
 		},
 		{
 			onSuccess: (_, id) => {
-				// ✅ refetch the comments list for our blog post
-				queryClient.invalidateQueries(['dictEntries', 'list', lang]);
+				queryClient.invalidateQueries([
+					'dictEntries',
+					'list',
+					lang?.id,
+				]);
 				queryClient.invalidateQueries([
 					'dictEntries',
 					'details',
