@@ -68,16 +68,13 @@ const Toolbar: React.FC<IToolbarProps> = ({
 				e.preventDefault();
 			}}
 		>
-			{/*
-				
 			<ToolbarButton
 				title="DEBUG"
 				action={() => {}}
 				enabled
 				active
-				icon="DEBUG"
+				icon="delta"
 			/>
-				 */}
 			<InputWrapperButton
 				showInput={showWordEditor}
 				icon="translate"

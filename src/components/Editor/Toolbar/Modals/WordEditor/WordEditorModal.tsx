@@ -223,7 +223,11 @@ const WordEditorModal: React.FC<IWordInputProps> = ({ visible, close }) => {
 					/>
 				)}
 				<Checkbox
-					style={{ marginLeft: 'auto' }}
+					style={{
+						marginTop: '7px',
+						paddingTop: '7px',
+						borderTop: '1px solid lightgray',
+					}}
 					checked={markOtherInstances}
 					onChange={() => {
 						setMarkOtherInstances(!markOtherInstances);
