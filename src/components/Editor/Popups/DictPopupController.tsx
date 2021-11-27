@@ -17,8 +17,8 @@ const DictPopupController: React.FC<IDictPopupControllerProps> = ({
 }) => {
 	const editor = useSlateStatic();
 	const [dictId, setDictId] = useState<string>();
-	const [loadingMain, entry] = useDictionaryEntryResolved(dictId);
-	const [loadingRoot, rootEntry] = useDictionaryEntryResolved(entry?.root);
+	const [, entry] = useDictionaryEntryResolved(dictId);
+	const [, rootEntry] = useDictionaryEntryResolved(entry?.root);
 	const [relativeBounding, setRelativeBounding] = useState<DOMRect | null>(
 		null
 	);
@@ -46,6 +46,7 @@ const DictPopupController: React.FC<IDictPopupControllerProps> = ({
 			visible={!!dictId}
 			parentElement={rootElement}
 			relativeBounding={relativeBounding}
+			arrow
 		>
 			<DictPopup
 				entry={entry}

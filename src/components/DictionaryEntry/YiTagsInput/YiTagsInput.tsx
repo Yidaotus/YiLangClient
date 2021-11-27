@@ -7,7 +7,7 @@ import {
 	MultiSelect,
 	MultiSelectProps,
 } from '@blueprintjs/select';
-import { Button, Divider, Menu, MenuItem, Tag } from '@blueprintjs/core';
+import { Button, Divider, Menu, MenuItem } from '@blueprintjs/core';
 
 type IStagedDictionaryTag = Omit<IDictionaryTag, 'id'> & { id?: string };
 

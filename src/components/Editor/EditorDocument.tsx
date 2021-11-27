@@ -155,12 +155,12 @@ const Element = (props: RenderElementProps) => {
 			);
 		default:
 			return (
-				<p
+				<div
 					{...attributes}
 					style={{ textAlign: element.align || 'left' }}
 				>
 					{children}
-				</p>
+				</div>
 			);
 	}
 };

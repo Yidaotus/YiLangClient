@@ -1,9 +1,8 @@
 import './Dictionary.css';
 import React, { useRef, useState } from 'react';
 import DictionaryTable from '@components/DictionaryList/DictionaryTable';
-import { Button, Col, Empty, notification, PageHeader, Row } from 'antd';
+import { Button, Col, Empty, PageHeader, Row } from 'antd';
 import { PlusOutlined } from '@ant-design/icons';
-import WordInput from '@components/Editor/Toolbar/Modals/WordEditor/WordEditor';
 import TagList from '@components/TagList/TagList';
 import handleError from '@helpers/Error';
 import InnerModal from '@components/InnerModal/InnerModal';
@@ -16,7 +15,6 @@ import { useActiveLanguageConf } from '@hooks/ConfigQueryHooks';
  */
 const Dictionary: React.FC = () => {
 	const dictCardRef = useRef<HTMLDivElement>(null);
-	const [newEntryVisible, setNewEntryVisible] = useState(false);
 	const [newTagVisible, setNewTagVisible] = useState(false);
 	const activeLanguage = useActiveLanguageConf();
 

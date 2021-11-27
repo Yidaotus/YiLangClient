@@ -54,7 +54,7 @@ const NavButton: React.FC<INavButtonProps> = ({ to, icon, text }) => (
 );
 
 const HomeView: React.FC = () => {
-	const [activeDocument, changeActiveDocument] = useActiveDocument();
+	const [activeDocument] = useActiveDocument();
 	const [loading, setLoading] = useState<string | null>(null);
 	const contentRef = useRef<HTMLDivElement>(null);
 

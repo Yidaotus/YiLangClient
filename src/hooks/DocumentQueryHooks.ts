@@ -13,7 +13,12 @@ import {
 	create,
 } from 'api/document.service';
 import { IDocumentSerialized } from 'Document/Document';
-import { useQueryClient, useMutation, useQuery } from 'react-query';
+import {
+	useQueryClient,
+	useMutation,
+	useQuery,
+	UseMutationResult,
+} from 'react-query';
 import { useActiveLanguageConf } from './ConfigQueryHooks';
 
 const documentKeys = queryKeyFactory('documents');
@@ -80,7 +85,16 @@ const useListDocuments = (
 	return [isLoading, data || defaultValue];
 };
 
-const useUpdateEditorDocument = () => {
+const useUpdateEditorDocument = (): UseMutationResult<
+	void,
+	IApiResponse<void>,
+	{
+		id: string;
+		title: string;
+		serializedDocument: string;
+	},
+	unknown
+> => {
 	const activeLanguage = useActiveLanguageConf();
 	const queryClient = useQueryClient();
 
@@ -119,7 +133,12 @@ const useUpdateEditorDocument = () => {
 	);
 };
 
-const useCreateDocument = () => {
+const useCreateDocument = (): UseMutationResult<
+	string,
+	IApiResponse<void>,
+	void,
+	unknown
+> => {
 	const activeLanguage = useActiveLanguageConf();
 	const queryClient = useQueryClient();
 
@@ -143,7 +162,12 @@ const useCreateDocument = () => {
 	);
 };
 
-const useDeleteEditorDocument = () => {
+const useDeleteEditorDocument = (): UseMutationResult<
+	void,
+	IApiResponse<void>,
+	string,
+	unknown
+> => {
 	const activeLanguage = useActiveLanguageConf();
 	const queryClient = useQueryClient();
 

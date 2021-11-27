@@ -1,7 +1,7 @@
 import { IUser, UserContext } from '@components/AuthProvider/AuthProvider';
 import { useContext } from 'react';
 
-const useUserContext = () => {
+const useUserContext = (): IUser | null => {
 	return useContext(UserContext).user;
 };
 

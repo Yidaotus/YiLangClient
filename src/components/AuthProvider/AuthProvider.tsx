@@ -1,4 +1,4 @@
-import { Spin } from 'antd';
+import { Spinner } from '@blueprintjs/core';
 import { authorize } from 'api/user.service';
 import { IConfig } from 'Document/Config';
 import React, { useCallback, useState } from 'react';
@@ -56,7 +56,10 @@ const UserProvider: React.FC = ({ children }) => {
 	return (
 		<>
 			{user.isLoading ? (
-				<Spin tip="Checking user credentials" />
+				<div>
+					<Spinner />
+					<p>Checking user credentials</p>
+				</div>
 			) : (
 				<UserContext.Provider
 					value={{

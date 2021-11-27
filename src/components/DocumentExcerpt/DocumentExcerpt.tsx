@@ -9,7 +9,6 @@ import {
 	Intent,
 	Menu,
 	MenuItem,
-	Position,
 } from '@blueprintjs/core';
 import { Popover2 } from '@blueprintjs/popover2';
 

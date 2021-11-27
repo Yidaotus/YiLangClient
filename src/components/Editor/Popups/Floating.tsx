@@ -100,7 +100,7 @@ const Floating: React.FC<IFloatingProps> = ({
 		<div
 			style={floatingStyle}
 			ref={floatingNode}
-			className="floating-container"
+			className={`floating-container ${arrow && 'arrow'}`}
 		>
 			{children}
 		</div>

@@ -24,24 +24,16 @@ interface IDictionaryEntryViewParams {
  * Let's the user filter tags, and search other columns
  */
 const DictionaryEntryPage: React.FC = () => {
-	const [loading, setLoading] = useState(false);
-	const [excerptLink, setExcerptLink] =
-		useState<IExcerptedDocumentLink | null>(null);
-	const [additionalExcerpts, setAdditionalExcerpt] = useState<
-		Array<IExcerptedDocumentLink>
-	>([]);
+	const [excerptLink] = useState<IExcerptedDocumentLink | null>(null);
+	const [additionalExcerpts] = useState<Array<IExcerptedDocumentLink>>([]);
 
 	const history = useHistory();
 	const { entryId } = useParams<IDictionaryEntryViewParams>();
 	const [loadingMain, entry] = useDictionaryEntryResolved(entryId);
-	const [loadingRoot, rootEntry] = useDictionaryEntryResolved(entry?.root);
-	const [subDictEntries, setSubDictEntries] = useState<
-		Array<IDictionaryEntryResolved>
-	>([]);
-	const [sentencesLoading, sentences] = useDictionarySentencesByWord(entryId);
-	const [firstSeenLoading, firstSeen] = useDictionarySentence(
-		entry?.firstSeen?.sentenceId
-	);
+	const [, rootEntry] = useDictionaryEntryResolved(entry?.root);
+	const [subDictEntries] = useState<Array<IDictionaryEntryResolved>>([]);
+	const [, sentences] = useDictionarySentencesByWord(entryId);
+	const [, firstSeen] = useDictionarySentence(entry?.firstSeen?.sentenceId);
 
 	const afterRemove = useCallback(() => {
 		history.goBack();
@@ -50,7 +42,6 @@ const DictionaryEntryPage: React.FC = () => {
 	return (
 		<div>
 			<PageHeader title="Dictionary" subtitle="Everything dictionary" />
-			{loading && <Spinner />}
 			<div>
 				<div>
 					{loadingMain && <Spinner />}

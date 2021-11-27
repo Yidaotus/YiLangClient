@@ -1,8 +1,8 @@
 import './WordFragment.css';
 import { useDictionaryEntryResolved } from '@hooks/DictionaryQueryHooks';
-import { Spin } from 'antd';
 import React, { CSSProperties } from 'react';
 import { RenderElementProps, useSelected } from 'slate-react';
+import { Spinner } from '@blueprintjs/core';
 import { WordElement } from '../CustomEditor';
 
 export type IWordFragmentData = Omit<RenderElementProps, 'element'> & {
@@ -72,41 +72,43 @@ const WordFragment: React.FC<IWordFragmentData> = ({
 	}
 
 	return (
-		<span {...attributes}>
+		<div
+			style={{ display: 'inline-flex', alignItems: 'baseline' }}
+			{...attributes}
+		>
 			{children}
+			{loadingEntry && <Spinner size={13} className="inline-block" />}
 			<span contentEditable={false}>
-				<Spin wrapperClassName="inline-block" spinning={loadingEntry}>
-					{dictEntry && (
-						<span
-							data-spelling={dictEntry.spelling}
-							key={dictEntry.id}
-							className={`word-fragment ${
-								dictEntry.spelling && 'kanji'
-							}`}
-							style={{
-								position: 'relative',
-								cursor: 'default',
-								borderRadius: '2px',
-								backgroundColor: selected ? '#d4ecff' : '',
-							}}
-						>
-							{dictEntry.key}
-							<span style={gradiantStyle} />
-						</span>
-					)}
-					{!dictEntry && (
-						<span
-							style={{
-								position: 'relative',
-								cursor: 'default',
-							}}
-						>
-							{element.children.map((elem) => elem.text).join('')}
-						</span>
-					)}
-				</Spin>
+				{dictEntry && (
+					<span
+						data-spelling={dictEntry.spelling}
+						key={dictEntry.id}
+						className={`word-fragment ${
+							dictEntry.spelling && 'kanji'
+						}`}
+						style={{
+							position: 'relative',
+							cursor: 'default',
+							borderRadius: '2px',
+							backgroundColor: selected ? '#d4ecff' : '',
+						}}
+					>
+						{dictEntry.key}
+						<span style={gradiantStyle} />
+					</span>
+				)}
+				{!dictEntry && (
+					<span
+						style={{
+							position: 'relative',
+							cursor: 'default',
+						}}
+					>
+						{element.children.map((elem) => elem.text).join('')}
+					</span>
+				)}
 			</span>
-		</span>
+		</div>
 	);
 };
 

@@ -4,12 +4,11 @@ import { IDocumentExcerpt } from 'api/definitions/api';
 import DocumentExcerpt from '@components/DocumentExcerpt/DocumentExcerpt';
 import { useHistory } from 'react-router';
 import DictionaryEntry from '@components/DictionaryEntry/DictionaryEntry';
-import handleError from '@helpers/Error';
 import { useActiveLanguageConf } from '@hooks/ConfigQueryHooks';
 import { useDictionaryEntries } from '@hooks/DictionaryQueryHooks';
 import { Card, Divider, Elevation, Overlay, Spinner } from '@blueprintjs/core';
 
-const excerptsToLoad = 3;
+// const excerptsToLoad = 3;
 const Overview: React.FC = () => {
 	const [loadingExcerpts, setLoadingExcerpts] = useState(false);
 	const [loading, setLoading] = useState(false);
@@ -23,15 +22,8 @@ const Overview: React.FC = () => {
 	const history = useHistory();
 
 	const fetchDocumentAndSwitch = useCallback(
-		async (id: string) => {
-			setLoading(true);
-			try {
-				// await dispatch(loadDocument({ type: 'load', id }));
-				history.push('/home/editor/new');
-			} catch (e) {
-				handleError(e);
-			}
-			setLoading(false);
+		(id: string) => {
+			history.push(`/home/editor/${id}`);
 		},
 		[history]
 	);

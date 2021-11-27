@@ -77,9 +77,9 @@ const getSentence = async ({
 }: {
 	sentenceId: string;
 	language: string;
-}) => {
+}): Promise<IDictionarySentence> => {
 	const response = await ApiService.get<IApiResponse<IDictionarySentence>>(
-		`dictionary/${language}/sentences/sentenceId}`
+		`dictionary/${language}/sentences/${sentenceId}}`
 	);
 	return response.data.payload as IDictionarySentence;
 };

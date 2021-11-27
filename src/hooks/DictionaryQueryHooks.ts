@@ -25,7 +25,12 @@ import {
 	IDictionarySentence,
 } from 'Document/Dictionary';
 import { notUndefined } from 'Document/Utility';
-import { useMutation, useQuery, useQueryClient } from 'react-query';
+import {
+	useMutation,
+	UseMutationResult,
+	useQuery,
+	useQueryClient,
+} from 'react-query';
 import { useActiveLanguageConf } from './ConfigQueryHooks';
 import { useTags } from './useTags';
 
@@ -176,7 +181,12 @@ const useDictionaryEntries = (
 
 	return [isLoading, data || defaultValue];
 };
-const useDeleteDictionaryEntry = () => {
+const useDeleteDictionaryEntry = (): UseMutationResult<
+	void,
+	IApiResponse<void>,
+	string,
+	unknown
+> => {
 	const activeLanugage = useActiveLanguageConf();
 	const queryClient = useQueryClient();
 
@@ -203,7 +213,12 @@ const useDeleteDictionaryEntry = () => {
 	);
 };
 
-const useUpdateDictionaryEntry = () => {
+const useUpdateDictionaryEntry = (): UseMutationResult<
+	void,
+	IApiResponse<void>,
+	IDictionaryEntry,
+	unknown
+> => {
 	const activeLanugage = useActiveLanguageConf();
 	const queryClient = useQueryClient();
 
@@ -235,7 +250,12 @@ const useUpdateDictionaryEntry = () => {
 	);
 };
 
-const useAddDictionarySentence = () => {
+const useAddDictionarySentence = (): UseMutationResult<
+	string,
+	IApiResponse<void>,
+	Omit<IDictionarySentence, 'id' | 'lang'>,
+	unknown
+> => {
 	const activeLanugage = useActiveLanguageConf();
 	//		['dictEntries', 'details', lang, id],
 	const queryClient = useQueryClient();
@@ -260,9 +280,13 @@ const useAddDictionarySentence = () => {
 	);
 };
 
-const useUnlinkWordSentence = () => {
+const useUnlinkWordSentence = (): UseMutationResult<
+	void,
+	IApiResponse<void>,
+	ILinkSentenceWordParams,
+	unknown
+> => {
 	const activeLanugage = useActiveLanguageConf();
-	const queryClient = useQueryClient();
 
 	return useMutation(
 		(newLink: ILinkSentenceWordParams) => {
@@ -280,7 +304,12 @@ const useUnlinkWordSentence = () => {
 	);
 };
 
-const useLinkWordSentence = () => {
+const useLinkWordSentence = (): UseMutationResult<
+	void,
+	IApiResponse<void>,
+	ILinkSentenceWordParams,
+	unknown
+> => {
 	const activeLanugage = useActiveLanguageConf();
 
 	return useMutation(
@@ -299,7 +328,12 @@ const useLinkWordSentence = () => {
 	);
 };
 
-const useAddDictionaryEntry = () => {
+const useAddDictionaryEntry = (): UseMutationResult<
+	string,
+	IApiResponse<void>,
+	Omit<IDictionaryEntry, 'id' | 'lang'>,
+	unknown
+> => {
 	const activeLanugage = useActiveLanguageConf();
 	//		['dictEntries', 'details', lang, id],
 	const queryClient = useQueryClient();

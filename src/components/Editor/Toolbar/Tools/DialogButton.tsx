@@ -85,7 +85,6 @@ const DialogButton: React.FC<IDialogButtonProps> = ({
 						Transforms.insertNodes(editor, dialogNode, {
 							at: [startTopLevelBlockIndex],
 						});
-						console.log(currentTexts);
 					} else {
 						Transforms.unwrapNodes(editor, {
 							match: (n) =>

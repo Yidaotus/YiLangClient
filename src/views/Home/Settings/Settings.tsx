@@ -1,7 +1,6 @@
 import './Settings.css';
 import React from 'react';
 import { Divider, Icon, Tab, Tabs } from '@blueprintjs/core';
-import { useHistory } from 'react-router';
 import LanguageConfigPanel from './LanguageConfig/LanguageConfig';
 import EditorConfigPanel from './EditorConfig/EditorConfig';
 

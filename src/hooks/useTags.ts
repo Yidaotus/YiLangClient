@@ -1,6 +1,11 @@
 import { addTag, getTags } from 'api/tags.service';
 import { IDictionaryTag } from 'Document/Dictionary';
-import { useMutation, useQuery, useQueryClient } from 'react-query';
+import {
+	useMutation,
+	UseMutationResult,
+	useQuery,
+	useQueryClient,
+} from 'react-query';
 import { useActiveLanguageConf } from './ConfigQueryHooks';
 
 const useTags = (): Array<IDictionaryTag> => {
@@ -17,7 +22,12 @@ const useTags = (): Array<IDictionaryTag> => {
 	return data || [];
 };
 
-const useAddDictionaryTag = () => {
+const useAddDictionaryTag = (): UseMutationResult<
+	string,
+	unknown,
+	Omit<IDictionaryTag, 'id'>,
+	unknown
+> => {
 	const lang = useActiveLanguageConf();
 	//		['dictEntries', 'details', lang, id],
 	const queryClient = useQueryClient();

@@ -1,3 +1,28 @@
+.arrow:after,
+.arrow:before {
+	bottom: 100%;
+	left: 50%;
+	border: solid transparent;
+	content: '';
+	height: 0;
+	width: 0;
+	position: absolute;
+	pointer-events: none;
+}
+
+.arrow:after {
+	border-color: rgba(255, 255, 255, 0);
+	border-bottom-color: #ffffff;
+	border-width: 5px;
+	margin-left: -5px;
+}
+.arrow:before {
+	border-color: rgba(197, 197, 197, 0);
+	border-bottom-color: #c5c5c5;
+	border-width: 6px;
+	margin-left: -6px;
+}
+
 .floating-container {
 	position: absolute;
 	z-index: 30;
@@ -6,7 +31,8 @@
 	box-shadow: 0px 0px 5px 0px rgb(173, 173, 173);
 	border: 1px solid #c5c5c5;
 	background: #fff;
-	transition: top 100ms ease-out, left 100ms ease-out, opacity ease-in 200ms;
+	transition: top 100ms ease-out, left 100ms ease-out, opacity ease-in 200ms,
+		width ease-in 500ms;
 }
 
 .floating-container * {

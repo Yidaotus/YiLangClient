@@ -10,7 +10,7 @@ import {
 	useUpdateLanguageConfig,
 } from '@hooks/ConfigQueryHooks';
 import PageHeader from '@components/PageHeader/PageHeader';
-import { Alert, Button, Card, Classes, Intent } from '@blueprintjs/core';
+import { Alert, Button, Card, Intent } from '@blueprintjs/core';
 import { useForm } from 'react-hook-form';
 
 const defaultConfig = {
@@ -33,7 +33,6 @@ const LanguageConfig: React.FC = () => {
 	const removeLanguageConfig = useRemoveLanguageConfig();
 
 	const saveConfig = (configEntry: ILanguageConfig) => {
-		console.log(configEntry);
 		if (configEntry.id) {
 			updateLanguageConfig.mutate({
 				id: configEntry.id,

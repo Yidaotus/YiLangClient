@@ -55,7 +55,7 @@ const SentenceEditorModal: React.FC<ISentenceModalProps> = ({
 					match: (node): node is WordElement =>
 						SlateElement.isElement(node) && node.type === 'word',
 				});
-				for (const [wordNode, wordPath] of wordNodes) {
+				for (const [wordNode] of wordNodes) {
 					linkWordSentence.mutate({
 						wordId: wordNode.dictId,
 						sentenceId,

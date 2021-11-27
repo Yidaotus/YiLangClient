@@ -1,7 +1,7 @@
 import './Toolbar.css';
 import React, { useRef, useState } from 'react';
 import { useSlateStatic } from 'slate-react';
-import { BaseSelection, Editor, Range as SlateRange } from 'slate';
+import { BaseSelection, Range as SlateRange } from 'slate';
 import useClickOutside from '@hooks/useClickOutside';
 import { useLookupSources } from '@hooks/ConfigQueryHooks';
 import LookupSourceButton from '@components/LookupSourceButton';
@@ -44,9 +44,7 @@ const Toolbar: React.FC<IToolbarProps> = ({
 	const sharedProps = {
 		editor,
 		selection,
-		onChange: () => {
-			console.log('something happened!');
-		},
+		onChange: () => {},
 	};
 
 	const menuProps = {
@@ -109,7 +107,7 @@ const Toolbar: React.FC<IToolbarProps> = ({
 				{...menuProps}
 			>
 				{lookupSources.map((luSource) => (
-					<LookupSourceButton source={luSource} />
+					<LookupSourceButton source={luSource} key={luSource.name} />
 				))}
 			</ToolbarMenu>
 			<Divider />
@@ -184,7 +182,6 @@ const Toolbar: React.FC<IToolbarProps> = ({
 						title={`${colorProps.title} (${
 							colorProps.hotkey || 'No shortcut'
 						})`}
-						icon="font"
 						{...sharedProps}
 					/>
 				))}

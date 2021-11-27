@@ -329,7 +329,7 @@ const WordInput: React.ForwardRefRenderFunction<
 					});
 				}
 			} catch (e) {
-				console.log(e);
+				handleError(e);
 			}
 		} else {
 			try {

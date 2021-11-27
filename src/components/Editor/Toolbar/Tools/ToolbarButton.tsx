@@ -1,6 +1,6 @@
 import React from 'react';
 import { AnchorButton, IconName, Intent } from '@blueprintjs/core';
-import { Popover2, Tooltip2 } from '@blueprintjs/popover2';
+import { Tooltip2 } from '@blueprintjs/popover2';
 
 const toolbarItemTypes = ['Wrapper', 'Dropdown', 'Action'] as const;
 export type ToolbarItemType = typeof toolbarItemTypes[number];

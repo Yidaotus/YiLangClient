@@ -14,7 +14,7 @@ const LanguageSelect = Select.ofType<ILanguageConfig>();
 
 export const renderLanguageConfig: ItemRenderer<ILanguageConfig> = (
 	config,
-	{ handleClick, modifiers, query }
+	{ handleClick, modifiers }
 ) => {
 	if (!modifiers.matchesPredicate) {
 		return null;
@@ -36,7 +36,6 @@ const SettingsPopover: React.FC = () => {
 	const setActiveLanguage = useSetActiveLanguage();
 	const history = useHistory();
 
-	const documentModified = false;
 	const logoutConfirm = useCallback(() => {
 		// dispatch(logout());
 	}, []);

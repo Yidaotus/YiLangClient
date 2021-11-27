@@ -1,10 +1,7 @@
 import './DictionarySelect.css';
 import React, { useCallback, useState } from 'react';
 import useDebounce from '@hooks/useDebounce';
-import {
-	IDictionaryEntry,
-	IDictionaryEntryResolved,
-} from 'Document/Dictionary';
+import { IDictionaryEntry } from 'Document/Dictionary';
 import { useDictionarySearch } from '@hooks/DictionaryQueryHooks';
 import { Button, Divider, Menu, MenuItem } from '@blueprintjs/core';
 import { ItemRenderer, Suggest } from '@blueprintjs/select';
@@ -16,17 +13,6 @@ export interface IRootSelectProps {
 	createRoot?: (input: string) => void;
 }
 
-const entryLabel = (entry: IDictionaryEntryResolved | IDictionaryEntry) => (
-	<div className="entry-preview">
-		<div className="entry-preview-item">
-			<span>{entry.key}</span>
-			{entry.spelling && (
-				<span className="entry-preview-spelling">{entry.spelling}</span>
-			)}
-		</div>
-		<div className="entry-preview-item">{entry.translations.join(',')}</div>
-	</div>
-);
 const RootSuggest = Suggest.ofType<IDictionaryEntry>();
 
 const DictionarySelect: React.FC<IRootSelectProps> = ({
@@ -37,7 +23,7 @@ const DictionarySelect: React.FC<IRootSelectProps> = ({
 }) => {
 	const [query, setQuery] = useState('');
 	const debouncedSeach = useDebounce(query, 500);
-	const [searching, searchEntries] = useDictionarySearch(debouncedSeach);
+	const [, searchEntries] = useDictionarySearch(debouncedSeach);
 
 	const dropDownRenderer: ItemRenderer<IDictionaryEntry> = (
 		entry,

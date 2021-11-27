@@ -10,7 +10,6 @@ import PrivateRoute from '@components/PrivateRoute';
 import Home from '@views/Home/Home';
 import Login from '@views/Login';
 import Verify from '@views/Verify';
-import { notification } from 'antd';
 import AuthProvider, { Role } from '@components/AuthProvider/AuthProvider';
 import { ReactQueryDevtools } from 'react-query/devtools';
 import { QueryClient, QueryClientProvider } from 'react-query';
@@ -20,12 +19,6 @@ const queryClient = new QueryClient({
 });
 
 const App: React.FC = () => {
-	notification.config({
-		placement: 'topRight',
-		top: 80,
-		duration: 3,
-	});
-
 	return (
 		<QueryClientProvider client={queryClient}>
 			<AuthProvider>

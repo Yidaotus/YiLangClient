@@ -1,4 +1,5 @@
 const queryKeyFactory =
+	// eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
 	(rootKey: string) => (languageId: string | undefined) => {
 		const factoryKeys = {
 			all: [rootKey, languageId] as const,

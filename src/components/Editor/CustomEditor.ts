@@ -303,7 +303,7 @@ export const highlightSelection = (
 	return removeHighlights;
 };
 
-export const getRootBlocks = (editor: Editor) => {
+export const getRootBlocks = (editor: Editor): Array<EditorElement> => {
 	const { selection } = editor;
 	if (selection == null) {
 		return [];
@@ -373,7 +373,7 @@ export const toggleBlockType = (
 	);
 };
 
-export const withList = (editor: Editor) => {
+export const withList = (editor: Editor): CustomEditor => {
 	const { insertBreak } = editor;
 
 	// eslint-disable-next-line no-param-reassign
@@ -412,7 +412,7 @@ export const withList = (editor: Editor) => {
 	return editor;
 };
 
-export const withDialog = (editor: Editor) => {
+export const withDialog = (editor: Editor): CustomEditor => {
 	const { deleteBackward, insertBreak, normalizeNode } = editor;
 
 	// eslint-disable-next-line no-param-reassign
@@ -571,7 +571,7 @@ export const withDialog = (editor: Editor) => {
 	return editor;
 };
 
-export const withLayout = (editor: Editor) => {
+export const withLayout = (editor: Editor): CustomEditor => {
 	const { normalizeNode } = editor;
 
 	// eslint-disable-next-line no-param-reassign

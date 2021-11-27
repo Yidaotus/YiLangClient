@@ -15,7 +15,12 @@ import {
 	IEditorConfig,
 	ILanguageConfig,
 } from 'Document/Config';
-import { useMutation, useQuery, useQueryClient } from 'react-query';
+import {
+	useMutation,
+	UseMutationResult,
+	useQuery,
+	useQueryClient,
+} from 'react-query';
 
 const useUserConfig = (): IConfig | null => {
 	const { data } = useQuery(['userConfig'], fetchConfig, {
@@ -48,7 +53,7 @@ const useActiveLanguageConf = (): ILanguageConfig | null => {
 	return activeConfig || null;
 };
 
-const useLookupSources = () => {
+const useLookupSources = (): Array<IDictionaryLookupSource> => {
 	const activeLanguage = useActiveLanguageConf();
 	let lookupSources: Array<IDictionaryLookupSource> = [];
 	if (activeLanguage) {
@@ -58,7 +63,12 @@ const useLookupSources = () => {
 	return lookupSources;
 };
 
-const useRemoveLanguageConfig = () => {
+const useRemoveLanguageConfig = (): UseMutationResult<
+	void,
+	IApiResponse<void>,
+	string,
+	unknown
+> => {
 	const queryClient = useQueryClient();
 
 	return useMutation(
@@ -76,7 +86,12 @@ const useRemoveLanguageConfig = () => {
 	);
 };
 
-const useAddLanguageConfig = () => {
+const useAddLanguageConfig = (): UseMutationResult<
+	string,
+	IApiResponse<void>,
+	Omit<ILanguageConfig, 'id'>,
+	unknown
+> => {
 	const queryClient = useQueryClient();
 
 	return useMutation(
@@ -94,7 +109,14 @@ const useAddLanguageConfig = () => {
 	);
 };
 
-const useUpdateEditorConfig = () => {
+const useUpdateEditorConfig = (): UseMutationResult<
+	void,
+	IApiResponse<void>,
+	{
+		editorConfig: Partial<IEditorConfig>;
+	},
+	unknown
+> => {
 	const queryClient = useQueryClient();
 
 	return useMutation(
@@ -112,7 +134,15 @@ const useUpdateEditorConfig = () => {
 	);
 };
 
-const useUpdateLanguageConfig = () => {
+const useUpdateLanguageConfig = (): UseMutationResult<
+	void,
+	IApiResponse<void>,
+	{
+		id: string;
+		languageConfig: Omit<ILanguageConfig, 'id'>;
+	},
+	unknown
+> => {
 	const queryClient = useQueryClient();
 
 	return useMutation(
@@ -136,7 +166,12 @@ const useUpdateLanguageConfig = () => {
 	);
 };
 
-const useSetActiveLanguage = () => {
+const useSetActiveLanguage = (): UseMutationResult<
+	void,
+	IApiResponse<void>,
+	string,
+	unknown
+> => {
 	const queryClient = useQueryClient();
 
 	return useMutation(
@@ -156,7 +191,12 @@ const useSetActiveLanguage = () => {
 	);
 };
 
-const useUpdateConfig = () => {
+const useUpdateConfig = (): UseMutationResult<
+	void,
+	IApiResponse<void>,
+	IConfig,
+	unknown
+> => {
 	const queryClient = useQueryClient();
 
 	return useMutation(
