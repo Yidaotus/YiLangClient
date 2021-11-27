@@ -1,16 +1,12 @@
 import './DictionaryEntryRow.css';
 import React from 'react';
-import { Popover, Tag, Spin, Button } from 'antd';
-import {
-	BookOutlined,
-	ExclamationCircleOutlined,
-	LinkOutlined,
-} from '@ant-design/icons';
 import { IGrammarPoint, IDictionaryTag } from 'Document/Dictionary';
 import { useDictionaryEntryResolved } from '@hooks/DictionaryQueryHooks';
 import { Editor, Path, Transforms } from 'slate';
 import { ReactEditor } from 'slate-react';
 import { useHistory } from 'react-router';
+import { Button, Spinner, Tag } from '@blueprintjs/core';
+import { Popover2 } from '@blueprintjs/popover2';
 
 type IDictEntryRowProps = {
 	editor: Editor;
@@ -38,25 +34,28 @@ export const GrammarPoint: React.FC<{ point: IGrammarPoint; color?: string }> =
 const EntryTag: React.FC<{ tag: IDictionaryTag }> = ({ tag }) => {
 	const tagItem = (
 		<Tag
-			icon={tag.grammarPoint && <ExclamationCircleOutlined />}
+			icon={tag.grammarPoint && 'info-sign'}
 			color={tag.color || 'blue'}
 			key={tag.name}
-			style={{ userSelect: 'none' }}
+			style={{
+				userSelect: 'none',
+				backgroundColor: tag.color,
+				color: '#333333',
+			}}
 		>
 			{tag.name}
 		</Tag>
 	);
 	return tag.grammarPoint ? (
-		<Popover
+		<Popover2
 			content={
 				<GrammarPoint point={tag.grammarPoint} color={tag.color} />
 			}
-			trigger="click"
 			className="clickable-tag"
 			placement="bottom"
 		>
 			{tagItem}
-		</Popover>
+		</Popover2>
 	) : (
 		tagItem
 	);
@@ -79,11 +78,9 @@ const DictionaryEntryRow: React.FC<IDictEntryRowProps> = (props) => {
 							</span>
 						)}
 					</span>
-					{entryResolved.comment && (
-						<span className="dictentry-col dictentry-comment">
-							{entryResolved.comment}
-						</span>
-					)}
+					<span className="dictentry-col dictentry-comment">
+						{entryResolved.comment}
+					</span>
 					<span className="dictentry-col">
 						{entryResolved.translations.join(', ')}
 					</span>
@@ -98,21 +95,19 @@ const DictionaryEntryRow: React.FC<IDictEntryRowProps> = (props) => {
 					</span>
 					<Button
 						className="dictentry-col"
-						shape="circle"
-						size="small"
-						type="ghost"
+						style={{ width: '25px' }}
+						minimal
 						onMouseUp={() => {
 							history.push(
 								`/home/dictionary/${entryResolved.id}`
 							);
 						}}
-						icon={<BookOutlined />}
+						icon="book"
 					/>
 					<Button
 						className="dictentry-col"
-						shape="circle"
-						size="small"
-						type="ghost"
+						style={{ width: '25px' }}
+						minimal
 						onMouseUp={(e) => {
 							setTimeout(() => {
 								Transforms.select(editor, path);
@@ -131,11 +126,11 @@ const DictionaryEntryRow: React.FC<IDictEntryRowProps> = (props) => {
 							});
 							e.preventDefault();
 						}}
-						icon={<LinkOutlined />}
+						icon="link"
 					/>
 				</div>
 			)}
-			{loading && <Spin tip="Fetching Entry" />}
+			{loading && <Spinner />}
 			{!loading && !entryResolved && <span>ERROR</span>}
 		</>
 	);
