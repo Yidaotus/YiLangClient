@@ -66,6 +66,7 @@ const DictionarySelect: React.FC<IRootSelectProps> = ({
 			onQueryChange={setQuery}
 			openOnKeyDown
 			query={query}
+			resetOnSelect
 			initialContent={placeholder}
 			itemRenderer={dropDownRenderer}
 			tagRenderer={(item) => item.key}
