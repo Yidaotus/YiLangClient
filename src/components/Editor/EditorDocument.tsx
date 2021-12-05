@@ -1,6 +1,6 @@
 import './EditorDocument.css';
 import React, { useCallback } from 'react';
-import { Transforms, Text, Editor } from 'slate';
+import { Transforms, Text, Editor, Range } from 'slate';
 
 import {
 	Editable,
@@ -179,6 +179,19 @@ const EditorDocument: React.FC = () => {
 				className="editor-container"
 				renderElement={renderElement}
 				renderLeaf={renderLeaf}
+				onMouseDown={(e) => {
+					if (
+						editor.selection &&
+						!Range.isCollapsed(editor.selection)
+					) {
+						if (
+							editor.operations[editor.operations.length - 1]
+								?.type !== 'set_selection'
+						) {
+							Transforms.collapse(editor);
+						}
+					}
+				}}
 				onKeyDown={(event) => {
 					if (event.getModifierState('Alt')) {
 						if (event.key === '&') {
