@@ -30,7 +30,6 @@ const DictionaryEntryPage: React.FC = () => {
 	const history = useHistory();
 	const { entryId } = useParams<IDictionaryEntryViewParams>();
 	const [loadingMain, entry] = useDictionaryEntryResolved(entryId);
-	const [, rootEntry] = useDictionaryEntryResolved(entry?.root);
 	const [subDictEntries] = useState<Array<IDictionaryEntryResolved>>([]);
 	const [, sentences] = useDictionarySentencesByWord(entryId);
 	const [, firstSeen] = useDictionarySentence(entry?.firstSeen?.sentenceId);
@@ -50,7 +49,7 @@ const DictionaryEntryPage: React.FC = () => {
 							<DictEntryWithEdit
 								dictEntry={entry}
 								canRemove
-								root={rootEntry || undefined}
+								root={[]}
 								removeCallback={afterRemove}
 							/>
 						</Card>
@@ -67,9 +66,11 @@ const DictionaryEntryPage: React.FC = () => {
 			<Divider />
 			<div>
 				<div>
-					{rootEntry && (
-						<DictionaryEntry entryId={rootEntry.id} canLink />
-					)}
+					{entry?.root.map((rootId) => (
+						<div key={rootId}>
+							<DictionaryEntry entryId={rootId} canLink />
+						</div>
+					))}
 				</div>
 				<div>
 					{subDictEntries.length > 0 &&

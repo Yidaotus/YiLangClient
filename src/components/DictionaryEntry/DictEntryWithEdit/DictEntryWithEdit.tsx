@@ -10,7 +10,7 @@ import DictEntryEdit, { IWordInputRef } from '../DictEntryEdit/DictEntryEdit';
 
 type IDictEntryWithEditProps = {
 	dictEntry: IDictionaryEntryResolved;
-	root?: IDictionaryEntryResolved;
+	root: Array<IDictionaryEntryResolved>;
 	canLink?: boolean;
 	canRemove?: boolean;
 	removeCallback?: () => void;

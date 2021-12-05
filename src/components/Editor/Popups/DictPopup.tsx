@@ -6,10 +6,9 @@ import { Divider } from '@blueprintjs/core';
 
 export interface IDictPopupProps {
 	entry: IDictionaryEntryResolved | null;
-	rootEntry: IDictionaryEntryResolved | null;
 }
 
-const DictPopup: React.FC<IDictPopupProps> = ({ entry, rootEntry }) => {
+const DictPopup: React.FC<IDictPopupProps> = ({ entry }) => {
 	return (
 		<div
 			className="dictpopup-container"
@@ -19,12 +18,12 @@ const DictPopup: React.FC<IDictPopupProps> = ({ entry, rootEntry }) => {
 			}}
 		>
 			{entry && <DictionaryEntry entryId={entry.id} />}
-			{rootEntry && (
-				<>
+			{entry?.root.map((rootEntry) => (
+				<React.Fragment key={rootEntry}>
 					<Divider />
-					<DictionaryEntry entryId={rootEntry.id} />
-				</>
-			)}
+					<DictionaryEntry entryId={rootEntry} />
+				</React.Fragment>
+			))}
 		</div>
 	);
 };

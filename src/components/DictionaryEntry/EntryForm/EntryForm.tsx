@@ -15,7 +15,7 @@ export type IDictionaryEntryInput = Omit<
 	'firstSeen' | 'id' | 'tags' | 'root' | 'lang'
 > & {
 	tags: Array<IDictionaryTag | Omit<IDictionaryTag, 'id'>>;
-	root?: IDictionaryEntryResolved | IDictionaryEntryInput;
+	root: Array<IDictionaryEntryResolved | IDictionaryEntryInput>;
 };
 
 export interface IEntryFormProps {
@@ -122,11 +122,21 @@ const EntryForm: React.FC<IEntryFormProps> = ({
 					<Controller
 						name="root"
 						control={form.control}
-						defaultValue=""
+						defaultValue={[]}
 						render={({ value, onChange }) => (
 							<DictionarySelect
-								value={value}
-								onChange={onChange}
+								values={value}
+								onSelectRoot={(newRoot) => {
+									onChange([...value, newRoot]);
+								}}
+								onRemoveRoot={(newRoot) => {
+									onChange(
+										value.filter(
+											(vRoot: IDictionaryEntry) =>
+												vRoot.id !== newRoot.id
+										)
+									);
+								}}
 								placeholder="Select a root entry"
 								createRoot={createRoot}
 							/>

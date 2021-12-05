@@ -73,11 +73,18 @@ const WordFragment: React.FC<IWordFragmentData> = ({
 
 	return (
 		<div
-			style={{ display: 'inline-flex', alignItems: 'baseline' }}
+			style={{
+				position: 'relative',
+				display: 'inline-flex',
+				alignItems: 'baseline',
+				color: loadingEntry ? 'lightgray' : 'black',
+			}}
 			{...attributes}
 		>
 			{children}
-			{loadingEntry && <Spinner size={13} className="inline-block" />}
+			{loadingEntry && (
+				<Spinner size={13} className="inline-spinner-container" />
+			)}
 			<span contentEditable={false}>
 				{dictEntry && (
 					<span

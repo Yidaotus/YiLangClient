@@ -150,7 +150,7 @@ const useDictionarySearch = (
 	return [isLoading, data || []];
 };
 
-const useDictionaryEntries = (
+const useListDictionaryEntries = (
 	paginationOptions: Omit<IListDictionaryParams, 'lang'> | undefined
 ): [boolean, IListDictionaryResult] => {
 	const activeLanguage = useActiveLanguageConf();
@@ -360,7 +360,7 @@ const useAddDictionaryEntry = (): UseMutationResult<
 };
 
 export {
-	useDictionaryEntries,
+	useListDictionaryEntries,
 	useDictionaryEntry,
 	useDictionaryEntryResolved,
 	useAddDictionaryEntry,

@@ -4,22 +4,24 @@ import useDebounce from '@hooks/useDebounce';
 import { IDictionaryEntry } from 'Document/Dictionary';
 import { useDictionarySearch } from '@hooks/DictionaryQueryHooks';
 import { Button, Divider, Menu, MenuItem } from '@blueprintjs/core';
-import { ItemRenderer, Suggest } from '@blueprintjs/select';
+import { ItemRenderer, MultiSelect } from '@blueprintjs/select';
 
 export interface IRootSelectProps {
-	value: IDictionaryEntry;
-	onChange: (entry: IDictionaryEntry) => void;
+	values: Array<IDictionaryEntry>;
 	placeholder: string;
 	createRoot?: (input: string) => void;
+	onSelectRoot: (root: IDictionaryEntry) => void;
+	onRemoveRoot: (root: IDictionaryEntry) => void;
 }
 
-const RootSuggest = Suggest.ofType<IDictionaryEntry>();
+const RootSuggest = MultiSelect.ofType<IDictionaryEntry>();
 
 const DictionarySelect: React.FC<IRootSelectProps> = ({
 	createRoot,
-	value,
+	values,
 	placeholder,
-	onChange,
+	onSelectRoot,
+	onRemoveRoot,
 }) => {
 	const [query, setQuery] = useState('');
 	const debouncedSeach = useDebounce(query, 500);
@@ -52,8 +54,9 @@ const DictionarySelect: React.FC<IRootSelectProps> = ({
 
 	return (
 		<RootSuggest
-			onItemSelect={onChange}
-			selectedItem={value}
+			onItemSelect={onSelectRoot}
+			onRemove={onRemoveRoot}
+			selectedItems={values}
 			fill
 			popoverProps={{
 				minimal: true,
@@ -61,12 +64,11 @@ const DictionarySelect: React.FC<IRootSelectProps> = ({
 				popoverClassName: 'dropdown-container',
 			}}
 			onQueryChange={setQuery}
-			closeOnSelect
 			openOnKeyDown
 			query={query}
 			initialContent={placeholder}
-			inputValueRenderer={(item) => item.key}
 			itemRenderer={dropDownRenderer}
+			tagRenderer={(item) => item.key}
 			itemListRenderer={({ items, renderItem }) => (
 				<Menu>
 					{items.map((item, index) => renderItem(item, index))}
@@ -82,7 +84,7 @@ const DictionarySelect: React.FC<IRootSelectProps> = ({
 						)}
 				</Menu>
 			)}
-			items={value?.key ? [...searchEntries, value] : searchEntries}
+			items={[...searchEntries, ...values]}
 			className="search-autocomplete"
 		/>
 	);

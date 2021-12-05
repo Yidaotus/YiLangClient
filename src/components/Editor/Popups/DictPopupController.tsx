@@ -18,7 +18,6 @@ const DictPopupController: React.FC<IDictPopupControllerProps> = ({
 	const editor = useSlateStatic();
 	const [dictId, setDictId] = useState<string>();
 	const [, entry] = useDictionaryEntryResolved(dictId);
-	const [, rootEntry] = useDictionaryEntryResolved(entry?.root);
 	const [relativeBounding, setRelativeBounding] = useState<DOMRect | null>(
 		null
 	);
@@ -48,10 +47,7 @@ const DictPopupController: React.FC<IDictPopupControllerProps> = ({
 			relativeBounding={relativeBounding}
 			arrow
 		>
-			<DictPopup
-				entry={entry}
-				rootEntry={entry?.root ? rootEntry : null}
-			/>
+			<DictPopup entry={entry} />
 		</Floating>
 	);
 };

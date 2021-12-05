@@ -220,6 +220,7 @@ const WordEditorModal: React.FC<IWordInputProps> = ({ visible, close }) => {
 						ref={dictEntryEdit}
 						entryKey={entryKey}
 						stateChanged={setEditMode}
+						root={[]}
 					/>
 				)}
 				<Checkbox

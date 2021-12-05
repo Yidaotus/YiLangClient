@@ -5,7 +5,7 @@ import DocumentExcerpt from '@components/DocumentExcerpt/DocumentExcerpt';
 import { useHistory } from 'react-router';
 import DictionaryEntry from '@components/DictionaryEntry/DictionaryEntry';
 import { useActiveLanguageConf } from '@hooks/ConfigQueryHooks';
-import { useDictionaryEntries } from '@hooks/DictionaryQueryHooks';
+import { useListDictionaryEntries } from '@hooks/DictionaryQueryHooks';
 import { Card, Divider, Elevation, Overlay, Spinner } from '@blueprintjs/core';
 
 // const excerptsToLoad = 3;
@@ -14,7 +14,7 @@ const Overview: React.FC = () => {
 	const [loading, setLoading] = useState(false);
 	const [excerpts, setExcerpts] = useState<Array<IDocumentExcerpt>>([]);
 	const activeLanguage = useActiveLanguageConf();
-	const [loadingEntries, entries] = useDictionaryEntries({
+	const [loadingEntries, entries] = useListDictionaryEntries({
 		excerptLength: 0,
 		limit: 3,
 		skip: 0,

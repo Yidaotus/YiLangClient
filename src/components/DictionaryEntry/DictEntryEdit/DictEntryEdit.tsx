@@ -30,7 +30,7 @@ import EntryForm, { IDictionaryEntryInput } from '../EntryForm/EntryForm';
 export interface IWordInputState {
 	entryKey: string | IDictionaryEntryResolved;
 	stateChanged?: (stage: WordEditorMode) => void;
-	root?: IDictionaryEntryResolved;
+	root: Array<IDictionaryEntryResolved>;
 }
 
 type Optional<T, K extends keyof T> = Pick<Partial<T>, K> & Omit<T, K>;
@@ -146,10 +146,10 @@ const WordInput: React.ForwardRefRenderFunction<
 					comment: '',
 					tags: [],
 					translations: [],
-					root: undefined,
+					root: [],
 				});
 			} else {
-				wordForm.reset({ ...entryKey, root: root || undefined });
+				wordForm.reset({ ...entryKey, root });
 			}
 			previousEntryKey.current = entryKey;
 		}
@@ -189,33 +189,42 @@ const WordInput: React.ForwardRefRenderFunction<
 		async (input: IDictionaryEntryInput): Promise<string | null> => {
 			// We have  new root entry
 			try {
-				let rootId;
+				const rootIds: Array<string> = [];
 				if (input.root) {
-					if (isOldRoot(input.root)) {
-						rootId = input.root.id;
-					} else if (!isOldRoot(input)) {
-						const newTagsToSave =
-							input.root.tags.filter(isUnsavedTag);
-						const tagPromises = [];
-						for (const newTag of newTagsToSave) {
-							tagPromises.push(addTag.mutateAsync(newTag));
-						}
-						const createdTagIds = await Promise.all(tagPromises);
+					for (const inputRoot of input.root) {
+						if (isOldRoot(inputRoot)) {
+							rootIds.push(inputRoot.id);
+						} else if (!isOldRoot(input)) {
+							const newTagsToSave =
+								inputRoot.tags.filter(isUnsavedTag);
+							const tagPromises = [];
+							for (const newTag of newTagsToSave) {
+								tagPromises.push(addTag.mutateAsync(newTag));
+							}
+							// eslint-disable-next-line no-await-in-loop
+							const createdTagIds = await Promise.all(
+								tagPromises
+							);
 
-						const rootToCreate: Omit<
-							IDictionaryEntry,
-							'id' | 'lang'
-						> = {
-							...input.root,
-							root: undefined,
-							tags: [
-								...input.tags
-									.filter(isPersistedTag)
-									.map((pTag) => pTag.id),
-								...createdTagIds,
-							],
-						};
-						rootId = await addEntry.mutateAsync(rootToCreate);
+							const rootToCreate: Omit<
+								IDictionaryEntry,
+								'id' | 'lang'
+							> = {
+								...inputRoot,
+								root: [],
+								tags: [
+									...input.tags
+										.filter(isPersistedTag)
+										.map((pTag) => pTag.id),
+									...createdTagIds,
+								],
+							};
+							// eslint-disable-next-line no-await-in-loop
+							const rootId = await addEntry.mutateAsync(
+								rootToCreate
+							);
+							rootIds.push(rootId);
+						}
 					}
 				}
 				const newTagsToSave = input.tags.filter(isUnsavedTag);
@@ -228,7 +237,7 @@ const WordInput: React.ForwardRefRenderFunction<
 				const entryToUpsert: Optional<IDictionaryEntry, 'id' | 'lang'> =
 					{
 						...input,
-						root: rootId,
+						root: rootIds,
 						tags: [
 							...input.tags
 								.filter(isPersistedTag)
@@ -340,7 +349,7 @@ const WordInput: React.ForwardRefRenderFunction<
 					const currentWordFormValues = wordForm.getValues();
 					wordForm.reset({
 						...currentWordFormValues,
-						root: { ...rootValues },
+						root: [...currentWordFormValues.root, rootValues],
 					});
 					dispatchWordEditorState({
 						type: 'popState',
