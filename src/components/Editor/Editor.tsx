@@ -45,6 +45,7 @@ const withYiLang = (editor: Editor) => {
 	const voidTypes: Array<EditorElement['type']> = [
 		'word',
 		'image',
+		'video',
 		'wordList',
 	];
 

@@ -10,9 +10,10 @@ import {
 } from 'slate-react';
 import MarkFragment from './Fragments/MarkFragment';
 import SentenceFragment from './Fragments/SentenceFragment';
-import WordFragment from './Fragments/WordFragment';
+import WordFragment from './Fragments/Word/WordFragment';
 import ImageBlock from './Blocks/Elements/Image/Image';
 import WordList from './Blocks/Elements/WordList/WordList';
+import VideoBlock, { videoBlockPasteAction } from './Fragments/Video/Video';
 
 // Define a React component to render leaves with bold text.
 const Leaf = ({ attributes, leaf, children }: RenderLeafProps) => {
@@ -153,6 +154,12 @@ const Element = (props: RenderElementProps) => {
 					{children}
 				</blockquote>
 			);
+		case 'video':
+			return (
+				<VideoBlock attributes={attributes} element={element}>
+					{children}
+				</VideoBlock>
+			);
 		default:
 			return (
 				<div
@@ -176,10 +183,13 @@ const EditorDocument: React.FC = () => {
 	return (
 		<div style={{ position: 'relative', fontSize: '1.3em' }}>
 			<Editable
+				onPaste={(event) => {
+					videoBlockPasteAction(event, editor);
+				}}
 				className="editor-container"
 				renderElement={renderElement}
 				renderLeaf={renderLeaf}
-				onMouseDown={(e) => {
+				onMouseDown={() => {
 					if (
 						editor.selection &&
 						!Range.isCollapsed(editor.selection)

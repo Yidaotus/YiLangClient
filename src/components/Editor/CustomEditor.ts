@@ -119,6 +119,12 @@ export type TitleElement = {
 	children: CustomText[];
 };
 
+export type VideoElement = {
+	type: 'video';
+	src: string;
+	children: CustomText[];
+};
+
 export type WordListElement = {
 	type: 'wordList';
 	children: CustomText[];
@@ -154,6 +160,7 @@ export type EditorBlockElement =
 	| ParagraphElement
 	| ImageElement
 	| TitleElement
+	| VideoElement
 	| BlockQuoteElement
 	| BulletedListElement
 	| NumberedListElement

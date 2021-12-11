@@ -3,7 +3,7 @@ import { useDictionaryEntryResolved } from '@hooks/DictionaryQueryHooks';
 import React, { CSSProperties } from 'react';
 import { RenderElementProps, useSelected } from 'slate-react';
 import { Spinner } from '@blueprintjs/core';
-import { WordElement } from '../CustomEditor';
+import { WordElement } from '../../CustomEditor';
 
 export type IWordFragmentData = Omit<RenderElementProps, 'element'> & {
 	element: WordElement;
