@@ -43,7 +43,7 @@ export interface IWordInputProps {
 
 const formatURL = ({ source, searchTerm }: ILookupSourceLinkProps): string =>
 	source.source.replace('{}', searchTerm);
-const target = '_blank';
+const WINDOW_TARGET = '_blank';
 
 const WordEditorModal: React.FC<IWordInputProps> = ({ visible, close }) => {
 	const editor = useSlateStatic();
@@ -79,7 +79,7 @@ const WordEditorModal: React.FC<IWordInputProps> = ({ visible, close }) => {
 					text={source.name}
 					onClick={() => {
 						const url = formatURL({ source, searchTerm: entryKey });
-						window.open(url, target);
+						window.open(url, WINDOW_TARGET);
 					}}
 				/>
 			))}
@@ -169,12 +169,12 @@ const WordEditorModal: React.FC<IWordInputProps> = ({ visible, close }) => {
 		if (dictEntryEdit.current) {
 			const editResult = await dictEntryEdit.current.finish();
 			if (editResult.isDone && editResult.entryId) {
-				await wrapWithWord(editResult.entryId);
+				wrapWithWord(editResult.entryId);
 				close(false);
 			}
 		}
 		if (entryInDictionary) {
-			await wrapWithWord(entryInDictionary.id);
+			wrapWithWord(entryInDictionary.id);
 			close(false);
 		}
 	};
