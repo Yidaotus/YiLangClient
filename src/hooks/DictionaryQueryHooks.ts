@@ -19,23 +19,32 @@ import {
 	unlinkSentenceWord,
 	updateDictionaryEntry,
 } from 'api/dictionary.service';
+import { getTag } from 'api/tags.service';
 import {
 	IDictionaryEntry,
 	IDictionaryEntryResolved,
 	IDictionarySentence,
+	IDictionaryTag,
 } from 'Document/Dictionary';
-import { notUndefined } from 'Document/Utility';
+import {
+	DictionaryEntryID,
+	DictionaryTagID,
+	notUndefined,
+} from 'Document/Utility';
 import {
 	useMutation,
 	UseMutationResult,
+	useQueries,
 	useQuery,
 	useQueryClient,
+	UseQueryResult,
 } from 'react-query';
 import { useActiveLanguageConf } from './ConfigQueryHooks';
 import { useTags } from './useTags';
 
 const dictSentencesKeys = queryKeyFactory('sentences');
 const dictEntryKeys = queryKeyFactory('entries');
+const tagEntryKeys = queryKeyFactory('tags');
 
 const useDictionarySentence = (
 	sentenceId: string | undefined
@@ -101,23 +110,42 @@ const useDictionaryEntry = (
 	return [isLoading, data || null];
 };
 
+const useDictionaryEntryFromArray = (entryIds: Array<DictionaryEntryID>) => {
+	const activeLanguage = useActiveLanguageConf();
+	const entryResults = useQueries(
+		entryIds.map((entry) => ({
+			queryKey: dictEntryKeys(activeLanguage?.id).detail(entry),
+			queryFn: () => {
+				if (!activeLanguage) {
+					throw new Error('no id / language selected!');
+				}
+				return getEntry({ language: activeLanguage.id, id: entry });
+			},
+		}))
+	) as Array<UseQueryResult<IDictionaryEntry>>;
+	return entryResults.map(({ data }) => data).filter(notUndefined);
+};
+
 const useDictionaryEntryResolved = (
 	id: string | undefined
 ): [boolean, IDictionaryEntryResolved | null] => {
-	const [loading, entry] = useDictionaryEntry(id);
-	const tags = useTags();
+	const [isLoading, unresolvedEntry] = useDictionaryEntry(id);
+
+	const resolvedTags = useTags(unresolvedEntry?.tags || []);
+	const resolvedRoots = useDictionaryEntryFromArray(
+		unresolvedEntry?.roots || []
+	);
 
 	let resolvedEntry: IDictionaryEntryResolved | null = null;
-	if (entry) {
+	if (unresolvedEntry) {
 		resolvedEntry = {
-			...entry,
-			tags: entry.tags
-				.map((tagId) => tags.find((tagEntry) => tagEntry.id === tagId))
-				.filter(notUndefined),
+			...unresolvedEntry,
+			tags: resolvedTags,
+			roots: resolvedRoots,
 		};
 	}
 
-	return [loading, resolvedEntry];
+	return [isLoading, resolvedEntry];
 };
 
 const defaultValue = {
@@ -329,7 +357,7 @@ const useLinkWordSentence = (): UseMutationResult<
 };
 
 const useAddDictionaryEntry = (): UseMutationResult<
-	string,
+	DictionaryEntryID,
 	IApiResponse<void>,
 	Omit<IDictionaryEntry, 'id' | 'lang'>,
 	unknown
@@ -362,7 +390,6 @@ const useAddDictionaryEntry = (): UseMutationResult<
 export {
 	useListDictionaryEntries,
 	useDictionaryEntry,
-	useDictionaryEntryResolved,
 	useAddDictionaryEntry,
 	useDeleteDictionaryEntry,
 	useUpdateDictionaryEntry,
@@ -372,4 +399,5 @@ export {
 	useUnlinkWordSentence,
 	useDictionarySentencesByWord,
 	useDictionarySentence,
+	useDictionaryEntryResolved,
 };

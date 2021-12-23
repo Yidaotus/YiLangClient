@@ -12,11 +12,12 @@ import {
 	Point,
 } from 'slate';
 import { ReactEditor } from 'slate-react';
-import { HistoryEditor } from 'slate-history';
+import { HistoryEditor, withHistory } from 'slate-history';
+import { DictionaryEntryID } from 'Document/Utility';
 
 export type CustomEditor = BaseEditor & ReactEditor & HistoryEditor;
 
-export const BlockTypes = [
+const BlockTypes = [
 	'title',
 	'subtitle',
 	'paragraph',
@@ -26,8 +27,10 @@ export const BlockTypes = [
 	'numberedList',
 	'blockQuote',
 ] as const;
-export const InlineTypes = ['word', 'sentence', 'mark', 'highlight'] as const;
-export const ElementTypeLabels: {
+
+const InlineTypes = ['word', 'sentence', 'mark', 'highlight'] as const;
+
+const ElementTypeLabels: {
 	[k in typeof BlockTypes[number] | typeof InlineTypes[number]]: string;
 } = {
 	title: 'Title',
@@ -102,7 +105,7 @@ export type SentenceElement = {
 
 export type WordElement = {
 	type: 'word';
-	dictId: string;
+	dictId: DictionaryEntryID;
 	isUserInput: boolean;
 	children: CustomText[];
 };
@@ -190,7 +193,7 @@ declare module 'slate' {
 	}
 }
 
-export const isNodeAtSelection = (
+const isNodeAtSelection = (
 	editor: Editor,
 	selection: Selection,
 	type: EditorElement['type']
@@ -207,7 +210,7 @@ export const isNodeAtSelection = (
 	return isAbove;
 };
 
-export const isNodeInSelection = (
+const isNodeInSelection = (
 	editor: Editor,
 	selection: Selection,
 	type: EditorElement['type']
@@ -223,7 +226,7 @@ export const isNodeInSelection = (
 	return !nodesInside.next().done;
 };
 
-export const highlightSelection = (
+const highlightSelection = (
 	editor: Editor,
 	selection?: Location
 ): (() => void) | null => {
@@ -310,7 +313,7 @@ export const highlightSelection = (
 	return removeHighlights;
 };
 
-export const getRootBlocks = (editor: Editor): Array<EditorElement> => {
+const getRootBlocks = (editor: Editor): Array<EditorElement> => {
 	const { selection } = editor;
 	if (selection == null) {
 		return [];
@@ -332,7 +335,7 @@ export const getRootBlocks = (editor: Editor): Array<EditorElement> => {
 	return rootBlocks;
 };
 
-export const getTextBlockStyle = (
+const getTextBlockStyle = (
 	editor: Editor
 ): EditorElement['type'] | null | 'multiple' => {
 	let blockType = null;
@@ -347,7 +350,7 @@ export const getTextBlockStyle = (
 	return blockType;
 };
 
-export const getAlign = (editor: Editor): AlignValue | null => {
+const getAlign = (editor: Editor): AlignValue | null => {
 	let blockAlign = null;
 	const rootBlocks = getRootBlocks(editor).filter(
 		(block): block is AlignableElement =>
@@ -363,7 +366,7 @@ export const getAlign = (editor: Editor): AlignValue | null => {
 	return blockAlign;
 };
 
-export const toggleBlockType = (
+const toggleBlockType = (
 	editor: Editor,
 	blockType: EditorElement['type'],
 	applyToRoot?: boolean
@@ -380,7 +383,7 @@ export const toggleBlockType = (
 	);
 };
 
-export const withList = (editor: Editor): CustomEditor => {
+const withList = (editor: Editor): CustomEditor => {
 	const { insertBreak } = editor;
 
 	// eslint-disable-next-line no-param-reassign
@@ -419,7 +422,7 @@ export const withList = (editor: Editor): CustomEditor => {
 	return editor;
 };
 
-export const withDialog = (editor: Editor): CustomEditor => {
+const withDialog = (editor: Editor): CustomEditor => {
 	const { deleteBackward, insertBreak, normalizeNode } = editor;
 
 	// eslint-disable-next-line no-param-reassign
@@ -578,7 +581,7 @@ export const withDialog = (editor: Editor): CustomEditor => {
 	return editor;
 };
 
-export const withLayout = (editor: Editor): CustomEditor => {
+const withLayout = (editor: Editor): CustomEditor => {
 	const { normalizeNode } = editor;
 
 	// eslint-disable-next-line no-param-reassign
@@ -638,3 +641,44 @@ export const withLayout = (editor: Editor): CustomEditor => {
 
 	return editor;
 };
+
+const withYiLang = (editor: Editor): CustomEditor => {
+	const { isInline, isVoid } = editor;
+	const inlineTypes: Array<EditorElement['type']> = [
+		'word',
+		'mark',
+		'sentence',
+		'highlight',
+	];
+
+	const voidTypes: Array<EditorElement['type']> = [
+		'word',
+		'image',
+		'video',
+		'wordList',
+	];
+
+	// eslint-disable-next-line no-param-reassign
+	editor.isInline = (element) => {
+		return inlineTypes.includes(element.type) ? true : isInline(element);
+	};
+
+	// eslint-disable-next-line no-param-reassign
+	editor.isVoid = (element) => {
+		return voidTypes.includes(element.type) ? true : isVoid(element);
+	};
+
+	return withHistory(withLayout(withList(withDialog(editor))));
+};
+
+const YiEditor = {
+	...Editor,
+	isNodeAtSelection,
+	isNodeInSelection,
+	highlightSelection,
+	toggleBlockType,
+	getAlign,
+	getTextBlockStyle,
+};
+
+export { YiEditor, withYiLang };

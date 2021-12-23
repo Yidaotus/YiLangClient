@@ -1,6 +1,6 @@
 import React from 'react';
 import { RenderElementProps } from 'slate-react';
-import { MarkElement } from '../CustomEditor';
+import { MarkElement } from '@components/Editor/YiEditor';
 
 export type IMarkFragmentData = Omit<RenderElementProps, 'element'> & {
 	element: MarkElement;

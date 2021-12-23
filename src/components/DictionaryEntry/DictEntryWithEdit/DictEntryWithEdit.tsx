@@ -1,16 +1,14 @@
-/* eslint-disable react/destructuring-assignment */
 import './DictEntryWithEdit.css';
 import React, { useCallback, useRef, useState } from 'react';
-import { IDictionaryEntryResolved } from 'Document/Dictionary';
 import { useDeleteDictionaryEntry } from '@hooks/DictionaryQueryHooks';
 import { Popover2 } from '@blueprintjs/popover2';
+import { IDictionaryEntryResolved } from 'Document/Dictionary';
 import { Button, Intent, Menu, MenuItem } from '@blueprintjs/core';
 import DictionaryEntry from '../DictionaryEntry';
 import DictEntryEdit, { IWordInputRef } from '../DictEntryEdit/DictEntryEdit';
 
 type IDictEntryWithEditProps = {
 	dictEntry: IDictionaryEntryResolved;
-	root: Array<IDictionaryEntryResolved>;
 	canLink?: boolean;
 	canRemove?: boolean;
 	removeCallback?: () => void;
@@ -20,7 +18,6 @@ const DictEntryWithEdit: React.FC<IDictEntryWithEditProps> = ({
 	dictEntry,
 	canLink,
 	canRemove,
-	root,
 	removeCallback,
 }) => {
 	const [editing, setEditing] = useState(false);
@@ -86,11 +83,7 @@ const DictEntryWithEdit: React.FC<IDictEntryWithEditProps> = ({
 			</div>
 			{editing && (
 				<div>
-					<DictEntryEdit
-						entryKey={dictEntry}
-						ref={dictEntryEdit}
-						root={root}
-					/>
+					<DictEntryEdit entryKey={dictEntry} ref={dictEntryEdit} />
 					<div className="entry-with-edit-controlls-bottom">
 						<Button onClick={cancel} icon="stop">
 							Cancel
@@ -102,7 +95,7 @@ const DictEntryWithEdit: React.FC<IDictEntryWithEditProps> = ({
 				</div>
 			)}
 			{!editing && (
-				<DictionaryEntry entryId={dictEntry.id} canLink={canLink} />
+				<DictionaryEntry entry={dictEntry} canLink={canLink} />
 			)}
 		</div>
 	);

@@ -61,20 +61,6 @@ const Overview: React.FC = () => {
 					<Card elevation={Elevation.TWO}>
 						<h2 className="bp3-heading">Latest Entries</h2>
 						<Divider />
-						{activeLanguage &&
-							!loadingEntries &&
-							entries.total > 0 &&
-							entries.entries.map((entry) => (
-								<DictionaryEntry
-									key={entry.id}
-									entryId={entry.id}
-									canLink
-								/>
-							))}
-						{activeLanguage &&
-							!loadingEntries &&
-							entries.total < 1 && <span>No Entries</span>}
-						{!activeLanguage && <span>No language selected!</span>}
 					</Card>
 				</div>
 			</div>

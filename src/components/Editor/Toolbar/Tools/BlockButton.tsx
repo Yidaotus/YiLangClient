@@ -1,9 +1,5 @@
 import React from 'react';
-import {
-	EditorBlockElement,
-	getTextBlockStyle,
-	toggleBlockType,
-} from '@components/Editor/CustomEditor';
+import { EditorBlockElement, YiEditor } from '@components/Editor/YiEditor';
 import { Editor } from 'slate';
 import ToolbarButton, { IToolbarItem } from './ToolbarButton';
 
@@ -20,14 +16,14 @@ const WrapperItem: React.FC<IToolbarWrapperItem> = ({
 	editor,
 	onChange,
 }): JSX.Element => {
-	const isActive = getTextBlockStyle(editor) === type;
+	const isActive = YiEditor.getTextBlockStyle(editor) === type;
 
 	return (
 		<ToolbarButton
 			tooltip={title}
 			title={title}
 			action={() => {
-				toggleBlockType(editor, type);
+				YiEditor.toggleBlockType(editor, type);
 				onChange();
 			}}
 			active={isActive}

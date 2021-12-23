@@ -1,17 +1,15 @@
 import './LangConfForm.css';
 import React from 'react';
-import { Controller, useFieldArray, UseFormMethods } from 'react-hook-form';
+import { Controller, useFieldArray, UseFormReturn } from 'react-hook-form';
 import { Button, InputGroup, Label } from '@blueprintjs/core';
 import { InfoCircleOutlined } from '@ant-design/icons';
 import { Tooltip2 } from '@blueprintjs/popover2';
 import { ILanguageConfig } from '../../../Document/Config';
 
-type ILangFormProps = UseFormMethods<ILanguageConfig>;
+type ILangFormProps = UseFormReturn<ILanguageConfig>;
 
 const LangConfForm: React.FC<ILangFormProps> = ({ control, register }) => {
-	const { fields, append, remove } = useFieldArray<
-		ILanguageConfig['lookupSources'][0]
-	>({
+	const { fields, append, remove } = useFieldArray({
 		control,
 		name: 'lookupSources',
 	});
@@ -25,13 +23,8 @@ const LangConfForm: React.FC<ILangFormProps> = ({ control, register }) => {
 					name="name"
 					control={control}
 					defaultValue=""
-					render={({ value, onChange }) => (
-						<InputGroup
-							large
-							onChange={onChange}
-							placeholder="Name"
-							value={value}
-						/>
+					render={({ field }) => (
+						<InputGroup large placeholder="Name" {...field} />
 					)}
 				/>
 			</Label>
@@ -48,41 +41,33 @@ const LangConfForm: React.FC<ILangFormProps> = ({ control, register }) => {
 					<InfoCircleOutlined />
 				</Tooltip2>
 			</div>
-			{fields.map((field, index) => (
-				<div className="source-sub-form" key={field.id}>
+			{fields.map((fieldEntry, index) => (
+				<div className="source-sub-form" key={fieldEntry.id}>
 					<Controller
 						name={`lookupSources.${index}.priority`}
-						defaultValue={field.priority}
+						defaultValue={fieldEntry.priority}
 						control={control}
-						render={({ value, onChange }) => (
-							<input hidden onChange={onChange} value={value} />
-						)}
+						render={({ field }) => <input hidden {...field} />}
 					/>
 					<Controller
 						name={`lookupSources.${index}.name`}
-						defaultValue={field.name}
+						defaultValue={fieldEntry.name}
 						control={control}
-						render={({ value, onChange }) => (
-							<InputGroup
-								large
-								onChange={onChange}
-								placeholder="Name"
-								value={value}
-							/>
+						render={({ field }) => (
+							<InputGroup large placeholder="Name" {...field} />
 						)}
 					/>
 					<Controller
 						name={`lookupSources.${index}.source`}
-						defaultValue={field.source}
+						defaultValue={fieldEntry.source}
 						control={control}
-						render={({ value, onChange }) => (
+						render={({ field }) => (
 							<InputGroup
 								large
-								onChange={onChange}
 								placeholder="Name"
-								value={value}
 								className="input-grow"
 								style={{ flexGrow: 1 }}
+								{...field}
 							/>
 						)}
 					/>

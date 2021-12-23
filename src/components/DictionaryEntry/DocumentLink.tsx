@@ -16,9 +16,6 @@ const DocumentLink: React.FC<{
 	}, [history, link.documentId]);
 	return (
 		<Link onClick={() => fetchDocumentAndSwitch()}>
-			{
-				// TODO Use FragmentedString and not a 3rd party highlighter
-			}
 			<Highlighter
 				highlightStyle={{
 					backgroundColor: '#ffc069',

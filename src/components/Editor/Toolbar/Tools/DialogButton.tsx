@@ -1,8 +1,4 @@
-import {
-	DialogElement,
-	getTextBlockStyle,
-	toggleBlockType,
-} from '@components/Editor/CustomEditor';
+import { DialogElement, YiEditor } from '@components/Editor/YiEditor';
 import React from 'react';
 import {
 	Editor,
@@ -24,7 +20,7 @@ const DialogButton: React.FC<IDialogButtonProps> = ({
 	onChange,
 }) => {
 	const type = 'dialog';
-	const selectedBlockType = getTextBlockStyle(editor);
+	const selectedBlockType = YiEditor.getTextBlockStyle(editor);
 	const inDialog = selectedBlockType === type;
 
 	return (
@@ -93,7 +89,7 @@ const DialogButton: React.FC<IDialogButtonProps> = ({
 								n.type === 'dialog',
 							split: true,
 						});
-						toggleBlockType(editor, 'paragraph', true);
+						YiEditor.toggleBlockType(editor, 'paragraph', true);
 						const [start, end] = SlateRange.edges(editor.selection);
 						const startRootPath = start.path[0];
 						const endRootPath = end.path[0];

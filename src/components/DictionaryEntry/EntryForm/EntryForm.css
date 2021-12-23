@@ -16,3 +16,7 @@
 .word-root-form .ant-divider {
 	margin: 10px 0px;
 }
+
+.form-error-label {
+	color: red;
+}

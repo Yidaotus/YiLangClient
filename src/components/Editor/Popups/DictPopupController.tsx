@@ -1,8 +1,9 @@
 import { useDictionaryEntryResolved } from '@hooks/DictionaryQueryHooks';
+import { DictionaryEntryID } from 'Document/Utility';
 import React, { useEffect, useState } from 'react';
 import { BaseSelection, Editor, Range } from 'slate';
 import { ReactEditor, useSlateStatic } from 'slate-react';
-import { isNodeAtSelection, WordElement } from '../CustomEditor';
+import { WordElement, YiEditor } from '../YiEditor';
 import DictPopup from './DictPopup';
 import Floating from './Floating';
 
@@ -16,14 +17,18 @@ const DictPopupController: React.FC<IDictPopupControllerProps> = ({
 	selection,
 }) => {
 	const editor = useSlateStatic();
-	const [dictId, setDictId] = useState<string>();
+	const [dictId, setDictId] = useState<DictionaryEntryID>();
 	const [, entry] = useDictionaryEntryResolved(dictId);
 	const [relativeBounding, setRelativeBounding] = useState<DOMRect | null>(
 		null
 	);
 
 	useEffect(() => {
-		const clickedVocab = isNodeAtSelection(editor, selection, 'word');
+		const clickedVocab = YiEditor.isNodeAtSelection(
+			editor,
+			selection,
+			'word'
+		);
 
 		if (clickedVocab && selection && Range.isCollapsed(selection)) {
 			const wordFragment = Editor.above(editor);
@@ -47,7 +52,7 @@ const DictPopupController: React.FC<IDictPopupControllerProps> = ({
 			relativeBounding={relativeBounding}
 			arrow
 		>
-			<DictPopup entry={entry} />
+			{entry && <DictPopup entry={entry} />}
 		</Floating>
 	);
 };

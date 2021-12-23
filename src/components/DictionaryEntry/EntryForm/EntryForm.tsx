@@ -1,28 +1,36 @@
 import './EntryForm.css';
 import React from 'react';
-import {
-	IDictionaryEntry,
-	IDictionaryEntryResolved,
-	IDictionaryTag,
-} from 'Document/Dictionary';
+import { IDictionaryEntry, IDictionaryTag } from 'Document/Dictionary';
 import DictionarySelect from '@components/DictionaryEntry/DictionarySelect/DictionarySelect';
 import YiTagsInput from '@components/DictionaryEntry/YiTagsInput/YiTagsInput';
-import { Controller, UseFormMethods } from 'react-hook-form';
+import { Controller, UseFormReturn } from 'react-hook-form';
 import { Divider, InputGroup, TagInput } from '@blueprintjs/core';
+import { DictionaryEntryID } from 'Document/Utility';
+import { IDictionaryTagInput } from '../TagForm/TagForm';
+
+// react-hook-form v7 does not allow circular references so
+// we need to abstract an additional rootsinput type
+export type IRootsInput = Omit<
+	IDictionaryEntry,
+	'firstSeen' | 'id' | 'tags' | 'roots' | 'lang'
+> & {
+	tags: Array<IDictionaryTag | IDictionaryTagInput>;
+	roots: [];
+};
 
 export type IDictionaryEntryInput = Omit<
 	IDictionaryEntry,
-	'firstSeen' | 'id' | 'tags' | 'root' | 'lang'
+	'firstSeen' | 'id' | 'tags' | 'roots' | 'lang'
 > & {
-	tags: Array<IDictionaryTag | Omit<IDictionaryTag, 'id'>>;
-	root: Array<IDictionaryEntryResolved | IDictionaryEntryInput>;
+	id?: string;
+	tags: Array<IDictionaryTag | IDictionaryTagInput>;
+	roots: Array<IDictionaryEntry | IRootsInput>;
 };
 
 export interface IEntryFormProps {
-	form: UseFormMethods<IDictionaryEntryInput>;
+	form: UseFormReturn<IDictionaryEntryInput>;
 	createTag?: (tagName: string) => void;
 	createRoot?: (key: string) => void;
-	allTags: Array<Omit<IDictionaryTag, 'id'> & { id?: string }>;
 	canEditRoot?: boolean;
 }
 
@@ -30,7 +38,6 @@ const EntryForm: React.FC<IEntryFormProps> = ({
 	form,
 	createTag,
 	createRoot,
-	allTags,
 	canEditRoot,
 }) => {
 	return (
@@ -41,14 +48,13 @@ const EntryForm: React.FC<IEntryFormProps> = ({
 					name="key"
 					control={form.control}
 					defaultValue=""
-					render={({ value, onChange }) => (
+					render={({ field }) => (
 						<InputGroup
-							onChange={onChange}
 							placeholder="Key"
-							value={value}
 							fill
 							disabled={!canEditRoot}
 							large
+							{...field}
 						/>
 					)}
 				/>
@@ -56,61 +62,67 @@ const EntryForm: React.FC<IEntryFormProps> = ({
 					name="spelling"
 					control={form.control}
 					defaultValue=""
-					render={({ value, onChange }) => (
-						<InputGroup
-							onChange={onChange}
-							placeholder="Spelling"
-							fill
-							value={value}
-						/>
+					render={({ field }) => (
+						<InputGroup placeholder="Spelling" fill {...field} />
 					)}
 				/>
+				{!!form.formState.errors.translations && (
+					<span className="form-error-label">
+						At least one translation is required
+					</span>
+				)}
 				<Controller
 					name="translations"
 					control={form.control}
+					rules={{
+						required: true,
+						minLength: 1,
+						validate: (translations: Array<string>) =>
+							translations.length > 0 || 'Error!',
+					}}
 					defaultValue={[]}
-					render={({ value, onChange }) => (
+					render={({ field }) => (
 						<TagInput
 							fill
-							values={value}
-							onChange={onChange}
+							intent={
+								form.formState.errors.translations
+									? 'danger'
+									: 'none'
+							}
 							placeholder="Translation(s)"
 							separator=";"
 							addOnPaste
 							addOnBlur
+							{...field}
 						/>
 					)}
 				/>
 				<Controller
 					name="comment"
 					control={form.control}
-					defaultValue=""
-					render={({ value, onChange }) => (
-						<InputGroup
-							onChange={onChange}
-							placeholder="Comment"
-							value={value}
-							fill
-						/>
+					defaultValue={form.getValues().comment || ''}
+					render={({ field }) => (
+						<InputGroup placeholder="Comment" fill {...field} />
 					)}
 				/>
 				<Controller
 					name="tags"
 					control={form.control}
 					defaultValue={[]}
-					render={({ value, onChange }) => (
+					render={({ field }) => (
 						<YiTagsInput
 							createTag={createTag}
-							allTags={allTags}
-							values={value}
+							values={
+								field.value as IDictionaryEntryInput['tags']
+							}
 							onSelectTag={(tag) => {
-								onChange([...value, tag]);
+								field.onChange([...field.value, tag]);
 							}}
 							onRemoveTag={(tag) => {
-								onChange(
-									value.filter(
-										(vTag: IDictionaryTag) =>
-											vTag.id !== tag.id
+								const index = field.value.indexOf(tag);
+								field.onChange(
+									field.value.filter(
+										(_, itemIndex) => index !== itemIndex
 									)
 								);
 							}}
@@ -120,20 +132,25 @@ const EntryForm: React.FC<IEntryFormProps> = ({
 				<Divider />
 				{createRoot && (
 					<Controller
-						name="root"
+						name="roots"
 						control={form.control}
 						defaultValue={[]}
-						render={({ value, onChange }) => (
+						render={({ field }) => (
 							<DictionarySelect
-								values={value}
+								values={
+									// react hook form seems to be unable to resolve
+									// tagged types
+									field.value as IDictionaryEntryInput['roots']
+								}
 								onSelectRoot={(newRoot) => {
-									onChange([...value, newRoot]);
+									field.onChange([...field.value, newRoot]);
 								}}
-								onRemoveRoot={(newRoot) => {
-									onChange(
-										value.filter(
-											(vRoot: IDictionaryEntry) =>
-												vRoot.id !== newRoot.id
+								onRemoveRoot={(root) => {
+									const index = field.value.indexOf(root);
+									field.onChange(
+										field.value.filter(
+											(_, itemIndex) =>
+												index !== itemIndex
 										)
 									);
 								}}

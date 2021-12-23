@@ -110,7 +110,7 @@ const Toolbar: React.FC<IToolbarProps> = ({
 					<LookupSourceButton source={luSource} key={luSource.name} />
 				))}
 			</ToolbarMenu>
-			<Divider />
+			<Divider className="toolbar-divider" />
 			<AlignButton
 				align="left"
 				icon="align-left"
@@ -129,7 +129,7 @@ const Toolbar: React.FC<IToolbarProps> = ({
 				title="Right Align"
 				{...sharedProps}
 			/>
-			<Divider />
+			<Divider className="toolbar-divider" />
 			<ToolbarMenu
 				type="blockType"
 				icon="vertical-distribution"
@@ -168,7 +168,7 @@ const Toolbar: React.FC<IToolbarProps> = ({
 					{...sharedProps}
 				/>
 			</ToolbarMenu>
-			<Divider />
+			<Divider className="toolbar-divider" />
 			<ToolbarMenu
 				type="color"
 				icon="highlight"
@@ -186,11 +186,11 @@ const Toolbar: React.FC<IToolbarProps> = ({
 					/>
 				))}
 			</ToolbarMenu>
-			<Divider />
+			<Divider className="toolbar-divider" />
 			<ToolbarMenu
 				type="glyphs"
 				icon="arrow-down"
-				title="Font Color"
+				title="Glyphs"
 				{...menuProps}
 			>
 				<InsertButton text="←" title="Left Arrow" {...sharedProps} />
@@ -235,7 +235,7 @@ const Toolbar: React.FC<IToolbarProps> = ({
 			<Divider />
 			<ToolbarButton
 				icon="undo"
-				tooltip="undo"
+				tooltip="Undo"
 				title="Undo"
 				action={() => {
 					editor.undo();

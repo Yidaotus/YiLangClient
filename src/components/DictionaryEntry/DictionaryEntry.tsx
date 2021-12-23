@@ -1,14 +1,16 @@
-/* eslint-disable react/destructuring-assignment */
 import './DictionaryEntry.css';
 import React from 'react';
-import { IGrammarPoint, IDictionaryTag } from 'Document/Dictionary';
+import {
+	IDictionaryEntryResolved,
+	IDictionaryTag,
+	IGrammarPoint,
+} from 'Document/Dictionary';
 import { useHistory } from 'react-router';
-import { useDictionaryEntryResolved } from '@hooks/DictionaryQueryHooks';
-import { Button, Spinner, Tag } from '@blueprintjs/core';
+import { Button, Tag } from '@blueprintjs/core';
 import { Popover2 } from '@blueprintjs/popover2';
 
 type IDictEntryProps = {
-	entryId: string;
+	entry: IDictionaryEntryResolved;
 	canLink?: boolean;
 };
 
@@ -59,13 +61,12 @@ const EntryTag: React.FC<{ tag: IDictionaryTag }> = ({ tag }) => {
 };
 
 const DictionaryEntry: React.FC<IDictEntryProps> = (props) => {
-	const { entryId, canLink } = props;
-	const [loading, entryResolved] = useDictionaryEntryResolved(entryId);
+	const { entry, canLink } = props;
 	const history = useHistory();
 
 	return (
 		<>
-			{entryResolved && (
+			{entry && (
 				<div className="dictentry-panel">
 					<div className="dictentry-head">
 						{canLink ? (
@@ -74,29 +75,29 @@ const DictionaryEntry: React.FC<IDictEntryProps> = (props) => {
 									minimal
 									onClick={() => {
 										history.push(
-											`/home/dictionary/${entryResolved.id}`
+											`/home/dictionary/${entry.id}`
 										);
 									}}
 								>
-									{entryResolved.key}
+									{entry.key}
 								</Button>
-								{entryResolved.spelling && (
-									<span>{entryResolved.spelling}</span>
+								{entry.spelling && (
+									<span>{entry.spelling}</span>
 								)}
 							</h1>
 						) : (
 							<h1 className="dictentry-head-item">
-								{entryResolved.key}
-								{entryResolved.spelling && (
-									<span>{entryResolved.spelling}</span>
+								{entry.key}
+								{entry.spelling && (
+									<span>{entry.spelling}</span>
 								)}
 							</h1>
 						)}
 					</div>
-					<blockquote>{entryResolved.comment}</blockquote>
-					<p>{entryResolved.translations.join(', ')}</p>
+					<blockquote>{entry.comment}</blockquote>
+					<p>{entry.translations.join(', ')}</p>
 					<ul>
-						{entryResolved.tags.map((tag) => (
+						{entry.tags.map((tag) => (
 							<li key={tag.id} className="tag-node">
 								<EntryTag tag={tag} />
 							</li>
@@ -104,8 +105,6 @@ const DictionaryEntry: React.FC<IDictEntryProps> = (props) => {
 					</ul>
 				</div>
 			)}
-			{loading && <Spinner />}
-			{!loading && !entryResolved && <span>ERROR</span>}
 		</>
 	);
 };

@@ -1,16 +1,15 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { enableMapSet } from 'immer';
 
+import { ChakraProvider } from '@chakra-ui/react';
 import App from './components/App/App';
 import * as serviceWorker from './serviceWorker';
-import 'antd/dist/antd.css';
-
-enableMapSet();
 
 ReactDOM.render(
 	<React.StrictMode>
-		<App />
+		<ChakraProvider>
+			<App />
+		</ChakraProvider>
 	</React.StrictMode>,
 	document.getElementById('root')
 );

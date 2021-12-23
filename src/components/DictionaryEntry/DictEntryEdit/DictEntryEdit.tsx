@@ -5,21 +5,22 @@ import React, {
 	useEffect,
 	useImperativeHandle,
 	forwardRef,
-	useState,
 	useRef,
 } from 'react';
 import { useForm } from 'react-hook-form';
+import { DictionaryEntryID } from 'Document/Utility';
 import {
 	IDictionaryEntry,
 	IDictionaryEntryResolved,
 	IDictionaryTag,
+	IGrammarPoint,
 } from 'Document/Dictionary';
 import TagForm, {
 	INITIAL_TAG_FORM_VALUES,
 	IDictionaryTagInput,
 } from '@components/DictionaryEntry/TagForm/TagForm';
 import handleError from '@helpers/Error';
-import { useTags, useAddDictionaryTag } from '@hooks/useTags';
+import { useAddDictionaryTag } from '@hooks/useTags';
 import { Spinner } from '@blueprintjs/core';
 import {
 	useAddDictionaryEntry,
@@ -30,12 +31,11 @@ import EntryForm, { IDictionaryEntryInput } from '../EntryForm/EntryForm';
 export interface IWordInputState {
 	entryKey: string | IDictionaryEntryResolved;
 	stateChanged?: (stage: WordEditorMode) => void;
-	root: Array<IDictionaryEntryResolved>;
 }
 
 type Optional<T, K extends keyof T> = Pick<Partial<T>, K> & Omit<T, K>;
-
 export type WordEditorMode = 'word' | 'tag' | 'root';
+
 type WordReducerAction =
 	| {
 			type: 'pushState';
@@ -90,7 +90,7 @@ const INITIAL_WORD_REDUCER_STATE: IWordReducerState = {
 type FinishCallbackReturn =
 	| {
 			isDone: true;
-			entryId: string | null;
+			entryId: DictionaryEntryID | null;
 	  }
 	| { isDone: false };
 
@@ -100,24 +100,24 @@ export interface IWordInputRef {
 }
 
 const isOldRoot = (
-	input: IDictionaryEntryInput | IDictionaryEntryResolved
-): input is IDictionaryEntryResolved => {
+	input: IDictionaryEntryInput | IDictionaryEntry
+): input is IDictionaryEntry => {
 	return 'id' in input && input.id !== undefined;
 };
 
 const isUnsavedTag = (
-	input: Omit<IDictionaryTag, 'id'> | IDictionaryTag
-): input is Omit<IDictionaryTag, 'id'> =>
+	input: IDictionaryTagInput | IDictionaryTag
+): input is IDictionaryTagInput =>
 	!('id' in input) || ('id' in input && input.id === undefined);
 
 const isPersistedTag = (
-	input: Omit<IDictionaryTag, 'id'> | IDictionaryTag
+	input: IDictionaryTagInput | IDictionaryTag
 ): input is IDictionaryTag => 'id' in input && input.id !== undefined;
 
 const WordInput: React.ForwardRefRenderFunction<
 	IWordInputRef,
 	IWordInputState
-> = ({ entryKey, stateChanged, root }, ref) => {
+> = ({ entryKey, stateChanged }, ref) => {
 	const previousEntryKey = useRef<string | IDictionaryEntryResolved | null>(
 		null
 	);
@@ -126,14 +126,10 @@ const WordInput: React.ForwardRefRenderFunction<
 	const tagForm = useForm<IDictionaryTagInput>({
 		defaultValues: INITIAL_TAG_FORM_VALUES,
 	});
-	const [createdTags, setCreatedTags] = useState<
-		Array<Omit<IDictionaryTag, 'id'> & { id?: string }>
-	>([]);
 	const [wordEditorState, dispatchWordEditorState] = useReducer(
 		wordStateReducer,
 		INITIAL_WORD_REDUCER_STATE
 	);
-	const userTags = useTags();
 	const addTag = useAddDictionaryTag();
 	const updateEntry = useUpdateDictionaryEntry();
 	const addEntry = useAddDictionaryEntry();
@@ -146,14 +142,14 @@ const WordInput: React.ForwardRefRenderFunction<
 					comment: '',
 					tags: [],
 					translations: [],
-					root: [],
+					roots: [],
 				});
 			} else {
-				wordForm.reset({ ...entryKey, root });
+				wordForm.reset(entryKey);
 			}
 			previousEntryKey.current = entryKey;
 		}
-	}, [entryKey, root, wordForm]);
+	}, [entryKey, wordForm]);
 
 	const createTagCallback = useCallback(
 		(tagName: string) => {
@@ -186,58 +182,81 @@ const WordInput: React.ForwardRefRenderFunction<
 	);
 
 	const saveEntry = useCallback(
-		async (input: IDictionaryEntryInput): Promise<string | null> => {
+		async (
+			input: IDictionaryEntryInput
+		): Promise<DictionaryEntryID | null> => {
 			// We have  new root entry
 			try {
-				const rootIds: Array<string> = [];
-				if (input.root) {
-					for (const inputRoot of input.root) {
-						if (isOldRoot(inputRoot)) {
-							rootIds.push(inputRoot.id);
-						} else if (!isOldRoot(input)) {
-							const newTagsToSave =
-								inputRoot.tags.filter(isUnsavedTag);
-							const tagPromises = [];
-							for (const newTag of newTagsToSave) {
-								tagPromises.push(addTag.mutateAsync(newTag));
-							}
-							// eslint-disable-next-line no-await-in-loop
-							const createdTagIds = await Promise.all(
-								tagPromises
-							);
-
-							const rootToCreate: Omit<
-								IDictionaryEntry,
-								'id' | 'lang'
-							> = {
-								...inputRoot,
-								root: [],
-								tags: [
-									...input.tags
-										.filter(isPersistedTag)
-										.map((pTag) => pTag.id),
-									...createdTagIds,
-								],
+				const rootIds: Array<DictionaryEntryID> = [];
+				for (const inputRoot of input.roots) {
+					if (isOldRoot(inputRoot)) {
+						rootIds.push(inputRoot.id);
+					} else {
+						const newTagsToSave =
+							inputRoot.tags.filter(isUnsavedTag);
+						const tagPromises = [];
+						for (const newTag of newTagsToSave) {
+							const cleanedUpGrammarPoint: IGrammarPoint = {
+								...newTag.grammarPoint,
+								construction:
+									newTag.grammarPoint.construction?.map(
+										(gmc) => gmc.point
+									) || [],
 							};
-							// eslint-disable-next-line no-await-in-loop
-							const rootId = await addEntry.mutateAsync(
-								rootToCreate
+							tagPromises.push(
+								addTag.mutateAsync({
+									...newTag,
+									grammarPoint: cleanedUpGrammarPoint,
+								})
 							);
-							rootIds.push(rootId);
 						}
+						// eslint-disable-next-line no-await-in-loop
+						const createdTagIds = await Promise.all(tagPromises);
+
+						const rootToCreate: Omit<
+							IDictionaryEntry,
+							'id' | 'lang'
+						> = {
+							...inputRoot,
+							roots: [],
+							tags: [
+								...input.tags
+									.filter(isPersistedTag)
+									.map((pTag) => pTag.id),
+								...createdTagIds,
+							],
+						};
+						// eslint-disable-next-line no-await-in-loop
+						const rootId = await addEntry.mutateAsync(rootToCreate);
+						rootIds.push(rootId);
 					}
 				}
 				const newTagsToSave = input.tags.filter(isUnsavedTag);
 				const tagPromises = [];
 				for (const newTag of newTagsToSave) {
-					tagPromises.push(addTag.mutateAsync(newTag));
+					const cleanedUpGrammarPoint: IGrammarPoint = {
+						...newTag.grammarPoint,
+						construction:
+							newTag.grammarPoint.construction?.map(
+								(gmc) => gmc.point
+							) || [],
+					};
+					tagPromises.push(
+						addTag.mutateAsync({
+							...newTag,
+							grammarPoint: cleanedUpGrammarPoint,
+						})
+					);
 				}
 				const createdTagIds = await Promise.all(tagPromises);
 
 				const entryToUpsert: Optional<IDictionaryEntry, 'id' | 'lang'> =
 					{
 						...input,
-						root: rootIds,
+						roots: rootIds,
+						id: input.id
+							? (input.id as DictionaryEntryID)
+							: undefined,
 						tags: [
 							...input.tags
 								.filter(isPersistedTag)
@@ -273,11 +292,14 @@ const WordInput: React.ForwardRefRenderFunction<
 			try {
 				const correct = await wordForm.trigger();
 				if (correct) {
-					const wordFormData = wordForm.getValues();
+					const wordFormData =
+						wordForm.getValues() as IDictionaryEntryInput;
 					const entryId = await saveEntry(wordFormData);
-					result = { isDone: true, entryId };
-					setCreatedTags([]);
-					tagForm.reset();
+					result = {
+						isDone: true,
+						entryId,
+					};
+					tagForm.reset(INITIAL_TAG_FORM_VALUES);
 					rootForm.reset();
 					wordForm.reset();
 				}
@@ -288,27 +310,8 @@ const WordInput: React.ForwardRefRenderFunction<
 			try {
 				const correct = await tagForm.trigger();
 				if (correct) {
-					const tagValues = await tagForm.getValues();
-					tagForm.reset();
-					const cleanedUpTagValues = {
-						...tagValues,
-						id: undefined,
-						grammarPoint: tagValues.grammarPoint?.name
-							? {
-									name: tagValues.grammarPoint.name,
-									description:
-										tagValues.grammarPoint.description,
-									construction:
-										tagValues.grammarPoint.construction?.map(
-											(rhfPoint) => rhfPoint.point
-										),
-							  }
-							: undefined,
-					};
-					setCreatedTags((currentTags) => [
-						...currentTags,
-						cleanedUpTagValues,
-					]);
+					const tagValues = tagForm.getValues();
+					tagForm.reset(INITIAL_TAG_FORM_VALUES);
 					if (wordEditorState.stateHistory.length > 0) {
 						const previousState =
 							wordEditorState.stateHistory[
@@ -321,16 +324,13 @@ const WordInput: React.ForwardRefRenderFunction<
 							targetForm = rootForm;
 						}
 						const currentFormValues = targetForm.getValues();
-						targetForm.reset(
-							{
-								...currentFormValues,
-								tags: [
-									...(currentFormValues.tags || []),
-									cleanedUpTagValues,
-								],
-							},
-							{ isDirty: true }
-						);
+						targetForm.reset({
+							...currentFormValues,
+							tags: [
+								...(currentFormValues.tags || []),
+								tagValues,
+							],
+						});
 					}
 					dispatchWordEditorState({
 						type: 'popState',
@@ -349,7 +349,7 @@ const WordInput: React.ForwardRefRenderFunction<
 					const currentWordFormValues = wordForm.getValues();
 					wordForm.reset({
 						...currentWordFormValues,
-						root: [...currentWordFormValues.root, rootValues],
+						roots: [...currentWordFormValues.roots, rootValues],
 					});
 					dispatchWordEditorState({
 						type: 'popState',
@@ -384,8 +384,7 @@ const WordInput: React.ForwardRefRenderFunction<
 				payload: { stateChanged },
 			});
 		} else {
-			setCreatedTags([]);
-			tagForm.reset();
+			tagForm.reset(INITIAL_TAG_FORM_VALUES);
 			rootForm.reset();
 			wordForm.reset();
 		}
@@ -413,13 +412,14 @@ const WordInput: React.ForwardRefRenderFunction<
 							: 'none',
 				}}
 			>
-				<EntryForm
-					form={wordForm}
-					canEditRoot={canEditRoot}
-					createTag={createTagCallback}
-					createRoot={createRootCallback}
-					allTags={[...userTags, ...createdTags]}
-				/>
+				<div>
+					<EntryForm
+						form={wordForm}
+						canEditRoot={canEditRoot}
+						createTag={createTagCallback}
+						createRoot={createRootCallback}
+					/>
+				</div>
 			</div>
 			<div
 				style={{
@@ -429,11 +429,7 @@ const WordInput: React.ForwardRefRenderFunction<
 							: 'none',
 				}}
 			>
-				<EntryForm
-					form={rootForm}
-					createTag={createTagCallback}
-					allTags={[...userTags, ...createdTags]}
-				/>
+				<EntryForm form={rootForm} createTag={createTagCallback} />
 			</div>
 			<div
 				style={{

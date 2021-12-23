@@ -78,3 +78,7 @@
 	width: 241px;
 	padding-bottom: 6px;
 }
+
+.toolbar-divider {
+	height: 20px;
+}

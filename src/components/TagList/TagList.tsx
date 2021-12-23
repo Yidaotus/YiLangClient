@@ -14,7 +14,7 @@ import {
 import Highlighter from 'react-highlight-words';
 import { FilterConfirmProps } from 'antd/lib/table/interface';
 import { GrammarPoint } from '@components/DictionaryEntry/DictionaryEntry';
-import { useTags } from '@hooks/useTags';
+import { useAllTags, useTags } from '@hooks/useTags';
 
 const confirmModal = Modal.confirm;
 
@@ -29,7 +29,7 @@ type ColumnSearchMap = {
 const TagList: React.FC = () => {
 	const [pageSize, setPageSize] = useState(10);
 	const [columnSearch, setColumnSearch] = useState<ColumnSearchMap>({});
-	const allTags = useTags();
+	const allTags = useAllTags();
 
 	const searchInput = useRef<Input>(null);
 

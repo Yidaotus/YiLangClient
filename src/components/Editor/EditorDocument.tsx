@@ -1,21 +1,19 @@
 import './EditorDocument.css';
 import React, { useCallback } from 'react';
-import { Transforms, Text, Editor, Range } from 'slate';
-
+import { Transforms, Range } from 'slate';
 import {
 	Editable,
 	RenderLeafProps,
 	RenderElementProps,
 	useSlateStatic,
 } from 'slate-react';
-import MarkFragment from './Fragments/MarkFragment';
-import SentenceFragment from './Fragments/SentenceFragment';
+import MarkFragment from './Fragments/Mark/MarkFragment';
+import SentenceFragment from './Fragments/Sentence/SentenceFragment';
 import WordFragment from './Fragments/Word/WordFragment';
-import ImageBlock from './Blocks/Elements/Image/Image';
-import WordList from './Blocks/Elements/WordList/WordList';
-import VideoBlock, { videoBlockPasteAction } from './Fragments/Video/Video';
+import ImageBlock from './Blocks/Image/Image';
+import WordList from './Blocks/WordList/WordList';
+import VideoBlock, { videoBlockPasteAction } from './Blocks/Video/Video';
 
-// Define a React component to render leaves with bold text.
 const Leaf = ({ attributes, leaf, children }: RenderLeafProps) => {
 	return (
 		<span
@@ -28,14 +26,6 @@ const Leaf = ({ attributes, leaf, children }: RenderLeafProps) => {
 			{children}
 		</span>
 	);
-};
-
-const isBoldMarkActive = (editor: Editor): boolean => {
-	const [matched] = Editor.nodes(editor, {
-		match: (n) => Text.isText(n) && n.bold === true,
-		universal: true,
-	});
-	return !!matched;
 };
 
 const Element = (props: RenderElementProps) => {
@@ -176,7 +166,6 @@ const EditorDocument: React.FC = () => {
 	const renderLeaf = useCallback((props) => {
 		return <Leaf {...props} />;
 	}, []);
-
 	const renderElement = useCallback((props) => <Element {...props} />, []);
 	const editor = useSlateStatic();
 
@@ -199,44 +188,6 @@ const EditorDocument: React.FC = () => {
 								?.type !== 'set_selection'
 						) {
 							Transforms.collapse(editor);
-						}
-					}
-				}}
-				onKeyDown={(event) => {
-					if (event.getModifierState('Alt')) {
-						if (event.key === '&') {
-							// Prevent the ampersand character from being inserted.
-							event.preventDefault();
-							// Execute the `insertText` method when the event occurs.
-							editor.insertText('and');
-						}
-						if (event.key === 'b') {
-							// Prevent the ampersand character from being inserted.
-							event.preventDefault();
-							// Execute the `insertText` method when the event occurs.
-							if (isBoldMarkActive(editor)) {
-								Transforms.setNodes(
-									editor,
-									{ bold: undefined },
-									// Apply it to text nodes, and split the text node up if the
-									// selection is overlapping only part of it.
-									{
-										match: (n) => Text.isText(n),
-										split: true,
-									}
-								);
-							} else {
-								Transforms.setNodes(
-									editor,
-									{ bold: true },
-									// Apply it to text nodes, and split the text node up if the
-									// selection is overlapping only part of it.
-									{
-										match: (n) => Text.isText(n),
-										split: true,
-									}
-								);
-							}
 						}
 					}
 				}}

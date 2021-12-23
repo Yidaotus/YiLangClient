@@ -1,6 +1,6 @@
 import './WordList.css';
 import DictionaryEntryRow from '@components/DictionaryEntry/DictionaryEntryRow';
-import { SentenceElement, WordElement } from '@components/Editor/CustomEditor';
+import { SentenceElement, WordElement } from '@components/Editor/YiEditor';
 import React from 'react';
 import {
 	Element as SlateElement,

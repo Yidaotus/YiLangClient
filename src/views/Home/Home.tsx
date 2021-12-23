@@ -39,6 +39,7 @@ interface INavButtonProps {
 	icon: IconName;
 	text: string;
 }
+
 const NavButton: React.FC<INavButtonProps> = ({ to, icon, text }) => (
 	<NavLink href="#" to={to}>
 		<span
@@ -55,13 +56,13 @@ const NavButton: React.FC<INavButtonProps> = ({ to, icon, text }) => (
 
 const HomeView: React.FC = () => {
 	const [activeDocument] = useActiveDocument();
-	const [loading, setLoading] = useState<string | null>(null);
+	const [loading, setLoading] = useState(false);
 	const contentRef = useRef<HTMLDivElement>(null);
-
+	const activeLanguage = useActiveLanguageConf();
 	const { url } = useRouteMatch();
 	const { location } = useHistory();
 
-	const activeLanguage = useActiveLanguageConf();
+	const activeTabId = location.pathname.split('/').slice(1, 3).join('-');
 
 	const locationMap = {
 		home: `${url}`,
@@ -75,7 +76,7 @@ const HomeView: React.FC = () => {
 
 	useEffect(() => {
 		const init = async () => {
-			setLoading('Initializing');
+			setLoading(true);
 			try {
 				AppToaster.show({
 					message: `YiLang initialized`,
@@ -84,7 +85,7 @@ const HomeView: React.FC = () => {
 			} catch (e: unknown) {
 				handleError(e);
 			}
-			setLoading(null);
+			setLoading(false);
 		};
 		init();
 	}, []);
@@ -98,7 +99,6 @@ const HomeView: React.FC = () => {
 		}
 	}, [activeLanguage]);
 
-	const activeTabId = location.pathname.split('/').slice(1, 3).join('-');
 	return (
 		<div className="yi-layout">
 			<header>
@@ -191,7 +191,7 @@ const HomeView: React.FC = () => {
 
 			<main className="yi-layout">
 				<div className="yi-content" ref={contentRef}>
-					<Overlay isOpen={!!loading} usePortal={false}>
+					<Overlay isOpen={loading} usePortal={false}>
 						<Spinner />
 					</Overlay>
 					<Switch>

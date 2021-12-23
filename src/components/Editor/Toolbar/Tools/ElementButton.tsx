@@ -1,8 +1,5 @@
 import React from 'react';
-import {
-	EditorInlineElement,
-	isNodeInSelection,
-} from '@components/Editor/CustomEditor';
+import { EditorInlineElement, YiEditor } from '@components/Editor/YiEditor';
 import { Editor, Transforms, Element as SlateElement, Range } from 'slate';
 import ToolbarButton, { IToolbarItem } from './ToolbarButton';
 
@@ -21,7 +18,7 @@ const ElementButton: React.FC<IToolbarWrapperItem> = ({
 	onChange,
 	createElement,
 }): JSX.Element => {
-	const isActive = isNodeInSelection(editor, editor.selection, type);
+	const isActive = YiEditor.isNodeInSelection(editor, editor.selection, type);
 
 	return (
 		<ToolbarButton

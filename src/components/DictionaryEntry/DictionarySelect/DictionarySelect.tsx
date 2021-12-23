@@ -1,20 +1,21 @@
 import './DictionarySelect.css';
 import React, { useCallback, useState } from 'react';
 import useDebounce from '@hooks/useDebounce';
-import { IDictionaryEntry } from 'Document/Dictionary';
 import { useDictionarySearch } from '@hooks/DictionaryQueryHooks';
 import { Button, Divider, Menu, MenuItem } from '@blueprintjs/core';
 import { ItemRenderer, MultiSelect } from '@blueprintjs/select';
+import { IDictionaryEntryInput } from '../EntryForm/EntryForm';
 
 export interface IRootSelectProps {
-	values: Array<IDictionaryEntry>;
+	values: IDictionaryEntryInput['roots'];
 	placeholder: string;
 	createRoot?: (input: string) => void;
-	onSelectRoot: (root: IDictionaryEntry) => void;
-	onRemoveRoot: (root: IDictionaryEntry) => void;
+	onSelectRoot: (roots: IDictionaryEntryInput['roots'][number]) => void;
+	onRemoveRoot: (roots: IDictionaryEntryInput['roots'][number]) => void;
 }
 
-const RootSuggest = MultiSelect.ofType<IDictionaryEntry>();
+const RootSuggest =
+	MultiSelect.ofType<IDictionaryEntryInput['roots'][number]>();
 
 const DictionarySelect: React.FC<IRootSelectProps> = ({
 	createRoot,
@@ -27,17 +28,16 @@ const DictionarySelect: React.FC<IRootSelectProps> = ({
 	const debouncedSeach = useDebounce(query, 500);
 	const [, searchEntries] = useDictionarySearch(debouncedSeach);
 
-	const dropDownRenderer: ItemRenderer<IDictionaryEntry> = (
-		entry,
-		{ modifiers, handleClick }
-	) => {
+	const dropDownRenderer: ItemRenderer<
+		IDictionaryEntryInput['roots'][number]
+	> = (entry, { modifiers, handleClick }) => {
 		if (!modifiers.matchesPredicate) {
 			return null;
 		}
 		return (
 			<MenuItem
 				active={modifiers.active}
-				key={entry.id || entry.key}
+				key={entry.key}
 				label={entry.translations.join(',')}
 				onClick={handleClick}
 				text={entry.key}
@@ -68,6 +68,11 @@ const DictionarySelect: React.FC<IRootSelectProps> = ({
 			query={query}
 			resetOnSelect
 			initialContent={placeholder}
+			itemPredicate={(input, entry) =>
+				entry.key
+					.toLocaleLowerCase()
+					.includes(input.toLocaleLowerCase())
+			}
 			itemRenderer={dropDownRenderer}
 			tagRenderer={(item) => item.key}
 			itemListRenderer={({ items, renderItem }) => (

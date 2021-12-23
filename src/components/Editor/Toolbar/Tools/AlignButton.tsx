@@ -1,4 +1,4 @@
-import { AlignValue, getAlign } from '@components/Editor/CustomEditor';
+import { AlignValue, YiEditor } from '@components/Editor/YiEditor';
 import React from 'react';
 import { Editor, Transforms } from 'slate';
 import ToolbarButton, { IToolbarItem } from './ToolbarButton';
@@ -36,7 +36,7 @@ const AlignButton: React.FC<IAlignButtonProps> = ({
 	editor,
 	onChange,
 }) => {
-	const currentAlign = getAlign(editor);
+	const currentAlign = YiEditor.getAlign(editor);
 
 	return (
 		<ToolbarButton

@@ -2,13 +2,13 @@ import './Login.css';
 
 import React, { useState } from 'react';
 import { Redirect } from 'react-router-dom';
-import { Button, Col, Row, Spin } from 'antd';
-import RegisterForm from 'components/Login/RegisterFormAnt';
+import RegisterForm from 'components/Login/RegisterForm';
 import { useUserContext } from '@hooks/useUserContext';
 import { LS_TOKEN_POINTER } from 'api/api.service';
 import { useQueryClient } from 'react-query';
 import { login, register } from 'api/user.service';
-import LoginForm from '../components/Login/LoginFormAnt';
+import { Flex, Box, Spinner, Button, Stack, Link } from '@chakra-ui/react';
+import LoginForm from '../components/Login/LoginForm';
 
 export interface IRegisterData {
 	email: string;
@@ -61,53 +61,61 @@ const LoginView: React.FC = () => {
 	return user ? (
 		<Redirect to="/home" />
 	) : (
-		<Row justify="center">
-			<Col span={6}>
-				<div className="login-logo">
-					<img src="yilang.png" alt="YiText" />
-				</div>
-				<Spin spinning={isLoading}>
+		<Flex minH="100vh" align="center" justify="center">
+			<Box rounded="lg" boxShadow="md" p={8} minWidth={400}>
+				<Stack spacing={4}>
+					<div className="login-logo">
+						<img src="yilang.png" alt="YiText" />
+					</div>
+					{isLoading && (
+						<Spinner
+							thickness="4px"
+							speed="0.65s"
+							emptyColor="gray.200"
+							color="blue.500"
+							size="xl"
+						/>
+					)}
 					{isRegister ? (
-						<RegisterForm register={registerCB} />
+						<RegisterForm submit={registerCB} />
 					) : (
 						<LoginForm
 							initialEmail=""
 							initialPassword=""
-							login={loginCB}
+							submit={loginCB}
 						/>
 					)}
-				</Spin>
-				<div className="sub-form">
-					<p>
-						Need to
-						<Button
-							size="small"
-							type="link"
-							onClick={toggleRegister}
-							onKeyDown={toggleRegister}
-						>
-							{isRegister ? ' login' : ' register'}?
-						</Button>
-					</p>
-				</div>
-				{errors.length > 0 && (
-					<div className="flex justify-center pt-4">
-						<span className="text-md text-red-600">
-							{errors.map((err) => (
-								<span>{err}</span>
-							))}
-						</span>
+					<div className="sub-form">
+						<p>
+							Need to
+							<Link
+								color="green.500"
+								onClick={toggleRegister}
+								onKeyDown={toggleRegister}
+							>
+								{isRegister ? ' login' : ' register'}?
+							</Link>
+						</p>
 					</div>
-				)}
-				{infoMsg && (
-					<div className="flex justify-center pt-4">
-						<span className="text-md text-green-600">
-							{infoMsg}
-						</span>
-					</div>
-				)}
-			</Col>
-		</Row>
+					{errors.length > 0 && (
+						<div className="flex justify-center pt-4">
+							<span className="text-md text-red-600">
+								{errors.map((err) => (
+									<span>{err}</span>
+								))}
+							</span>
+						</div>
+					)}
+					{infoMsg && (
+						<div className="flex justify-center pt-4">
+							<span className="text-md text-green-600">
+								{infoMsg}
+							</span>
+						</div>
+					)}
+				</Stack>
+			</Box>
+		</Flex>
 	);
 };
 

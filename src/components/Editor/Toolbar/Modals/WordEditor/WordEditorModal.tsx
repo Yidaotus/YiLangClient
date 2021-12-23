@@ -20,7 +20,7 @@ import DictEntryEdit, {
 import { ILookupSourceLinkProps } from '@components/LookupSourceLink';
 import { Editor, Transforms, Text, Range, Selection } from 'slate';
 import { useSlateStatic } from 'slate-react';
-import { CustomText, WordElement } from '@components/Editor/CustomEditor';
+import { CustomText, WordElement } from '@components/Editor/YiEditor';
 import { useDictionarySearch } from '@hooks/DictionaryQueryHooks';
 import { useLookupSources } from '@hooks/ConfigQueryHooks';
 import usePrevious from '@hooks/usePreviousState';
@@ -35,6 +35,7 @@ import {
 	Spinner,
 } from '@blueprintjs/core';
 import { Popover2 } from '@blueprintjs/popover2';
+import { DictionaryEntryID } from 'Document/Utility';
 
 export interface IWordInputProps {
 	visible: boolean;
@@ -87,7 +88,7 @@ const WordEditorModal: React.FC<IWordInputProps> = ({ visible, close }) => {
 	);
 
 	const wrapWithWord = useCallback(
-		(entryId: string) => {
+		(entryId: DictionaryEntryID) => {
 			if (entryId && savedSelection) {
 				const vocab: WordElement = {
 					type: 'word',
@@ -220,7 +221,6 @@ const WordEditorModal: React.FC<IWordInputProps> = ({ visible, close }) => {
 						ref={dictEntryEdit}
 						entryKey={entryKey}
 						stateChanged={setEditMode}
-						root={[]}
 					/>
 				)}
 				<Checkbox
@@ -258,7 +258,6 @@ const WordEditorModal: React.FC<IWordInputProps> = ({ visible, close }) => {
 					key="save"
 					onClick={() => finish()}
 				/>
-				,
 			</div>
 		</Dialog>
 	);

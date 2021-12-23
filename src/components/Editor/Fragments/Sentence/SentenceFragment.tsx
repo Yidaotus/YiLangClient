@@ -1,7 +1,7 @@
 import { Tooltip2 } from '@blueprintjs/popover2';
 import React from 'react';
 import { RenderElementProps } from 'slate-react';
-import { SentenceElement } from '../CustomEditor';
+import { SentenceElement } from '@components/Editor/YiEditor';
 
 export type SentenceFragmentProps = Omit<RenderElementProps, 'element'> & {
 	element: SentenceElement;

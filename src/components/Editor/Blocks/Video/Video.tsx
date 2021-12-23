@@ -1,7 +1,7 @@
 import React from 'react';
 import { Transforms, Element as SlateElement } from 'slate';
 import { ReactEditor, RenderElementProps, useSlateStatic } from 'slate-react';
-import { CustomEditor, VideoElement } from '../../CustomEditor';
+import { CustomEditor, VideoElement } from '@components/Editor/YiEditor';
 
 export type IVideoBlockData = Omit<RenderElementProps, 'element'> & {
 	element: VideoElement;

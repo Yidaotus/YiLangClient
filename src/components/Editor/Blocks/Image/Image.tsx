@@ -7,7 +7,7 @@ import {
 	useSelected,
 	useSlateStatic,
 } from 'slate-react';
-import { ImageElement } from '@components/Editor/CustomEditor';
+import { ImageElement } from '@components/Editor/YiEditor';
 import { Editor, Element as SlateElement, Transforms } from 'slate';
 import isHotkey from 'is-hotkey';
 

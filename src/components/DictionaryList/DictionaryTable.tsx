@@ -16,7 +16,7 @@ import { notUndefined } from 'Document/Utility';
 import { IListDictionaryParams } from 'api/definitions/api';
 import { useHistory } from 'react-router-dom';
 import Link from 'antd/lib/typography/Link';
-import { useTags } from '@hooks/useTags';
+import { useAllTags } from '@hooks/useTags';
 import { useListDictionaryEntries } from '@hooks/DictionaryQueryHooks';
 import { useActiveLanguageConf } from '@hooks/ConfigQueryHooks';
 
@@ -42,7 +42,7 @@ const DictionaryTable: React.FC = () => {
 		});
 	const [loading, paginatedEntries] =
 		useListDictionaryEntries(paginationOptions);
-	const tags = useTags();
+	const tags = useAllTags();
 	const [columnSearch, setColumnSearch] = useState<ColumnSearchMap>({});
 
 	const searchInput = useRef<Input>(null);
@@ -289,7 +289,7 @@ const DictionaryTable: React.FC = () => {
 			columns={columns}
 			dataSource={paginatedEntries.entries.map((entry) => ({
 				...entry,
-				root: [],
+				roots: [],
 				tags: entry.tags
 					.map((tagId) => tags.find((tag) => tag.id === tagId))
 					.filter(notUndefined),

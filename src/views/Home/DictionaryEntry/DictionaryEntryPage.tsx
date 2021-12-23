@@ -5,7 +5,7 @@ import { IExcerptedDocumentLink } from 'Document/Document';
 import DocumentLink from '@components/DictionaryEntry/DocumentLink';
 import DictEntryWithEdit from '@components/DictionaryEntry/DictEntryWithEdit/DictEntryWithEdit';
 import DictionaryEntry from '@components/DictionaryEntry/DictionaryEntry';
-import { IDictionaryEntryResolved } from 'Document/Dictionary';
+import DictionaryRootEntry from '@components/DictionaryEntry/DictionaryRootEntry';
 import {
 	useDictionaryEntryResolved,
 	useDictionarySentence,
@@ -13,6 +13,7 @@ import {
 } from '@hooks/DictionaryQueryHooks';
 import PageHeader from '@components/PageHeader/PageHeader';
 import { Card, Divider, NonIdealState, Spinner } from '@blueprintjs/core';
+import { IDictionaryEntry } from 'Document/Dictionary';
 
 interface IDictionaryEntryViewParams {
 	entryId: string;
@@ -30,7 +31,6 @@ const DictionaryEntryPage: React.FC = () => {
 	const history = useHistory();
 	const { entryId } = useParams<IDictionaryEntryViewParams>();
 	const [loadingMain, entry] = useDictionaryEntryResolved(entryId);
-	const [subDictEntries] = useState<Array<IDictionaryEntryResolved>>([]);
 	const [, sentences] = useDictionarySentencesByWord(entryId);
 	const [, firstSeen] = useDictionarySentence(entry?.firstSeen?.sentenceId);
 
@@ -49,7 +49,6 @@ const DictionaryEntryPage: React.FC = () => {
 							<DictEntryWithEdit
 								dictEntry={entry}
 								canRemove
-								root={[]}
 								removeCallback={afterRemove}
 							/>
 						</Card>
@@ -66,17 +65,11 @@ const DictionaryEntryPage: React.FC = () => {
 			<Divider />
 			<div>
 				<div>
-					{entry?.root.map((rootId) => (
-						<div key={rootId}>
-							<DictionaryEntry entryId={rootId} canLink />
+					{entry?.roots.map((root) => (
+						<div key={root.id}>
+							<DictionaryRootEntry entry={root} canLink />
 						</div>
 					))}
-				</div>
-				<div>
-					{subDictEntries.length > 0 &&
-						subDictEntries.map((entryItem) => (
-							<DictionaryEntry entryId={entryItem.id} canLink />
-						))}
 				</div>
 			</div>
 			{firstSeen && (

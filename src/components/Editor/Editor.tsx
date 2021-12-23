@@ -6,10 +6,7 @@ import React, {
 	useRef,
 	useState,
 } from 'react';
-
 import handleError from '@helpers/Error';
-
-import { withHistory } from 'slate-history';
 import { Slate, withReact } from 'slate-react';
 import { BaseRange, createEditor, Descendant, Editor, Transforms } from 'slate';
 import useSelection from '@hooks/useSelection';
@@ -20,52 +17,18 @@ import {
 	useEditorDocument,
 	useUpdateEditorDocument,
 } from '@hooks/DocumentQueryHooks';
-import { Button, Icon, Intent, Spinner, Tab, Tabs } from '@blueprintjs/core';
+import { Spinner } from '@blueprintjs/core';
 import EditorDocument from './EditorDocument';
-import WordsPanel from './WordsPanel/WordsPanel';
 import DictPopupController from './Popups/DictPopupController';
 import Toolbar from './Toolbar/Toolbar';
-import {
-	EditorElement,
-	CustomEditor,
-	withDialog,
-	withList,
-} from './CustomEditor';
+import { withYiLang } from './YiEditor';
 import WordEditorModal from './Toolbar/Modals/WordEditor/WordEditorModal';
-
-const withYiLang = (editor: Editor) => {
-	const { isInline, isVoid } = editor;
-	const inlineTypes: Array<EditorElement['type']> = [
-		'word',
-		'mark',
-		'sentence',
-		'highlight',
-	];
-
-	const voidTypes: Array<EditorElement['type']> = [
-		'word',
-		'image',
-		'video',
-		'wordList',
-	];
-
-	// eslint-disable-next-line no-param-reassign
-	editor.isInline = (element) => {
-		return inlineTypes.includes(element.type) ? true : isInline(element);
-	};
-
-	// eslint-disable-next-line no-param-reassign
-	editor.isVoid = (element) => {
-		return voidTypes.includes(element.type) ? true : isVoid(element);
-	};
-
-	return editor;
-};
+import SavingIndicator, {
+	SavingState,
+} from './SavingIndicator/SavingIndicator';
 
 const AVERAGE_ACTIONS_PER_COMMAND = 15;
 const SAVE_EVERY_ACTIONS = 5 * AVERAGE_ACTIONS_PER_COMMAND;
-
-export type SavingState = 'LOADING' | 'SUCCESS' | 'ERROR' | 'IDLE';
 
 const YiEditor: React.FC = () => {
 	const editorContainer = useRef(null);
@@ -77,18 +40,11 @@ const YiEditor: React.FC = () => {
 	const [savedSelection, setSavedSelection] = useState<BaseRange | null>(
 		null
 	);
-	const activeLanguage = useActiveLanguageConf();
 	const { id } = useParams<{ id: string }>();
 	const updateEditorDocument = useUpdateEditorDocument();
 	const [loadingDocument, dbDocument] = useEditorDocument(id);
 
-	const editor = useMemo(
-		() =>
-			withReact(
-				withYiLang(withList(withDialog(withHistory(createEditor()))))
-			) as CustomEditor,
-		[]
-	);
+	const editor = useMemo(() => withReact(withYiLang(createEditor())), []);
 	const [selection, setSelection] = useSelection(editor);
 	const [editorNodes, setEditorNodes] = useState<Array<Descendant>>([]);
 
@@ -108,42 +64,32 @@ const YiEditor: React.FC = () => {
 		fetch();
 	}, [dbDocument, setEditorNodes]);
 
-	const deleteDocument = useCallback(async () => {
-		try {
-			// await removeDocumentService(id);
-		} catch (error) {
-			handleError(error);
-		}
-	}, []);
-
 	// TODO throttle!
 	const updateDocument = useCallback(async () => {
-		if (activeLanguage) {
-			try {
-				setSavingIndicator('LOADING');
-				const title = Editor.string(editor, [0], { voids: true });
-				const serializedDocument = JSON.stringify(editorNodes);
-				await updateEditorDocument.mutateAsync({
-					id,
-					title,
-					serializedDocument,
-				});
+		try {
+			setSavingIndicator('LOADING');
+			const title = Editor.string(editor, [0], { voids: true });
+			const serializedDocument = JSON.stringify(editorNodes);
+			await updateEditorDocument.mutateAsync({
+				id,
+				title,
+				serializedDocument,
+			});
 
-				// Hacky but feels beter for the user to actually see the saving process
+			// Hacky but feels beter for the user to actually see the saving process
+			setTimeout(() => {
+				setSavingIndicator('SUCCESS');
 				setTimeout(() => {
-					setSavingIndicator('SUCCESS');
-					setTimeout(() => {
-						setSavingIndicator('IDLE');
-					}, 2000);
-				}, 1000);
-			} catch (error) {
-				setSavingIndicator('ERROR');
-				handleError(error);
-			} finally {
-				setIsEditorDirty(false);
-			}
+					setSavingIndicator('IDLE');
+				}, 2000);
+			}, 1000);
+		} catch (error) {
+			setSavingIndicator('ERROR');
+			handleError(error);
+		} finally {
+			setIsEditorDirty(false);
 		}
-	}, [activeLanguage, editor, editorNodes, id, updateEditorDocument]);
+	}, [editor, editorNodes, id, updateEditorDocument]);
 
 	const closeSentenceEditorModal = useCallback(() => {
 		setSentenceEditorVisible(false);
@@ -168,7 +114,6 @@ const YiEditor: React.FC = () => {
 				setSelection(editor.selection);
 			}
 			if (isAstChange) {
-				// TODO all examples always set newValue? Bug?
 				setEditorNodes(newValue);
 				setIsEditorDirty(true);
 				setActionCount(
@@ -194,38 +139,12 @@ const YiEditor: React.FC = () => {
 	);
 
 	return (
-		<div
-			onMouseUp={(e) => {
-				e.preventDefault();
-			}}
-			role="none"
-		>
+		<div>
 			<Prompt
 				message="There are unsaved changes, which will be lost. Please safe before!"
 				when={isEditorDirty}
 			/>
-			{savingIndicator !== 'IDLE' && (
-				<div className="saving-indicator-container">
-					{savingIndicator === 'LOADING' && (
-						<>
-							<Spinner intent={Intent.PRIMARY} size={20} />
-							<span>Saving document...</span>
-						</>
-					)}
-					{savingIndicator === 'ERROR' && (
-						<>
-							<Icon intent={Intent.WARNING} icon="error" />
-							<span> Something went wrong!</span>
-						</>
-					)}
-					{savingIndicator === 'SUCCESS' && (
-						<>
-							<Icon intent={Intent.SUCCESS} icon="tick" />
-							<span> Document saved</span>
-						</>
-					)}
-				</div>
-			)}
+			<SavingIndicator savingState={savingIndicator} />
 			<div>
 				{!!loadingDocument && <Spinner />}
 				<div>
@@ -235,76 +154,35 @@ const YiEditor: React.FC = () => {
 							value={editorNodes}
 							onChange={onEditorChange}
 						>
-							<Tabs>
-								<Tab
-									title="Document"
-									key="1"
-									id="1"
-									panel={
-										<div
-											ref={editorContainer}
-											style={{ position: 'relative' }}
-										>
-											<Toolbar
-												selection={selection}
-												showSentenceEditor={() => {
-													setSentenceEditorVisible(
-														true
-													);
-												}}
-												showWordEditor={() => {
-													setSavedSelection(
-														editor.selection
-													);
-													setWordEditorVisible(true);
-												}}
-												updateDocument={updateDocument}
-											/>
-											<WordEditorModal
-												visible={wordEditorVisible}
-												close={closeWordEditorModal}
-											/>
-											<SentenceEditorModal
-												visible={sentenceEditorVisible}
-												close={closeSentenceEditorModal}
-											/>
-											<DictPopupController
-												rootElement={editorContainer}
-												selection={selection}
-											/>
-											<EditorDocument />
-										</div>
-									}
+							<div
+								ref={editorContainer}
+								style={{ position: 'relative' }}
+							>
+								<Toolbar
+									selection={selection}
+									showSentenceEditor={() => {
+										setSentenceEditorVisible(true);
+									}}
+									showWordEditor={() => {
+										setSavedSelection(editor.selection);
+										setWordEditorVisible(true);
+									}}
+									updateDocument={updateDocument}
 								/>
-								<Tab
-									title="Elements"
-									key="2"
-									id="2"
-									panel={<WordsPanel />}
+								<WordEditorModal
+									visible={wordEditorVisible}
+									close={closeWordEditorModal}
 								/>
-								<Tab
-									title="Debug"
-									key="3"
-									id="3"
-									panel={
-										<div>
-											<Button onClick={updateDocument}>
-												Update
-											</Button>
-											<Button onClick={deleteDocument}>
-												Delete
-											</Button>
-											<pre>
-												{JSON.stringify(
-													editor.children,
-													null,
-													2
-												)}
-											</pre>
-										</div>
-									}
+								<SentenceEditorModal
+									visible={sentenceEditorVisible}
+									close={closeSentenceEditorModal}
 								/>
-							</Tabs>
+								<DictPopupController
+									rootElement={editorContainer}
+									selection={selection}
+								/>
+								<EditorDocument />
+							</div>
 						</Slate>
 					</div>
 				</div>

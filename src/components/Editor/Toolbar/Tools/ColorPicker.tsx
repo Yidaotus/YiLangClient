@@ -1,8 +1,5 @@
 import { UpOutlined, DownOutlined, HighlightOutlined } from '@ant-design/icons';
-import {
-	isNodeInSelection,
-	MarkElement,
-} from '@components/Editor/CustomEditor';
+import { MarkElement, YiEditor } from '@components/Editor/YiEditor';
 import HSLColorPicker from '@components/HSLColorPicker/HSLColorPicker';
 import { Button, Tooltip } from 'antd';
 import React, { useCallback, useMemo, useRef, useState } from 'react';
@@ -19,7 +16,11 @@ const ColorPicker: React.FC<{ editor: Editor }> = ({ editor }) => {
 	const selectedColor = useMemo(() => {
 		return `hsl(${selectedColorValue}, ${saturation}%, ${lightness}%)`;
 	}, [selectedColorValue]);
-	const isActive = isNodeInSelection(editor, editor.selection, 'mark');
+	const isActive = YiEditor.isNodeInSelection(
+		editor,
+		editor.selection,
+		'mark'
+	);
 
 	const wrap = useCallback(() => {
 		if (editor.selection) {

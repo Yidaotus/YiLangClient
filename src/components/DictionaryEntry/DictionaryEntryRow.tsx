@@ -61,8 +61,11 @@ const EntryTag: React.FC<{ tag: IDictionaryTag }> = ({ tag }) => {
 	);
 };
 
-const DictionaryEntryRow: React.FC<IDictEntryRowProps> = (props) => {
-	const { entryId, path, editor } = props;
+const DictionaryEntryRow: React.FC<IDictEntryRowProps> = ({
+	entryId,
+	path,
+	editor,
+}) => {
 	const [loading, entryResolved] = useDictionaryEntryResolved(entryId);
 	const history = useHistory();
 

@@ -162,6 +162,11 @@ export interface IGetManyTagsPrams {
 	ids: Array<string>;
 }
 
+export interface ISearchTagParams {
+	lang: string;
+	key: string;
+}
+
 export interface ISearchDictionaryParams {
 	lang: string;
 	key: string;

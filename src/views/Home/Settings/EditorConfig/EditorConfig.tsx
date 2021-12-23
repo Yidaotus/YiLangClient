@@ -56,11 +56,11 @@ const LanguageConfigPanel: React.FC = () => {
 					name="autoSave"
 					control={control}
 					defaultValue
-					render={({ value, onChange }) => (
+					render={({ field }) => (
 						<Switch
-							checked={value}
+							checked={field.value}
 							onChange={() => {
-								onChange(!value);
+								field.onChange(!field.value);
 							}}
 							large
 							label="Auto save"
@@ -73,10 +73,10 @@ const LanguageConfigPanel: React.FC = () => {
 					<Controller
 						name="saveEveryNActions"
 						control={control}
-						render={({ value, onChange }) => (
+						render={({ field }) => (
 							<NumericInput
-								value={value}
-								onValueChange={onChange}
+								value={field.value}
+								onValueChange={field.onChange}
 								placeholder="Save every n actions"
 							/>
 						)}

@@ -2,7 +2,7 @@ import './SentenceEditorModal.css';
 import React, { useCallback, useEffect, useState } from 'react';
 import { Editor, Transforms, Selection, Element as SlateElement } from 'slate';
 import { useSlateStatic } from 'slate-react';
-import { SentenceElement, WordElement } from '@components/Editor/CustomEditor';
+import { SentenceElement, WordElement } from '@components/Editor/YiEditor';
 import usePrevious from '@hooks/usePreviousState';
 import {
 	useAddDictionarySentence,

@@ -1,4 +1,5 @@
 import { IDictionaryEntry, IDictionarySentence } from 'Document/Dictionary';
+import { DictionaryEntryID } from 'Document/Utility';
 import {
 	IAddDictionaryEntryParams,
 	IAddDictionarySentenceParams,
@@ -63,12 +64,12 @@ const linkSentenceWord = async (
 const addDictionaryEntry = async (
 	addParams: IAddDictionaryEntryParams,
 	language: string
-): Promise<string> => {
+): Promise<DictionaryEntryID> => {
 	const response = await ApiService.post<IApiResponse<string>>(
 		`dictionary/${language}/entries`,
 		addParams
 	);
-	return response.data.payload as string;
+	return response.data.payload as DictionaryEntryID;
 };
 
 const getSentence = async ({

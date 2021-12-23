@@ -8,47 +8,53 @@ import {
 	MultiSelectProps,
 } from '@blueprintjs/select';
 import { Button, Divider, Menu, MenuItem } from '@blueprintjs/core';
+import useDebounce from '@hooks/useDebounce';
+import { useTagSearch } from '@hooks/useTags';
+import { isReference } from 'Document/Utility';
+import { IDictionaryEntryInput } from '../EntryForm/EntryForm';
 
-type IStagedDictionaryTag = Omit<IDictionaryTag, 'id'> & { id?: string };
+type PossibleSelectValues = IDictionaryEntryInput['tags'][number];
 
 export interface YiTagsInputProps
 	extends Partial<MultiSelectProps<IDictionaryTag>> {
-	allTags: Array<IStagedDictionaryTag>;
 	createTag?: (input: string) => void;
-	values: Array<IStagedDictionaryTag>;
-	onSelectTag: (tag: IStagedDictionaryTag) => void;
-	onRemoveTag: (tag: IStagedDictionaryTag) => void;
+	values: IDictionaryEntryInput['tags'];
+	onSelectTag: (tag: IDictionaryEntryInput['tags'][number]) => void;
+	onRemoveTag: (tag: IDictionaryEntryInput['tags'][number]) => void;
 }
-const TagMultiSelect = MultiSelect.ofType<IStagedDictionaryTag>();
+const TagMultiSelect = MultiSelect.ofType<PossibleSelectValues>();
 
 const YiTagsInput: React.FC<YiTagsInputProps> = ({
-	allTags,
 	createTag,
 	values,
 	onSelectTag,
 	onRemoveTag,
 }) => {
-	const [query, setQuery] = useState('');
-
-	const tagRenderer = (tag: IStagedDictionaryTag) => {
+	const tagRenderer = (tag: PossibleSelectValues) => {
 		return <span>{tag.name}</span>;
 	};
 
-	const isSelected = (tag: IStagedDictionaryTag) => {
+	const isSelected = (tag: PossibleSelectValues) => {
 		return values.indexOf(tag) > -1;
 	};
 
-	const dropDownRenderer: ItemRenderer<IStagedDictionaryTag> = (
-		tag,
-		{ modifiers, handleClick }
-	) => {
+	const [query, setQuery] = useState('');
+	const debouncedSeach = useDebounce(query, 500);
+	const [, searchTags] = useTagSearch(debouncedSeach);
+
+	const dropDownRenderer: ItemRenderer<
+		IDictionaryEntryInput['tags'][number]
+	> = (tag, { modifiers, handleClick }) => {
 		if (!modifiers.matchesPredicate || isSelected(tag)) {
 			return null;
+		}
+		if (isReference(tag)) {
+			return <span>tag</span>;
 		}
 		return (
 			<MenuItem
 				active={modifiers.active}
-				key={tag.id}
+				key={tag.name}
 				label={tag.name}
 				onClick={handleClick}
 				text={tag.name}
@@ -72,7 +78,7 @@ const YiTagsInput: React.FC<YiTagsInputProps> = ({
 			tagRenderer={tagRenderer}
 			placeholder="Tags"
 			itemDisabled={(item) => isSelected(item)}
-			items={allTags}
+			items={[...searchTags, ...values]}
 			resetOnSelect
 			onItemSelect={onSelectTag}
 			itemPredicate={(input, tag) =>

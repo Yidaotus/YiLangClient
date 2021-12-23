@@ -1,5 +1,5 @@
 import React from 'react';
-import { isNodeInSelection } from '@components/Editor/CustomEditor';
+import { YiEditor } from '@components/Editor/YiEditor';
 import { IconName } from '@blueprintjs/core';
 import { Editor, Transforms, Element as SlateElement, Range } from 'slate';
 import ToolbarButton from './ToolbarButton';
@@ -21,7 +21,7 @@ const InputWrapperButton: React.FC<IInputWrapperButtonProps> = ({
 	icon,
 	showInput,
 }): JSX.Element => {
-	const isActive = isNodeInSelection(editor, editor.selection, type);
+	const isActive = YiEditor.isNodeInSelection(editor, editor.selection, type);
 
 	return (
 		<ToolbarButton
