@@ -14,7 +14,7 @@ import {
 } from 'antd/lib/table/interface';
 import { notUndefined } from 'Document/Utility';
 import { IListDictionaryParams } from 'api/definitions/api';
-import { useHistory } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import Link from 'antd/lib/typography/Link';
 import { useAllTags } from '@hooks/useTags';
 import { useListDictionaryEntries } from '@hooks/DictionaryQueryHooks';
@@ -46,7 +46,7 @@ const DictionaryTable: React.FC = () => {
 	const [columnSearch, setColumnSearch] = useState<ColumnSearchMap>({});
 
 	const searchInput = useRef<Input>(null);
-	const history = useHistory();
+	const navigate = useNavigate();
 
 	const tableChangeHandler = async (
 		pagination: TablePaginationConfig,
@@ -183,7 +183,7 @@ const DictionaryTable: React.FC = () => {
 					return (
 						<Link
 							onClick={() => {
-								history.push(`/home/dictionary/${record.id}`);
+								navigate(`/home/dictionary/${record.id}`);
 							}}
 						>
 							<Highlighter
@@ -215,7 +215,7 @@ const DictionaryTable: React.FC = () => {
 				return (
 					<Link
 						onClick={() => {
-							history.push(`/home/dictionary/${record.id}`);
+							navigate(`/home/dictionary/${record.id}`);
 						}}
 					>
 						{renderText}

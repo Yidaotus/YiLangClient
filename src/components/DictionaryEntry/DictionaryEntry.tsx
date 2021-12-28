@@ -5,7 +5,7 @@ import {
 	IDictionaryTag,
 	IGrammarPoint,
 } from 'Document/Dictionary';
-import { useHistory } from 'react-router';
+import { useNavigate } from 'react-router';
 import { Button, Tag } from '@blueprintjs/core';
 import { Popover2 } from '@blueprintjs/popover2';
 
@@ -62,7 +62,7 @@ const EntryTag: React.FC<{ tag: IDictionaryTag }> = ({ tag }) => {
 
 const DictionaryEntry: React.FC<IDictEntryProps> = (props) => {
 	const { entry, canLink } = props;
-	const history = useHistory();
+	const navigate = useNavigate();
 
 	return (
 		<>
@@ -74,7 +74,7 @@ const DictionaryEntry: React.FC<IDictEntryProps> = (props) => {
 								<Button
 									minimal
 									onClick={() => {
-										history.push(
+										navigate(
 											`/home/dictionary/${entry.id}`
 										);
 									}}

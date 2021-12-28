@@ -2,9 +2,18 @@ import './TagForm.css';
 import { IDictionaryTag, IGrammarPoint } from 'Document/Dictionary';
 import React, { useCallback, useState } from 'react';
 import YiColorPickerField from '@components/DictionaryEntry/YiColorPickerField/YiColorPickerField';
+import { Add, Remove } from '@mui/icons-material';
 import { Controller, useFieldArray, UseFormReturn } from 'react-hook-form';
-import { Button, InputGroup, Switch } from '@blueprintjs/core';
-import { DictionaryTagID } from 'Document/Utility';
+import {
+	IconButton,
+	Button,
+	Switch,
+	TextField,
+	Stack,
+	Box,
+	FormGroup,
+	FormControlLabel,
+} from '@mui/material';
 
 // This is the special type for the dynamic form input as
 // react hook form does not support flat arrays we need to
@@ -60,106 +69,127 @@ const TagForm: React.FC<ITagFormProps> = ({ form }) => {
 			className="tag-input-form-container"
 			onChange={updateShowConstButton}
 		>
-			<div className="tag-form-line">
-				{!!form.formState.errors.name && (
-					<span className="form-error-label">
-						A name for the tag is required
-					</span>
-				)}
-				<Controller
-					name="name"
-					control={form.control}
-					defaultValue=""
-					rules={{ required: true, minLength: 1 }}
-					render={({ field }) => (
-						<InputGroup placeholder="name" fill {...field} />
-					)}
-				/>
-				<Controller
-					name="color"
-					control={form.control}
-					defaultValue=""
-					render={({ field }) => <YiColorPickerField {...field} />}
-				/>
-			</div>
-			<div className="tag-form-line tag-form-center">
-				<p className="bp3-ui-text bp3-running-text">
-					Has Grammarpoint?
-				</p>
-				<Switch
-					onChange={(e) =>
-						setHasGrammarPoint(e.currentTarget.checked)
-					}
-					checked={hasGrammarPoint}
-				/>
-			</div>
-			<div className="tag-form-line">
+			<Stack spacing={2}>
+				<Stack
+					spacing={2}
+					direction="row"
+					alignItems="center"
+					sx={{
+						display: 'flex',
+						width: '100%',
+					}}
+				>
+					<Box sx={{ flexGrow: 1 }}>
+						<Controller
+							name="name"
+							control={form.control}
+							defaultValue=""
+							rules={{ required: true, minLength: 1 }}
+							render={({ field }) => (
+								<TextField
+									{...field}
+									fullWidth
+									placeholder="name"
+								/>
+							)}
+						/>
+					</Box>
+					<Controller
+						name="color"
+						control={form.control}
+						defaultValue=""
+						render={({ field }) => (
+							<YiColorPickerField {...field} />
+						)}
+					/>
+				</Stack>
+				<Box sx={{ alignSelf: 'center' }}>
+					<FormGroup>
+						<FormControlLabel
+							control={
+								<Switch
+									onChange={(e) =>
+										setHasGrammarPoint(
+											e.currentTarget.checked
+										)
+									}
+									checked={hasGrammarPoint}
+								/>
+							}
+							label="Has Grammarpoint"
+						/>
+					</FormGroup>
+				</Box>
 				<Controller
 					name="grammarPoint.name"
 					defaultValue=""
 					control={form.control}
 					render={({ field }) => (
-						<InputGroup
-							placeholder="Name"
-							fill
-							disabled={!hasGrammarPoint}
+						<TextField
 							{...field}
+							placeholder="Name"
+							fullWidth
+							disabled={!hasGrammarPoint}
 						/>
 					)}
 				/>
-			</div>
-			<div className="tag-form-line">
 				<Controller
 					name="grammarPoint.description"
 					defaultValue=""
 					control={form.control}
 					render={({ field }) => (
-						<InputGroup
+						<TextField
 							placeholder="Desc"
-							fill
+							fullWidth
 							disabled={!hasGrammarPoint}
 							{...field}
 						/>
 					)}
 				/>
-			</div>
-			{hasGrammarPoint &&
-				fields.map((field, index) => (
-					<div className="source-sub-form" key={field.id}>
-						<Controller
-							name={`grammarPoint.construction.${index}.point`}
-							defaultValue={field.point}
-							control={form.control}
-							render={(subField) => (
-								<InputGroup
-									placeholder="Point"
-									fill
-									{...subField.field}
-								/>
-							)}
-						/>
-						<Button
-							icon="minus"
-							minimal
-							onClick={() => remove(index)}
-						/>
-					</div>
-				))}
-			{hasGrammarPoint && showAddConstButton && (
-				<div className="tag-form-line">
+				{hasGrammarPoint &&
+					fields.map((field, index) => (
+						<div className="source-sub-form" key={field.id}>
+							<Stack
+								spacing={2}
+								direction="row"
+								alignItems="center"
+								sx={{
+									display: 'flex',
+									width: '100%',
+								}}
+							>
+								<Box sx={{ flexGrow: 1 }}>
+									<Controller
+										name={`grammarPoint.construction.${index}.point`}
+										defaultValue={field.point}
+										control={form.control}
+										render={(subField) => (
+											<TextField
+												{...subField.field}
+												fullWidth
+												placeholder="Point"
+											/>
+										)}
+									/>
+								</Box>
+								<IconButton onClick={() => remove(index)}>
+									<Remove />
+								</IconButton>
+							</Stack>
+						</div>
+					))}
+				{hasGrammarPoint && showAddConstButton && (
 					<Button
 						onClick={() => {
 							append({ point: '' });
 						}}
-						style={{
-							width: '100%',
-						}}
-						icon="plus"
+						endIcon={<Add />}
+						variant="contained"
 					>
 						Add Constructor
 					</Button>
-				</div>
-			)}
+				)}
+			</Stack>
 		</form>
 	);
 };

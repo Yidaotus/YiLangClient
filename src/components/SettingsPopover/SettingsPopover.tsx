@@ -1,6 +1,6 @@
 import './SettingsPopover.css';
 import React, { useCallback } from 'react';
-import { useHistory } from 'react-router';
+import { useNavigate } from 'react-router';
 import {
 	useActiveLanguageConf,
 	useLanguageConfigs,
@@ -34,7 +34,7 @@ const SettingsPopover: React.FC = () => {
 	const activeLanguage = useActiveLanguageConf();
 	const availableLanguages = useLanguageConfigs();
 	const setActiveLanguage = useSetActiveLanguage();
-	const history = useHistory();
+	const navigate = useNavigate();
 
 	const logoutConfirm = useCallback(() => {
 		// dispatch(logout());
@@ -84,7 +84,7 @@ const SettingsPopover: React.FC = () => {
 			<Button
 				icon="settings"
 				onClick={() => {
-					history.push(`/home/settings`);
+					navigate(`/home/settings`);
 				}}
 				fill
 				minimal

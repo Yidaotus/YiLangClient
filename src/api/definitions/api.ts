@@ -95,7 +95,10 @@ export interface IDictionaryEntryFetchResponse {
 }
 
 export type IAddDictionaryTagParams = Omit<IDictionaryTag, 'id'>;
-export type IAddDictionaryEntryParams = Omit<IDictionaryEntry, 'id' | 'lang'>;
+export type IAddDictionaryEntryParams = Omit<
+	IDictionaryEntry,
+	'id' | 'lang' | 'createdAt'
+>;
 export type IAddDictionarySentenceParams = Omit<
 	IDictionarySentence,
 	'id' | 'lang'

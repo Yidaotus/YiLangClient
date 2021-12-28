@@ -1,6 +1,6 @@
 import './Documents.css';
 import React, { useState, useCallback } from 'react';
-import { useHistory } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import DocumentExcerpt from 'components/DocumentExcerpt/DocumentExcerpt';
 import handleError from '@helpers/Error';
 import { useActiveLanguageConf } from '@hooks/ConfigQueryHooks';
@@ -23,7 +23,7 @@ const excerptLength = 100;
 const pageSize = 5;
 
 const Documents: React.FC = () => {
-	const history = useHistory();
+	const navigate = useNavigate();
 	const [pageSkip, setPageSkip] = useState(0);
 	const [, changeActiveDocument] = useActiveDocument();
 	const deleteDocument = useDeleteEditorDocument();
@@ -40,9 +40,9 @@ const Documents: React.FC = () => {
 	const fetchDocumentAndSwitch = useCallback(
 		async (id: string) => {
 			changeActiveDocument(id);
-			history.push(`/home/editor/${id}`);
+			navigate(`/home/editor/${id}`);
 		},
-		[changeActiveDocument, history]
+		[changeActiveDocument, navigate]
 	);
 
 	const removeDocument = useCallback(
@@ -59,8 +59,8 @@ const Documents: React.FC = () => {
 	const createNewDocument = useCallback(async () => {
 		const newDocumentId = await createDocument.mutateAsync();
 		changeActiveDocument(newDocumentId);
-		history.push(`/home/editor/${newDocumentId}`);
-	}, [changeActiveDocument, createDocument, history]);
+		navigate(`/home/editor/${newDocumentId}`);
+	}, [changeActiveDocument, createDocument, navigate]);
 
 	return (
 		<>

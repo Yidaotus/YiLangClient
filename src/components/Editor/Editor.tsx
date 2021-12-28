@@ -10,14 +10,13 @@ import handleError from '@helpers/Error';
 import { Slate, withReact } from 'slate-react';
 import { BaseRange, createEditor, Descendant, Editor, Transforms } from 'slate';
 import useSelection from '@hooks/useSelection';
-import { useActiveLanguageConf } from '@hooks/ConfigQueryHooks';
-import { Prompt, useParams } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import SentenceEditorModal from '@editor/Toolbar/Modals/SentenceEditor/SentenceEditorModal';
 import {
 	useEditorDocument,
 	useUpdateEditorDocument,
 } from '@hooks/DocumentQueryHooks';
-import { Spinner } from '@blueprintjs/core';
+import { CircularProgress } from '@mui/material';
 import EditorDocument from './EditorDocument';
 import DictPopupController from './Popups/DictPopupController';
 import Toolbar from './Toolbar/Toolbar';
@@ -71,7 +70,7 @@ const YiEditor: React.FC = () => {
 			const title = Editor.string(editor, [0], { voids: true });
 			const serializedDocument = JSON.stringify(editorNodes);
 			await updateEditorDocument.mutateAsync({
-				id,
+				id: id || 'what',
 				title,
 				serializedDocument,
 			});
@@ -140,13 +139,9 @@ const YiEditor: React.FC = () => {
 
 	return (
 		<div>
-			<Prompt
-				message="There are unsaved changes, which will be lost. Please safe before!"
-				when={isEditorDirty}
-			/>
 			<SavingIndicator savingState={savingIndicator} />
 			<div>
-				{!!loadingDocument && <Spinner />}
+				{!!loadingDocument && <CircularProgress />}
 				<div>
 					<div className="editor-container">
 						<Slate

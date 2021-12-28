@@ -7,44 +7,37 @@ import React, {
 	useState,
 } from 'react';
 import { IDictionaryEntry } from 'Document/Dictionary';
-import {
-	SaveOutlined,
-	ReadOutlined,
-	StopOutlined,
-	RollbackOutlined,
-} from '@ant-design/icons';
 import DictEntryEdit, {
 	IWordInputRef,
 	WordEditorMode,
 } from '@components/DictionaryEntry/DictEntryEdit/DictEntryEdit';
-import { ILookupSourceLinkProps } from '@components/LookupSourceLink';
+import { Delete, Save, ArrowBack } from '@mui/icons-material';
 import { Editor, Transforms, Text, Range, Selection } from 'slate';
 import { useSlateStatic } from 'slate-react';
 import { CustomText, WordElement } from '@components/Editor/YiEditor';
 import { useDictionarySearch } from '@hooks/DictionaryQueryHooks';
-import { useLookupSources } from '@hooks/ConfigQueryHooks';
 import usePrevious from '@hooks/usePreviousState';
-import {
-	Button,
-	Checkbox,
-	Classes,
-	Dialog,
-	Menu,
-	MenuItem,
-	Position,
-	Spinner,
-} from '@blueprintjs/core';
-import { Popover2 } from '@blueprintjs/popover2';
 import { DictionaryEntryID } from 'Document/Utility';
+import {
+	Dialog,
+	DialogTitle,
+	DialogContent,
+	DialogContentText,
+	Checkbox,
+	DialogActions,
+	IconButton,
+	CircularProgress,
+	FormControlLabel,
+	FormGroup,
+	Stack,
+} from '@mui/material';
+import LoadingButton from '@mui/lab/LoadingButton';
+import LookupSourceMenu from './LookupSouceMenu';
 
 export interface IWordInputProps {
 	visible: boolean;
 	close: (restoreSelection: boolean) => void;
 }
-
-const formatURL = ({ source, searchTerm }: ILookupSourceLinkProps): string =>
-	source.source.replace('{}', searchTerm);
-const WINDOW_TARGET = '_blank';
 
 const WordEditorModal: React.FC<IWordInputProps> = ({ visible, close }) => {
 	const editor = useSlateStatic();
@@ -57,7 +50,7 @@ const WordEditorModal: React.FC<IWordInputProps> = ({ visible, close }) => {
 		useState<IDictionaryEntry>();
 	const [fetchingRoot, rootInDictionary] = useDictionarySearch(entryKey);
 	const [markOtherInstances, setMarkOtherInstances] = useState(true);
-	const lookupSources = useLookupSources();
+	const [saving, setSaving] = useState(false);
 
 	const cardTitle = useMemo(() => {
 		switch (editMode) {
@@ -71,21 +64,6 @@ const WordEditorModal: React.FC<IWordInputProps> = ({ visible, close }) => {
 				return 'Word Editor';
 		}
 	}, [editMode]);
-
-	const menu = (
-		<Menu>
-			{lookupSources.map((source) => (
-				<MenuItem
-					key={source.name}
-					text={source.name}
-					onClick={() => {
-						const url = formatURL({ source, searchTerm: entryKey });
-						window.open(url, WINDOW_TARGET);
-					}}
-				/>
-			))}
-		</Menu>
-	);
 
 	const wrapWithWord = useCallback(
 		(entryId: DictionaryEntryID) => {
@@ -167,6 +145,7 @@ const WordEditorModal: React.FC<IWordInputProps> = ({ visible, close }) => {
 	}, [entryKey, rootInDictionary]);
 
 	const finish = async () => {
+		setSaving(true);
 		if (dictEntryEdit.current) {
 			const editResult = await dictEntryEdit.current.finish();
 			if (editResult.isDone && editResult.entryId) {
@@ -178,6 +157,7 @@ const WordEditorModal: React.FC<IWordInputProps> = ({ visible, close }) => {
 			wrapWithWord(entryInDictionary.id);
 			close(false);
 		}
+		setSaving(false);
 	};
 
 	const cancel = () => {
@@ -193,72 +173,68 @@ const WordEditorModal: React.FC<IWordInputProps> = ({ visible, close }) => {
 	};
 
 	return (
-		<Dialog
-			isOpen={visible}
-			title={
-				<div className="word-input-head">
-					<ReadOutlined />
-					{cardTitle}
-					<Popover2 content={menu} position={Position.BOTTOM}>
-						<Button icon="search" minimal />
-					</Popover2>
-				</div>
-			}
-			onClose={() => close(true)}
-			canEscapeKeyClose
-			canOutsideClickClose={false}
-			shouldReturnFocusOnClose={false}
-		>
-			{fetchingRoot && <Spinner />}
-			<div className={`word-input-root-form ${Classes.DIALOG_BODY}`}>
-				{entryInDictionary ? (
-					<span>
-						{entryInDictionary.key} already found in Dictionary. Use
-						found entry instead?
-					</span>
-				) : (
-					<DictEntryEdit
-						ref={dictEntryEdit}
-						entryKey={entryKey}
-						stateChanged={setEditMode}
-					/>
-				)}
-				<Checkbox
-					style={{
-						marginTop: '7px',
-						paddingTop: '7px',
-						borderTop: '1px solid lightgray',
-					}}
-					checked={markOtherInstances}
-					onChange={() => {
-						setMarkOtherInstances(!markOtherInstances);
-					}}
+		<Dialog open={visible} onClose={() => close(true)}>
+			{fetchingRoot && <CircularProgress />}
+			<DialogTitle>
+				<Stack
+					justifyContent="space-between"
+					direction="row"
+					alignItems="center"
 				>
-					Mark all instances
-				</Checkbox>
-			</div>
-			<div
-				className={`word-input-root-form ${Classes.DIALOG_FOOTER_ACTIONS}`}
-			>
-				{editMode === 'word' ? (
-					<Button
-						icon={<StopOutlined />}
-						key="discard"
-						onClick={cancel}
-					/>
-				) : (
-					<Button
-						icon={<RollbackOutlined />}
-						key="discard"
-						onClick={cancel}
-					/>
-				)}
-				<Button
-					icon={<SaveOutlined />}
-					key="save"
-					onClick={() => finish()}
-				/>
-			</div>
+					{cardTitle}
+					<LookupSourceMenu searchTerm={entryKey} />
+				</Stack>
+			</DialogTitle>
+			<DialogContent sx={{ minWidth: '500px' }}>
+				<DialogContentText>
+					{entryInDictionary ? (
+						<span>
+							{entryInDictionary.key} already found in Dictionary.
+							Use found entry instead?
+						</span>
+					) : (
+						<DictEntryEdit
+							ref={dictEntryEdit}
+							entryKey={entryKey}
+							stateChanged={setEditMode}
+						/>
+					)}
+				</DialogContentText>
+				<DialogActions>
+					<FormGroup>
+						<FormControlLabel
+							label="Mark all instances"
+							control={
+								<Checkbox
+									checked={markOtherInstances}
+									onChange={() => {
+										setMarkOtherInstances(
+											!markOtherInstances
+										);
+									}}
+								/>
+							}
+						/>
+					</FormGroup>
+					{editMode === 'word' ? (
+						<IconButton key="discard" onClick={cancel}>
+							<Delete />
+						</IconButton>
+					) : (
+						<IconButton key="discard" onClick={cancel}>
+							<ArrowBack />
+						</IconButton>
+					)}
+					<LoadingButton
+						key="save"
+						onClick={() => finish()}
+						loading={saving}
+						startIcon={<Save />}
+					>
+						Save
+					</LoadingButton>
+				</DialogActions>
+			</DialogContent>
 		</Dialog>
 	);
 };

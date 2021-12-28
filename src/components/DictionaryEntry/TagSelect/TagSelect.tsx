@@ -1,28 +1,27 @@
-import './DictionarySelect.css';
 import React, { useState, useEffect, useMemo } from 'react';
 import useDebounce from '@hooks/useDebounce';
-import { useDictionarySearch } from '@hooks/DictionaryQueryHooks';
 import { Box, TextField, Autocomplete, InputAdornment } from '@mui/material';
 import { Search } from '@mui/icons-material';
 import { isNotString, isString } from 'Document/Utility';
+import { useTagSearch } from '@hooks/useTags';
 import { IDictionaryEntryInput } from '../EntryForm/EntryForm';
 
-export interface IRootSelectProps {
-	value: IDictionaryEntryInput['roots'];
+export interface ITagSelectProps {
+	value: IDictionaryEntryInput['tags'];
 	placeholder: string;
-	createRoot: (input: string) => void;
-	onChange: (roots: IDictionaryEntryInput['roots']) => void;
+	create: (input: string) => void;
+	onChange: (tags: IDictionaryEntryInput['tags']) => void;
 }
 
-const DictionarySelect: React.FC<IRootSelectProps> = ({
-	createRoot,
+const TagSelect: React.FC<ITagSelectProps> = ({
+	create,
 	value,
 	placeholder,
 	onChange,
 }) => {
 	const [query, setQuery] = useState('');
 	const debouncedSeach = useDebounce(query, 200);
-	const [, searchEntries] = useDictionarySearch(debouncedSeach);
+	const [, searchTags] = useTagSearch(debouncedSeach);
 	const [isLoading, setIsLoading] = useState(false);
 
 	useEffect(() => {
@@ -31,26 +30,25 @@ const DictionarySelect: React.FC<IRootSelectProps> = ({
 
 	useEffect(() => {
 		setIsLoading(false);
-	}, [searchEntries]);
+	}, [searchTags]);
 
-	const autoCompletOptions = useMemo(() => {
-		let options: Array<IDictionaryEntryInput['roots'][number] | string> =
-			[];
-		if (!isLoading) {
-			const searchEntriesDeduplicated = searchEntries.filter(
-				(opt) => !value.find((v) => v.key === opt.key)
+	const autoCompleteOptions = useMemo(() => {
+		let options: Array<IDictionaryEntryInput['tags'][number] | string> = [];
+		if (!isLoading && value) {
+			const searchEntriesDeduplicated = searchTags.filter(
+				(opt) => !value.find((v) => v.name === opt.name)
 			);
 			options = [...value, ...searchEntriesDeduplicated];
 		}
 		return options;
-	}, [isLoading, searchEntries, value]);
+	}, [isLoading, searchTags, value]);
 
 	return (
 		<Autocomplete
 			placeholder={placeholder}
 			id="country-select-demo"
-			multiple
 			fullWidth
+			multiple
 			loading={isLoading}
 			clearOnBlur
 			filterOptions={(options, state) => {
@@ -61,7 +59,7 @@ const DictionarySelect: React.FC<IRootSelectProps> = ({
 					!isLoading &&
 					!options
 						.filter(isNotString)
-						.find((v) => v.key === inputValue)
+						.find((v) => v.name === inputValue)
 				) {
 					newOptions.push(inputValue);
 				}
@@ -72,21 +70,19 @@ const DictionarySelect: React.FC<IRootSelectProps> = ({
 				const valuesToCreate = newValue.filter(isString);
 				const otherValues = newValue.filter(isNotString);
 				for (const valueToCreate of valuesToCreate) {
-					createRoot(valueToCreate);
+					create(valueToCreate);
 				}
 				onChange(otherValues);
 			}}
-			options={autoCompletOptions}
+			options={autoCompleteOptions}
 			autoHighlight
 			getOptionLabel={(option) =>
-				typeof option === 'string' ? option : option.key
+				typeof option === 'string' ? option : option.name
 			}
 			renderOption={(props, option) => {
 				return typeof option !== 'string' ? (
 					<Box component="li" {...props}>
-						<span>{option.key}</span>
-						<span>{option.translations.join(' ,')}</span>
-						<span>{option.comment}</span>
+						<span>{option.name}</span>
 					</Box>
 				) : (
 					<Box component="li" {...props}>
@@ -97,7 +93,6 @@ const DictionarySelect: React.FC<IRootSelectProps> = ({
 			renderInput={(params) => (
 				<TextField
 					{...params}
-					variant="outlined"
 					label={placeholder}
 					value={query}
 					onChange={(e) => setQuery(e.target.value)}
@@ -115,4 +110,4 @@ const DictionarySelect: React.FC<IRootSelectProps> = ({
 	);
 };
 
-export default DictionarySelect;
+export default TagSelect;

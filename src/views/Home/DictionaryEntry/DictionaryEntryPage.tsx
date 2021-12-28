@@ -1,10 +1,9 @@
 import './DictionaryEntryPage.css';
 import React, { useState, useCallback } from 'react';
-import { useHistory, useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { IExcerptedDocumentLink } from 'Document/Document';
 import DocumentLink from '@components/DictionaryEntry/DocumentLink';
 import DictEntryWithEdit from '@components/DictionaryEntry/DictEntryWithEdit/DictEntryWithEdit';
-import DictionaryEntry from '@components/DictionaryEntry/DictionaryEntry';
 import DictionaryRootEntry from '@components/DictionaryEntry/DictionaryRootEntry';
 import {
 	useDictionaryEntryResolved,
@@ -13,11 +12,6 @@ import {
 } from '@hooks/DictionaryQueryHooks';
 import PageHeader from '@components/PageHeader/PageHeader';
 import { Card, Divider, NonIdealState, Spinner } from '@blueprintjs/core';
-import { IDictionaryEntry } from 'Document/Dictionary';
-
-interface IDictionaryEntryViewParams {
-	entryId: string;
-}
 
 /**
  * Renders the Dictionary into a Table.
@@ -28,15 +22,15 @@ const DictionaryEntryPage: React.FC = () => {
 	const [excerptLink] = useState<IExcerptedDocumentLink | null>(null);
 	const [additionalExcerpts] = useState<Array<IExcerptedDocumentLink>>([]);
 
-	const history = useHistory();
-	const { entryId } = useParams<IDictionaryEntryViewParams>();
+	const navigate = useNavigate();
+	const { entryId } = useParams();
 	const [loadingMain, entry] = useDictionaryEntryResolved(entryId);
 	const [, sentences] = useDictionarySentencesByWord(entryId);
 	const [, firstSeen] = useDictionarySentence(entry?.firstSeen?.sentenceId);
 
 	const afterRemove = useCallback(() => {
-		history.goBack();
-	}, [history]);
+		navigate(-1);
+	}, [navigate]);
 
 	return (
 		<div>

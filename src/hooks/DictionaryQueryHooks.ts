@@ -359,7 +359,7 @@ const useLinkWordSentence = (): UseMutationResult<
 const useAddDictionaryEntry = (): UseMutationResult<
 	DictionaryEntryID,
 	IApiResponse<void>,
-	Omit<IDictionaryEntry, 'id' | 'lang'>,
+	Omit<IDictionaryEntry, 'id' | 'lang' | 'createdAt'>,
 	unknown
 > => {
 	const activeLanugage = useActiveLanguageConf();
@@ -367,7 +367,7 @@ const useAddDictionaryEntry = (): UseMutationResult<
 	const queryClient = useQueryClient();
 
 	return useMutation(
-		(newEntry: Omit<IDictionaryEntry, 'id' | 'lang'>) => {
+		(newEntry: Omit<IDictionaryEntry, 'id' | 'lang' | 'createdAt'>) => {
 			if (!activeLanugage) {
 				throw new Error('No Language selected!');
 			}

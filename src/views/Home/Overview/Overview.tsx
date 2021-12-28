@@ -2,7 +2,7 @@ import './Overview.css';
 import React, { useCallback, useState } from 'react';
 import { IDocumentExcerpt } from 'api/definitions/api';
 import DocumentExcerpt from '@components/DocumentExcerpt/DocumentExcerpt';
-import { useHistory } from 'react-router';
+import { useNavigate } from 'react-router';
 import DictionaryEntry from '@components/DictionaryEntry/DictionaryEntry';
 import { useActiveLanguageConf } from '@hooks/ConfigQueryHooks';
 import { useListDictionaryEntries } from '@hooks/DictionaryQueryHooks';
@@ -19,13 +19,13 @@ const Overview: React.FC = () => {
 		limit: 3,
 		skip: 0,
 	});
-	const history = useHistory();
+	const navigate = useNavigate();
 
 	const fetchDocumentAndSwitch = useCallback(
 		(id: string) => {
-			history.push(`/home/editor/${id}`);
+			navigate(`/home/editor/${id}`);
 		},
-		[history]
+		[navigate]
 	);
 
 	return (

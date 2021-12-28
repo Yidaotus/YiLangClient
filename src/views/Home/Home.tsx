@@ -1,219 +1,49 @@
 import './Home.css';
 import React, { useEffect, useRef, useState } from 'react';
-import {
-	useRouteMatch,
-	useHistory,
-	NavLink,
-	Switch,
-	Route,
-} from 'react-router-dom';
+import { useLocation, Routes, Route, Outlet } from 'react-router-dom';
 
-import { useActiveDocument } from '@hooks/useUserContext';
 import handleError from '@helpers/Error';
 import { useActiveLanguageConf } from '@hooks/ConfigQueryHooks';
-import {
-	Navbar,
-	Button,
-	Alignment,
-	Spinner,
-	Intent,
-	Overlay,
-	PopoverInteractionKind,
-	Tabs,
-	Tab,
-	Icon,
-	IconName,
-} from '@blueprintjs/core';
-import { Popover2 } from '@blueprintjs/popover2';
-import SettingsPopover from '@components/SettingsPopover/SettingsPopover';
-import Overview from '@views/Home/Overview/Overview';
-import Documents from '@views/Home/Documents/Documents';
-import DictionaryEntryPage from '@views/Home/DictionaryEntry/DictionaryEntryPage';
-import Dictionary from '@views/Home/Dictionary/Dictionary';
-import Editor from '@editor/Editor';
-import AppToaster from '@components/Toaster';
-import Settings from '@views/Home/Settings/Settings';
-
-interface INavButtonProps {
-	to: string;
-	icon: IconName;
-	text: string;
-}
-
-const NavButton: React.FC<INavButtonProps> = ({ to, icon, text }) => (
-	<NavLink href="#" to={to}>
-		<span
-			style={{
-				display: 'flex',
-				alignItems: 'center',
-			}}
-		>
-			<Icon icon={icon} />
-			<span style={{ marginLeft: '5px' }}>{text}</span>
-		</span>
-	</NavLink>
-);
+import { useSnackbar } from 'notistack';
+import ResponsiveAppBar from './AppBar';
 
 const HomeView: React.FC = () => {
-	const [activeDocument] = useActiveDocument();
 	const [loading, setLoading] = useState(false);
 	const contentRef = useRef<HTMLDivElement>(null);
 	const activeLanguage = useActiveLanguageConf();
-	const { url } = useRouteMatch();
-	const { location } = useHistory();
-
-	const activeTabId = location.pathname.split('/').slice(1, 3).join('-');
-
-	const locationMap = {
-		home: `${url}`,
-		user: `${url}/settings`,
-		editor: `${url}/editor/:id`,
-		dicitonary: `${url}/dictionary`,
-		documents: `${url}/docs`,
-		dicitonaryEntry: `${url}/dictionary/:entryId`,
-		settings: `${url}/settings`,
-	};
+	const { enqueueSnackbar } = useSnackbar();
+	const url = useLocation();
 
 	useEffect(() => {
 		const init = async () => {
 			setLoading(true);
 			try {
-				AppToaster.show({
-					message: `YiLang initialized`,
-					intent: Intent.SUCCESS,
-				});
+				enqueueSnackbar(`YiLang initialized`, { variant: 'success' });
 			} catch (e: unknown) {
 				handleError(e);
 			}
 			setLoading(false);
 		};
 		init();
-	}, []);
+	}, [enqueueSnackbar]);
 
 	useEffect(() => {
 		if (activeLanguage) {
-			AppToaster.show({
-				message: `YiLang initialized for ${activeLanguage.name}!`,
-				intent: Intent.SUCCESS,
+			enqueueSnackbar(`YiLang initialized for ${activeLanguage.name}!`, {
+				variant: 'success',
 			});
 		}
-	}, [activeLanguage]);
+	}, [activeLanguage, enqueueSnackbar]);
 
 	return (
 		<div className="yi-layout">
 			<header>
-				<Navbar>
-					<Navbar.Group align={Alignment.LEFT}>
-						<Navbar.Heading>
-							<NavLink href="#" to={locationMap.home}>
-								<img
-									alt="YiLang.png"
-									src="/yilang.png"
-									className="yi-logo"
-								/>
-							</NavLink>
-						</Navbar.Heading>
-					</Navbar.Group>
-					<Navbar.Group align={Alignment.RIGHT}>
-						<Tabs
-							animate
-							id="navbar"
-							large
-							selectedTabId={activeTabId}
-						>
-							<Tab
-								id={locationMap.home}
-								title={
-									<NavButton
-										to={locationMap.home}
-										icon="home"
-										text="Home"
-									/>
-								}
-							/>
-							{activeDocument && (
-								<Tab
-									id={locationMap.editor
-										.split('/')
-										.slice(1, 3)
-										.join('-')}
-									title={
-										<NavButton
-											to={`${url}/editor/${activeDocument}`}
-											icon="edit"
-											text="Editor"
-										/>
-									}
-								/>
-							)}
-							<Tab
-								id={locationMap.dicitonary
-									.split('/')
-									.slice(1, 3)
-									.join('-')}
-								title={
-									<NavButton
-										to={locationMap.dicitonary}
-										icon="book"
-										text="Dictionary"
-									/>
-								}
-							/>
-							<Tab
-								id={locationMap.documents
-									.split('/')
-									.slice(1, 3)
-									.join('-')}
-								title={
-									<NavButton
-										to={locationMap.documents}
-										icon="document"
-										text="Documents"
-									/>
-								}
-							/>
-						</Tabs>
-						<Navbar.Divider />
-						<Popover2
-							interactionKind={PopoverInteractionKind.CLICK}
-							content={<SettingsPopover />}
-							modifiers={{
-								arrow: { enabled: true },
-								flip: { enabled: true },
-								preventOverflow: { enabled: true },
-							}}
-						>
-							<Button minimal icon="user" tabIndex={0} />
-						</Popover2>
-					</Navbar.Group>
-				</Navbar>
+				<ResponsiveAppBar />
 			</header>
 
 			<main className="yi-layout">
 				<div className="yi-content" ref={contentRef}>
-					<Overlay isOpen={loading} usePortal={false}>
-						<Spinner />
-					</Overlay>
-					<Switch>
-						<Route path={locationMap.home} exact>
-							<Overview />
-						</Route>
-						<Route path={locationMap.documents}>
-							<Documents />
-						</Route>
-						<Route path={locationMap.dicitonaryEntry}>
-							<DictionaryEntryPage />
-						</Route>
-						<Route path={locationMap.dicitonary}>
-							<Dictionary />
-						</Route>
-						<Route path={locationMap.editor}>
-							<Editor />
-						</Route>
-						<Route path={locationMap.settings}>
-							<Settings />
-						</Route>
-					</Switch>
+					<Outlet />
 				</div>
 			</main>
 			<footer className="yi-footer-container">

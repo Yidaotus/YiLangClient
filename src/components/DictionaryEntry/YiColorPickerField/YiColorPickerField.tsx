@@ -1,10 +1,10 @@
 import './YiColorPickerField.css';
 
-import { BgColorsOutlined } from '@ant-design/icons';
-import { Button } from 'antd';
 import React, { CSSProperties, useEffect, useRef, useState } from 'react';
 import useClickOutside from '@hooks/useClickOutside';
 import HSLColorPicker from '@components/HSLColorPicker/HSLColorPicker';
+import { ColorLens } from '@mui/icons-material';
+import { IconButton } from '@mui/material';
 
 export interface YiColorPickerFieldProps {
 	value?: string;
@@ -45,15 +45,16 @@ const YiColorPickerField: React.FC<YiColorPickerFieldProps> = (
 
 	return (
 		<div>
-			<Button
+			<IconButton
 				style={colorButtonStyle}
 				className="color-input-box"
 				onClick={handleClick}
 				onKeyPress={() => {}}
 				tabIndex={0}
 				aria-label="Open Colorpicker"
-				icon={<BgColorsOutlined />}
-			/>
+			>
+				<ColorLens />
+			</IconButton>
 			{pickerVisible ? (
 				<div className="tagform-color-picker" ref={popover}>
 					<HSLColorPicker

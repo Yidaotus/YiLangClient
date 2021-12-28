@@ -1,7 +1,7 @@
 import './DictionaryEntry.css';
 import React from 'react';
 import { IDictionaryEntry } from 'Document/Dictionary';
-import { useHistory } from 'react-router';
+import { useNavigate } from 'react-router';
 import { Button } from '@blueprintjs/core';
 
 type IDictEntryProps = {
@@ -11,7 +11,7 @@ type IDictEntryProps = {
 
 const DictionaryRootEntry: React.FC<IDictEntryProps> = (props) => {
 	const { entry, canLink } = props;
-	const history = useHistory();
+	const navigate = useNavigate();
 
 	return (
 		<>
@@ -23,7 +23,7 @@ const DictionaryRootEntry: React.FC<IDictEntryProps> = (props) => {
 								<Button
 									minimal
 									onClick={() => {
-										history.push(
+										navigate(
 											`/home/dictionary/${entry.id}`
 										);
 									}}

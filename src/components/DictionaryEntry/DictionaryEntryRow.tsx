@@ -4,7 +4,7 @@ import { IGrammarPoint, IDictionaryTag } from 'Document/Dictionary';
 import { useDictionaryEntryResolved } from '@hooks/DictionaryQueryHooks';
 import { Editor, Path, Transforms } from 'slate';
 import { ReactEditor } from 'slate-react';
-import { useHistory } from 'react-router';
+import { useNavigate } from 'react-router';
 import { Button, Spinner, Tag } from '@blueprintjs/core';
 import { Popover2 } from '@blueprintjs/popover2';
 
@@ -67,7 +67,7 @@ const DictionaryEntryRow: React.FC<IDictEntryRowProps> = ({
 	editor,
 }) => {
 	const [loading, entryResolved] = useDictionaryEntryResolved(entryId);
-	const history = useHistory();
+	const navigate = useNavigate();
 
 	return (
 		<>
@@ -101,9 +101,7 @@ const DictionaryEntryRow: React.FC<IDictEntryRowProps> = ({
 						style={{ width: '25px' }}
 						minimal
 						onMouseUp={() => {
-							history.push(
-								`/home/dictionary/${entryResolved.id}`
-							);
+							navigate(`/home/dictionary/${entryResolved.id}`);
 						}}
 						icon="book"
 					/>

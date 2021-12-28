@@ -1,13 +1,13 @@
 import './Login.css';
 
 import React, { useState } from 'react';
-import { Redirect } from 'react-router-dom';
+import { Navigate } from 'react-router-dom';
 import RegisterForm from 'components/Login/RegisterForm';
 import { useUserContext } from '@hooks/useUserContext';
 import { LS_TOKEN_POINTER } from 'api/api.service';
 import { useQueryClient } from 'react-query';
 import { login, register } from 'api/user.service';
-import { Flex, Box, Spinner, Button, Stack, Link } from '@chakra-ui/react';
+import { Flex, Box, Spinner, Stack, Link } from '@chakra-ui/react';
 import LoginForm from '../components/Login/LoginForm';
 
 export interface IRegisterData {
@@ -59,7 +59,7 @@ const LoginView: React.FC = () => {
 	};
 
 	return user ? (
-		<Redirect to="/home" />
+		<Navigate to="/home" replace />
 	) : (
 		<Flex minH="100vh" align="center" justify="center">
 			<Box rounded="lg" boxShadow="md" p={8} minWidth={400}>

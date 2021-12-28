@@ -8,11 +8,10 @@ import React, {
 	useRef,
 } from 'react';
 import { useForm } from 'react-hook-form';
-import { DictionaryEntryID } from 'Document/Utility';
+import { DictionaryEntryID, DictionaryTagID } from 'Document/Utility';
 import {
 	IDictionaryEntry,
 	IDictionaryEntryResolved,
-	IDictionaryTag,
 	IGrammarPoint,
 } from 'Document/Dictionary';
 import TagForm, {
@@ -20,13 +19,21 @@ import TagForm, {
 	IDictionaryTagInput,
 } from '@components/DictionaryEntry/TagForm/TagForm';
 import handleError from '@helpers/Error';
+import { yupResolver } from '@hookform/resolvers/yup';
 import { useAddDictionaryTag } from '@hooks/useTags';
 import { Spinner } from '@blueprintjs/core';
 import {
 	useAddDictionaryEntry,
 	useUpdateDictionaryEntry,
 } from '@hooks/DictionaryQueryHooks';
-import EntryForm, { IDictionaryEntryInput } from '../EntryForm/EntryForm';
+import EntryForm, {
+	entrySchema,
+	IDictionaryEntryInForm,
+	IDictionaryEntryInput,
+	IDictionaryTagInForm,
+	INITIAL_ENTRY_FORM,
+	IRootsInput,
+} from '../EntryForm/EntryForm';
 
 export interface IWordInputState {
 	entryKey: string | IDictionaryEntryResolved;
@@ -100,19 +107,18 @@ export interface IWordInputRef {
 }
 
 const isOldRoot = (
-	input: IDictionaryEntryInput | IDictionaryEntry
-): input is IDictionaryEntry => {
+	input: IDictionaryEntryInput | IDictionaryEntryInForm
+): input is IDictionaryEntryInForm => {
 	return 'id' in input && input.id !== undefined;
 };
 
 const isUnsavedTag = (
-	input: IDictionaryTagInput | IDictionaryTag
-): input is IDictionaryTagInput =>
-	!('id' in input) || ('id' in input && input.id === undefined);
+	input: IDictionaryTagInput | IDictionaryTagInForm
+): input is IDictionaryTagInput => 'id' in input && input.id === undefined;
 
 const isPersistedTag = (
-	input: IDictionaryTagInput | IDictionaryTag
-): input is IDictionaryTag => 'id' in input && input.id !== undefined;
+	input: IDictionaryTagInput | IDictionaryTagInForm
+): input is IDictionaryTagInForm => 'id' in input && input.id !== undefined;
 
 const WordInput: React.ForwardRefRenderFunction<
 	IWordInputRef,
@@ -121,8 +127,14 @@ const WordInput: React.ForwardRefRenderFunction<
 	const previousEntryKey = useRef<string | IDictionaryEntryResolved | null>(
 		null
 	);
-	const wordForm = useForm<IDictionaryEntryInput>();
-	const rootForm = useForm<IDictionaryEntryInput>();
+	const wordForm = useForm<IDictionaryEntryInput>({
+		resolver: yupResolver(entrySchema),
+		reValidateMode: 'onChange',
+		defaultValues: INITIAL_ENTRY_FORM,
+	});
+	const rootForm = useForm<IDictionaryEntryInput>({
+		defaultValues: INITIAL_ENTRY_FORM,
+	});
 	const tagForm = useForm<IDictionaryTagInput>({
 		defaultValues: INITIAL_TAG_FORM_VALUES,
 	});
@@ -137,13 +149,7 @@ const WordInput: React.ForwardRefRenderFunction<
 	useEffect(() => {
 		if (previousEntryKey.current !== entryKey) {
 			if (typeof entryKey === 'string') {
-				wordForm.reset({
-					key: entryKey,
-					comment: '',
-					tags: [],
-					translations: [],
-					roots: [],
-				});
+				wordForm.reset({ ...INITIAL_ENTRY_FORM, key: entryKey });
 			} else {
 				wordForm.reset(entryKey);
 			}
@@ -190,7 +196,7 @@ const WordInput: React.ForwardRefRenderFunction<
 				const rootIds: Array<DictionaryEntryID> = [];
 				for (const inputRoot of input.roots) {
 					if (isOldRoot(inputRoot)) {
-						rootIds.push(inputRoot.id);
+						rootIds.push(inputRoot.id as DictionaryEntryID);
 					} else {
 						const newTagsToSave =
 							inputRoot.tags.filter(isUnsavedTag);
@@ -215,14 +221,14 @@ const WordInput: React.ForwardRefRenderFunction<
 
 						const rootToCreate: Omit<
 							IDictionaryEntry,
-							'id' | 'lang'
+							'id' | 'lang' | 'createdAt'
 						> = {
 							...inputRoot,
 							roots: [],
 							tags: [
 								...input.tags
 									.filter(isPersistedTag)
-									.map((pTag) => pTag.id),
+									.map((pTag) => pTag.id as DictionaryTagID),
 								...createdTagIds,
 							],
 						};
@@ -250,20 +256,20 @@ const WordInput: React.ForwardRefRenderFunction<
 				}
 				const createdTagIds = await Promise.all(tagPromises);
 
-				const entryToUpsert: Optional<IDictionaryEntry, 'id' | 'lang'> =
-					{
-						...input,
-						roots: rootIds,
-						id: input.id
-							? (input.id as DictionaryEntryID)
-							: undefined,
-						tags: [
-							...input.tags
-								.filter(isPersistedTag)
-								.map((pTag) => pTag.id),
-							...createdTagIds,
-						],
-					};
+				const entryToUpsert: Optional<
+					IDictionaryEntry,
+					'id' | 'lang' | 'createdAt'
+				> = {
+					...input,
+					roots: rootIds,
+					id: input.id ? (input.id as DictionaryEntryID) : undefined,
+					tags: [
+						...input.tags
+							.filter(isPersistedTag)
+							.map((pTag) => pTag.id as DictionaryTagID),
+						...createdTagIds,
+					],
+				};
 
 				let resultId;
 				if (entryToUpsert.id) {
@@ -320,17 +326,25 @@ const WordInput: React.ForwardRefRenderFunction<
 						let targetForm;
 						if (previousState === 'word') {
 							targetForm = wordForm;
+							const currentFormValues = targetForm.getValues();
+							targetForm.reset({
+								...currentFormValues,
+								tags: [
+									...(currentFormValues.tags || []),
+									tagValues,
+								],
+							});
 						} else {
 							targetForm = rootForm;
+							const currentFormValues = targetForm.getValues();
+							targetForm.reset({
+								...currentFormValues,
+								tags: [
+									...(currentFormValues.tags || []),
+									tagValues,
+								],
+							});
 						}
-						const currentFormValues = targetForm.getValues();
-						targetForm.reset({
-							...currentFormValues,
-							tags: [
-								...(currentFormValues.tags || []),
-								tagValues,
-							],
-						});
 					}
 					dispatchWordEditorState({
 						type: 'popState',
@@ -344,7 +358,9 @@ const WordInput: React.ForwardRefRenderFunction<
 			try {
 				const correct = await rootForm.trigger();
 				if (correct) {
-					const rootValues = rootForm.getValues();
+					// Casting because I know it's safe. Maybe not the cleanest solution
+					// but the most ergonomic one as for now
+					const rootValues = rootForm.getValues() as IRootsInput;
 					rootForm.reset();
 					const currentWordFormValues = wordForm.getValues();
 					wordForm.reset({
@@ -357,7 +373,7 @@ const WordInput: React.ForwardRefRenderFunction<
 					});
 				}
 			} catch (e) {
-				// The forms will show appropriate erros themselfes.
+				// The forms will show appropriate errors themselves.
 			}
 		}
 		return result;
