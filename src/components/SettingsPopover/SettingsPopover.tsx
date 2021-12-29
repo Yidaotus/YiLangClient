@@ -1,4 +1,3 @@
-import './SettingsPopover.css';
 import React, { useCallback } from 'react';
 import { useNavigate } from 'react-router';
 import {
@@ -6,29 +5,22 @@ import {
 	useLanguageConfigs,
 	useSetActiveLanguage,
 } from '@hooks/ConfigQueryHooks';
-import { Button, Divider, Icon, Intent, MenuItem } from '@blueprintjs/core';
-import { ItemRenderer, Select } from '@blueprintjs/select';
-import { ILanguageConfig } from '../../Document/Config';
-
-const LanguageSelect = Select.ofType<ILanguageConfig>();
-
-export const renderLanguageConfig: ItemRenderer<ILanguageConfig> = (
-	config,
-	{ handleClick, modifiers }
-) => {
-	if (!modifiers.matchesPredicate) {
-		return null;
-	}
-	return (
-		<MenuItem
-			active={modifiers.active}
-			disabled={modifiers.disabled}
-			key={config.id}
-			onClick={handleClick}
-			text={config.name}
-		/>
-	);
-};
+import {
+	Language as LanguageIcon,
+	Logout as LogoutIcon,
+	SettingsApplications as SettingsApplicationsIcon,
+} from '@mui/icons-material';
+import {
+	Divider,
+	Stack,
+	Box,
+	Select,
+	Button,
+	FormControl,
+	InputLabel,
+	MenuItem,
+	SelectChangeEvent,
+} from '@mui/material';
 
 const SettingsPopover: React.FC = () => {
 	const activeLanguage = useActiveLanguageConf();
@@ -41,66 +33,88 @@ const SettingsPopover: React.FC = () => {
 	}, []);
 
 	const changeLanguage = useCallback(
-		(selectedLanguage: ILanguageConfig) => {
+		(selectedLanguageId: string) => {
 			const languageConfig = availableLanguages.find(
-				(langConf) => langConf.id === selectedLanguage.id
+				(langConf) => langConf.id === selectedLanguageId
 			);
 			if (languageConfig) {
-				setActiveLanguage.mutate(languageConfig.id);
+				setActiveLanguage.mutate(selectedLanguageId);
 			}
 		},
 		[availableLanguages, setActiveLanguage]
 	);
 
+	const handleLanguageChange = useCallback(
+		(event: SelectChangeEvent<string | null>) => {
+			if (event.target.value) {
+				changeLanguage(event.target.value);
+			}
+		},
+		[changeLanguage]
+	);
+
 	return (
-		<div className="settings-popover">
-			<div className="settings-language">
-				<Icon
-					icon="translate"
-					style={{ marginRight: '5px', marginLeft: '5px' }}
-				/>
-				<LanguageSelect
-					activeItem={activeLanguage}
-					itemRenderer={renderLanguageConfig}
-					onItemSelect={(item) => {
-						changeLanguage(item);
-					}}
-					items={availableLanguages}
-					popoverProps={{ minimal: true, usePortal: false }}
-					className="settings-language-select"
-					matchTargetWidth
-					filterable={false}
-					fill
-				>
-					<Button
-						text={activeLanguage?.name || 'note selected!'}
-						minimal
-						fill
-						rightIcon="double-caret-vertical"
-					/>
-				</LanguageSelect>
-			</div>
-			<Divider />
+		<Stack
+			spacing={1}
+			alignItems="center"
+			padding="5px"
+			justifyContent="end"
+		>
+			<Stack
+				spacing={2}
+				direction="row"
+				alignItems="center"
+				sx={{
+					display: 'flex',
+					width: '100%',
+				}}
+			>
+				<LanguageIcon />
+				<Box sx={{ flexGrow: 1 }}>
+					<FormControl
+						variant="standard"
+						size="small"
+						sx={{ m: 1, minWidth: 120 }}
+					>
+						<InputLabel id="active-language-label">
+							Active Language Config
+						</InputLabel>
+						<Select
+							labelId="active-language-label"
+							id="activa-language-select"
+							value={activeLanguage?.id || ''}
+							onChange={handleLanguageChange}
+							label="Active Language"
+						>
+							{availableLanguages.map((language) => (
+								<MenuItem value={language.id}>
+									{language.name}
+								</MenuItem>
+							))}
+						</Select>
+					</FormControl>
+				</Box>
+			</Stack>
+			<Divider variant="middle" sx={{ width: '100%' }} />
 			<Button
-				icon="settings"
 				onClick={() => {
 					navigate(`/home/settings`);
 				}}
-				fill
-				minimal
+				startIcon={<SettingsApplicationsIcon />}
+				variant="outlined"
+				fullWidth
 			>
 				Settings
 			</Button>
-			<Divider />
 			<Button
-				intent={Intent.DANGER}
-				icon="log-out"
-				style={{ width: '100%' }}
 				onClick={logoutConfirm}
+				endIcon={<LogoutIcon />}
+				variant="outlined"
+				fullWidth
 			>
 				Logout
 			</Button>
-		</div>
+		</Stack>
 	);
 };
 

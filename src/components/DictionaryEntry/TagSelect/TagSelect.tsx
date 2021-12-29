@@ -100,7 +100,10 @@ const TagSelect: React.FC<ITagSelectProps> = ({
 						...params.InputProps,
 						startAdornment: (
 							<InputAdornment position="start">
-								<Search />
+								<>
+									<Search />
+									{params.InputProps.startAdornment}
+								</>
 							</InputAdornment>
 						),
 					}}

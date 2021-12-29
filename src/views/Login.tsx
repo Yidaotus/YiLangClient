@@ -7,7 +7,7 @@ import { useUserContext } from '@hooks/useUserContext';
 import { LS_TOKEN_POINTER } from 'api/api.service';
 import { useQueryClient } from 'react-query';
 import { login, register } from 'api/user.service';
-import { Flex, Box, Spinner, Stack, Link } from '@chakra-ui/react';
+import { Paper, Box, Stack, Grid, Alert, Button } from '@mui/material';
 import LoginForm from '../components/Login/LoginForm';
 
 export interface IRegisterData {
@@ -36,6 +36,8 @@ const LoginView: React.FC = () => {
 	};
 
 	const loginCB = async (loginData: { email: string; password: string }) => {
+		setErrors([]);
+		setInfoMsg('');
 		setIsLoading(true);
 		try {
 			const { token } = await login(loginData);
@@ -51,71 +53,79 @@ const LoginView: React.FC = () => {
 	};
 
 	const registerCB = async (registerData: IRegisterData) => {
-		await register(registerData);
-		setInfoMsg(
-			'Registration complete! Please check your emails and validate your Account'
-		);
-		setRegister(false);
+		setErrors([]);
+		setInfoMsg('');
+		setIsLoading(true);
+		try {
+			await register(registerData);
+			setInfoMsg(
+				'Registration complete! Please check your emails and validate your Account'
+			);
+			setRegister(false);
+		} catch (e) {
+			if (e instanceof Error) {
+				const { message } = e;
+				setErrors((stateErrors) => [...stateErrors, message]);
+			}
+		}
+		setIsLoading(false);
 	};
 
 	return user ? (
 		<Navigate to="/home" replace />
 	) : (
-		<Flex minH="100vh" align="center" justify="center">
-			<Box rounded="lg" boxShadow="md" p={8} minWidth={400}>
-				<Stack spacing={4}>
-					<div className="login-logo">
-						<img src="yilang.png" alt="YiText" />
-					</div>
-					{isLoading && (
-						<Spinner
-							thickness="4px"
-							speed="0.65s"
-							emptyColor="gray.200"
-							color="blue.500"
-							size="xl"
-						/>
-					)}
-					{isRegister ? (
-						<RegisterForm submit={registerCB} />
-					) : (
-						<LoginForm
-							initialEmail=""
-							initialPassword=""
-							submit={loginCB}
-						/>
-					)}
-					<div className="sub-form">
-						<p>
-							Need to
-							<Link
-								color="green.500"
-								onClick={toggleRegister}
-								onKeyDown={toggleRegister}
-							>
-								{isRegister ? ' login' : ' register'}?
-							</Link>
-						</p>
-					</div>
+		<Grid
+			container
+			direction="row"
+			alignItems="center"
+			justifyContent="center"
+			height="100vh"
+		>
+			<Paper
+				elevation={3}
+				sx={{
+					p: 3,
+					width: '400px',
+				}}
+			>
+				<Stack spacing={4} alignItems="center">
+					<img src="yilang.png" alt="YiText" width="200px" />
 					{errors.length > 0 && (
-						<div className="flex justify-center pt-4">
-							<span className="text-md text-red-600">
-								{errors.map((err) => (
-									<span>{err}</span>
-								))}
-							</span>
-						</div>
+						<Alert severity="error" sx={{ width: '100%' }}>
+							{errors.map((err) => (
+								<span>{err}</span>
+							))}
+						</Alert>
 					)}
 					{infoMsg && (
-						<div className="flex justify-center pt-4">
-							<span className="text-md text-green-600">
-								{infoMsg}
-							</span>
-						</div>
+						<Alert severity="info" sx={{ width: '100%' }}>
+							{infoMsg}
+						</Alert>
 					)}
+					<Box sx={{ width: '100%' }}>
+						{isRegister ? (
+							<RegisterForm submit={registerCB} />
+						) : (
+							<LoginForm
+								initialEmail=""
+								initialPassword=""
+								submit={loginCB}
+							/>
+						)}
+					</Box>
+					<span>
+						Need to
+						<Button
+							onClick={toggleRegister}
+							onKeyDown={toggleRegister}
+							disabled={isLoading}
+						>
+							{isRegister ? ' login' : ' register'}?
+						</Button>
+					</span>
 				</Stack>
-			</Box>
-		</Flex>
+			</Paper>
+		</Grid>
 	);
 };
 

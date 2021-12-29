@@ -79,6 +79,18 @@ const theme = createTheme({
 				size: 'small',
 			},
 		},
+		MuiAppBar: {
+			styleOverrides: {
+				root: {
+					'& .MuiTabs-root .MuiButtonBase-root': {
+						'&.Mui-selected': {
+							color: '#FFFFFF',
+						},
+						color: '#AAAAAA',
+					},
+				},
+			},
+		},
 		MuiAutocomplete: {
 			styleOverrides: {
 				paper: {

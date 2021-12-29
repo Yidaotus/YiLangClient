@@ -6,7 +6,7 @@ import { useNavigate } from 'react-router';
 import DictionaryEntry from '@components/DictionaryEntry/DictionaryEntry';
 import { useActiveLanguageConf } from '@hooks/ConfigQueryHooks';
 import { useListDictionaryEntries } from '@hooks/DictionaryQueryHooks';
-import { Card, Divider, Elevation, Overlay, Spinner } from '@blueprintjs/core';
+import { Backdrop, Card, CircularProgress, Divider } from '@mui/material';
 
 // const excerptsToLoad = 3;
 const Overview: React.FC = () => {
@@ -30,9 +30,9 @@ const Overview: React.FC = () => {
 
 	return (
 		<div>
-			<Overlay isOpen={!!loading} usePortal={false}>
-				<Spinner />
-			</Overlay>
+			<Backdrop open={!!loading}>
+				<CircularProgress color="inherit" />
+			</Backdrop>
 			<div>
 				<div>
 					<Card title="Latest documents">
@@ -58,9 +58,8 @@ const Overview: React.FC = () => {
 					</Card>
 				</div>
 				<div>
-					<Card elevation={Elevation.TWO}>
-						<h2 className="bp3-heading">Latest Entries</h2>
-						<Divider />
+					<Card>
+						<h2>Latest Entries</h2>
 					</Card>
 				</div>
 			</div>

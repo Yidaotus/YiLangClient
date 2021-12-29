@@ -1,6 +1,5 @@
 import React from 'react';
 import { YiEditor } from '@components/Editor/YiEditor';
-import { IconName } from '@blueprintjs/core';
 import { Editor, Transforms, Element as SlateElement, Range } from 'slate';
 import ToolbarButton from './ToolbarButton';
 
@@ -9,7 +8,7 @@ export interface IInputWrapperButtonProps {
 	onChange: () => void;
 	type: SlateElement['type'];
 	title: string;
-	icon: IconName;
+	icon: React.ReactElement | string;
 	showInput: () => void;
 }
 

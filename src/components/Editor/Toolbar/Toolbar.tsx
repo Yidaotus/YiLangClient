@@ -6,7 +6,7 @@ import useClickOutside from '@hooks/useClickOutside';
 import { useLookupSources } from '@hooks/ConfigQueryHooks';
 import LookupSourceButton from '@components/LookupSourceButton';
 import DialogButton from '@editor/Toolbar/Tools/DialogButton';
-import { Divider } from '@blueprintjs/core';
+import { Divider } from '@mui/material';
 
 import AlignButton from './Tools/AlignButton';
 import ListButton from './Tools/ListButton';
@@ -110,7 +110,7 @@ const Toolbar: React.FC<IToolbarProps> = ({
 					<LookupSourceButton source={luSource} key={luSource.name} />
 				))}
 			</ToolbarMenu>
-			<Divider className="toolbar-divider" />
+			<Divider orientation="vertical" flexItem />
 			<AlignButton
 				align="left"
 				icon="align-left"
@@ -129,7 +129,7 @@ const Toolbar: React.FC<IToolbarProps> = ({
 				title="Right Align"
 				{...sharedProps}
 			/>
-			<Divider className="toolbar-divider" />
+			<Divider orientation="vertical" flexItem />
 			<ToolbarMenu
 				type="blockType"
 				icon="vertical-distribution"
@@ -168,7 +168,7 @@ const Toolbar: React.FC<IToolbarProps> = ({
 					{...sharedProps}
 				/>
 			</ToolbarMenu>
-			<Divider className="toolbar-divider" />
+			<Divider orientation="vertical" flexItem />
 			<ToolbarMenu
 				type="color"
 				icon="highlight"
@@ -186,7 +186,7 @@ const Toolbar: React.FC<IToolbarProps> = ({
 					/>
 				))}
 			</ToolbarMenu>
-			<Divider className="toolbar-divider" />
+			<Divider orientation="vertical" flexItem />
 			<ToolbarMenu
 				type="glyphs"
 				icon="arrow-down"
@@ -232,7 +232,7 @@ const Toolbar: React.FC<IToolbarProps> = ({
 					{...sharedProps}
 				/>
 			</ToolbarMenu>
-			<Divider />
+			<Divider orientation="vertical" flexItem />
 			<ToolbarButton
 				icon="undo"
 				tooltip="Undo"

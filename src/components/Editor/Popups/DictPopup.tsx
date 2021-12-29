@@ -3,7 +3,7 @@ import React from 'react';
 import DictionaryEntry from '@components/DictionaryEntry/DictionaryEntry';
 import DictionaryRootEntry from '@components/DictionaryEntry/DictionaryRootEntry';
 import { IDictionaryEntryResolved } from 'Document/Dictionary';
-import { Divider } from '@blueprintjs/core';
+import { Divider } from '@mui/material';
 
 export interface IDictPopupProps {
 	entry: IDictionaryEntryResolved;

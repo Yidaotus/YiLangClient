@@ -105,7 +105,10 @@ const DictionarySelect: React.FC<IRootSelectProps> = ({
 						...params.InputProps,
 						startAdornment: (
 							<InputAdornment position="start">
-								<Search />
+								<>
+									<Search />
+									{params.InputProps.startAdornment}
+								</>
 							</InputAdornment>
 						),
 					}}

@@ -1,34 +1,38 @@
 import './SavingIndicator.css';
 import React from 'react';
-import { Icon, Intent, Spinner } from '@blueprintjs/core';
+import { Box, Alert, Snackbar, CircularProgress } from '@mui/material';
 
 export type SavingState = 'LOADING' | 'SUCCESS' | 'ERROR' | 'IDLE';
 
 const SavingIndicator: React.FC<{ savingState: SavingState }> = ({
 	savingState,
-}) => {
-	return savingState !== 'IDLE' ? (
-		<div className="saving-indicator-container">
+}) => (
+	<Snackbar
+		open={savingState !== 'IDLE'}
+		anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+	>
+		<Box>
 			{savingState === 'LOADING' && (
-				<>
-					<Spinner intent={Intent.PRIMARY} size={20} />
-					<span>Saving document...</span>
-				</>
+				<Alert
+					icon={<CircularProgress size={20} />}
+					severity="info"
+					sx={{ width: '100%' }}
+				>
+					Saving document...
+				</Alert>
 			)}
 			{savingState === 'ERROR' && (
-				<>
-					<Icon intent={Intent.WARNING} icon="error" />
-					<span> Something went wrong!</span>
-				</>
+				<Alert severity="error" sx={{ width: '100%' }}>
+					Something went wrong
+				</Alert>
 			)}
 			{savingState === 'SUCCESS' && (
-				<>
-					<Icon intent={Intent.SUCCESS} icon="tick" />
-					<span> Document saved</span>
-				</>
+				<Alert severity="success" sx={{ width: '100%' }}>
+					Document saved
+				</Alert>
 			)}
-		</div>
-	) : null;
-};
+		</Box>
+	</Snackbar>
+);
 
 export default SavingIndicator;

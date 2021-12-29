@@ -1,7 +1,7 @@
-import { Tooltip2 } from '@blueprintjs/popover2';
 import React from 'react';
 import { RenderElementProps } from 'slate-react';
 import { SentenceElement } from '@components/Editor/YiEditor';
+import { Tooltip } from '@mui/material';
 
 export type SentenceFragmentProps = Omit<RenderElementProps, 'element'> & {
 	element: SentenceElement;
@@ -18,13 +18,9 @@ const SentenceFragment: React.FC<SentenceFragmentProps> = ({
 				borderBottom: '1px dashed #8DA46E',
 			}}
 		>
-			<Tooltip2
-				content={element.translation}
-				hoverOpenDelay={500}
-				position="top"
-			>
+			<Tooltip title={element.translation}>
 				<span>{children}</span>
-			</Tooltip2>
+			</Tooltip>
 		</span>
 	);
 };

@@ -1,4 +1,3 @@
-import { notification } from 'antd';
 import { IApiResponse } from 'api/definitions/api';
 
 const isApiResponse = (e: unknown): e is IApiResponse<void> => {
@@ -15,11 +14,14 @@ const handleError = (e: unknown): void => {
 	} else if (isApiResponse(e)) {
 		description = e.message;
 	}
+	/*
+	TODO: notistack with hook not possible here I think
 	notification.open({
 		message: 'Error',
 		description,
 		type: 'error',
 	});
+	*/
 };
 
 export default handleError;

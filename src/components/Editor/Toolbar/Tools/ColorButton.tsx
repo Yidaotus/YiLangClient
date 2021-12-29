@@ -1,6 +1,6 @@
 import React from 'react';
 import { Editor } from 'slate';
-import { Icon } from '@blueprintjs/core';
+import InvertColorsIcon from '@mui/icons-material/InvertColors';
 import ToolbarButton from './ToolbarButton';
 
 export interface IColorButtonProps {
@@ -20,7 +20,7 @@ const ColorButton: React.FC<IColorButtonProps> = ({
 
 	return (
 		<ToolbarButton
-			text={<Icon icon="tint" color={color} />}
+			text={<InvertColorsIcon sx={{ color }} />}
 			title={title}
 			action={() => {
 				if (selectionColor === color) {

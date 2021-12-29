@@ -1,13 +1,13 @@
 import './DictionaryEntry.css';
-import React from 'react';
+import React, { useState } from 'react';
 import {
 	IDictionaryEntryResolved,
 	IDictionaryTag,
 	IGrammarPoint,
 } from 'Document/Dictionary';
 import { useNavigate } from 'react-router';
-import { Button, Tag } from '@blueprintjs/core';
-import { Popover2 } from '@blueprintjs/popover2';
+import { Button, Chip, Popover } from '@mui/material';
+import { Info as InfoIcon } from '@mui/icons-material';
 
 type IDictEntryProps = {
 	entry: IDictionaryEntryResolved;
@@ -32,31 +32,47 @@ export const GrammarPoint: React.FC<{ point: IGrammarPoint; color?: string }> =
 	};
 
 const EntryTag: React.FC<{ tag: IDictionaryTag }> = ({ tag }) => {
-	const tagItem = (
-		<Tag
-			icon={tag.grammarPoint && 'info-sign'}
-			style={{ backgroundColor: tag.color || 'blue', marginLeft: '5px' }}
-			key={tag.name}
-		>
-			{tag.name}
-		</Tag>
-	);
+	const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null);
+	const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
+		setAnchorEl(event.currentTarget);
+	};
+	const handleClose = () => {
+		setAnchorEl(null);
+	};
+
+	const open = Boolean(anchorEl);
+	const id = open ? 'simple-popover' : undefined;
 	return tag.grammarPoint ? (
-		<Popover2
-			content={
-				<div style={{ padding: '10px' }}>
-					<GrammarPoint point={tag.grammarPoint} color={tag.color} />
-				</div>
-			}
-			interactionKind="click"
-			className="clickable-tag pt-popover-content-sizing"
-			portalClassName="popover-class"
-			placement="bottom"
-		>
-			{tagItem}
-		</Popover2>
+		<>
+			<Button
+				aria-describedby={id}
+				variant="contained"
+				onClick={handleClick}
+			>
+				{tag.name}
+			</Button>
+			<Popover
+				id={id}
+				open={open}
+				anchorEl={anchorEl}
+				onClose={handleClose}
+				anchorOrigin={{
+					vertical: 'bottom',
+					horizontal: 'left',
+				}}
+			>
+				<GrammarPoint point={tag.grammarPoint} color={tag.color} />
+			</Popover>
+		</>
 	) : (
-		tagItem
+		<Chip
+			style={{
+				backgroundColor: tag.color || 'blue',
+				marginLeft: '5px',
+			}}
+			key={tag.name}
+			label={tag.name}
+		/>
 	);
 };
 
@@ -72,7 +88,6 @@ const DictionaryEntry: React.FC<IDictEntryProps> = (props) => {
 						{canLink ? (
 							<h1 className="dictentry-head-item">
 								<Button
-									minimal
 									onClick={() => {
 										navigate(
 											`/home/dictionary/${entry.id}`

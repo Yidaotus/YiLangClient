@@ -1,6 +1,5 @@
 import './Image.css';
 import React, { useCallback, useState } from 'react';
-import { Input } from 'antd';
 import {
 	RenderElementProps,
 	useFocused,
@@ -10,6 +9,7 @@ import {
 import { ImageElement } from '@components/Editor/YiEditor';
 import { Editor, Element as SlateElement, Transforms } from 'slate';
 import isHotkey from 'is-hotkey';
+import { TextField } from '@mui/material';
 
 export type IImageBlockData = Omit<RenderElementProps, 'element'> & {
 	element: ImageElement;
@@ -104,15 +104,13 @@ const ImageBlock: React.FC<IImageBlockData> = ({
 					}}
 				/>
 				{isEditingCaption ? (
-					<Input
+					<TextField
 						autoFocus
-						className="image-caption-input"
 						type="text"
 						defaultValue={element.caption}
 						onKeyDown={onKeyDown}
 						onChange={onCaptionChange}
 						onBlur={onToggleCaptionEditMode}
-						style={{ margin: 'auto', textAlign: 'center' }}
 					/>
 				) : (
 					<div

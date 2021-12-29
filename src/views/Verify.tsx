@@ -1,5 +1,4 @@
 import React, { FC, useState, useEffect } from 'react';
-import { useDispatch } from 'react-redux';
 import { useParams, useNavigate } from 'react-router-dom';
 
 export interface IRegisterData {
@@ -16,7 +15,6 @@ export interface ILoginData {
 const VerifyView: FC = () => {
 	const { code } = useParams<{ code: string }>();
 	const [errors, setErrors] = useState<string[]>(new Array<string>());
-	const dispatch = useDispatch();
 	const navigate = useNavigate();
 
 	useEffect(() => {
@@ -28,7 +26,7 @@ const VerifyView: FC = () => {
 		};
 
 		verifyCB();
-	}, [code, dispatch, navigate]);
+	}, [code, navigate]);
 
 	return (
 		<div className="rounded-t-lg overflow-hidden border-t border-l border-r border-gray-400 flex justify-center p-8">

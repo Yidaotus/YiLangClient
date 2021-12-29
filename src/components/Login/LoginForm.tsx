@@ -2,15 +2,9 @@ import React from 'react';
 import * as Yup from 'yup';
 import { ILoginData } from 'views/Login';
 import { yupResolver } from '@hookform/resolvers/yup';
-import { useForm } from 'react-hook-form';
-import {
-	Stack,
-	Button,
-	FormControl,
-	FormErrorMessage,
-	FormLabel,
-	Input,
-} from '@chakra-ui/react';
+import { useForm, Controller } from 'react-hook-form';
+import { Stack, TextField } from '@mui/material';
+import LoadingButton from '@mui/lab/LoadingButton';
 
 interface ILogin {
 	email: string;
@@ -35,8 +29,8 @@ const LoginForm: React.FC<ILoginFormProps> = ({
 }: ILoginFormProps) => {
 	const {
 		handleSubmit,
-		formState: { errors, isSubmitting },
-		register,
+		formState: { isSubmitting },
+		control,
 	} = useForm<ILogin>({
 		resolver: yupResolver(schema),
 		defaultValues: {
@@ -48,31 +42,46 @@ const LoginForm: React.FC<ILoginFormProps> = ({
 	return (
 		<form onSubmit={handleSubmit(submit)} noValidate>
 			<Stack spacing={4}>
-				<FormControl isInvalid={!!errors.email}>
-					<FormLabel>Email address</FormLabel>
-					<Input
-						type="email"
-						disabled={isSubmitting}
-						{...register('email')}
-					/>
-					<FormErrorMessage>
-						{errors.email && errors.email.message}
-					</FormErrorMessage>
-				</FormControl>
-				<FormControl isInvalid={!!errors.password}>
-					<FormLabel>Password</FormLabel>
-					<Input
-						type="password"
-						disabled={isSubmitting}
-						{...register('password')}
-					/>
-					<FormErrorMessage>
-						{errors.password && errors.password.message}
-					</FormErrorMessage>
-				</FormControl>
-				<Button isLoading={isSubmitting} type="submit">
+				<Controller
+					name="email"
+					control={control}
+					defaultValue=""
+					render={({ field, fieldState: { error } }) => (
+						<TextField
+							{...field}
+							disabled={isSubmitting}
+							error={!!error}
+							variant="outlined"
+							helperText={error?.message || null}
+							label="Email"
+							placeholder="Email"
+						/>
+					)}
+				/>
+				<Controller
+					name="password"
+					control={control}
+					defaultValue=""
+					render={({ field, fieldState: { error } }) => (
+						<TextField
+							{...field}
+							error={!!error}
+							disabled={isSubmitting}
+							type="password"
+							variant="outlined"
+							helperText={error?.message || null}
+							label="Password"
+							placeholder="Password"
+						/>
+					)}
+				/>
+				<LoadingButton
+					loading={isSubmitting}
+					type="submit"
+					variant="contained"
+				>
 					Sign In
-				</Button>
+				</LoadingButton>
 			</Stack>
 		</form>
 	);

@@ -1,9 +1,19 @@
 import './LangConfForm.css';
 import React from 'react';
 import { Controller, useFieldArray, UseFormReturn } from 'react-hook-form';
-import { Button, InputGroup, Label } from '@blueprintjs/core';
-import { InfoCircleOutlined } from '@ant-design/icons';
-import { Tooltip2 } from '@blueprintjs/popover2';
+import {
+	Info as InfoIcon,
+	Remove as RemoveIcon,
+	Add as AddIcon,
+} from '@mui/icons-material';
+import {
+	Box,
+	Tooltip,
+	TextField,
+	IconButton,
+	Button,
+	Stack,
+} from '@mui/material';
 import { ILanguageConfig } from '../../../Document/Config';
 
 type ILangFormProps = UseFormReturn<ILanguageConfig>;
@@ -15,75 +25,76 @@ const LangConfForm: React.FC<ILangFormProps> = ({ control, register }) => {
 	});
 	return (
 		<>
-			<h3>Name</h3>
 			<input hidden {...register('id')} />
-			<Label>
-				Language Name
-				<Controller
-					name="name"
-					control={control}
-					defaultValue=""
-					render={({ field }) => (
-						<InputGroup large placeholder="Name" {...field} />
-					)}
-				/>
-			</Label>
-			<div className="lu-title">
+			<Controller
+				name="name"
+				control={control}
+				defaultValue=""
+				render={({ field }) => (
+					<TextField {...field} placeholder="Name" label="Name" />
+				)}
+			/>
+			<Box
+				sx={{
+					display: 'flex',
+					alignItems: 'center',
+				}}
+			>
 				<h3>Lookup Sources</h3>
-				<Tooltip2
-					placement="bottom"
-					content='
+				<Tooltip
+					title='
 						To create a lookup source enter a name and the URL for
 						the source. Important: replace the search string with
 						"&#123;&#125;". YiLang will substitude
 						"&#123;&#125;" with the given search string.'
 				>
-					<InfoCircleOutlined />
-				</Tooltip2>
-			</div>
-			{fields.map((fieldEntry, index) => (
-				<div className="source-sub-form" key={fieldEntry.id}>
-					<Controller
-						name={`lookupSources.${index}.priority`}
-						defaultValue={fieldEntry.priority}
-						control={control}
-						render={({ field }) => <input hidden {...field} />}
-					/>
-					<Controller
-						name={`lookupSources.${index}.name`}
-						defaultValue={fieldEntry.name}
-						control={control}
-						render={({ field }) => (
-							<InputGroup large placeholder="Name" {...field} />
-						)}
-					/>
-					<Controller
-						name={`lookupSources.${index}.source`}
-						defaultValue={fieldEntry.source}
-						control={control}
-						render={({ field }) => (
-							<InputGroup
-								large
-								placeholder="Name"
-								className="input-grow"
-								style={{ flexGrow: 1 }}
-								{...field}
-							/>
-						)}
-					/>
-					<Button
-						icon="minus"
-						minimal
-						onClick={() => remove(index)}
-					/>
-				</div>
-			))}
+					<InfoIcon sx={{ height: '20px' }} />
+				</Tooltip>
+			</Box>
+			<Stack spacing={2}>
+				{fields.map((fieldEntry, index) => (
+					<Stack direction="row" spacing={1} key={fieldEntry.id}>
+						<Controller
+							name={`lookupSources.${index}.priority`}
+							defaultValue={fieldEntry.priority}
+							control={control}
+							render={({ field }) => <input hidden {...field} />}
+						/>
+						<Controller
+							name={`lookupSources.${index}.name`}
+							defaultValue={fieldEntry.name}
+							control={control}
+							render={({ field }) => (
+								<TextField
+									{...field}
+									label="Source Name"
+									placeholder="Source Name"
+								/>
+							)}
+						/>
+						<Controller
+							name={`lookupSources.${index}.source`}
+							defaultValue={fieldEntry.source}
+							control={control}
+							render={({ field }) => (
+								<TextField
+									{...field}
+									label="Source URL"
+									placeholder=""
+									sx={{ flexGrow: 1 }}
+								/>
+							)}
+						/>
+						<IconButton onClick={() => remove(index)}>
+							<RemoveIcon />
+						</IconButton>
+					</Stack>
+				))}
+			</Stack>
 			<Button
-				fill
-				minimal
 				onClick={() => append({ name: '', source: '', priority: 0 })}
-				icon="plus"
-				className="lu-add"
+				endIcon={<AddIcon />}
+				variant="outlined"
 			>
 				Add Source
 			</Button>

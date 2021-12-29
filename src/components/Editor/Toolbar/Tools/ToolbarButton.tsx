@@ -1,6 +1,5 @@
+import { IconButton, ToggleButton, Tooltip } from '@mui/material';
 import React from 'react';
-import { AnchorButton, IconName, Intent } from '@blueprintjs/core';
-import { Tooltip2 } from '@blueprintjs/popover2';
 
 const toolbarItemTypes = ['Wrapper', 'Dropdown', 'Action'] as const;
 export type ToolbarItemType = typeof toolbarItemTypes[number];
@@ -8,8 +7,8 @@ export type ToolbarItemType = typeof toolbarItemTypes[number];
 export interface IToolbarItem {
 	title: string;
 	enabled?: boolean;
-	icon?: IconName;
-	text?: React.ReactNode;
+	icon?: React.ReactNode | string;
+	text?: React.ReactNode | string;
 	tooltip?: string;
 	active?: boolean;
 	className?: string;
@@ -28,27 +27,20 @@ const ToolbarButton: React.FC<IToolbarButtonProps> = ({
 	action,
 	className,
 }) => (
-	<Tooltip2
-		content={tooltip}
-		openOnTargetFocus
-		hoverOpenDelay={200}
-		position="bottom"
-	>
-		<AnchorButton
-			className={`bp3-minimal button ${className}`}
-			large
-			intent={active ? Intent.PRIMARY : Intent.NONE}
-			icon={icon}
-			onMouseUp={() => {
+	<Tooltip title={tooltip || ''}>
+		<ToggleButton
+			disabled={!enabled}
+			value="test"
+			onClick={() => {
 				if (enabled) {
 					action();
 				}
 			}}
-			disabled={!enabled}
+			selected={active}
 		>
-			{text}
-		</AnchorButton>
-	</Tooltip2>
+			{icon}
+		</ToggleButton>
+	</Tooltip>
 );
 
 export default ToolbarButton;

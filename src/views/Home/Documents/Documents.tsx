@@ -1,18 +1,29 @@
 import './Documents.css';
 import React, { useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import DocumentExcerpt from 'components/DocumentExcerpt/DocumentExcerpt';
+import FolderIcon from '@mui/icons-material/Folder';
+import DeleteIcon from '@mui/icons-material/Delete';
 import handleError from '@helpers/Error';
 import { useActiveLanguageConf } from '@hooks/ConfigQueryHooks';
 import { useActiveDocument } from '@hooks/useUserContext';
-import ReactPaginate from 'react-paginate';
 import {
 	useCreateDocument,
 	useDeleteEditorDocument,
 	useListDocuments,
 } from '@hooks/DocumentQueryHooks';
-import { Button, Icon } from '@blueprintjs/core';
 import PageHeader from '@components/PageHeader/PageHeader';
+import {
+	Box,
+	Button,
+	IconButton,
+	Link,
+	List,
+	ListItem,
+	ListItemIcon,
+	ListItemText,
+	Pagination,
+	Paper,
+} from '@mui/material';
 
 /**
  * Renders the Dictionary into a Table.
@@ -24,13 +35,13 @@ const pageSize = 5;
 
 const Documents: React.FC = () => {
 	const navigate = useNavigate();
-	const [pageSkip, setPageSkip] = useState(0);
+	const [page, setPage] = useState(0);
 	const [, changeActiveDocument] = useActiveDocument();
 	const deleteDocument = useDeleteEditorDocument();
 	const createDocument = useCreateDocument();
 	const [loadingDocuments, documentList] = useListDocuments({
 		excerptLength,
-		skip: pageSkip,
+		skip: page * pageSize,
 		limit: pageSize,
 		sortBy: 'createdAt',
 	});
@@ -63,55 +74,71 @@ const Documents: React.FC = () => {
 	}, [changeActiveDocument, createDocument, navigate]);
 
 	return (
-		<>
-			<div>
-				<PageHeader
-					title="Documents"
-					subtitle="Manage your documents"
-					options={
-						<Button
-							minimal
-							outlined
-							title="New"
-							onClick={createNewDocument}
-						>
-							New
-						</Button>
-					}
-				/>
-				<div className="excerpt-list">
-					{!loadingDocuments &&
-						documentList?.excerpts?.length > 0 &&
-						documentList.excerpts.map((excerpt) => (
-							<DocumentExcerpt
-								key={excerpt.id}
-								excerpt={excerpt}
-								selectDocument={fetchDocumentAndSwitch}
-								removeDocument={removeDocument}
-							/>
-						))}
-					{!activeLanguage && <span> No language selected!</span>}
-				</div>
-			</div>
-			<div>
-				<ReactPaginate
-					marginPagesDisplayed={100}
-					breakLabel={<Icon icon="more" />}
-					nextLabel={<Icon icon="chevron-right" />}
-					onPageChange={(pageEvent) => {
-						setPageSkip(pageEvent.selected * pageSize);
+		<Paper sx={{ p: 2 }}>
+			<PageHeader
+				title="Documents"
+				subtitle="Manage your documents"
+				options={
+					<Button
+						variant="outlined"
+						title="New"
+						onClick={createNewDocument}
+					>
+						New
+					</Button>
+				}
+			/>
+			<List>
+				{documentList.excerpts.map((excerpt) => (
+					<ListItem
+						secondaryAction={
+							<IconButton
+								edge="end"
+								aria-label="delete"
+								onClick={() => {
+									removeDocument(excerpt.id);
+								}}
+							>
+								<DeleteIcon />
+							</IconButton>
+						}
+					>
+						<ListItemIcon>
+							<FolderIcon />
+						</ListItemIcon>
+						<ListItemText
+							primary={
+								<Link
+									component="button"
+									variant="body2"
+									onClick={() => {
+										fetchDocumentAndSwitch(excerpt.id);
+									}}
+								>
+									{excerpt.title}
+								</Link>
+							}
+							secondary={excerpt.excerpt}
+						/>
+					</ListItem>
+				))}
+			</List>
+			{!activeLanguage && <span> No language selected!</span>}
+			<Box
+				sx={{
+					display: 'flex',
+					justifyContent: 'center',
+				}}
+			>
+				<Pagination
+					page={page + 1}
+					onChange={(event, value) => {
+						setPage(value - 1);
 					}}
-					pageRangeDisplayed={5}
-					pageCount={Math.ceil(documentList?.total / pageSize)}
-					previousLabel={<Icon icon="chevron-left" />}
-					containerClassName="paginate-container"
-					nextClassName="bp3-button bp3-minimal bp3-outlined"
-					previousClassName="bp3-button bp3-minimal bp3-outlined"
-					pageClassName="paginate-page bp3-button bp3-minimal bp3-outlined"
-					activeClassName="bp3-active"
+					count={Math.ceil(documentList?.total / pageSize)}
 				/>
-			</div>
-		</>
+			</Box>
+		</Paper>
 	);
 };
 

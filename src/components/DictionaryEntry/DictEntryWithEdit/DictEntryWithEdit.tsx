@@ -1,9 +1,9 @@
 import './DictEntryWithEdit.css';
 import React, { useCallback, useRef, useState } from 'react';
 import { useDeleteDictionaryEntry } from '@hooks/DictionaryQueryHooks';
-import { Popover2 } from '@blueprintjs/popover2';
 import { IDictionaryEntryResolved } from 'Document/Dictionary';
-import { Button, Intent, Menu, MenuItem } from '@blueprintjs/core';
+import { Button, IconButton } from '@mui/material';
+import { Delete as DeleteIcon, Edit as EditIcon } from '@mui/icons-material';
 import DictionaryEntry from '../DictionaryEntry';
 import DictEntryEdit, { IWordInputRef } from '../DictEntryEdit/DictEntryEdit';
 
@@ -47,50 +47,28 @@ const DictEntryWithEdit: React.FC<IDictEntryWithEditProps> = ({
 		removeCallback?.();
 	}, [deleteEntry, dictEntry.id, removeCallback]);
 
-	const moreDropdown = (
-		<Menu>
-			<MenuItem
-				key="1"
-				icon="edit"
-				onClick={() => setEditing((editState) => !editState)}
-				text="Edit"
-			/>
-			<MenuItem
-				key="2"
-				icon="delete"
-				onClick={remove}
-				intent={Intent.DANGER}
-				text="Remove"
-			/>
-		</Menu>
-	);
-
 	return (
 		<div className="entry-with-edit-container">
-			<div className="entry-with-edit-controlls-top">
-				{canRemove ? (
-					<Popover2 content={moreDropdown} placement="bottom">
-						<Button minimal outlined icon="more" />
-					</Popover2>
-				) : (
-					<Button
-						minimal
-						outlined
-						icon="edit"
+			{!editing && (
+				<div className="entry-with-edit-controlls-top">
+					<IconButton
 						onClick={() => setEditing((editState) => !editState)}
-					/>
-				)}
-			</div>
+					>
+						<EditIcon />
+					</IconButton>
+					{canRemove && (
+						<IconButton onClick={remove}>
+							<DeleteIcon />
+						</IconButton>
+					)}
+				</div>
+			)}
 			{editing && (
 				<div>
 					<DictEntryEdit entryKey={dictEntry} ref={dictEntryEdit} />
 					<div className="entry-with-edit-controlls-bottom">
-						<Button onClick={cancel} icon="stop">
-							Cancel
-						</Button>
-						<Button onClick={finish} icon="floppy-disk">
-							Save
-						</Button>
+						<Button onClick={cancel}>Cancel</Button>
+						<Button onClick={finish}>Save</Button>
 					</div>
 				</div>
 			)}

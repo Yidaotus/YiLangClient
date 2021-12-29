@@ -15,8 +15,8 @@ import {
 	useSelected,
 	useSlate,
 } from 'slate-react';
-import { Button } from 'antd';
-import { LinkOutlined } from '@ant-design/icons';
+import { Link as LinkIcon } from '@mui/icons-material';
+import { IconButton } from '@mui/material';
 
 const WordList: React.FC<RenderElementProps> = ({ children, attributes }) => {
 	const editor = useSlate();
@@ -84,11 +84,8 @@ const WordList: React.FC<RenderElementProps> = ({ children, attributes }) => {
 					<div className="sentence-row" key={s.sentenceId}>
 						<p>{SlateNode.string(s)}</p>
 						<p>{s.translation}</p>
-						<Button
-							className="dictentry-col"
-							shape="circle"
+						<IconButton
 							size="small"
-							type="ghost"
 							onMouseUp={(e) => {
 								setTimeout(() => {
 									Transforms.select(editor, spath);
@@ -107,8 +104,9 @@ const WordList: React.FC<RenderElementProps> = ({ children, attributes }) => {
 								});
 								e.preventDefault();
 							}}
-							icon={<LinkOutlined />}
-						/>
+						>
+							<LinkIcon />
+						</IconButton>
 					</div>
 				))}
 

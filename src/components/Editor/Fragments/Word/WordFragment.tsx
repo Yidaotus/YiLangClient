@@ -2,8 +2,8 @@ import './WordFragment.css';
 import { useDictionaryEntryResolved } from '@hooks/DictionaryQueryHooks';
 import React, { CSSProperties } from 'react';
 import { RenderElementProps, useSelected } from 'slate-react';
-import { Spinner } from '@blueprintjs/core';
 import { WordElement } from '@components/Editor/YiEditor';
+import { CircularProgress } from '@mui/material';
 
 export type IWordFragmentData = Omit<RenderElementProps, 'element'> & {
 	element: WordElement;
@@ -82,9 +82,7 @@ const WordFragment: React.FC<IWordFragmentData> = ({
 			{...attributes}
 		>
 			{children}
-			{loadingEntry && (
-				<Spinner size={13} className="inline-spinner-container" />
-			)}
+			{loadingEntry && <CircularProgress />}
 			<span contentEditable={false}>
 				{dictEntry && (
 					<span

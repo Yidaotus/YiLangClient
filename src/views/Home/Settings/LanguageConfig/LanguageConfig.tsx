@@ -1,5 +1,4 @@
 import './LanguageConfig.css';
-import InnerModal from '@components/InnerModal/InnerModal';
 import LangConfForm from '@components/Settings/LangConfForm/LangConfForm';
 import { ILanguageConfig } from 'Document/Config';
 import React, { useState } from 'react';
@@ -10,8 +9,29 @@ import {
 	useUpdateLanguageConfig,
 } from '@hooks/ConfigQueryHooks';
 import PageHeader from '@components/PageHeader/PageHeader';
-import { Alert, Button, Card, Intent } from '@blueprintjs/core';
 import { useForm } from 'react-hook-form';
+import {
+	Button,
+	IconButton,
+	Card,
+	Dialog,
+	DialogActions,
+	DialogContent,
+	DialogContentText,
+	DialogTitle,
+	Box,
+	Stack,
+	List,
+	ListItem,
+	ListItemIcon,
+	ListItemText,
+} from '@mui/material';
+import {
+	Edit as EditIcon,
+	Delete as DeleteIcon,
+	Add as AddIcon,
+	Language as LanguageIcon,
+} from '@mui/icons-material';
 
 const defaultConfig = {
 	id: undefined,
@@ -56,101 +76,108 @@ const LanguageConfig: React.FC = () => {
 	};
 
 	return (
-		<div>
-			<Alert
-				confirmButtonText="Delete"
-				intent={Intent.DANGER}
-				icon="trash"
-				isOpen={!!currentLanguageContext}
+		<Box sx={{ width: '100%' }}>
+			<Dialog
+				open={!!currentLanguageContext}
 				onClose={() => setCurrentLanguageContext(null)}
-				onConfirm={() => {
-					if (currentLanguageContext) {
-						removeLanguageConfig.mutate(currentLanguageContext);
-						setCurrentLanguageContext(null);
-					}
-				}}
 			>
-				<p>Forever gone!</p>
-			</Alert>
+				<DialogTitle>Really delete</DialogTitle>
+				<DialogContent>
+					<DialogContentText>Forever gone!</DialogContentText>
+				</DialogContent>
+				<DialogActions>
+					<IconButton
+						onClick={() => {
+							if (currentLanguageContext) {
+								removeLanguageConfig.mutate(
+									currentLanguageContext
+								);
+								setCurrentLanguageContext(null);
+							}
+						}}
+					>
+						<DeleteIcon />
+					</IconButton>
+				</DialogActions>
+			</Dialog>
+			<Dialog
+				onClose={() => {
+					setAddFormVisible(false);
+				}}
+				open={addFormVisible}
+				fullWidth
+				maxWidth="lg"
+			>
+				<DialogTitle>Add Language</DialogTitle>
+				<form onSubmit={handleSubmit(saveConfig)}>
+					<DialogContent>
+						<LangConfForm {...languageFormContext} />
+					</DialogContent>
+					<DialogActions>
+						<Button
+							variant="outlined"
+							onClick={() => {
+								reset(defaultConfig);
+								setAddFormVisible(false);
+							}}
+						>
+							Cancel
+						</Button>
+						<Button
+							variant="outlined"
+							type="submit"
+							startIcon={<AddIcon />}
+						>
+							Save
+						</Button>
+					</DialogActions>
+				</form>
+			</Dialog>
+
 			<PageHeader
 				title="Language Configurations"
 				subtitle="Change your language settings"
 				options={
-					<Button
-						intent={Intent.PRIMARY}
-						onClick={() => setAddFormVisible(true)}
-					>
+					<Button onClick={() => setAddFormVisible(true)}>
 						Add language
 					</Button>
 				}
 			/>
-			{addFormVisible && (
-				<InnerModal
-					onClose={() => {
-						setAddFormVisible(false);
-					}}
-					width="600px"
-				>
-					<Card>
-						<form onSubmit={handleSubmit(saveConfig)}>
-							<LangConfForm {...languageFormContext} />
-							<div className="add-form-actions">
-								<Button
-									onClick={() => {
-										handleSubmit(saveConfig);
-									}}
-									type="submit"
-									intent={Intent.PRIMARY}
-								>
-									Save
-								</Button>
-								<Button
-									onClick={() => {
-										reset(defaultConfig);
-										setAddFormVisible(false);
-									}}
-									intent={Intent.DANGER}
-								>
-									Cancel
-								</Button>
-							</div>
-						</form>
-					</Card>
-				</InnerModal>
-			)}
-
-			<div>
+			<List>
 				{availableLanguages.map((language) => (
-					<Card>
-						<PageHeader
-							title={language.name}
-							subtitle={language.lookupSources
+					<ListItem
+						secondaryAction={
+							<>
+								<IconButton
+									edge="end"
+									aria-label="delete"
+									onClick={() => {
+										setCurrentLanguageContext(language.id);
+									}}
+								>
+									<DeleteIcon />
+								</IconButton>
+								<IconButton
+									onClick={() => editConfig(language.id)}
+								>
+									<EditIcon />
+								</IconButton>
+							</>
+						}
+					>
+						<ListItemIcon>
+							<LanguageIcon />
+						</ListItemIcon>
+						<ListItemText
+							primary={language.name}
+							secondary={language.lookupSources
 								.map((luSource) => luSource.name)
 								.join(', ')}
-							options={
-								<div>
-									<Button
-										icon="edit"
-										minimal
-										onClick={() => editConfig(language.id)}
-									/>
-									<Button
-										icon="trash"
-										intent={Intent.DANGER}
-										minimal
-										onClick={() =>
-											setCurrentLanguageContext(
-												language.id
-											)
-										}
-									/>
-								</div>
-							}
 						/>
-					</Card>
+					</ListItem>
 				))}
-			</div>
-		</div>
+			</List>
+		</Box>
 	);
 };
 

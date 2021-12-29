@@ -11,7 +11,7 @@ import {
 	useDictionarySentencesByWord,
 } from '@hooks/DictionaryQueryHooks';
 import PageHeader from '@components/PageHeader/PageHeader';
-import { Card, Divider, NonIdealState, Spinner } from '@blueprintjs/core';
+import { CircularProgress, Divider, Paper } from '@mui/material';
 
 /**
  * Renders the Dictionary into a Table.
@@ -33,42 +33,25 @@ const DictionaryEntryPage: React.FC = () => {
 	}, [navigate]);
 
 	return (
-		<div>
+		<Paper sx={{ p: 2 }}>
 			<PageHeader title="Dictionary" subtitle="Everything dictionary" />
-			<div>
-				<div>
-					{loadingMain && <Spinner />}
-					{entry && (
-						<Card title="Entry">
-							<DictEntryWithEdit
-								dictEntry={entry}
-								canRemove
-								removeCallback={afterRemove}
-							/>
-						</Card>
-					)}
-					{!entry && !loadingMain && (
-						<NonIdealState
-							icon="error"
-							description="Entry not found"
-							title="Error"
-						/>
-					)}
-				</div>
-			</div>
+			{loadingMain && <CircularProgress />}
+			{entry && (
+				<DictEntryWithEdit
+					dictEntry={entry}
+					canRemove
+					removeCallback={afterRemove}
+				/>
+			)}
+			{!entry && !loadingMain && <span>Entry not found</span>}
 			<Divider />
-			<div>
-				<div>
-					{entry?.roots.map((root) => (
-						<div key={root.id}>
-							<DictionaryRootEntry entry={root} canLink />
-						</div>
-					))}
+			{entry?.roots.map((root) => (
+				<div key={root.id}>
+					<DictionaryRootEntry entry={root} canLink />
 				</div>
-			</div>
+			))}
 			{firstSeen && (
 				<div>
-					firstSeenLoading && <Spinner />
 					<p>{firstSeen.content}</p>
 					<p>{firstSeen.translation}</p>
 				</div>
@@ -100,7 +83,7 @@ const DictionaryEntryPage: React.FC = () => {
 						/>
 					</span>
 				))}
-		</div>
+		</Paper>
 	);
 };
 

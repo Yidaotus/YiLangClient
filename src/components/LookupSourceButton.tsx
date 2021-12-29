@@ -2,7 +2,7 @@ import { IDictionaryLookupSource } from 'Document/Config';
 import React from 'react';
 import { useSlateStatic } from 'slate-react';
 import { Editor } from 'slate';
-import { Button } from '@blueprintjs/core';
+import { Button } from '@mui/material';
 
 export interface ILookupSourceLinkProps {
 	source: IDictionaryLookupSource;
@@ -21,7 +21,7 @@ const LookupSourceButton: React.FC<ILookupSourceLinkProps> = ({ source }) => {
 	const target = '_blank';
 	return (
 		<Button
-			outlined
+			variant="outlined"
 			onClick={() => {
 				if (editor.selection) {
 					const searchTerm =

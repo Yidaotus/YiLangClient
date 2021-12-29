@@ -2,7 +2,7 @@ import './DictionaryEntry.css';
 import React from 'react';
 import { IDictionaryEntry } from 'Document/Dictionary';
 import { useNavigate } from 'react-router';
-import { Button } from '@blueprintjs/core';
+import { Button } from '@mui/material';
 
 type IDictEntryProps = {
 	entry: IDictionaryEntry;
@@ -21,7 +21,6 @@ const DictionaryRootEntry: React.FC<IDictEntryProps> = (props) => {
 						{canLink ? (
 							<h1 className="dictentry-head-item">
 								<Button
-									minimal
 									onClick={() => {
 										navigate(
 											`/home/dictionary/${entry.id}`

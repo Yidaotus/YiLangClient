@@ -5,8 +5,8 @@ import { useDictionaryEntryResolved } from '@hooks/DictionaryQueryHooks';
 import { Editor, Path, Transforms } from 'slate';
 import { ReactEditor } from 'slate-react';
 import { useNavigate } from 'react-router';
-import { Button, Spinner, Tag } from '@blueprintjs/core';
-import { Popover2 } from '@blueprintjs/popover2';
+import { Book as BookIcon, Link as LinkIcon } from '@mui/icons-material';
+import { IconButton, Chip, CircularProgress } from '@mui/material';
 
 type IDictEntryRowProps = {
 	editor: Editor;
@@ -31,35 +31,16 @@ export const GrammarPoint: React.FC<{ point: IGrammarPoint; color?: string }> =
 		);
 	};
 
-const EntryTag: React.FC<{ tag: IDictionaryTag }> = ({ tag }) => {
-	const tagItem = (
-		<Tag
-			icon={tag.grammarPoint && 'info-sign'}
-			color={tag.color || 'blue'}
-			key={tag.name}
-			style={{
-				userSelect: 'none',
-				backgroundColor: tag.color,
-				color: '#333333',
-			}}
-		>
-			{tag.name}
-		</Tag>
-	);
-	return tag.grammarPoint ? (
-		<Popover2
-			content={
-				<GrammarPoint point={tag.grammarPoint} color={tag.color} />
-			}
-			className="clickable-tag"
-			placement="bottom"
-		>
-			{tagItem}
-		</Popover2>
-	) : (
-		tagItem
-	);
-};
+const EntryTag: React.FC<{ tag: IDictionaryTag }> = ({ tag }) => (
+	<Chip
+		key={tag.name}
+		style={{
+			backgroundColor: tag.color,
+			color: '#333333',
+		}}
+		label={tag.name}
+	/>
+);
 
 const DictionaryEntryRow: React.FC<IDictEntryRowProps> = ({
 	entryId,
@@ -96,19 +77,14 @@ const DictionaryEntryRow: React.FC<IDictEntryRowProps> = ({
 							))}
 						</ul>
 					</span>
-					<Button
-						className="dictentry-col"
-						style={{ width: '25px' }}
-						minimal
+					<IconButton
 						onMouseUp={() => {
 							navigate(`/home/dictionary/${entryResolved.id}`);
 						}}
-						icon="book"
-					/>
-					<Button
-						className="dictentry-col"
-						style={{ width: '25px' }}
-						minimal
+					>
+						<BookIcon />
+					</IconButton>
+					<IconButton
 						onMouseUp={(e) => {
 							setTimeout(() => {
 								Transforms.select(editor, path);
@@ -127,11 +103,12 @@ const DictionaryEntryRow: React.FC<IDictEntryRowProps> = ({
 							});
 							e.preventDefault();
 						}}
-						icon="link"
-					/>
+					>
+						<LinkIcon />
+					</IconButton>
 				</div>
 			)}
-			{loading && <Spinner />}
+			{loading && <CircularProgress />}
 			{!loading && !entryResolved && <span>ERROR</span>}
 		</>
 	);

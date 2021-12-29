@@ -1,4 +1,3 @@
-import { Spinner } from '@blueprintjs/core';
 import { authorize } from 'api/user.service';
 import { IConfig } from 'Document/Config';
 import React, { useCallback, useState } from 'react';
@@ -57,7 +56,6 @@ const UserProvider: React.FC = ({ children }) => {
 		<>
 			{user.isLoading ? (
 				<div>
-					<Spinner />
 					<p>Checking user credentials</p>
 				</div>
 			) : (

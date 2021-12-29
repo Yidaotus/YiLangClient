@@ -8,7 +8,14 @@ import {
 	useAddDictionarySentence,
 	useLinkWordSentence,
 } from '@hooks/DictionaryQueryHooks';
-import { Button, Classes, Dialog, InputGroup } from '@blueprintjs/core';
+import {
+	Button,
+	Dialog,
+	DialogActions,
+	DialogContent,
+	DialogTitle,
+	TextField,
+} from '@mui/material';
 import { IDictionarySentence } from '../../../../../Document/Dictionary';
 
 export interface ISentenceModalProps {
@@ -103,32 +110,27 @@ const SentenceEditorModal: React.FC<ISentenceModalProps> = ({
 	};
 
 	return (
-		<Dialog
-			isOpen={visible}
-			title={<div className="sentence-input-head">Sentence Editor</div>}
-			onClose={close}
-		>
-			<div className={Classes.DIALOG_BODY}>
-				<div className="sentence-input-form">
-					<p>{sentenceKey}</p>
-					<InputGroup
-						placeholder="Translation..."
-						value={translationInput}
-						onChange={(e) => {
-							setTranslationInput(e.target.value);
-						}}
-						onKeyDown={(e) => {
-							if (e.key === 'Enter') {
-								finish();
-							}
-						}}
-					/>
-				</div>
-				<div className={Classes.DIALOG_FOOTER_ACTIONS}>
-					<Button icon="stop" key="discard" onClick={cancel} />
-					<Button icon="saved" key="save" onClick={() => finish()} />
-				</div>
-			</div>
+		<Dialog open={visible} onClose={close}>
+			<DialogTitle>Sentence Editor</DialogTitle>
+			<DialogContent>
+				<p>{sentenceKey}</p>
+				<TextField
+					placeholder="Translation..."
+					value={translationInput}
+					onChange={(e) => {
+						setTranslationInput(e.target.value);
+					}}
+					onKeyDown={(e) => {
+						if (e.key === 'Enter') {
+							finish();
+						}
+					}}
+				/>
+			</DialogContent>
+			<DialogActions>
+				<Button key="discard" onClick={cancel} />
+				<Button key="save" onClick={() => finish()} />
+			</DialogActions>
 		</Dialog>
 	);
 };

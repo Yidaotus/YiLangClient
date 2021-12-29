@@ -2,15 +2,9 @@ import React from 'react';
 import * as Yup from 'yup';
 import { IRegisterData } from 'views/Login';
 import { yupResolver } from '@hookform/resolvers/yup';
-import { useForm } from 'react-hook-form';
-import {
-	Button,
-	FormControl,
-	FormErrorMessage,
-	FormLabel,
-	Input,
-	Stack,
-} from '@chakra-ui/react';
+import { useForm, Controller } from 'react-hook-form';
+import { Stack, TextField } from '@mui/material';
+import LoadingButton from '@mui/lab/LoadingButton';
 
 interface IRegister {
 	username: string;
@@ -39,8 +33,8 @@ const RegisterForm: React.FC<IRegisterFormProps> = ({
 }) => {
 	const {
 		handleSubmit,
-		formState: { errors, isSubmitting },
-		register,
+		formState: { isSubmitting },
+		control,
 	} = useForm<IRegister>({
 		resolver: yupResolver(schema),
 		defaultValues: {
@@ -52,43 +46,63 @@ const RegisterForm: React.FC<IRegisterFormProps> = ({
 
 	return (
 		<form onSubmit={handleSubmit(submit)}>
-			<Stack spacing={4}>
-				<FormControl isInvalid={!!errors.email}>
-					<FormLabel>Email address</FormLabel>
-					<Input
-						type="email"
-						disabled={isSubmitting}
-						{...register('email')}
-					/>
-					<FormErrorMessage>
-						{errors.email && errors.email.message}
-					</FormErrorMessage>
-				</FormControl>
-				<FormControl isInvalid={!!errors.username}>
-					<FormLabel>Username</FormLabel>
-					<Input
-						type="text"
-						disabled={isSubmitting}
-						{...register('username')}
-					/>
-					<FormErrorMessage>
-						{errors.username && errors.username.message}
-					</FormErrorMessage>
-				</FormControl>
-				<FormControl isInvalid={!!errors.password}>
-					<FormLabel>Password</FormLabel>
-					<Input
-						type="password"
-						disabled={isSubmitting}
-						{...register('password')}
-					/>
-					<FormErrorMessage>
-						{errors.password && errors.password.message}
-					</FormErrorMessage>
-				</FormControl>
-				<Button isLoading={isSubmitting} type="submit">
+			<Stack spacing={2}>
+				<Controller
+					name="email"
+					control={control}
+					defaultValue=""
+					render={({ field, fieldState: { error } }) => (
+						<TextField
+							{...field}
+							error={!!error}
+							disabled={isSubmitting}
+							variant="outlined"
+							helperText={error?.message || null}
+							label="Email"
+							placeholder="Email"
+						/>
+					)}
+				/>
+				<Controller
+					name="username"
+					control={control}
+					defaultValue=""
+					render={({ field, fieldState: { error } }) => (
+						<TextField
+							{...field}
+							error={!!error}
+							variant="outlined"
+							disabled={isSubmitting}
+							helperText={error?.message || null}
+							label="Username"
+							placeholder="Username"
+						/>
+					)}
+				/>
+				<Controller
+					name="password"
+					control={control}
+					defaultValue=""
+					render={({ field, fieldState: { error } }) => (
+						<TextField
+							{...field}
+							error={!!error}
+							type="password"
+							variant="outlined"
+							disabled={isSubmitting}
+							helperText={error?.message || null}
+							label="Password"
+							placeholder="Password"
+						/>
+					)}
+				/>
+				<LoadingButton
+					loading={isSubmitting}
+					type="submit"
+					variant="contained"
+				>
 					Register
-				</Button>
+				</LoadingButton>
 			</Stack>
 		</form>
 	);
