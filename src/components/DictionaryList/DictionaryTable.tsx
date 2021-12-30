@@ -3,6 +3,7 @@ import {
 	Box,
 	Checkbox,
 	Chip,
+	Divider,
 	IconButton,
 	Link,
 	Menu,
@@ -48,14 +49,14 @@ const headCells: readonly HeadCell[] = [
 		label: 'Key',
 	},
 	{
-		id: 'comment',
-		disablePadding: false,
-		label: 'Comment',
-	},
-	{
 		id: 'spelling',
 		disablePadding: false,
 		label: 'Spelling',
+	},
+	{
+		id: 'comment',
+		disablePadding: false,
+		label: 'Comment',
 	},
 	{
 		id: 'tags',
@@ -122,36 +123,49 @@ const FilterableTableHeadCell: React.FC<
 					},
 				}}
 			>
-				{allFilterOptions.map((tag) => (
-					<MenuItem
-						dense
-						sx={{
-							height: '20px',
-							paddingLeft: '1px',
-						}}
-					>
-						<Stack spacing={1} direction="row" alignItems="center">
-							<Checkbox
-								checked={
-									!!tagFilter.find(
-										(filter) => filter === tag.id
-									)
-								}
-								name={tag.id}
-								onChange={handleCheckFilter}
-							/>
-							<Chip
-								sx={{
-									backgroundColor: tag.color || 'blue',
-									marginLeft: '5px',
-									width: '100%',
-								}}
-								key={tag.name}
-								label={tag.name}
-							/>
-						</Stack>
-					</MenuItem>
-				))}
+				{allFilterOptions
+					// Sort alphabetically
+					.sort((a, b) => a.name.localeCompare(b.name))
+					// Move selected items to top
+					.sort(
+						(a, b) =>
+							Number(tagFilter.indexOf(b.id) > -1) -
+							Number(tagFilter.indexOf(a.id) > -1)
+					)
+					.map((tag) => (
+						<MenuItem
+							dense
+							sx={{
+								height: '20px',
+								paddingLeft: '1px',
+							}}
+						>
+							<Stack
+								spacing={1}
+								direction="row"
+								alignItems="center"
+							>
+								<Checkbox
+									checked={
+										!!tagFilter.find(
+											(filter) => filter === tag.id
+										)
+									}
+									name={tag.id}
+									onChange={handleCheckFilter}
+								/>
+								<Chip
+									sx={{
+										backgroundColor: tag.color || 'blue',
+										marginLeft: '5px',
+										width: '100%',
+									}}
+									key={tag.name}
+									label={tag.name}
+								/>
+							</Stack>
+						</MenuItem>
+					))}
 			</Menu>
 		</Stack>
 	);
