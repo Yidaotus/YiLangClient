@@ -4,6 +4,7 @@ import {
 	IDictionaryTag,
 } from 'Document/Dictionary';
 import { IExcerptedDocumentLink } from 'Document/Document';
+import { DictionaryTagID } from 'Document/Utility';
 
 export type DictionaryEntryField =
 	| 'word'
@@ -158,6 +159,8 @@ export interface IListDictionaryParams {
 	limit: number;
 	excerptLength: number;
 	lang: string;
+	searchTerm?: string;
+	tagFilter?: Array<DictionaryTagID>;
 }
 
 export interface IGetManyTagsPrams {

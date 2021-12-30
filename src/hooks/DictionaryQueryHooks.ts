@@ -188,6 +188,8 @@ const useListDictionaryEntries = (
 			skip: paginationOptions?.skip,
 			filter: paginationOptions?.filter,
 			sortBy: paginationOptions?.sortBy,
+			searchTerm: paginationOptions?.searchTerm,
+			tagFilter: paginationOptions?.tagFilter,
 		}),
 		() =>
 			paginationOptions && activeLanguage
@@ -198,6 +200,8 @@ const useListDictionaryEntries = (
 						limit: paginationOptions.limit,
 						excerptLength: 80,
 						lang: activeLanguage.id,
+						searchTerm: paginationOptions.searchTerm,
+						tagFilter: paginationOptions.tagFilter || [],
 				  })
 				: defaultValue,
 		{

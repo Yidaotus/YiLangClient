@@ -7,7 +7,7 @@ import { useUserContext } from '@hooks/useUserContext';
 import { LS_TOKEN_POINTER } from 'api/api.service';
 import { useQueryClient } from 'react-query';
 import { login, register } from 'api/user.service';
-import { Paper, Box, Stack, Grid, Alert, Button } from '@mui/material';
+import { Paper, Box, Stack, Grid, Alert, Button, Link } from '@mui/material';
 import LoginForm from '../components/Login/LoginForm';
 
 export interface IRegisterData {
@@ -113,16 +113,13 @@ const LoginView: React.FC = () => {
 							/>
 						)}
 					</Box>
-					<span>
-						Need to
-						<Button
-							onClick={toggleRegister}
-							onKeyDown={toggleRegister}
-							disabled={isLoading}
-						>
-							{isRegister ? ' login' : ' register'}?
-						</Button>
-					</span>
+					<Link
+						component="button"
+						variant="body2"
+						onClick={toggleRegister}
+					>
+						Need to {isRegister ? ' login' : ' register'}?
+					</Link>
 				</Stack>
 			</Paper>
 		</Grid>

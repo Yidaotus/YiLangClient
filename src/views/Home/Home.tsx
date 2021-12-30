@@ -1,6 +1,6 @@
 import './Home.css';
 import React, { useEffect, useRef, useState } from 'react';
-import { useLocation, Routes, Route, Outlet } from 'react-router-dom';
+import { Outlet } from 'react-router-dom';
 
 import handleError from '@helpers/Error';
 import { useActiveLanguageConf } from '@hooks/ConfigQueryHooks';
@@ -12,7 +12,6 @@ const HomeView: React.FC = () => {
 	const contentRef = useRef<HTMLDivElement>(null);
 	const activeLanguage = useActiveLanguageConf();
 	const { enqueueSnackbar } = useSnackbar();
-	const url = useLocation();
 
 	useEffect(() => {
 		const init = async () => {

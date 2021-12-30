@@ -15,7 +15,7 @@ import {
 } from '@mui/material';
 import { Menu as MenuIcon } from '@mui/icons-material';
 import SettingsPopover from '@components/SettingsPopover/SettingsPopover';
-import { useMatch, Link, useResolvedPath, matchRoutes } from 'react-router-dom';
+import { Link, matchRoutes } from 'react-router-dom';
 import { useActiveDocument } from '@hooks/useUserContext';
 import { useLocation } from 'react-router';
 
@@ -44,7 +44,6 @@ const ResponsiveAppBar: React.FC = () => {
 		setAnchorElUser(null);
 	};
 
-	const currentTab = 'test';
 	const location = useLocation();
 	const matchedRoutes = matchRoutes(
 		[

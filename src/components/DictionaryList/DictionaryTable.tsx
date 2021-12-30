@@ -1,8 +1,14 @@
 import * as React from 'react';
 import {
 	Box,
+	Checkbox,
+	Chip,
+	IconButton,
 	Link,
+	Menu,
+	MenuItem,
 	Paper,
+	Stack,
 	Table,
 	TableBody,
 	TableCell,
@@ -11,6 +17,7 @@ import {
 	TablePagination,
 	TableRow,
 	TableSortLabel,
+	TextField,
 	Toolbar,
 	Typography,
 } from '@mui/material';
@@ -18,14 +25,16 @@ import { useActiveLanguageConf } from '@hooks/ConfigQueryHooks';
 import { useListDictionaryEntries } from '@hooks/DictionaryQueryHooks';
 import { useAllTags } from '@hooks/useTags';
 import { IListDictionaryParams } from 'api/definitions/api';
-import { IDictionaryEntry } from 'Document/Dictionary';
+import { IDictionaryEntry, IDictionaryTag } from 'Document/Dictionary';
 import { useMemo, useState } from 'react';
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { visuallyHidden } from '@mui/utils';
 import { useNavigate } from 'react-router';
+import useDebounce from '@hooks/useDebounce';
+import { DictionaryTagID, notUndefined } from 'Document/Utility';
+import { FilterList } from '@mui/icons-material';
 
 type Order = 'asc' | 'desc';
-
 interface HeadCell {
 	disablePadding: boolean;
 	id: keyof IDictionaryEntry;
@@ -49,25 +58,118 @@ const headCells: readonly HeadCell[] = [
 		label: 'Spelling',
 	},
 	{
+		id: 'tags',
+		disablePadding: false,
+		label: 'Tags',
+	},
+	{
 		id: 'translations',
 		disablePadding: false,
 		label: 'Translations',
 	},
 ];
 
-interface EnhancedTableProps {
-	numSelected: number;
+interface FilterableTableHeadCellProps<T extends { id: unknown }> {
+	headCell: HeadCell;
+	onRequestFilterTag: (key: string, checked: boolean) => void;
+	tagFilter: Array<T['id']>;
+	allFilterOptions: Array<T>;
+}
+
+const ITEM_HEIGHT = 48;
+const FilterableTableHeadCell: React.FC<
+	FilterableTableHeadCellProps<IDictionaryTag>
+> = ({ headCell, onRequestFilterTag, tagFilter, allFilterOptions }) => {
+	const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
+	const open = Boolean(anchorEl);
+	const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
+		setAnchorEl(event.currentTarget);
+	};
+	const handleCheckFilter = (
+		event: React.ChangeEvent<HTMLInputElement>,
+		checked: boolean
+	) => {
+		onRequestFilterTag(event.target.name, checked);
+	};
+	const handleClose = () => {
+		setAnchorEl(null);
+	};
+
+	return (
+		<Stack spacing={1} direction="row" alignItems="center">
+			{headCell.label}
+			<IconButton
+				aria-controls={open ? 'basic-menu' : undefined}
+				aria-haspopup="true"
+				aria-expanded={open ? 'true' : undefined}
+				onClick={handleClick}
+				color={tagFilter.length > 0 ? 'secondary' : 'primary'}
+			>
+				<FilterList />
+			</IconButton>
+			<Menu
+				id="basic-menu"
+				anchorEl={anchorEl}
+				open={open}
+				onClose={handleClose}
+				MenuListProps={{
+					'aria-labelledby': 'basic-button',
+				}}
+				PaperProps={{
+					style: {
+						maxHeight: ITEM_HEIGHT * 4.5,
+						width: '20ch',
+					},
+				}}
+			>
+				{allFilterOptions.map((tag) => (
+					<MenuItem
+						dense
+						sx={{
+							height: '20px',
+							paddingLeft: '1px',
+						}}
+					>
+						<Stack spacing={1} direction="row" alignItems="center">
+							<Checkbox
+								checked={
+									!!tagFilter.find(
+										(filter) => filter === tag.id
+									)
+								}
+								name={tag.id}
+								onChange={handleCheckFilter}
+							/>
+							<Chip
+								sx={{
+									backgroundColor: tag.color || 'blue',
+									marginLeft: '5px',
+									width: '100%',
+								}}
+								key={tag.name}
+								label={tag.name}
+							/>
+						</Stack>
+					</MenuItem>
+				))}
+			</Menu>
+		</Stack>
+	);
+};
+
+interface SortableTableHeadCellProps {
 	onRequestSort: (
 		event: React.MouseEvent<unknown>,
 		property: keyof IDictionaryEntry
 	) => void;
+	headCell: HeadCell;
 	order: Order;
 	orderBy: string | null;
 }
-
-const EnhancedTableHead: React.FC<EnhancedTableProps> = ({
-	order,
+const SortableTableHeadCell: React.FC<SortableTableHeadCellProps> = ({
 	orderBy,
+	order,
+	headCell,
 	onRequestSort,
 }) => {
 	const createSortHandler =
@@ -75,7 +177,43 @@ const EnhancedTableHead: React.FC<EnhancedTableProps> = ({
 		(event: React.MouseEvent<unknown>) => {
 			onRequestSort(event, property);
 		};
+	return (
+		<TableSortLabel
+			active={orderBy === headCell.id}
+			direction={orderBy === headCell.id ? order : 'asc'}
+			onClick={createSortHandler(headCell.id)}
+		>
+			{headCell.label}
+			{orderBy === headCell.id ? (
+				<Box component="span" sx={visuallyHidden}>
+					{order === 'desc'
+						? 'sorted descending'
+						: 'sorted ascending'}
+				</Box>
+			) : null}
+		</TableSortLabel>
+	);
+};
 
+interface EnhancedTableProps {
+	onRequestSort: (
+		event: React.MouseEvent<unknown>,
+		property: keyof IDictionaryEntry
+	) => void;
+	onRequestFilterTag: (key: string, checked: boolean) => void;
+	order: Order;
+	orderBy: string | null;
+	tagFilter: Array<DictionaryTagID>;
+	allTags: Array<IDictionaryTag>;
+}
+const EnhancedTableHead: React.FC<EnhancedTableProps> = ({
+	order,
+	orderBy,
+	onRequestSort,
+	onRequestFilterTag,
+	tagFilter,
+	allTags,
+}) => {
 	return (
 		<TableHead>
 			<TableRow>
@@ -85,20 +223,21 @@ const EnhancedTableHead: React.FC<EnhancedTableProps> = ({
 						padding={headCell.disablePadding ? 'none' : 'normal'}
 						sortDirection={orderBy === headCell.id ? order : false}
 					>
-						<TableSortLabel
-							active={orderBy === headCell.id}
-							direction={orderBy === headCell.id ? order : 'asc'}
-							onClick={createSortHandler(headCell.id)}
-						>
-							{headCell.label}
-							{orderBy === headCell.id ? (
-								<Box component="span" sx={visuallyHidden}>
-									{order === 'desc'
-										? 'sorted descending'
-										: 'sorted ascending'}
-								</Box>
-							) : null}
-						</TableSortLabel>
+						{headCell.id === 'tags' ? (
+							<FilterableTableHeadCell
+								allFilterOptions={allTags}
+								tagFilter={tagFilter}
+								headCell={headCell}
+								onRequestFilterTag={onRequestFilterTag}
+							/>
+						) : (
+							<SortableTableHeadCell
+								orderBy={orderBy}
+								order={order}
+								headCell={headCell}
+								onRequestSort={onRequestSort}
+							/>
+						)}
 					</TableCell>
 				))}
 			</TableRow>
@@ -106,33 +245,17 @@ const EnhancedTableHead: React.FC<EnhancedTableProps> = ({
 	);
 };
 
-const EnhancedTableToolbar: React.FC = () => (
-	<Toolbar
-		sx={{
-			pl: { sm: 2 },
-			pr: { xs: 1, sm: 1 },
-		}}
-	>
-		<Typography
-			sx={{ flex: '1 1 100%' }}
-			variant="h6"
-			id="tableTitle"
-			component="div"
-		>
-			Dictionary Entries
-		</Typography>
-		<span>Search TODO</span>
-	</Toolbar>
-);
-
 const DictionaryTable: React.FC = () => {
 	const [order, setOrder] = useState<Order>('asc');
 	const [orderBy, setOrderBy] = useState<keyof IDictionaryEntry | null>(null);
-	const [selected, setSelected] = useState<readonly string[]>([]);
 	const [page, setPage] = useState(0);
 	const [pageSize, setPageSize] = useState(10);
-	const [filter, setFilter] = useState<keyof IDictionaryEntry | null>(null);
+	// const [filter, setFilter] = useState<keyof IDictionaryEntry | null>(null);
+	const [searchTerm, setSearchTerm] = useState<string | undefined>(undefined);
+	const debouncedSearchTerm = useDebounce(searchTerm, 500);
 	const selectedLanguage = useActiveLanguageConf();
+	const allUserTags = useAllTags();
+	const [tagFilter, setTagFilter] = useState<Array<DictionaryTagID>>([]);
 
 	const paginationOptions = useMemo<IListDictionaryParams>(
 		() => ({
@@ -147,12 +270,21 @@ const DictionaryTable: React.FC = () => {
 						order: order === 'asc' ? 'ascend' : 'descend',
 				  }
 				: undefined,
+			searchTerm: debouncedSearchTerm,
+			tagFilter,
 		}),
-		[order, orderBy, page, pageSize, selectedLanguage?.id]
+		[
+			order,
+			orderBy,
+			page,
+			pageSize,
+			debouncedSearchTerm,
+			selectedLanguage?.id,
+			tagFilter,
+		]
 	);
 	const [loading, paginatedEntries] =
 		useListDictionaryEntries(paginationOptions);
-	const tags = useAllTags();
 
 	const handleRequestSort = (
 		event: React.MouseEvent<unknown>,
@@ -189,7 +321,28 @@ const DictionaryTable: React.FC = () => {
 	return (
 		<Box sx={{ width: '100%' }}>
 			<Paper sx={{ width: '100%', mb: 2 }}>
-				<EnhancedTableToolbar />
+				<Toolbar
+					sx={{
+						pl: { sm: 2 },
+						pr: { xs: 1, sm: 1 },
+					}}
+				>
+					<Typography
+						sx={{ flex: '1 1 100%' }}
+						variant="h6"
+						id="tableTitle"
+						component="div"
+					>
+						Dictionary Entries
+					</Typography>
+					<TextField
+						label="Search"
+						value={searchTerm}
+						onChange={(e) =>
+							setSearchTerm(e.target.value || undefined)
+						}
+					/>
+				</Toolbar>
 				<TableContainer>
 					<Table
 						sx={{ minWidth: 750 }}
@@ -197,10 +350,27 @@ const DictionaryTable: React.FC = () => {
 						size="medium"
 					>
 						<EnhancedTableHead
-							numSelected={selected.length}
 							order={order}
+							allTags={allUserTags}
 							orderBy={orderBy}
 							onRequestSort={handleRequestSort}
+							onRequestFilterTag={(key, checked) => {
+								if (checked) {
+									setTagFilter([
+										...tagFilter,
+										key as DictionaryTagID,
+									]);
+								} else {
+									setTagFilter(
+										tagFilter.filter(
+											(tagId) =>
+												tagId !==
+												(key as DictionaryTagID)
+										)
+									);
+								}
+							}}
+							tagFilter={tagFilter}
 						/>
 						<TableBody>
 							{paginatedEntries.entries.map((entry, index) => {
@@ -245,6 +415,37 @@ const DictionaryTable: React.FC = () => {
 											}}
 										>
 											{entry.comment}
+										</TableCell>
+										<TableCell
+											align="right"
+											sx={{
+												whiteSpace: 'nowrap',
+												overflow: 'hidden',
+												textOverflow: 'ellipsis',
+												width: '200px',
+												maxWidth: '200px',
+											}}
+										>
+											{entry.tags
+												.map((tagId) =>
+													allUserTags.find(
+														(userTag) =>
+															userTag.id === tagId
+													)
+												)
+												.filter(notUndefined)
+												.map((tag) => (
+													<Chip
+														style={{
+															backgroundColor:
+																tag.color ||
+																'blue',
+															marginLeft: '5px',
+														}}
+														key={tag.name}
+														label={tag.name}
+													/>
+												))}
 										</TableCell>
 										<TableCell
 											align="right"
