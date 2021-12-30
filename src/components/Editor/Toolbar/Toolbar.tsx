@@ -7,6 +7,25 @@ import { useLookupSources } from '@hooks/ConfigQueryHooks';
 import LookupSourceButton from '@components/LookupSourceButton';
 import DialogButton from '@editor/Toolbar/Tools/DialogButton';
 import { Divider } from '@mui/material';
+import {
+	Adb as AdbIcon,
+	FormatAlignCenter,
+	FormatAlignLeft,
+	FormatAlignRight,
+	FormatColorFill,
+	FormatListBulleted,
+	FormatListNumbered,
+	FormatColorText,
+	DriveFileRenameOutline,
+	Translate as TranslateIcon,
+	Bookmark as BookmarkIcon,
+	Widgets as WidgetsIcon,
+	Search as SearchIcon,
+	Save as SaveIcon,
+	Undo as UndoIcon,
+	Redo as RedoIcon,
+	EmojiSymbols as EmojiSymbolsIcon,
+} from '@mui/icons-material';
 
 import AlignButton from './Tools/AlignButton';
 import ListButton from './Tools/ListButton';
@@ -71,11 +90,11 @@ const Toolbar: React.FC<IToolbarProps> = ({
 				action={() => {}}
 				enabled
 				active
-				icon="delta"
+				icon={<AdbIcon />}
 			/>
 			<InputWrapperButton
 				showInput={showWordEditor}
-				icon="translate"
+				icon={<TranslateIcon />}
 				title="Word"
 				type="word"
 				{...sharedProps}
@@ -84,13 +103,13 @@ const Toolbar: React.FC<IToolbarProps> = ({
 				showInput={showSentenceEditor}
 				type="sentence"
 				title="Sentence"
-				icon="paragraph"
+				icon={<DriveFileRenameOutline />}
 				{...sharedProps}
 			/>
 			<ElementButton
 				type="mark"
 				title="Mark"
-				icon="annotation"
+				icon={<BookmarkIcon />}
 				createElement={() => ({
 					type: 'mark',
 					color: '#FFB30F',
@@ -101,7 +120,7 @@ const Toolbar: React.FC<IToolbarProps> = ({
 			<ToolbarMenu
 				flow="vertical"
 				type="lookup"
-				icon="search-text"
+				icon={<SearchIcon />}
 				title="Lookup Word"
 				enabled={lookupButtonActive}
 				{...menuProps}
@@ -113,26 +132,26 @@ const Toolbar: React.FC<IToolbarProps> = ({
 			<Divider orientation="vertical" flexItem />
 			<AlignButton
 				align="left"
-				icon="align-left"
+				icon={<FormatAlignLeft />}
 				title="Left Align"
 				{...sharedProps}
 			/>
 			<AlignButton
 				align="center"
-				icon="align-center"
+				icon={<FormatAlignCenter />}
 				title="Center Align"
 				{...sharedProps}
 			/>
 			<AlignButton
 				align="right"
-				icon="align-right"
+				icon={<FormatAlignRight />}
 				title="Right Align"
 				{...sharedProps}
 			/>
 			<Divider orientation="vertical" flexItem />
 			<ToolbarMenu
 				type="blockType"
-				icon="vertical-distribution"
+				icon={<WidgetsIcon />}
 				title="Block Type"
 				{...menuProps}
 			>
@@ -171,7 +190,7 @@ const Toolbar: React.FC<IToolbarProps> = ({
 			<Divider orientation="vertical" flexItem />
 			<ToolbarMenu
 				type="color"
-				icon="highlight"
+				icon={<FormatColorText />}
 				title="Font Color"
 				{...menuProps}
 			>
@@ -189,7 +208,7 @@ const Toolbar: React.FC<IToolbarProps> = ({
 			<Divider orientation="vertical" flexItem />
 			<ToolbarMenu
 				type="glyphs"
-				icon="arrow-down"
+				icon={<EmojiSymbolsIcon />}
 				title="Glyphs"
 				{...menuProps}
 			>
@@ -234,7 +253,7 @@ const Toolbar: React.FC<IToolbarProps> = ({
 			</ToolbarMenu>
 			<Divider orientation="vertical" flexItem />
 			<ToolbarButton
-				icon="undo"
+				icon={<UndoIcon />}
 				tooltip="Undo"
 				title="Undo"
 				action={() => {
@@ -242,7 +261,7 @@ const Toolbar: React.FC<IToolbarProps> = ({
 				}}
 			/>
 			<ToolbarButton
-				icon="redo"
+				icon={<RedoIcon />}
 				title="Redo"
 				tooltip="Redo"
 				action={() => {
@@ -250,7 +269,7 @@ const Toolbar: React.FC<IToolbarProps> = ({
 				}}
 			/>
 			<ToolbarButton
-				icon="floppy-disk"
+				icon={<SaveIcon />}
 				title="Save"
 				tooltip="Save"
 				action={() => {

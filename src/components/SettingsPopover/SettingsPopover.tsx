@@ -7,7 +7,9 @@ import {
 } from '@hooks/ConfigQueryHooks';
 import {
 	Language as LanguageIcon,
+	Logout,
 	Logout as LogoutIcon,
+	Settings,
 	SettingsApplications as SettingsApplicationsIcon,
 } from '@mui/icons-material';
 import {
@@ -15,11 +17,11 @@ import {
 	Stack,
 	Box,
 	Select,
-	Button,
 	FormControl,
 	InputLabel,
 	MenuItem,
 	SelectChangeEvent,
+	ListItemIcon,
 } from '@mui/material';
 
 const SettingsPopover: React.FC = () => {
@@ -54,67 +56,66 @@ const SettingsPopover: React.FC = () => {
 	);
 
 	return (
-		<Stack
-			spacing={1}
-			alignItems="center"
-			padding="5px"
-			justifyContent="end"
-		>
-			<Stack
-				spacing={2}
-				direction="row"
-				alignItems="center"
-				sx={{
-					display: 'flex',
-					width: '100%',
-				}}
-			>
-				<LanguageIcon />
-				<Box sx={{ flexGrow: 1 }}>
-					<FormControl
-						variant="standard"
-						size="small"
-						sx={{ m: 1, minWidth: 120 }}
-					>
-						<InputLabel id="active-language-label">
-							Active Language Config
-						</InputLabel>
-						<Select
-							labelId="active-language-label"
-							id="activa-language-select"
-							value={activeLanguage?.id || ''}
-							onChange={handleLanguageChange}
-							label="Active Language"
+		<>
+			<MenuItem>
+				<Stack
+					spacing={2}
+					direction="row"
+					alignItems="center"
+					sx={{
+						display: 'flex',
+						width: '100%',
+					}}
+				>
+					<LanguageIcon />
+					<Box sx={{ flexGrow: 1 }}>
+						<FormControl
+							variant="standard"
+							size="small"
+							sx={{ m: 1, minWidth: 120 }}
 						>
-							{availableLanguages.map((language) => (
-								<MenuItem value={language.id}>
-									{language.name}
-								</MenuItem>
-							))}
-						</Select>
-					</FormControl>
-				</Box>
-			</Stack>
+							<InputLabel id="active-language-label">
+								Active Language Config
+							</InputLabel>
+							<Select
+								labelId="active-language-label"
+								id="activa-language-select"
+								value={activeLanguage?.id || ''}
+								onChange={handleLanguageChange}
+								label="Active Language"
+							>
+								{availableLanguages.map((language) => (
+									<MenuItem value={language.id}>
+										{language.name}
+									</MenuItem>
+								))}
+							</Select>
+						</FormControl>
+					</Box>
+				</Stack>
+			</MenuItem>
 			<Divider variant="middle" sx={{ width: '100%' }} />
-			<Button
+			<MenuItem
 				onClick={() => {
 					navigate(`/home/settings`);
 				}}
-				startIcon={<SettingsApplicationsIcon />}
-				variant="outlined"
-				fullWidth
 			>
+				<ListItemIcon>
+					<Settings fontSize="small" />
+				</ListItemIcon>
 				Settings
-			</Button>
-			<Button
-				onClick={logoutConfirm}
-				endIcon={<LogoutIcon />}
-				variant="outlined"
-				fullWidth
+			</MenuItem>
+			<MenuItem
+				onClick={() => {
+					navigate(`/home/settings`);
+				}}
 			>
+				<ListItemIcon>
+					<Logout fontSize="small" />
+				</ListItemIcon>
 				Logout
-			</Button>
-		</Stack>
+			</MenuItem>
+		</>
 	);
 };
 

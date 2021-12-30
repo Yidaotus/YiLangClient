@@ -15,6 +15,7 @@ import PageHeader from '@components/PageHeader/PageHeader';
 import {
 	Box,
 	Button,
+	CircularProgress,
 	IconButton,
 	Link,
 	List,
@@ -25,11 +26,6 @@ import {
 	Paper,
 } from '@mui/material';
 
-/**
- * Renders the Dictionary into a Table.
- *
- * Let's the user filter tags, and search other columns
- */
 const excerptLength = 100;
 const pageSize = 5;
 
@@ -88,6 +84,19 @@ const Documents: React.FC = () => {
 					</Button>
 				}
 			/>
+			{loadingDocuments && (
+				<Box
+					sx={{
+						width: '100%',
+						height: '100%',
+						display: 'flex',
+						justifyContent: 'center',
+						alignItems: 'center',
+					}}
+				>
+					<CircularProgress size={32} sx={{ p: 4 }} />
+				</Box>
+			)}
 			<List>
 				{documentList.excerpts.map((excerpt) => (
 					<ListItem

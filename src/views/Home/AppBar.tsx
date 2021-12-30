@@ -204,8 +204,9 @@ const ResponsiveAppBar: React.FC = () => {
 								vertical: 'top',
 								horizontal: 'right',
 							}}
-							open={Boolean(anchorElUser)}
+							open={!!anchorElUser}
 							onClose={handleCloseUserMenu}
+							closeAfterTransition
 						>
 							<SettingsPopover />
 						</Menu>

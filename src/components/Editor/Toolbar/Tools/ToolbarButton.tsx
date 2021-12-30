@@ -7,8 +7,8 @@ export type ToolbarItemType = typeof toolbarItemTypes[number];
 export interface IToolbarItem {
 	title: string;
 	enabled?: boolean;
-	icon?: React.ReactNode | string;
-	text?: React.ReactNode | string;
+	icon?: React.ReactElement | string;
+	text?: React.ReactElement | string;
 	tooltip?: string;
 	active?: boolean;
 	className?: string;
@@ -29,6 +29,7 @@ const ToolbarButton: React.FC<IToolbarButtonProps> = ({
 }) => (
 	<Tooltip title={tooltip || ''}>
 		<ToggleButton
+			size="small"
 			disabled={!enabled}
 			value="test"
 			onClick={() => {

@@ -20,7 +20,7 @@ const ColorButton: React.FC<IColorButtonProps> = ({
 
 	return (
 		<ToolbarButton
-			text={<InvertColorsIcon sx={{ color }} />}
+			icon={<InvertColorsIcon sx={{ color }} />}
 			title={title}
 			action={() => {
 				if (selectionColor === color) {
