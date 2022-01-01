@@ -25,9 +25,10 @@ import {
 	Pagination,
 	Paper,
 } from '@mui/material';
+import ConfirmButton from '@components/ConfirmButton/ConfirmButton';
 
 const excerptLength = 100;
-const pageSize = 5;
+const pageSize = 10;
 
 const Documents: React.FC = () => {
 	const navigate = useNavigate();
@@ -101,15 +102,12 @@ const Documents: React.FC = () => {
 				{documentList.excerpts.map((excerpt) => (
 					<ListItem
 						secondaryAction={
-							<IconButton
-								edge="end"
-								aria-label="delete"
-								onClick={() => {
+							<ConfirmButton
+								icon={<DeleteIcon />}
+								onConfirm={() => {
 									removeDocument(excerpt.id);
 								}}
-							>
-								<DeleteIcon />
-							</IconButton>
+							/>
 						}
 					>
 						<ListItemIcon>

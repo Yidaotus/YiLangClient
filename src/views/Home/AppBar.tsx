@@ -16,7 +16,7 @@ import {
 import { Menu as MenuIcon } from '@mui/icons-material';
 import SettingsPopover from '@components/SettingsPopover/SettingsPopover';
 import { Link, matchRoutes } from 'react-router-dom';
-import { useActiveDocument } from '@hooks/useUserContext';
+import { useActiveDocument, useUserContext } from '@hooks/useUserContext';
 import { useLocation } from 'react-router';
 
 const pages = ['Products', 'Pricing', 'Blog'];
@@ -28,22 +28,19 @@ const ResponsiveAppBar: React.FC = () => {
 	const [anchorElUser, setAnchorElUser] = React.useState<null | HTMLElement>(
 		null
 	);
-
 	const handleOpenNavMenu = (event: React.MouseEvent<HTMLElement>) => {
 		setAnchorElNav(event.currentTarget);
 	};
 	const handleOpenUserMenu = (event: React.MouseEvent<HTMLElement>) => {
 		setAnchorElUser(event.currentTarget);
 	};
-
 	const handleCloseNavMenu = () => {
 		setAnchorElNav(null);
 	};
-
 	const handleCloseUserMenu = () => {
 		setAnchorElUser(null);
 	};
-
+	const user = useUserContext();
 	const location = useLocation();
 	const matchedRoutes = matchRoutes(
 		[
@@ -57,7 +54,6 @@ const ResponsiveAppBar: React.FC = () => {
 		'/home'
 	);
 	const matchedPath = matchedRoutes?.[0].route.path || null;
-	console.log(matchedPath);
 	const [activeDocumentId] = useActiveDocument();
 
 	return (
@@ -70,15 +66,17 @@ const ResponsiveAppBar: React.FC = () => {
 			<Container maxWidth="xl">
 				<Toolbar disableGutters>
 					<Box sx={{ mr: 2, display: { xs: 'none', md: 'flex' } }}>
-						<img
-							alt="YiLang.png"
-							src="/yilang.png"
-							style={{
-								objectFit: 'contain',
-								width: '100px',
-								height: '45px',
-							}}
-						/>
+						<Link to="/home">
+							<img
+								alt="YiLang.png"
+								src="/yilang.png"
+								style={{
+									objectFit: 'contain',
+									width: '100px',
+									height: '45px',
+								}}
+							/>
+						</Link>
 					</Box>
 
 					<Box
@@ -150,19 +148,12 @@ const ResponsiveAppBar: React.FC = () => {
 					>
 						<Tabs value={matchedPath}>
 							<Tab
-								label="Home"
-								value="/"
-								to=""
+								label="Editor"
+								value="editor/:id"
+								to={`editor/${activeDocumentId}`}
 								component={Link}
+								disabled={!!!activeDocumentId}
 							/>
-							{activeDocumentId && (
-								<Tab
-									label="Editor"
-									value="editor/:id"
-									to={`editor/${activeDocumentId}`}
-									component={Link}
-								/>
-							)}
 							<Tab
 								label="Dictionary"
 								value="dictionary"
@@ -185,7 +176,7 @@ const ResponsiveAppBar: React.FC = () => {
 								sx={{ p: 0 }}
 							>
 								<Avatar
-									alt="Remy Sharp"
+									alt={user?.username}
 									src="/static/images/avatar/2.jpg"
 								/>
 							</IconButton>

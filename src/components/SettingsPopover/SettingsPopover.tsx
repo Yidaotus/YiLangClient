@@ -23,15 +23,18 @@ import {
 	SelectChangeEvent,
 	ListItemIcon,
 } from '@mui/material';
+import { useActiveDocument } from '@hooks/useUserContext';
 
 const SettingsPopover: React.FC = () => {
 	const activeLanguage = useActiveLanguageConf();
 	const availableLanguages = useLanguageConfigs();
 	const setActiveLanguage = useSetActiveLanguage();
 	const navigate = useNavigate();
+	const [, changeActiveDocument] = useActiveDocument();
 
 	const logoutConfirm = useCallback(() => {
-		// dispatch(logout());
+		window.localStorage.clear();
+		window.location.reload();
 	}, []);
 
 	const changeLanguage = useCallback(
@@ -41,9 +44,10 @@ const SettingsPopover: React.FC = () => {
 			);
 			if (languageConfig) {
 				setActiveLanguage.mutate(selectedLanguageId);
+				changeActiveDocument(null);
 			}
 		},
-		[availableLanguages, setActiveLanguage]
+		[availableLanguages, changeActiveDocument, setActiveLanguage]
 	);
 
 	const handleLanguageChange = useCallback(
@@ -107,11 +111,11 @@ const SettingsPopover: React.FC = () => {
 			</MenuItem>
 			<MenuItem
 				onClick={() => {
-					navigate(`/home/settings`);
+					logoutConfirm();
 				}}
 			>
 				<ListItemIcon>
-					<Logout fontSize="small" />
+					<LogoutIcon fontSize="small" />
 				</ListItemIcon>
 				Logout
 			</MenuItem>

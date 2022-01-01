@@ -3,8 +3,8 @@ import {
 	Box,
 	Checkbox,
 	Chip,
-	Divider,
 	IconButton,
+	InputAdornment,
 	Link,
 	Menu,
 	MenuItem,
@@ -33,7 +33,7 @@ import { visuallyHidden } from '@mui/utils';
 import { useNavigate } from 'react-router';
 import useDebounce from '@hooks/useDebounce';
 import { DictionaryTagID, notUndefined } from 'Document/Utility';
-import { FilterList } from '@mui/icons-material';
+import { FilterList, Search } from '@mui/icons-material';
 
 type Order = 'asc' | 'desc';
 interface HeadCell {
@@ -96,6 +96,15 @@ const FilterableTableHeadCell: React.FC<
 		setAnchorEl(null);
 	};
 
+	const handleMenuKeyPress =
+		(id: DictionaryTagID) =>
+		(event: React.KeyboardEvent<HTMLLIElement>) => {
+			if (event.key === 'Enter') {
+				const isSelectedElementActive = tagFilter.indexOf(id) > -1;
+				onRequestFilterTag(id, !isSelectedElementActive);
+			}
+		};
+
 	return (
 		<Stack spacing={1} direction="row" alignItems="center">
 			{headCell.label}
@@ -139,6 +148,7 @@ const FilterableTableHeadCell: React.FC<
 								height: '20px',
 								paddingLeft: '1px',
 							}}
+							onKeyDown={handleMenuKeyPress(tag.id)}
 						>
 							<Stack
 								spacing={1}
@@ -353,8 +363,16 @@ const DictionaryTable: React.FC = () => {
 						label="Search"
 						value={searchTerm}
 						onChange={(e) =>
-							setSearchTerm(e.target.value || undefined)
+							setSearchTerm(e.target.value.trim() || undefined)
 						}
+						sx={{ '& .MuiInputBase-root': { borderRadius: '3px' } }}
+						InputProps={{
+							startAdornment: (
+								<InputAdornment position="start">
+									<Search />
+								</InputAdornment>
+							),
+						}}
 					/>
 				</Toolbar>
 				<TableContainer>
@@ -387,8 +405,7 @@ const DictionaryTable: React.FC = () => {
 							tagFilter={tagFilter}
 						/>
 						<TableBody>
-							{paginatedEntries.entries.map((entry, index) => {
-								const labelId = `enhanced-table-checkbox-${index}`;
+							{paginatedEntries.entries.map((entry) => {
 								return (
 									<TableRow
 										hover
@@ -396,11 +413,7 @@ const DictionaryTable: React.FC = () => {
 										tabIndex={-1}
 										key={entry.id}
 									>
-										<TableCell
-											component="th"
-											id={labelId}
-											scope="row"
-										>
+										<TableCell>
 											<Link
 												component="button"
 												variant="body2"
@@ -408,7 +421,13 @@ const DictionaryTable: React.FC = () => {
 													navigate(`${entry.id}`);
 												}}
 											>
-												{entry.key}
+												<Typography
+													sx={{
+														fontSize: '1.3em',
+													}}
+												>
+													{entry.key}
+												</Typography>
 											</Link>
 										</TableCell>
 										<TableCell

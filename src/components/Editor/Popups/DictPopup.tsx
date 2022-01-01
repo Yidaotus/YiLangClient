@@ -1,30 +1,30 @@
 import './DictPopup.css';
 import React from 'react';
 import DictionaryEntry from '@components/DictionaryEntry/DictionaryEntry';
-import DictionaryRootEntry from '@components/DictionaryEntry/DictionaryRootEntry';
 import { IDictionaryEntryResolved } from 'Document/Dictionary';
-import { Divider } from '@mui/material';
+import { Box, List, Divider, ListItem, ListItemText } from '@mui/material';
 
 export interface IDictPopupProps {
 	entry: IDictionaryEntryResolved;
 }
 
 const DictPopup: React.FC<IDictPopupProps> = ({ entry }) => (
-	<div
-		className="dictpopup-container"
-		role="none"
-		onMouseDown={(e) => {
-			e.preventDefault();
-		}}
-	>
+	<Box sx={{ p: 1 }}>
 		{entry && <DictionaryEntry entry={entry} />}
-		{entry?.roots.map((rootEntry) => (
-			<React.Fragment key={rootEntry.id}>
+		{entry.roots.length > 0 && (
+			<>
 				<Divider />
-				<DictionaryRootEntry entry={rootEntry} />
-			</React.Fragment>
-		))}
-	</div>
+				<List dense>
+					<ListItem>
+						<ListItemText
+							primary={entry.key}
+							secondary={entry.translations.join(', ')}
+						/>
+					</ListItem>
+				</List>
+			</>
+		)}
+	</Box>
 );
 
 export default DictPopup;

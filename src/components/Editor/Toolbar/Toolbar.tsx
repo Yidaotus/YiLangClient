@@ -43,6 +43,7 @@ export interface IToolbarProps {
 	showWordEditor: () => void;
 	showSentenceEditor: () => void;
 	updateDocument: () => void;
+	isEditorDirty: boolean;
 }
 
 const Toolbar: React.FC<IToolbarProps> = ({
@@ -50,6 +51,7 @@ const Toolbar: React.FC<IToolbarProps> = ({
 	showWordEditor,
 	showSentenceEditor,
 	updateDocument,
+	isEditorDirty,
 }) => {
 	const editor = useSlateStatic();
 	const toolbarRef = useRef(null);
@@ -275,6 +277,7 @@ const Toolbar: React.FC<IToolbarProps> = ({
 				action={() => {
 					updateDocument();
 				}}
+				enabled={isEditorDirty}
 			/>
 		</div>
 	);

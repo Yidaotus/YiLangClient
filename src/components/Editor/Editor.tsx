@@ -10,13 +10,13 @@ import handleError from '@helpers/Error';
 import { Slate, withReact } from 'slate-react';
 import { BaseRange, createEditor, Descendant, Editor, Transforms } from 'slate';
 import useSelection from '@hooks/useSelection';
-import { useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import SentenceEditorModal from '@editor/Toolbar/Modals/SentenceEditor/SentenceEditorModal';
 import {
 	useEditorDocument,
 	useUpdateEditorDocument,
 } from '@hooks/DocumentQueryHooks';
-import { CircularProgress } from '@mui/material';
+import { CircularProgress, Typography } from '@mui/material';
 import EditorDocument from './EditorDocument';
 import DictPopupController from './Popups/DictPopupController';
 import Toolbar from './Toolbar/Toolbar';
@@ -25,6 +25,7 @@ import WordEditorModal from './Toolbar/Modals/WordEditor/WordEditorModal';
 import SavingIndicator, {
 	SavingState,
 } from './SavingIndicator/SavingIndicator';
+import { useActiveLanguageConf } from '@hooks/ConfigQueryHooks';
 
 const AVERAGE_ACTIONS_PER_COMMAND = 15;
 const SAVE_EVERY_ACTIONS = 5 * AVERAGE_ACTIONS_PER_COMMAND;
@@ -46,6 +47,14 @@ const YiEditor: React.FC = () => {
 	const editor = useMemo(() => withReact(withYiLang(createEditor())), []);
 	const [selection, setSelection] = useSelection(editor);
 	const [editorNodes, setEditorNodes] = useState<Array<Descendant>>([]);
+	const navigate = useNavigate();
+	const activeLanguage = useActiveLanguageConf();
+
+	useEffect(() => {
+		if (dbDocument && dbDocument?.lang !== activeLanguage?.id) {
+			navigate('/home');
+		}
+	}, [activeLanguage?.id, dbDocument, navigate]);
 
 	useEffect(() => {
 		const fetch = async () => {
@@ -141,7 +150,7 @@ const YiEditor: React.FC = () => {
 		<div>
 			<SavingIndicator savingState={savingIndicator} />
 			<div>
-				{!!loadingDocument && <CircularProgress />}
+				{loadingDocument && <CircularProgress />}
 				<div>
 					<div className="editor-container">
 						<Slate
@@ -163,6 +172,7 @@ const YiEditor: React.FC = () => {
 										setWordEditorVisible(true);
 									}}
 									updateDocument={updateDocument}
+									isEditorDirty={isEditorDirty}
 								/>
 								<WordEditorModal
 									visible={wordEditorVisible}
@@ -177,6 +187,9 @@ const YiEditor: React.FC = () => {
 									selection={selection}
 								/>
 								<EditorDocument />
+								{!loadingDocument && !dbDocument && (
+									<Typography>Document not found</Typography>
+								)}
 							</div>
 						</Slate>
 					</div>

@@ -31,14 +31,39 @@ const queryClient = new QueryClient({
 	defaultOptions: { queries: { staleTime: 60000 } },
 });
 
-const theme = createTheme({
+const baseTheme = createTheme({
 	palette: {
 		mode: 'light',
 		primary: {
 			main: '#24424b',
 		},
 	},
+});
+
+const theme = createTheme(baseTheme, {
 	components: {
+		MuiTableHead: {
+			styleOverrides: {
+				root: {
+					'& th': {
+						backgroundColor: baseTheme.palette.grey,
+					},
+				},
+			},
+		},
+		MuiTableRow: {
+			styleOverrides: {
+				root: {
+					'&:nth-of-type(odd)': {
+						backgroundColor: baseTheme.palette.action.hover,
+					},
+					// hide last border
+					'&:last-child td': {
+						border: 0,
+					},
+				},
+			},
+		},
 		MuiChip: {
 			defaultProps: {
 				deleteIcon: <CloseSharpIcon sx={{ height: '15px' }} />,

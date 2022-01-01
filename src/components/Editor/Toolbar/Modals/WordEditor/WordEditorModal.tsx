@@ -114,7 +114,6 @@ const WordEditorModal: React.FC<IWordInputProps> = ({ visible, close }) => {
 								at: nodeLocation,
 								split: true,
 							});
-							Transforms.select(editor, nodeLocation);
 						}
 					}
 				}
