@@ -7,6 +7,7 @@ import { Chip, Autocomplete, TextField, Stack } from '@mui/material';
 import { Controller, UseFormReturn } from 'react-hook-form';
 import * as Yup from 'yup';
 import { IDictionaryTagInput } from '../TagForm/TagForm';
+import TagInput from '../TagInput';
 
 const INITIAL_ROOT_FORM: IRootsInput = {
 	key: '',
@@ -102,34 +103,13 @@ const EntryForm: React.FC<IEntryFormProps> = ({
 						control={form.control}
 						defaultValue={[]}
 						render={({ field, fieldState: { error } }) => (
-							<Autocomplete
-								{...field}
-								multiple
-								options={[] as Array<string>}
+							<TagInput
+								value={field.value}
+								onChange={field.onChange}
 								disabled={isSubmitting}
-								freeSolo
-								renderTags={(value, getTagProps) =>
-									value.map(
-										(option: string, index: number) => (
-											<Chip
-												variant="outlined"
-												label={option}
-												{...getTagProps({ index })}
-											/>
-										)
-									)
-								}
-								renderInput={(params) => (
-									<TextField
-										{...params}
-										variant="outlined"
-										error={!!error}
-										label="Translation(s)"
-										helperText={error?.message || null}
-										placeholder="Translation(s)"
-									/>
-								)}
-								onChange={(_, data) => field.onChange(data)}
+								error={error?.message || undefined}
+								label="Translation(s)"
+								placeholder="Translation(s)"
 							/>
 						)}
 					/>
