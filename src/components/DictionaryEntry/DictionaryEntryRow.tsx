@@ -14,22 +14,24 @@ type IDictEntryRowProps = {
 	entryId: string;
 };
 
-export const GrammarPoint: React.FC<{ point: IGrammarPoint; color?: string }> =
-	({ point, color }) => {
-		const highlightColor = color || '#91d5ff';
-		return (
-			<div className="grammar-container">
-				<h1 style={{ color: highlightColor }}>{point.name}</h1>
-				<blockquote>{point.description}</blockquote>
-				<ul>
-					{point.construction.map((c, i) => (
-						// eslint-disable-next-line react/no-array-index-key
-						<li key={i}>{c}</li>
-					))}
-				</ul>
-			</div>
-		);
-	};
+export const GrammarPoint: React.FC<{
+	point: IGrammarPoint;
+	color?: string;
+}> = ({ point, color }) => {
+	const highlightColor = color || '#91d5ff';
+	return (
+		<div className="grammar-container">
+			<h1 style={{ color: highlightColor }}>{point.name}</h1>
+			<blockquote>{point.description}</blockquote>
+			<ul>
+				{point.construction.map((c, i) => (
+					// eslint-disable-next-line react/no-array-index-key
+					<li key={i}>{c}</li>
+				))}
+			</ul>
+		</div>
+	);
+};
 
 const EntryTag: React.FC<{ tag: IDictionaryTag }> = ({ tag }) => (
 	<Chip

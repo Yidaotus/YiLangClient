@@ -1,7 +1,7 @@
 import './WordList.css';
 import DictionaryEntryRow from '@components/DictionaryEntry/DictionaryEntryRow';
 import { SentenceElement, WordElement } from '@components/Editor/YiEditor';
-import React from 'react';
+import React, { useState } from 'react';
 import {
 	Element as SlateElement,
 	Node as SlateNode,
@@ -16,9 +16,12 @@ import {
 	useSlate,
 } from 'slate-react';
 import { Link as LinkIcon } from '@mui/icons-material';
-import { IconButton } from '@mui/material';
+import { Button, IconButton } from '@mui/material';
+import FileLink from '@components/FileLink';
+import { convertEntriesToCsv } from '@helpers/CSVExporter';
 
 const WordList: React.FC<RenderElementProps> = ({ children, attributes }) => {
+	const [blob, setBlob] = useState<Blob | null>(null);
 	const editor = useSlate();
 	const selected = useSelected();
 
@@ -65,6 +68,20 @@ const WordList: React.FC<RenderElementProps> = ({ children, attributes }) => {
 				borderRadius: '5px',
 			}}
 		>
+			<Button
+				onClick={() => {
+					const csv = 'test123';
+					const element = document.createElement('a');
+					const file = new Blob([csv], { type: 'text/plain' });
+					element.href = URL.createObjectURL(file);
+					element.download = 'myFile.txt';
+					document.body.appendChild(element);
+					element.click();
+					document.body.removeChild(element);
+				}}
+			>
+				Export
+			</Button>
 			{children}
 			<div contentEditable={false} style={{ fontSize: '0.95rem' }}>
 				<h3 className="bp3-heading">Added Words</h3>
