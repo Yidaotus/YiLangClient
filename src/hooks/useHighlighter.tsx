@@ -9,7 +9,7 @@ interface IHighlighterProps {
 	formatter?: (i: string) => JSX.Element;
 }
 
-const Highligter: React.FC<IHighlighterProps> = ({
+const Highlighter: React.FC<IHighlighterProps> = ({
 	input,
 	indices,
 	tagName,
@@ -47,4 +47,4 @@ const Highligter: React.FC<IHighlighterProps> = ({
 	return <span>{chunks}</span>;
 };
 
-export default Highligter;
+export default Highlighter;

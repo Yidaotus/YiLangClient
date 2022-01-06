@@ -4,14 +4,13 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { IExcerptedDocumentLink } from 'Document/Document';
 import DocumentLink from '@components/DictionaryEntry/DocumentLink';
 import DictEntryWithEdit from '@components/DictionaryEntry/DictEntryWithEdit/DictEntryWithEdit';
-import DictionaryRootEntry from '@components/DictionaryEntry/DictionaryRootEntry';
 import {
 	useDictionaryEntryResolved,
 	useDictionarySentence,
 	useDictionarySentencesByWord,
 } from '@hooks/DictionaryQueryHooks';
 import PageHeader from '@components/PageHeader/PageHeader';
-import { CircularProgress, Divider, Paper } from '@mui/material';
+import { CircularProgress, Paper } from '@mui/material';
 
 /**
  * Renders the Dictionary into a Table.
@@ -44,12 +43,6 @@ const DictionaryEntryPage: React.FC = () => {
 				/>
 			)}
 			{!entry && !loadingMain && <span>Entry not found</span>}
-			<Divider />
-			{entry?.roots.map((root) => (
-				<div key={root.id}>
-					<DictionaryRootEntry entry={root} canLink />
-				</div>
-			))}
 			{firstSeen && (
 				<div>
 					<p>{firstSeen.content}</p>

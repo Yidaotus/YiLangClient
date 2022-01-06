@@ -1,4 +1,4 @@
-import handleError from '@helpers/Error';
+import useUiErrorHandler from '@helpers/Error';
 import { queryKeyFactory } from '@helpers/queryHelper';
 import {
 	IApiResponse,
@@ -19,18 +19,12 @@ import {
 	unlinkSentenceWord,
 	updateDictionaryEntry,
 } from 'api/dictionary.service';
-import { getTag } from 'api/tags.service';
 import {
 	IDictionaryEntry,
 	IDictionaryEntryResolved,
 	IDictionarySentence,
-	IDictionaryTag,
 } from 'Document/Dictionary';
-import {
-	DictionaryEntryID,
-	DictionaryTagID,
-	notUndefined,
-} from 'Document/Utility';
+import { DictionaryEntryID, notUndefined } from 'Document/Utility';
 import {
 	useMutation,
 	UseMutationResult,
@@ -44,7 +38,6 @@ import { useTags } from './useTags';
 
 const dictSentencesKeys = queryKeyFactory('sentences');
 const dictEntryKeys = queryKeyFactory('entries');
-const tagEntryKeys = queryKeyFactory('tags');
 
 const useDictionarySentence = (
 	sentenceId: string | undefined
@@ -221,6 +214,7 @@ const useDeleteDictionaryEntry = (): UseMutationResult<
 > => {
 	const activeLanugage = useActiveLanguageConf();
 	const queryClient = useQueryClient();
+	const handleError = useUiErrorHandler();
 
 	return useMutation(
 		(id: string) => {
@@ -253,6 +247,7 @@ const useUpdateDictionaryEntry = (): UseMutationResult<
 > => {
 	const activeLanugage = useActiveLanguageConf();
 	const queryClient = useQueryClient();
+	const handleError = useUiErrorHandler();
 
 	return useMutation(
 		(entryToUpdate: IDictionaryEntry) => {
@@ -291,6 +286,7 @@ const useAddDictionarySentence = (): UseMutationResult<
 	const activeLanugage = useActiveLanguageConf();
 	//		['dictEntries', 'details', lang, id],
 	const queryClient = useQueryClient();
+	const handleError = useUiErrorHandler();
 
 	return useMutation(
 		(newSentence: Omit<IDictionarySentence, 'id' | 'lang'>) => {
@@ -319,6 +315,7 @@ const useUnlinkWordSentence = (): UseMutationResult<
 	unknown
 > => {
 	const activeLanugage = useActiveLanguageConf();
+	const handleError = useUiErrorHandler();
 
 	return useMutation(
 		(newLink: ILinkSentenceWordParams) => {
@@ -343,6 +340,7 @@ const useLinkWordSentence = (): UseMutationResult<
 	unknown
 > => {
 	const activeLanugage = useActiveLanguageConf();
+	const handleError = useUiErrorHandler();
 
 	return useMutation(
 		(newLink: ILinkSentenceWordParams) => {
@@ -369,6 +367,7 @@ const useAddDictionaryEntry = (): UseMutationResult<
 	const activeLanugage = useActiveLanguageConf();
 	//		['dictEntries', 'details', lang, id],
 	const queryClient = useQueryClient();
+	const handleError = useUiErrorHandler();
 
 	return useMutation(
 		(newEntry: Omit<IDictionaryEntry, 'id' | 'lang' | 'createdAt'>) => {

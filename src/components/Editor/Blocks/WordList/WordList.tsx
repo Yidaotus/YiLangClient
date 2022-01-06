@@ -1,7 +1,7 @@
 import './WordList.css';
 import DictionaryEntryRow from '@components/DictionaryEntry/DictionaryEntryRow';
 import { SentenceElement, WordElement } from '@components/Editor/YiEditor';
-import React, { useState } from 'react';
+import React from 'react';
 import {
 	Element as SlateElement,
 	Node as SlateNode,
@@ -17,11 +17,8 @@ import {
 } from 'slate-react';
 import { Link as LinkIcon } from '@mui/icons-material';
 import { Button, IconButton } from '@mui/material';
-import FileLink from '@components/FileLink';
-import { convertEntriesToCsv } from '@helpers/CSVExporter';
 
 const WordList: React.FC<RenderElementProps> = ({ children, attributes }) => {
-	const [blob, setBlob] = useState<Blob | null>(null);
 	const editor = useSlate();
 	const selected = useSelected();
 

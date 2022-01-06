@@ -6,7 +6,6 @@ import React, {
 	useRef,
 	useState,
 } from 'react';
-import handleError from '@helpers/Error';
 import { Slate, withReact } from 'slate-react';
 import { BaseRange, createEditor, Descendant, Editor, Transforms } from 'slate';
 import useSelection from '@hooks/useSelection';
@@ -26,6 +25,7 @@ import SavingIndicator, {
 	SavingState,
 } from './SavingIndicator/SavingIndicator';
 import { useActiveLanguageConf } from '@hooks/ConfigQueryHooks';
+import useUiErrorHandler from '@helpers/Error';
 
 const AVERAGE_ACTIONS_PER_COMMAND = 15;
 const SAVE_EVERY_ACTIONS = 5 * AVERAGE_ACTIONS_PER_COMMAND;
@@ -49,6 +49,7 @@ const YiEditor: React.FC = () => {
 	const [editorNodes, setEditorNodes] = useState<Array<Descendant>>([]);
 	const navigate = useNavigate();
 	const activeLanguage = useActiveLanguageConf();
+	const handleError = useUiErrorHandler();
 
 	useEffect(() => {
 		if (dbDocument && dbDocument?.lang !== activeLanguage?.id) {
@@ -70,7 +71,7 @@ const YiEditor: React.FC = () => {
 			}
 		};
 		fetch();
-	}, [dbDocument, setEditorNodes]);
+	}, [dbDocument, handleError, setEditorNodes]);
 
 	// TODO throttle!
 	const updateDocument = useCallback(async () => {
@@ -84,7 +85,7 @@ const YiEditor: React.FC = () => {
 				serializedDocument,
 			});
 
-			// Hacky but feels beter for the user to actually see the saving process
+			// Hacky but feels better for the user to actually see the saving process
 			setTimeout(() => {
 				setSavingIndicator('SUCCESS');
 				setTimeout(() => {
@@ -97,7 +98,7 @@ const YiEditor: React.FC = () => {
 		} finally {
 			setIsEditorDirty(false);
 		}
-	}, [editor, editorNodes, id, updateEditorDocument]);
+	}, [editor, editorNodes, handleError, id, updateEditorDocument]);
 
 	const closeSentenceEditorModal = useCallback(() => {
 		setSentenceEditorVisible(false);

@@ -1,13 +1,12 @@
 import './DictionaryEntry.css';
-import React, { useState } from 'react';
+import React from 'react';
 import {
 	IDictionaryEntryResolved,
 	IDictionaryTag,
 	IGrammarPoint,
 } from 'Document/Dictionary';
 import { useNavigate } from 'react-router';
-import { Button, Chip, Popover } from '@mui/material';
-import { Info as InfoIcon } from '@mui/icons-material';
+import { Box, Chip, Link, Stack, Typography } from '@mui/material';
 
 type IDictEntryProps = {
 	entry: IDictionaryEntryResolved;
@@ -33,96 +32,115 @@ export const GrammarPoint: React.FC<{
 	);
 };
 
-const EntryTag: React.FC<{ tag: IDictionaryTag }> = ({ tag }) => {
-	const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null);
-	const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
-		setAnchorEl(event.currentTarget);
-	};
-	const handleClose = () => {
-		setAnchorEl(null);
-	};
-
-	const open = Boolean(anchorEl);
-	const id = open ? 'simple-popover' : undefined;
-	return tag.grammarPoint ? (
-		<>
-			<Button
-				aria-describedby={id}
-				variant="contained"
-				onClick={handleClick}
+const EntryTag: React.FC<{ tag: IDictionaryTag }> = ({ tag }) => (
+	<Chip
+		style={{
+			backgroundColor: tag.color || 'blue',
+		}}
+		key={tag.name}
+		label={
+			<Typography
+				variant="button"
+				sx={{ fontSize: '0.9em', color: 'white' }}
 			>
 				{tag.name}
-			</Button>
-			<Popover
-				id={id}
-				open={open}
-				anchorEl={anchorEl}
-				onClose={handleClose}
-				anchorOrigin={{
-					vertical: 'bottom',
-					horizontal: 'left',
-				}}
-			>
-				<GrammarPoint point={tag.grammarPoint} color={tag.color} />
-			</Popover>
-		</>
-	) : (
-		<Chip
-			style={{
-				backgroundColor: tag.color || 'blue',
-				marginLeft: '5px',
-			}}
-			key={tag.name}
-			label={tag.name}
-		/>
-	);
-};
+			</Typography>
+		}
+	/>
+);
 
-const DictionaryEntry: React.FC<IDictEntryProps> = (props) => {
-	const { entry, canLink } = props;
+const DictionaryEntry: React.FC<IDictEntryProps> = ({ entry }) => {
 	const navigate = useNavigate();
 
 	return (
-		<>
-			{entry && (
-				<div className="dictentry-panel">
-					<div className="dictentry-head">
-						{canLink ? (
-							<h1 className="dictentry-head-item">
-								<Button
-									onClick={() => {
-										navigate(
-											`/home/dictionary/${entry.id}`
-										);
+		<Box
+			sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' } }}
+		>
+			<Box sx={{ display: 'flex', flexDirection: 'column', p: 2 }}>
+				<Typography variant="subtitle2" component="div">
+					{entry.spelling}
+				</Typography>
+				<Typography variant="h5" gutterBottom component="div">
+					{entry.key}
+				</Typography>
+				<Stack direction={{ xs: 'row', sm: 'column' }} spacing={1}>
+					{entry.tags.map((tag) => (
+						<EntryTag tag={tag} key={tag.id} />
+					))}
+				</Stack>
+			</Box>
+			<Box sx={{ display: 'flex', flexDirection: 'column', p: 2 }}>
+				<Typography
+					variant="caption"
+					component="div"
+					sx={{ color: 'gray' }}
+				>
+					Translations
+				</Typography>
+				<Typography variant="body1" gutterBottom component="div">
+					{entry.translations.join(', ')}
+				</Typography>
+				{entry.comment && (
+					<>
+						<Typography
+							variant="caption"
+							component="div"
+							sx={{ color: 'gray' }}
+						>
+							Comment
+						</Typography>
+						<Typography
+							variant="body2"
+							gutterBottom
+							component="div"
+						>
+							{entry.comment}
+						</Typography>
+					</>
+				)}
+				{entry.roots.length > 0 && (
+					<>
+						<Typography
+							variant="caption"
+							component="div"
+							sx={{ color: 'gray' }}
+						>
+							Root entries
+						</Typography>
+						<Stack>
+							{entry.roots.map((root) => (
+								<Box
+									sx={{
+										display: 'flex',
+										flexDirection: 'row',
+										alignItems: 'baseline',
 									}}
 								>
-									{entry.key}
-								</Button>
-								{entry.spelling && (
-									<span>{entry.spelling}</span>
-								)}
-							</h1>
-						) : (
-							<h1 className="dictentry-head-item">
-								{entry.key}
-								{entry.spelling && (
-									<span>{entry.spelling}</span>
-								)}
-							</h1>
-						)}
-					</div>
-					<blockquote>{entry.comment}</blockquote>
-					<p>{entry.translations.join(', ')}</p>
-					<ul>
-						{entry.tags.map((tag) => (
-							<li key={tag.id} className="tag-node">
-								<EntryTag tag={tag} />
-							</li>
-						))}
-					</ul>
-				</div>
-			)}
-		</>
+									<Link
+										component="button"
+										variant="body2"
+										onClick={() => {
+											navigate(
+												`../dictionary/${root.id}`
+											);
+										}}
+									>
+										{root.key}
+									</Link>
+									<Typography
+										variant="body2"
+										gutterBottom
+										component="div"
+									>
+										{` : ${root.translations.join(', ')}`}
+									</Typography>
+								</Box>
+							))}
+						</Stack>
+					</>
+				)}
+			</Box>
+		</Box>
 	);
 };
 

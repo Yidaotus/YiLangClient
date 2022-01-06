@@ -6,7 +6,7 @@ import { Editor, Path, Transforms } from 'slate';
 import { ReactEditor } from 'slate-react';
 import { useNavigate } from 'react-router';
 import { Book as BookIcon, Link as LinkIcon } from '@mui/icons-material';
-import { IconButton, Chip, CircularProgress } from '@mui/material';
+import { IconButton, Chip, CircularProgress, Stack } from '@mui/material';
 
 type IDictEntryRowProps = {
 	editor: Editor;
@@ -71,13 +71,15 @@ const DictionaryEntryRow: React.FC<IDictEntryRowProps> = ({
 						{entryResolved.translations.join(', ')}
 					</span>
 					<span className="dictentry-col">
-						<ul>
+						<Stack
+							spacing={1}
+							direction="row"
+							flexWrap="wrap-reverse"
+						>
 							{entryResolved.tags.map((tag) => (
-								<li key={tag.id} className="tag-node">
-									<EntryTag tag={tag} />
-								</li>
+								<EntryTag tag={tag} />
 							))}
-						</ul>
+						</Stack>
 					</span>
 					<IconButton
 						onMouseUp={() => {

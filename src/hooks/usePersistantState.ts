@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 
-const usePerstistantState = <T>(
+const usePersistentState = <T>(
 	key: string,
 	defaultValue: T
 ): [T, React.Dispatch<React.SetStateAction<T>>] => {
@@ -19,4 +19,4 @@ const usePerstistantState = <T>(
 	return [state, setState];
 };
 
-export default usePerstistantState;
+export default usePersistentState;

@@ -2,16 +2,17 @@ import './Home.css';
 import React, { useEffect, useRef, useState } from 'react';
 import { Outlet } from 'react-router-dom';
 
-import handleError from '@helpers/Error';
 import { useActiveLanguageConf } from '@hooks/ConfigQueryHooks';
 import { useSnackbar } from 'notistack';
 import ResponsiveAppBar from './AppBar';
+import useUiErrorHandler from '@helpers/Error';
 
 const HomeView: React.FC = () => {
 	const [loading, setLoading] = useState(false);
 	const contentRef = useRef<HTMLDivElement>(null);
 	const activeLanguage = useActiveLanguageConf();
 	const { enqueueSnackbar } = useSnackbar();
+	const handleError = useUiErrorHandler();
 
 	useEffect(() => {
 		const init = async () => {
@@ -24,7 +25,7 @@ const HomeView: React.FC = () => {
 			setLoading(false);
 		};
 		init();
-	}, [enqueueSnackbar]);
+	}, [enqueueSnackbar, handleError]);
 
 	useEffect(() => {
 		if (activeLanguage) {
@@ -35,7 +36,7 @@ const HomeView: React.FC = () => {
 	}, [activeLanguage, enqueueSnackbar]);
 
 	return (
-		<div className="yi-layout">
+		<div>
 			<header>
 				<ResponsiveAppBar />
 			</header>

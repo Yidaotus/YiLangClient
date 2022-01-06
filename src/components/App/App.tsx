@@ -1,12 +1,6 @@
 import React from 'react';
 import './App.css';
-import {
-	BrowserRouter as Router,
-	Routes,
-	Route,
-	BrowserRouter,
-	Navigate,
-} from 'react-router-dom';
+import { Routes, Route, BrowserRouter, Navigate } from 'react-router-dom';
 import PrivateRoute from '@components/PrivateRoute';
 import Home from '@views/Home/Home';
 import Login from '@views/Login';
@@ -70,7 +64,7 @@ const theme = createTheme(baseTheme, {
 			},
 			styleOverrides: {
 				root: {
-					borderRadius: '1px',
+					borderRadius: '2px',
 					height: '20px',
 					'& svg': {
 						'& :hover': {

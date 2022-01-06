@@ -1,4 +1,6 @@
 import { IApiResponse } from 'api/definitions/api';
+import { useSnackbar } from 'notistack';
+import { useCallback } from 'react';
 
 const isApiResponse = (e: unknown): e is IApiResponse<void> => {
 	return (
@@ -7,21 +9,23 @@ const isApiResponse = (e: unknown): e is IApiResponse<void> => {
 	);
 };
 
-const handleError = (e: unknown): void => {
-	let description = 'Unkown Error!';
-	if (e instanceof Error) {
-		description = e.message;
-	} else if (isApiResponse(e)) {
-		description = e.message;
-	}
-	/*
-	TODO: notistack with hook not possible here I think
-	notification.open({
-		message: 'Error',
-		description,
-		type: 'error',
-	});
-	*/
+const useUiErrorHandler = () => {
+	const { enqueueSnackbar } = useSnackbar();
+
+	const handleError = useCallback(
+		(e: unknown): void => {
+			let description = 'Unkown Error!';
+			if (e instanceof Error) {
+				description = e.message;
+			} else if (isApiResponse(e)) {
+				description = e.message;
+			}
+			enqueueSnackbar(description, { variant: 'error' });
+		},
+		[enqueueSnackbar]
+	);
+
+	return handleError;
 };
 
-export default handleError;
+export default useUiErrorHandler;

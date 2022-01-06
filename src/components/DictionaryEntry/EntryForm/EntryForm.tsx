@@ -3,7 +3,7 @@ import React from 'react';
 import { IDictionaryEntry, IDictionaryTag } from 'Document/Dictionary';
 import DictionarySelect from '@components/DictionaryEntry/DictionarySelect/DictionarySelect';
 import TagSelect from '@components/DictionaryEntry/TagSelect/TagSelect';
-import { Chip, Autocomplete, TextField, Stack } from '@mui/material';
+import { TextField, Stack } from '@mui/material';
 import { Controller, UseFormReturn } from 'react-hook-form';
 import * as Yup from 'yup';
 import { IDictionaryTagInput } from '../TagForm/TagForm';
@@ -71,7 +71,6 @@ const EntryForm: React.FC<IEntryFormProps> = ({
 	form,
 	createTag,
 	createRoot,
-	canEditRoot,
 }) => {
 	const {
 		formState: { isSubmitting },

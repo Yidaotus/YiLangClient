@@ -1,4 +1,4 @@
-import handleError from '@helpers/Error';
+import useUiErrorHandler from '@helpers/Error';
 import { queryKeyFactory } from '@helpers/queryHelper';
 import {
 	IApiResponse,
@@ -97,6 +97,7 @@ const useUpdateEditorDocument = (): UseMutationResult<
 > => {
 	const activeLanguage = useActiveLanguageConf();
 	const queryClient = useQueryClient();
+	const handleError = useUiErrorHandler();
 
 	return useMutation(
 		({
@@ -141,6 +142,7 @@ const useCreateDocument = (): UseMutationResult<
 > => {
 	const activeLanguage = useActiveLanguageConf();
 	const queryClient = useQueryClient();
+	const handleError = useUiErrorHandler();
 
 	return useMutation(
 		() => {
@@ -170,6 +172,7 @@ const useDeleteEditorDocument = (): UseMutationResult<
 > => {
 	const activeLanguage = useActiveLanguageConf();
 	const queryClient = useQueryClient();
+	const handleError = useUiErrorHandler();
 
 	return useMutation(
 		(id: string) => {

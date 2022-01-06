@@ -18,7 +18,6 @@ import TagForm, {
 	INITIAL_TAG_FORM_VALUES,
 	IDictionaryTagInput,
 } from '@components/DictionaryEntry/TagForm/TagForm';
-import handleError from '@helpers/Error';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { useAddDictionaryTag } from '@hooks/useTags';
 import {
@@ -34,6 +33,7 @@ import EntryForm, {
 	INITIAL_ENTRY_FORM,
 	IRootsInput,
 } from '../EntryForm/EntryForm';
+import useUiErrorHandler from '@helpers/Error';
 
 export interface IWordInputState {
 	entryKey: string | IDictionaryEntryResolved;
@@ -150,6 +150,7 @@ const WordInput: React.ForwardRefRenderFunction<
 	const addTag = useAddDictionaryTag();
 	const updateEntry = useUpdateDictionaryEntry();
 	const addEntry = useAddDictionaryEntry();
+	const handleError = useUiErrorHandler();
 
 	useEffect(() => {
 		if (previousEntryKey.current !== entryKey) {
@@ -174,7 +175,7 @@ const WordInput: React.ForwardRefRenderFunction<
 				handleError(e);
 			}
 		},
-		[stateChanged, tagForm]
+		[handleError, stateChanged, tagForm]
 	);
 
 	const createRoot = useCallback(
@@ -189,7 +190,7 @@ const WordInput: React.ForwardRefRenderFunction<
 				handleError(e);
 			}
 		},
-		[rootForm, stateChanged]
+		[handleError, rootForm, stateChanged]
 	);
 
 	const saveEntry = useCallback(
@@ -346,6 +347,7 @@ const WordInput: React.ForwardRefRenderFunction<
 	}, [
 		addEntry.isLoading,
 		addTag.isLoading,
+		handleError,
 		rootForm,
 		saveEntry,
 		stateChanged,

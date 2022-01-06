@@ -1,4 +1,4 @@
-import handleError from '@helpers/Error';
+import useUiErrorHandler from '@helpers/Error';
 import {
 	removeLanguageConfig,
 	addLanguageConfig,
@@ -70,6 +70,7 @@ const useRemoveLanguageConfig = (): UseMutationResult<
 	unknown
 > => {
 	const queryClient = useQueryClient();
+	const handleError = useUiErrorHandler();
 
 	return useMutation(
 		(languageConfigId: string) => {
@@ -93,6 +94,7 @@ const useAddLanguageConfig = (): UseMutationResult<
 	unknown
 > => {
 	const queryClient = useQueryClient();
+	const handleError = useUiErrorHandler();
 
 	return useMutation(
 		(languageConfig: Omit<ILanguageConfig, 'id'>) => {
@@ -118,6 +120,7 @@ const useUpdateEditorConfig = (): UseMutationResult<
 	unknown
 > => {
 	const queryClient = useQueryClient();
+	const handleError = useUiErrorHandler();
 
 	return useMutation(
 		({ editorConfig }: { editorConfig: Partial<IEditorConfig> }) => {
@@ -144,6 +147,7 @@ const useUpdateLanguageConfig = (): UseMutationResult<
 	unknown
 > => {
 	const queryClient = useQueryClient();
+	const handleError = useUiErrorHandler();
 
 	return useMutation(
 		({
@@ -173,6 +177,7 @@ const useSetActiveLanguage = (): UseMutationResult<
 	unknown
 > => {
 	const queryClient = useQueryClient();
+	const handleError = useUiErrorHandler();
 
 	return useMutation(
 		(id: string) => {
@@ -198,6 +203,7 @@ const useUpdateConfig = (): UseMutationResult<
 	unknown
 > => {
 	const queryClient = useQueryClient();
+	const handleError = useUiErrorHandler();
 
 	return useMutation(
 		(configToUpdate: IConfig) => {

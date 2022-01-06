@@ -3,7 +3,6 @@ import React, { useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import FolderIcon from '@mui/icons-material/Folder';
 import DeleteIcon from '@mui/icons-material/Delete';
-import handleError from '@helpers/Error';
 import { useActiveLanguageConf } from '@hooks/ConfigQueryHooks';
 import { useActiveDocument } from '@hooks/useUserContext';
 import {
@@ -16,7 +15,6 @@ import {
 	Box,
 	Button,
 	CircularProgress,
-	IconButton,
 	Link,
 	List,
 	ListItem,
@@ -26,6 +24,7 @@ import {
 	Paper,
 } from '@mui/material';
 import ConfirmButton from '@components/ConfirmButton/ConfirmButton';
+import useUiErrorHandler from '@helpers/Error';
 
 const excerptLength = 100;
 const pageSize = 10;
@@ -42,6 +41,7 @@ const Documents: React.FC = () => {
 		limit: pageSize,
 		sortBy: 'createdAt',
 	});
+	const handleError = useUiErrorHandler();
 
 	const activeLanguage = useActiveLanguageConf();
 
@@ -61,7 +61,7 @@ const Documents: React.FC = () => {
 				handleError(e);
 			}
 		},
-		[deleteDocument]
+		[deleteDocument, handleError]
 	);
 
 	const createNewDocument = useCallback(async () => {

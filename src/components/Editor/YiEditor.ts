@@ -30,6 +30,7 @@ const BlockTypes = [
 
 const InlineTypes = ['word', 'sentence', 'mark', 'highlight'] as const;
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const ElementTypeLabels: {
 	[k in typeof BlockTypes[number] | typeof InlineTypes[number]]: string;
 } = {

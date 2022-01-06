@@ -1,11 +1,16 @@
 import { useLookupSources } from '@hooks/ConfigQueryHooks';
 import { IconButton, Menu, MenuItem } from '@mui/material';
 import { Search } from '@mui/icons-material';
-import { ILookupSourceLinkProps } from '@components/LookupSourceLink';
 import React from 'react';
+import { IDictionaryLookupSource } from 'Document/Config';
 
-const formatURL = ({ source, searchTerm }: ILookupSourceLinkProps): string =>
-	source.source.replace('{}', searchTerm);
+const formatURL = ({
+	source,
+	searchTerm,
+}: {
+	source: IDictionaryLookupSource;
+	searchTerm: string;
+}): string => source.source.replace('{}', searchTerm);
 const WINDOW_TARGET = '_blank';
 
 export interface ILookupSourceMenuProps {
