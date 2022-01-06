@@ -6,6 +6,7 @@ export interface IInsertButtonProps extends IToolbarItem {
 	text: string;
 	onChange: () => void;
 	editor: Editor;
+	className?: string;
 }
 
 const InsertButton: React.FC<IInsertButtonProps> = ({
@@ -13,6 +14,7 @@ const InsertButton: React.FC<IInsertButtonProps> = ({
 	title,
 	onChange,
 	editor,
+	className,
 }) => (
 	<ToolbarButton
 		title={title}
@@ -22,6 +24,7 @@ const InsertButton: React.FC<IInsertButtonProps> = ({
 			Editor.insertText(editor, text);
 			onChange();
 		}}
+		className={className}
 	/>
 );
 

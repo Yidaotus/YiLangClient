@@ -27,6 +27,7 @@ export interface IAlignButtonProps extends IToolbarItem {
 	align: AlignValue;
 	onChange: () => void;
 	editor: Editor;
+	className?: string;
 }
 
 const AlignButton: React.FC<IAlignButtonProps> = ({
@@ -35,6 +36,7 @@ const AlignButton: React.FC<IAlignButtonProps> = ({
 	title,
 	editor,
 	onChange,
+	className,
 }) => {
 	const currentAlign = YiEditor.getAlign(editor);
 
@@ -48,6 +50,7 @@ const AlignButton: React.FC<IAlignButtonProps> = ({
 				return onChange();
 			}}
 			active={currentAlign === align}
+			className={className}
 		/>
 	);
 };

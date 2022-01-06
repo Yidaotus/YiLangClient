@@ -8,6 +8,7 @@ export interface IToolbarWrapperItem extends IToolbarItem {
 	editor: Editor;
 	onChange: () => void;
 	createElement: () => EditorInlineElement;
+	className?: string;
 }
 
 const ElementButton: React.FC<IToolbarWrapperItem> = ({
@@ -17,6 +18,7 @@ const ElementButton: React.FC<IToolbarWrapperItem> = ({
 	editor,
 	onChange,
 	createElement,
+	className,
 }): JSX.Element => {
 	const isActive = YiEditor.isNodeInSelection(editor, editor.selection, type);
 
@@ -51,6 +53,7 @@ const ElementButton: React.FC<IToolbarWrapperItem> = ({
 			}
 			active={isActive}
 			icon={icon}
+			className={className}
 		/>
 	);
 };

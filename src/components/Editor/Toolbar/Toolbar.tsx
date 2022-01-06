@@ -6,15 +6,11 @@ import useClickOutside from '@hooks/useClickOutside';
 import { useLookupSources } from '@hooks/ConfigQueryHooks';
 import LookupSourceButton from '@components/LookupSourceButton';
 import DialogButton from '@editor/Toolbar/Tools/DialogButton';
-import { Divider } from '@mui/material';
+import { Divider, Paper, styled, ToggleButtonGroup } from '@mui/material';
 import {
-	Adb as AdbIcon,
 	FormatAlignCenter,
 	FormatAlignLeft,
 	FormatAlignRight,
-	FormatColorFill,
-	FormatListBulleted,
-	FormatListNumbered,
 	FormatColorText,
 	DriveFileRenameOutline,
 	Translate as TranslateIcon,
@@ -25,6 +21,11 @@ import {
 	Undo as UndoIcon,
 	Redo as RedoIcon,
 	EmojiSymbols as EmojiSymbolsIcon,
+	FormatListNumbered,
+	FormatListBulleted,
+	Title as TitleIcon,
+	ChatBubble,
+	ImportContacts,
 } from '@mui/icons-material';
 
 import AlignButton from './Tools/AlignButton';
@@ -37,6 +38,22 @@ import BlockButton from './Tools/BlockButton';
 import InsertButton from './Tools/InsertButton';
 import ElementButton from './Tools/ElementButton';
 import InputWrapperButton from './Tools/InputWrapperButton';
+
+const StyledToggleButtonGroup = styled(ToggleButtonGroup)(({ theme }) => ({
+	'& .MuiToggleButtonGroup-grouped': {
+		margin: theme.spacing(0.5),
+		border: 0,
+		'&.Mui-disabled': {
+			border: 0,
+		},
+		'&:not(:first-of-type)': {
+			borderRadius: theme.shape.borderRadius,
+		},
+		'&:first-of-type': {
+			borderRadius: theme.shape.borderRadius,
+		},
+	},
+}));
 
 export interface IToolbarProps {
 	selection: BaseSelection;
@@ -79,207 +96,279 @@ const Toolbar: React.FC<IToolbarProps> = ({
 		!!editor.selection && !SlateRange.isCollapsed(editor.selection);
 
 	return (
-		<div
-			className="toolbar"
-			ref={toolbarRef}
-			role="none"
+		<Paper
+			elevation={0}
+			sx={{
+				display: 'flex',
+				border: (theme) => `1px solid ${theme.palette.divider}`,
+				flexWrap: 'wrap',
+				justifyContent: 'center',
+				position: 'sticky',
+				top: '10px',
+				zIndex: 15,
+			}}
 			onMouseDown={(e) => {
 				e.preventDefault();
 			}}
+			ref={toolbarRef}
 		>
-			<ToolbarButton
-				title="DEBUG"
-				action={() => {}}
-				enabled
-				active
-				icon={<AdbIcon />}
-			/>
-			<InputWrapperButton
-				showInput={showWordEditor}
-				icon={<TranslateIcon />}
-				title="Word"
-				type="word"
-				{...sharedProps}
-			/>
-			<InputWrapperButton
-				showInput={showSentenceEditor}
-				type="sentence"
-				title="Sentence"
-				icon={<DriveFileRenameOutline />}
-				{...sharedProps}
-			/>
-			<ElementButton
-				type="mark"
-				title="Mark"
-				icon={<BookmarkIcon />}
-				createElement={() => ({
-					type: 'mark',
-					color: '#FFB30F',
-					children: [],
-				})}
-				{...sharedProps}
-			/>
-			<ToolbarMenu
-				flow="vertical"
-				type="lookup"
-				icon={<SearchIcon />}
-				title="Lookup Word"
-				enabled={lookupButtonActive}
-				{...menuProps}
+			<StyledToggleButtonGroup
+				size="small"
+				exclusive
+				value="none"
+				aria-label="text alignment"
 			>
-				{lookupSources.map((luSource) => (
-					<LookupSourceButton source={luSource} key={luSource.name} />
-				))}
-			</ToolbarMenu>
-			<Divider orientation="vertical" flexItem />
-			<AlignButton
-				align="left"
-				icon={<FormatAlignLeft />}
-				title="Left Align"
-				{...sharedProps}
-			/>
-			<AlignButton
-				align="center"
-				icon={<FormatAlignCenter />}
-				title="Center Align"
-				{...sharedProps}
-			/>
-			<AlignButton
-				align="right"
-				icon={<FormatAlignRight />}
-				title="Right Align"
-				{...sharedProps}
-			/>
-			<Divider orientation="vertical" flexItem />
-			<ToolbarMenu
-				type="blockType"
-				icon={<WidgetsIcon />}
-				title="Block Type"
-				{...menuProps}
+				<InputWrapperButton
+					showInput={showWordEditor}
+					icon={<TranslateIcon />}
+					title="Word"
+					type="word"
+					{...sharedProps}
+				/>
+				<InputWrapperButton
+					showInput={showSentenceEditor}
+					type="sentence"
+					title="Sentence"
+					icon={<DriveFileRenameOutline />}
+					{...sharedProps}
+				/>
+				<ElementButton
+					type="mark"
+					title="Mark"
+					icon={<BookmarkIcon />}
+					createElement={() => ({
+						type: 'mark',
+						color: '#FFB30F',
+						children: [],
+					})}
+					{...sharedProps}
+				/>
+				<ToolbarMenu
+					icon={<SearchIcon />}
+					title="Lookup Word"
+					enabled={lookupButtonActive}
+					{...menuProps}
+				>
+					{lookupSources.map((luSource) => (
+						<LookupSourceButton
+							source={luSource}
+							key={luSource.name}
+						/>
+					))}
+				</ToolbarMenu>
+			</StyledToggleButtonGroup>
+
+			<Divider flexItem orientation="vertical" sx={{ mx: 0.5, my: 1 }} />
+
+			<StyledToggleButtonGroup
+				size="small"
+				exclusive
+				value="none"
+				aria-label="text alignment"
 			>
-				<BlockButton
-					type="wordList"
-					title="Words and Sentences"
-					{...sharedProps}
-					icon="git-repo"
-				/>
-				<DialogButton icon="circle" title="Dialog" {...sharedProps} />
-				<BlockButton
-					type="title"
-					title="Title"
-					{...sharedProps}
-					icon="header"
-				/>
-				<BlockButton
-					type="subtitle"
-					title="Subtitle"
-					{...sharedProps}
-					icon="header-two"
-				/>
-				<ListButton
-					type="numberedList"
-					icon="numbered-list"
-					title="Numbered List"
+				<AlignButton
+					align="left"
+					icon={<FormatAlignLeft />}
+					title="Left Align"
 					{...sharedProps}
 				/>
-				<ListButton
-					type="bulletedList"
-					icon="list"
-					title="Numbered List"
+				<AlignButton
+					align="center"
+					icon={<FormatAlignCenter />}
+					title="Center Align"
 					{...sharedProps}
 				/>
-			</ToolbarMenu>
-			<Divider orientation="vertical" flexItem />
-			<ToolbarMenu
-				type="color"
-				icon={<FormatColorText />}
-				title="Font Color"
-				{...menuProps}
+				<AlignButton
+					align="right"
+					icon={<FormatAlignRight />}
+					title="Right Align"
+					{...sharedProps}
+				/>
+			</StyledToggleButtonGroup>
+
+			<Divider flexItem orientation="vertical" sx={{ mx: 0.5, my: 1 }} />
+
+			<StyledToggleButtonGroup
+				size="small"
+				exclusive
+				value="none"
+				aria-label="text alignment"
 			>
-				{Object.entries(TextColors).map(([color, colorProps]) => (
-					<ColorButton
-						color={colorProps.color}
-						key={color}
-						title={`${colorProps.title} (${
-							colorProps.hotkey || 'No shortcut'
-						})`}
-						{...sharedProps}
-					/>
-				))}
-			</ToolbarMenu>
-			<Divider orientation="vertical" flexItem />
-			<ToolbarMenu
-				type="glyphs"
-				icon={<EmojiSymbolsIcon />}
-				title="Glyphs"
-				{...menuProps}
+				<ToolbarMenu
+					icon={<WidgetsIcon />}
+					title="Block Type"
+					{...menuProps}
+				>
+					<StyledToggleButtonGroup
+						size="small"
+						exclusive
+						value="none"
+						aria-label="text alignment"
+					>
+						<BlockButton
+							type="wordList"
+							title="Words and Sentences"
+							{...sharedProps}
+							icon={<ImportContacts />}
+						/>
+						<DialogButton
+							icon={<ChatBubble />}
+							title="Dialog"
+							{...sharedProps}
+						/>
+						<BlockButton
+							type="title"
+							title="Title"
+							{...sharedProps}
+							icon={<TitleIcon />}
+						/>
+						<BlockButton
+							type="subtitle"
+							title="Subtitle"
+							{...sharedProps}
+							icon={<TitleIcon />}
+						/>
+						<ListButton
+							type="numberedList"
+							icon={<FormatListNumbered />}
+							title="Numbered List"
+							{...sharedProps}
+						/>
+						<ListButton
+							type="bulletedList"
+							icon={<FormatListBulleted />}
+							title="Bulleted List"
+							{...sharedProps}
+						/>
+					</StyledToggleButtonGroup>
+				</ToolbarMenu>
+
+				<ToolbarMenu
+					icon={<FormatColorText />}
+					title="Font Color"
+					{...menuProps}
+				>
+					<StyledToggleButtonGroup
+						size="small"
+						exclusive
+						value="none"
+						aria-label="text alignment"
+					>
+						{Object.entries(TextColors).map(
+							([color, colorProps]) => (
+								<ColorButton
+									color={colorProps.color}
+									key={color}
+									title={`${colorProps.title} (${
+										colorProps.hotkey || 'No shortcut'
+									})`}
+									{...sharedProps}
+								/>
+							)
+						)}
+					</StyledToggleButtonGroup>
+				</ToolbarMenu>
+
+				<ToolbarMenu
+					icon={<EmojiSymbolsIcon />}
+					title="Glyphs"
+					{...menuProps}
+				>
+					<StyledToggleButtonGroup
+						size="small"
+						exclusive
+						value="none"
+						aria-label="text alignment"
+					>
+						<InsertButton
+							text="←"
+							title="Left Arrow"
+							{...sharedProps}
+						/>
+						<InsertButton
+							text="→"
+							title="Right Arrow"
+							{...sharedProps}
+						/>
+						<InsertButton
+							text="↔"
+							title="Left Right Arrow"
+							{...sharedProps}
+						/>
+						<InsertButton
+							text="⇐"
+							title="Leftwards Double Arrow"
+							{...sharedProps}
+						/>
+						<InsertButton
+							text="⇒"
+							title="Rightwards Double Arrow"
+							{...sharedProps}
+						/>
+						<InsertButton
+							text="…"
+							title="Ellipsis"
+							{...sharedProps}
+						/>
+						<InsertButton
+							text="«"
+							title="Double Low Quote"
+							{...sharedProps}
+						/>
+						<InsertButton
+							text="»"
+							title="Double High Quote"
+							{...sharedProps}
+						/>
+						<InsertButton
+							text="„"
+							title="Double Angle Left Quote"
+							{...sharedProps}
+						/>
+						<InsertButton
+							text="”"
+							title="Double Angle Right Quote"
+							{...sharedProps}
+						/>
+					</StyledToggleButtonGroup>
+				</ToolbarMenu>
+			</StyledToggleButtonGroup>
+
+			<Divider flexItem orientation="vertical" sx={{ mx: 0.5, my: 1 }} />
+
+			<StyledToggleButtonGroup
+				size="small"
+				exclusive
+				value="none"
+				aria-label="text alignment"
 			>
-				<InsertButton text="←" title="Left Arrow" {...sharedProps} />
-				<InsertButton text="→" title="Right Arrow" {...sharedProps} />
-				<InsertButton
-					text="↔"
-					title="Left Right Arrow"
-					{...sharedProps}
+				<ToolbarButton
+					icon={<UndoIcon />}
+					tooltip="Undo"
+					title="Undo"
+					action={() => {
+						editor.undo();
+					}}
 				/>
-				<InsertButton
-					text="⇐"
-					title="Leftwards Double Arrow"
-					{...sharedProps}
+				<ToolbarButton
+					icon={<RedoIcon />}
+					title="Redo"
+					tooltip="Redo"
+					action={() => {
+						editor.redo();
+					}}
 				/>
-				<InsertButton
-					text="⇒"
-					title="Rightwards Double Arrow"
-					{...sharedProps}
+				<ToolbarButton
+					icon={<SaveIcon />}
+					title="Save"
+					tooltip="Save"
+					action={() => {
+						updateDocument();
+					}}
+					enabled={isEditorDirty}
 				/>
-				<InsertButton text="…" title="Ellipsis" {...sharedProps} />
-				<InsertButton
-					text="«"
-					title="Double Low Quote"
-					{...sharedProps}
-				/>
-				<InsertButton
-					text="»"
-					title="Double High Quote"
-					{...sharedProps}
-				/>
-				<InsertButton
-					text="„"
-					title="Double Angle Left Quote"
-					{...sharedProps}
-				/>
-				<InsertButton
-					text="”"
-					title="Double Angle Right Quote"
-					{...sharedProps}
-				/>
-			</ToolbarMenu>
-			<Divider orientation="vertical" flexItem />
-			<ToolbarButton
-				icon={<UndoIcon />}
-				tooltip="Undo"
-				title="Undo"
-				action={() => {
-					editor.undo();
-				}}
-			/>
-			<ToolbarButton
-				icon={<RedoIcon />}
-				title="Redo"
-				tooltip="Redo"
-				action={() => {
-					editor.redo();
-				}}
-			/>
-			<ToolbarButton
-				icon={<SaveIcon />}
-				title="Save"
-				tooltip="Save"
-				action={() => {
-					updateDocument();
-				}}
-				enabled={isEditorDirty}
-			/>
-		</div>
+			</StyledToggleButtonGroup>
+		</Paper>
 	);
 };
 

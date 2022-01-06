@@ -1,7 +1,9 @@
 import React from 'react';
 import { YiEditor } from '@components/Editor/YiEditor';
+import FormatAlignLeftIcon from '@mui/icons-material/FormatAlignLeft';
 import { Editor, Transforms, Element as SlateElement, Range } from 'slate';
 import ToolbarButton from './ToolbarButton';
+import { Tooltip, ToggleButton } from '@mui/material';
 
 export interface IInputWrapperButtonProps {
 	editor: Editor;
@@ -10,6 +12,7 @@ export interface IInputWrapperButtonProps {
 	title: string;
 	icon: React.ReactElement | string;
 	showInput: () => void;
+	className?: string;
 }
 
 const InputWrapperButton: React.FC<IInputWrapperButtonProps> = ({
@@ -19,6 +22,7 @@ const InputWrapperButton: React.FC<IInputWrapperButtonProps> = ({
 	title,
 	icon,
 	showInput,
+	className,
 }): JSX.Element => {
 	const isActive = YiEditor.isNodeInSelection(editor, editor.selection, type);
 
@@ -44,6 +48,7 @@ const InputWrapperButton: React.FC<IInputWrapperButtonProps> = ({
 			}
 			active={isActive}
 			icon={icon}
+			className={className}
 		/>
 	);
 };

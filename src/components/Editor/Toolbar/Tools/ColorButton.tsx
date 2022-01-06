@@ -8,6 +8,7 @@ export interface IColorButtonProps {
 	title: string;
 	editor: Editor;
 	onChange: () => void;
+	className?: string;
 }
 
 const ColorButton: React.FC<IColorButtonProps> = ({
@@ -15,6 +16,7 @@ const ColorButton: React.FC<IColorButtonProps> = ({
 	title,
 	editor,
 	onChange,
+	className,
 }) => {
 	const selectionColor = Editor.marks(editor)?.color;
 
@@ -30,7 +32,7 @@ const ColorButton: React.FC<IColorButtonProps> = ({
 				}
 				return onChange();
 			}}
-			className={`button color_${color}`}
+			className={`button color_${color} ${className}`}
 			active={selectionColor === color}
 		/>
 	);

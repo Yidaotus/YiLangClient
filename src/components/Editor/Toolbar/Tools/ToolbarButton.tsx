@@ -1,4 +1,4 @@
-import { IconButton, ToggleButton, Tooltip } from '@mui/material';
+import { ToggleButton, Tooltip } from '@mui/material';
 import React from 'react';
 
 const toolbarItemTypes = ['Wrapper', 'Dropdown', 'Action'] as const;
@@ -15,7 +15,7 @@ export interface IToolbarItem {
 }
 
 export interface IToolbarButtonProps extends IToolbarItem {
-	action: () => void;
+	action: (e: React.MouseEvent<HTMLButtonElement>) => void;
 }
 
 const ToolbarButton: React.FC<IToolbarButtonProps> = ({
@@ -29,15 +29,16 @@ const ToolbarButton: React.FC<IToolbarButtonProps> = ({
 }) => (
 	<Tooltip title={tooltip || ''}>
 		<ToggleButton
-			size="small"
 			disabled={!enabled}
-			value="test"
-			onClick={() => {
+			size="small"
+			value="left"
+			onClick={(e) => {
 				if (enabled) {
-					action();
+					action(e);
 				}
 			}}
 			selected={active}
+			className={className}
 		>
 			{icon}
 		</ToggleButton>

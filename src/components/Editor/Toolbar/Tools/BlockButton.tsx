@@ -7,6 +7,7 @@ export interface IToolbarWrapperItem extends IToolbarItem {
 	type: EditorBlockElement['type'];
 	editor: Editor;
 	onChange: () => void;
+	className?: string;
 }
 
 const WrapperItem: React.FC<IToolbarWrapperItem> = ({
@@ -15,6 +16,7 @@ const WrapperItem: React.FC<IToolbarWrapperItem> = ({
 	title,
 	editor,
 	onChange,
+	className,
 }): JSX.Element => {
 	const isActive = YiEditor.getTextBlockStyle(editor) === type;
 
@@ -28,6 +30,7 @@ const WrapperItem: React.FC<IToolbarWrapperItem> = ({
 			}}
 			active={isActive}
 			icon={icon}
+			className={className}
 		/>
 	);
 };

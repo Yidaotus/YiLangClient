@@ -2,7 +2,7 @@ import { IDictionaryLookupSource } from 'Document/Config';
 import React from 'react';
 import { useSlateStatic } from 'slate-react';
 import { Editor } from 'slate';
-import { Button } from '@mui/material';
+import { MenuItem } from '@mui/material';
 
 export interface ILookupSourceLinkProps {
 	source: IDictionaryLookupSource;
@@ -20,8 +20,7 @@ const LookupSourceButton: React.FC<ILookupSourceLinkProps> = ({ source }) => {
 	const editor = useSlateStatic();
 	const target = '_blank';
 	return (
-		<Button
-			variant="outlined"
+		<MenuItem
 			onClick={() => {
 				if (editor.selection) {
 					const searchTerm =
@@ -32,7 +31,7 @@ const LookupSourceButton: React.FC<ILookupSourceLinkProps> = ({ source }) => {
 			}}
 		>
 			{source.name}
-		</Button>
+		</MenuItem>
 	);
 };
 
