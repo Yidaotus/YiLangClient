@@ -1,5 +1,5 @@
 import { Autocomplete, Chip, TextField } from '@mui/material';
-import React, { useState } from 'react';
+import React, { useCallback, useState } from 'react';
 
 interface TagInputProps {
 	value: Array<string>;
@@ -20,6 +20,23 @@ const TagInput: React.FC<TagInputProps> = ({
 }) => {
 	const [inputValue, setInputValue] = useState('');
 
+	const sanitizedOnChange = useCallback(
+		(data: Array<string>) => {
+			const sanitizedData = data
+				.map((dataInput) => dataInput.split(';').flat())
+				.flat();
+			onChange(sanitizedData);
+		},
+		[onChange]
+	);
+
+	const onBlurHandler = useCallback(() => {
+		if (inputValue && value.indexOf(inputValue) < 0) {
+			sanitizedOnChange([...value, inputValue]);
+		}
+		setInputValue('');
+	}, [inputValue, sanitizedOnChange, value]);
+
 	return (
 		<Autocomplete
 			multiple
@@ -38,12 +55,7 @@ const TagInput: React.FC<TagInputProps> = ({
 			}
 			inputValue={inputValue}
 			onInputChange={(_, newInputValue) => setInputValue(newInputValue)}
-			onBlur={() => {
-				if (inputValue && value.indexOf(inputValue) < 0) {
-					onChange([...value, inputValue]);
-				}
-				setInputValue('');
-			}}
+			onBlur={onBlurHandler}
 			renderInput={(params) => (
 				<TextField
 					{...params}
@@ -55,7 +67,7 @@ const TagInput: React.FC<TagInputProps> = ({
 				/>
 			)}
 			value={value}
-			onChange={(_, data) => onChange(data)}
+			onChange={(_, data) => sanitizedOnChange(data)}
 		/>
 	);
 };
