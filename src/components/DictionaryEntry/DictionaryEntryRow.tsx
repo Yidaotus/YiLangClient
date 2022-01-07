@@ -4,7 +4,7 @@ import { useDictionaryEntryResolved } from '@hooks/DictionaryQueryHooks';
 import { Editor, Path, Transforms } from 'slate';
 import { ReactEditor } from 'slate-react';
 import { useNavigate } from 'react-router';
-import { Book as BookIcon, Link as LinkIcon } from '@mui/icons-material';
+import { Link as LinkIcon, MenuBookOutlined } from '@mui/icons-material';
 import {
 	IconButton,
 	Chip,
@@ -75,16 +75,16 @@ const DictionaryEntryRow: React.FC<IDictEntryRowProps> = ({
 					))}
 				</Stack>
 			</TableCell>
-			<TableCell align="right">
+			<TableCell align="right" width={1}>
 				<IconButton
 					onMouseUp={() => {
 						navigate(`/home/dictionary/${entry.id}`);
 					}}
 				>
-					<BookIcon />
+					<MenuBookOutlined />
 				</IconButton>
 			</TableCell>
-			<TableCell align="right">
+			<TableCell align="right" width={1}>
 				<IconButton
 					onMouseUp={(e) => {
 						setTimeout(() => {

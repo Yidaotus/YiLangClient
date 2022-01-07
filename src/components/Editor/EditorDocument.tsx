@@ -124,7 +124,6 @@ const Element = (props: RenderElementProps) => {
 						m: 2,
 						p: 1,
 					})}
-					className="TEST HALLO"
 					{...attributes}
 				>
 					{children}

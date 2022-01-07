@@ -103,7 +103,9 @@ const WordList: React.FC<RenderElementProps> = ({ children, attributes }) => {
 									{vocabs.map(([vocab, path]) => (
 										<DictionaryEntryRow
 											entryId={vocab.dictId}
-											key={vocab.dictId}
+											key={`${vocab.dictId}-${path.join(
+												''
+											)}`}
 											path={path}
 											editor={editor}
 										/>

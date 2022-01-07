@@ -48,7 +48,7 @@ const YiEditor: React.FC = () => {
 	const [loadingDocument, dbDocument] = useEditorDocument(id);
 
 	const [showSpelling, setShowSpelling] = useState(false);
-	const editor = useMemo(() => withReact(withYiLang(createEditor())), []);
+	const [editor, setEditor] = useState(withReact(withYiLang(createEditor())));
 	const [selection, setSelection] = useSelection(editor);
 	const [editorNodes, setEditorNodes] = useState<Array<Descendant>>([]);
 	const navigate = useNavigate();
@@ -107,6 +107,7 @@ const YiEditor: React.FC = () => {
 		setSentenceEditorVisible(false);
 	}, [setSentenceEditorVisible]);
 
+	/*
 	useEffect(() => {
 		if (
 			actionCountDebounced >= SAVE_EVERY_ACTIONS &&
@@ -116,9 +117,12 @@ const YiEditor: React.FC = () => {
 			setActionCount(0);
 		}
 	}, [actionCountDebounced, savingIndicator, updateDocument]);
+	*/
 
 	const onEditorChange = useCallback(
 		(newValue) => {
+			setEditorNodes(newValue);
+			/*
 			const isAstChange = editor.operations.some(
 				(op) => op.type !== 'set_selection'
 			);
@@ -137,10 +141,10 @@ const YiEditor: React.FC = () => {
 							(op) => op.type !== 'set_selection'
 						).length
 				);
-				setEditorNodes(newValue);
 			}
+			*/
 		},
-		[editor.operations, editor.selection, setSelection]
+		[setEditorNodes]
 	);
 
 	const closeWordEditorModal = useCallback(
@@ -210,7 +214,6 @@ const YiEditor: React.FC = () => {
 								)}
 							</div>
 						</Slate>
-						<div>{JSON.stringify(editorNodes, null, '\t')}</div>
 					</div>
 				</div>
 			</div>

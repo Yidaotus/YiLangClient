@@ -1,5 +1,5 @@
 import React from 'react';
-import { RenderElementProps } from 'slate-react';
+import { RenderElementProps, useSelected } from 'slate-react';
 import { SentenceElement } from '@components/Editor/YiEditor';
 import {
 	styled,
@@ -30,6 +30,8 @@ const SentenceFragment: React.FC<SentenceFragmentProps> = ({
 	element,
 	attributes,
 }) => {
+	const selected = useSelected();
+
 	return (
 		<span
 			{...attributes}
@@ -40,11 +42,17 @@ const SentenceFragment: React.FC<SentenceFragmentProps> = ({
 			<SentenceTooltip
 				title={element.translation}
 				TransitionComponent={Zoom}
-				enterDelay={1000}
-				leaveDelay={500}
+				enterDelay={300}
 				PopperProps={{ contentEditable: false }}
 			>
-				<span>{children}</span>
+				<span
+					style={{
+						borderRadius: '2px',
+						backgroundColor: selected ? '#d4ecff' : '',
+					}}
+				>
+					{children}
+				</span>
 			</SentenceTooltip>
 		</span>
 	);
