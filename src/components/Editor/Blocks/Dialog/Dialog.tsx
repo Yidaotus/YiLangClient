@@ -1,6 +1,7 @@
 import './Dialog.css';
 import React from 'react';
 import { IDialogBlock } from 'Document/Block';
+import { Box } from '@mui/material';
 
 /**
  * Renders a dialog.
@@ -27,10 +28,14 @@ const DialogBlock: React.FC<IDialogBlock> = ({
 							marginTop: `${hasSpellableWords ? '0.2em' : '0em'}`,
 						}}
 					>
-						<span>{line.speaker}</span>
-						<div>
-							<span>{children}</span>
-						</div>
+						<Box
+							sx={(theme) => ({
+								backgroundColor: theme.palette.primary.main,
+							})}
+						>
+							{line.speaker}
+						</Box>
+						<Box>{children}</Box>
 					</div>
 				) : null;
 			})}

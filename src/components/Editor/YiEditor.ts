@@ -18,6 +18,7 @@ import { DictionaryEntryID } from 'Document/Utility';
 export type CustomEditor = BaseEditor & ReactEditor & HistoryEditor;
 
 const BlockTypes = [
+	'documentTitle',
 	'title',
 	'subtitle',
 	'paragraph',
@@ -34,6 +35,7 @@ const InlineTypes = ['word', 'sentence', 'mark', 'highlight'] as const;
 const ElementTypeLabels: {
 	[k in typeof BlockTypes[number] | typeof InlineTypes[number]]: string;
 } = {
+	documentTitle: 'Document Title',
 	title: 'Title',
 	subtitle: 'Subtitle',
 	paragraph: 'Paragraph',
@@ -85,6 +87,11 @@ export type DialogLine = {
 export type DialogElement = {
 	type: 'dialog';
 	children: DialogLine[];
+};
+
+export type DocumentTitleElement = {
+	type: 'documentTitle';
+	children: CustomText[];
 };
 
 export type NumberedListElement = {
@@ -164,6 +171,7 @@ export type EditorBlockElement =
 	| ParagraphElement
 	| ImageElement
 	| TitleElement
+	| DocumentTitleElement
 	| VideoElement
 	| BlockQuoteElement
 	| BulletedListElement
@@ -443,7 +451,7 @@ const withDialog = (editor: Editor): CustomEditor => {
 				}
 			}
 		}
-		// Fall back to the original `normalizeNode` to enforce other constraints.
+
 		normalizeNode(entry);
 	};
 
@@ -589,23 +597,11 @@ const withLayout = (editor: Editor): CustomEditor => {
 	editor.normalizeNode = ([node, path]) => {
 		if (path.length === 0) {
 			if (editor.children.length < 1) {
-				const title: TitleElement = {
-					type: 'title',
-					align: null,
+				const title: DocumentTitleElement = {
+					type: 'documentTitle',
 					children: [{ text: 'Untitled' }],
 				};
 				Transforms.insertNodes(editor, title, { at: path.concat(0) });
-			}
-
-			if (editor.children.length < 2) {
-				const paragraph: ParagraphElement = {
-					type: 'paragraph',
-					align: null,
-					children: [{ text: '' }],
-				};
-				Transforms.insertNodes(editor, paragraph, {
-					at: path.concat(1),
-				});
 			}
 
 			for (const [child, childPath] of SlateNode.children(editor, path)) {
@@ -621,16 +617,27 @@ const withLayout = (editor: Editor): CustomEditor => {
 						Transforms.setNodes(editor, newProperties, {
 							at: childPath,
 						});
+						if (elementType === 'documentTitle') {
+							if (child.children.length > 0) {
+								child.children = [{ text: 'Untitled' }];
+							}
+						}
 					}
 				};
 
 				switch (slateIndex) {
 					case 0:
-						enforceType('title');
+						enforceType('documentTitle');
 						break;
-					case 1:
-						enforceType('paragraph');
+					case 1: {
+						if (
+							SlateElement.isElement(child) &&
+							child.type === 'documentTitle'
+						) {
+							enforceType('paragraph');
+						}
 						break;
+					}
 					default:
 						break;
 				}

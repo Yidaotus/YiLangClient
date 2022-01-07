@@ -124,7 +124,6 @@ const YiEditor: React.FC = () => {
 				setSelection(editor.selection);
 			}
 			if (isAstChange) {
-				setEditorNodes(newValue);
 				setIsEditorDirty(true);
 				setActionCount(
 					(count) =>
@@ -134,6 +133,7 @@ const YiEditor: React.FC = () => {
 						).length
 				);
 			}
+			setEditorNodes(newValue);
 		},
 		[editor.operations, editor.selection, setSelection]
 	);
@@ -197,6 +197,7 @@ const YiEditor: React.FC = () => {
 								)}
 							</div>
 						</Slate>
+						<div>{JSON.stringify(editorNodes, null, '\t')}</div>
 					</div>
 				</div>
 			</div>

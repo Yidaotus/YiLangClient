@@ -13,6 +13,9 @@ import WordFragment from './Fragments/Word/WordFragment';
 import ImageBlock from './Blocks/Image/Image';
 import WordList from './Blocks/WordList/WordList';
 import VideoBlock, { videoBlockPasteAction } from './Blocks/Video/Video';
+import { Person as PersonIcon } from '@mui/icons-material';
+import { Box, Grid, Paper, Typography } from '@mui/material';
+import AccountCircleTwoToneIcon from '@mui/icons-material/AccountCircleTwoTone';
 
 const Leaf = ({ attributes, leaf, children }: RenderLeafProps) => {
 	return (
@@ -37,6 +40,21 @@ const Element = (props: RenderElementProps) => {
 					{children}
 				</SentenceFragment>
 			);
+		case 'documentTitle': {
+			return (
+				<Typography
+					sx={(theme) => ({
+						borderBottom: `5px solid ${theme.palette.secondary.light}`,
+						m: 2,
+					})}
+					variant="h3"
+					component="div"
+					{...attributes}
+				>
+					{children}
+				</Typography>
+			);
+		}
 		case 'title': {
 			return (
 				<h1
@@ -98,30 +116,70 @@ const Element = (props: RenderElementProps) => {
 			);
 		case 'dialog':
 			return (
-				<div className="dialog-container" {...attributes}>
-					{children}
-				</div>
-			);
-		case 'dialogLine':
-			return (
-				<div className="dialog-line" {...attributes}>
-					{children}
-				</div>
-			);
-		case 'dialogLineActor':
-			return (
-				<div
-					className="dialog-line-actor .bp3-text-overflow-ellipsis"
+				<Paper
+					sx={(theme) => ({
+						display: 'flex',
+						flexDirection: 'column',
+						borderRadius: '3px',
+						m: 2,
+						p: 1,
+					})}
+					className="TEST HALLO"
 					{...attributes}
 				>
 					{children}
-				</div>
+				</Paper>
+			);
+		case 'dialogLine':
+			return (
+				<Box
+					sx={(theme) => ({
+						wordBreak: 'break-all',
+						whiteSpace: 'pre-wrap',
+						'&:nth-child(2n)': {
+							backgroundColor: theme.palette.secondary.light,
+							borderRadius: '2px',
+						},
+					})}
+					{...attributes}
+				>
+					{children}
+				</Box>
+			);
+		case 'dialogLineActor':
+			return (
+				<Box
+					sx={{
+						display: 'flex',
+						p: 1,
+						'& span': {
+							fontWeight: 'bold',
+						},
+					}}
+					{...attributes}
+				>
+					<div style={{ userSelect: 'none' }} contentEditable="false">
+						<AccountCircleTwoToneIcon
+							color="primary"
+							sx={{ paddingRight: 1 }}
+						/>
+					</div>
+					{children}
+				</Box>
 			);
 		case 'dialogLineSpeech':
 			return (
-				<div className="dialog-line-speech" {...attributes}>
+				<Grid
+					item
+					xs="auto"
+					sx={{
+						paddingBottom: 1,
+						paddingLeft: 1,
+					}}
+					{...attributes}
+				>
 					{children}
-				</div>
+				</Grid>
 			);
 		case 'listItem':
 			return <li {...attributes}>{children}</li>;
@@ -152,12 +210,12 @@ const Element = (props: RenderElementProps) => {
 			);
 		default:
 			return (
-				<div
+				<Box
 					{...attributes}
-					style={{ textAlign: element.align || 'left' }}
+					sx={{ textAlign: element.align || 'left', p: 1 }}
 				>
 					{children}
-				</div>
+				</Box>
 			);
 	}
 };
