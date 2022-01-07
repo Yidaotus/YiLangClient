@@ -27,6 +27,7 @@ import SavingIndicator, {
 import { useActiveLanguageConf } from '@hooks/ConfigQueryHooks';
 import useUiErrorHandler from '@helpers/Error';
 import DraggableDictionary from './DraggableDictionary';
+import useDebounce from '@hooks/useDebounce';
 
 const AVERAGE_ACTIONS_PER_COMMAND = 15;
 const SAVE_EVERY_ACTIONS = 5 * AVERAGE_ACTIONS_PER_COMMAND;
@@ -35,6 +36,7 @@ const YiEditor: React.FC = () => {
 	const editorContainer = useRef(null);
 	const [savingIndicator, setSavingIndicator] = useState<SavingState>('IDLE');
 	const [actionCount, setActionCount] = useState(0);
+	const actionCountDebounced = useDebounce(actionCount, 500);
 	const [wordEditorVisible, setWordEditorVisible] = useState(false);
 	const [sentenceEditorVisible, setSentenceEditorVisible] = useState(false);
 	const [isEditorDirty, setIsEditorDirty] = useState(false);
@@ -74,7 +76,6 @@ const YiEditor: React.FC = () => {
 		fetch();
 	}, [dbDocument, handleError, setEditorNodes]);
 
-	// TODO throttle!
 	const updateDocument = useCallback(async () => {
 		try {
 			setSavingIndicator('LOADING');
@@ -106,11 +107,14 @@ const YiEditor: React.FC = () => {
 	}, [setSentenceEditorVisible]);
 
 	useEffect(() => {
-		if (actionCount >= SAVE_EVERY_ACTIONS) {
+		if (
+			actionCountDebounced >= SAVE_EVERY_ACTIONS &&
+			savingIndicator === 'IDLE'
+		) {
 			updateDocument();
 			setActionCount(0);
 		}
-	}, [actionCount, updateDocument]);
+	}, [actionCountDebounced, savingIndicator, updateDocument]);
 
 	const onEditorChange = useCallback(
 		(newValue) => {
@@ -132,8 +136,8 @@ const YiEditor: React.FC = () => {
 							(op) => op.type !== 'set_selection'
 						).length
 				);
+				setEditorNodes(newValue);
 			}
-			setEditorNodes(newValue);
 		},
 		[editor.operations, editor.selection, setSelection]
 	);

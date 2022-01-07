@@ -9,7 +9,10 @@ import {
 	Box,
 	styled,
 } from '@mui/material';
-import { ExpandMore as ExpandMoreIcon } from '@mui/icons-material';
+import {
+	ExpandMore as ExpandMoreIcon,
+	MenuBookOutlined,
+} from '@mui/icons-material';
 import { BaseSelection, Editor, Range as SlateRange } from 'slate';
 import { useSlateStatic } from 'slate-react';
 import { YiEditor, WordElement } from './YiEditor';
@@ -94,7 +97,10 @@ const DraggableDictionary: React.FC<DraggableDictionaryProps> = ({
 								}
 							}}
 						>
-							<Typography>Dictionary</Typography>
+							<Box sx={{ display: 'flex', alignItems: 'center' }}>
+								<MenuBookOutlined sx={{ paddingRight: 1 }} />
+								<Typography>Dictionary</Typography>
+							</Box>
 						</AccordionSummary>
 						<AccordionDetails>
 							{!entry && (
