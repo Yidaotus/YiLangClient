@@ -5,12 +5,24 @@ import {
 	IDictionaryTag,
 	IGrammarPoint,
 } from 'Document/Dictionary';
-import { useNavigate } from 'react-router';
-import { Box, Chip, Link, Stack, Typography } from '@mui/material';
+import {
+	Box,
+	Chip,
+	Link,
+	Stack,
+	SxProps,
+	Theme,
+	Typography,
+} from '@mui/material';
+import { DictionaryEntryID } from 'Document/Utility';
+// eslint-disable-next-line import/no-extraneous-dependencies
+import { ResponsiveStyleValue } from '@mui/system';
 
-type IDictEntryProps = {
+export type IDictionaryEntryProps = {
 	entry: IDictionaryEntryResolved;
 	canLink?: boolean;
+	onRootSelect: (id: DictionaryEntryID) => void;
+	size?: 'small' | 'large' | 'responsive';
 };
 
 export const GrammarPoint: React.FC<{
@@ -49,27 +61,63 @@ const EntryTag: React.FC<{ tag: IDictionaryTag }> = ({ tag }) => (
 	/>
 );
 
-const DictionaryEntry: React.FC<IDictEntryProps> = ({ entry }) => {
-	const navigate = useNavigate();
+const DictionaryEntry: React.FC<IDictionaryEntryProps> = ({
+	entry,
+	onRootSelect,
+	size = 'responsive',
+}) => {
+	let rootDynamicSxProps: SxProps<Theme> = {
+		flexDirection: {
+			xs: 'column',
+			sm: 'row',
+		},
+	};
+	switch (size) {
+		case 'small':
+			rootDynamicSxProps = { flexDirection: 'column' };
+			break;
+		case 'large':
+			rootDynamicSxProps = { flexDirection: 'row' };
+			break;
+	}
+
+	let tagsDynamicSxProps: ResponsiveStyleValue<
+		'row' | 'row-reverse' | 'column' | 'column-reverse'
+	> = {
+		xs: 'row',
+		sm: 'column',
+	};
+	switch (size) {
+		case 'small':
+			tagsDynamicSxProps = 'row';
+			break;
+		case 'large':
+			tagsDynamicSxProps = 'column';
+			break;
+	}
 
 	return (
-		<Box
-			sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' } }}
-		>
-			<Box sx={{ display: 'flex', flexDirection: 'column', p: 2 }}>
+		<Box sx={{ ...rootDynamicSxProps, display: 'flex' }}>
+			<Box sx={{ display: 'flex', flexDirection: 'column', p: 1 }}>
 				<Typography variant="subtitle2" component="div">
 					{entry.spelling}
 				</Typography>
 				<Typography variant="h5" gutterBottom component="div">
 					{entry.key}
 				</Typography>
-				<Stack direction={{ xs: 'row', sm: 'column' }} spacing={1}>
+				<Stack
+					direction={tagsDynamicSxProps}
+					spacing={1}
+					sx={{ flexWrap: 'wrap' }}
+				>
 					{entry.tags.map((tag) => (
-						<EntryTag tag={tag} key={tag.id} />
+						<Box key={tag.id}>
+							<EntryTag tag={tag} />
+						</Box>
 					))}
 				</Stack>
 			</Box>
-			<Box sx={{ display: 'flex', flexDirection: 'column', p: 2 }}>
+			<Box sx={{ display: 'flex', flexDirection: 'column', p: 1 }}>
 				<Typography
 					variant="caption"
 					component="div"
@@ -114,18 +162,22 @@ const DictionaryEntry: React.FC<IDictEntryProps> = ({ entry }) => {
 										display: 'flex',
 										flexDirection: 'row',
 										alignItems: 'baseline',
+										wordBreak: 'break-word',
 									}}
 								>
 									<Link
 										component="button"
 										variant="body2"
 										onClick={() => {
-											navigate(
-												`../dictionary/${root.id}`
-											);
+											onRootSelect(root.id);
 										}}
 									>
-										{root.key}
+										<Typography
+											variant="body2"
+											component="div"
+										>
+											{root.key}
+										</Typography>
 									</Link>
 									<Typography
 										variant="body2"

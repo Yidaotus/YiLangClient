@@ -396,7 +396,13 @@ const WordInput: React.ForwardRefRenderFunction<
 							: 'none',
 				}}
 			>
-				<div>
+				<div
+					// Form has some popovers which are rendered outside this node,
+					// to make clickOutSide and other stuff work, stop propagation
+					onMouseDown={(e) => {
+						e.stopPropagation();
+					}}
+				>
 					<EntryForm
 						form={wordForm}
 						canEditRoot={canEditRoot}

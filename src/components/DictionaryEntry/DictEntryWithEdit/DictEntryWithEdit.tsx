@@ -1,24 +1,23 @@
 import './DictEntryWithEdit.css';
 import React, { useCallback, useRef, useState } from 'react';
 import { useDeleteDictionaryEntry } from '@hooks/DictionaryQueryHooks';
-import { IDictionaryEntryResolved } from 'Document/Dictionary';
 import { Button, IconButton } from '@mui/material';
 import { Delete as DeleteIcon, Edit as EditIcon } from '@mui/icons-material';
-import DictionaryEntry from '../DictionaryEntry';
+import DictionaryEntry, { IDictionaryEntryProps } from '../DictionaryEntry';
 import DictEntryEdit, { IWordInputRef } from '../DictEntryEdit/DictEntryEdit';
 
-type IDictEntryWithEditProps = {
-	dictEntry: IDictionaryEntryResolved;
-	canLink?: boolean;
+type IDictEntryWithEditProps = IDictionaryEntryProps & {
 	canRemove?: boolean;
 	removeCallback?: () => void;
 };
 
 const DictEntryWithEdit: React.FC<IDictEntryWithEditProps> = ({
-	dictEntry,
+	entry,
 	canLink,
 	canRemove,
 	removeCallback,
+	size,
+	onRootSelect,
 }) => {
 	const [editing, setEditing] = useState(false);
 	const deleteEntry = useDeleteDictionaryEntry();
@@ -43,9 +42,9 @@ const DictEntryWithEdit: React.FC<IDictEntryWithEditProps> = ({
 	};
 
 	const remove = useCallback(async () => {
-		await deleteEntry.mutateAsync(dictEntry.id);
+		await deleteEntry.mutateAsync(entry.id);
 		removeCallback?.();
-	}, [deleteEntry, dictEntry.id, removeCallback]);
+	}, [deleteEntry, entry.id, removeCallback]);
 
 	return (
 		<div className="entry-with-edit-container">
@@ -65,7 +64,7 @@ const DictEntryWithEdit: React.FC<IDictEntryWithEditProps> = ({
 			)}
 			{editing && (
 				<div>
-					<DictEntryEdit entryKey={dictEntry} ref={dictEntryEdit} />
+					<DictEntryEdit entryKey={entry} ref={dictEntryEdit} />
 					<div className="entry-with-edit-controlls-bottom">
 						<Button onClick={cancel}>Cancel</Button>
 						<Button onClick={finish}>Save</Button>
@@ -73,7 +72,12 @@ const DictEntryWithEdit: React.FC<IDictEntryWithEditProps> = ({
 				</div>
 			)}
 			{!editing && (
-				<DictionaryEntry entry={dictEntry} canLink={canLink} />
+				<DictionaryEntry
+					entry={entry}
+					canLink={canLink}
+					onRootSelect={onRootSelect}
+					size={size}
+				/>
 			)}
 		</div>
 	);

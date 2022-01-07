@@ -26,6 +26,7 @@ import SavingIndicator, {
 } from './SavingIndicator/SavingIndicator';
 import { useActiveLanguageConf } from '@hooks/ConfigQueryHooks';
 import useUiErrorHandler from '@helpers/Error';
+import DraggableDictionary from './DraggableDictionary';
 
 const AVERAGE_ACTIONS_PER_COMMAND = 15;
 const SAVE_EVERY_ACTIONS = 5 * AVERAGE_ACTIONS_PER_COMMAND;
@@ -183,10 +184,13 @@ const YiEditor: React.FC = () => {
 									visible={sentenceEditorVisible}
 									close={closeSentenceEditorModal}
 								/>
+								{/*
 								<DictPopupController
 									rootElement={editorContainer}
 									selection={selection}
 								/>
+								*/}
+								<DraggableDictionary selection={selection} />
 								<EditorDocument />
 								{!loadingDocument && !dbDocument && (
 									<Typography>Document not found</Typography>

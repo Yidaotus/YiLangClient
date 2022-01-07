@@ -14,9 +14,12 @@ import {
 	DialogActions,
 	DialogContent,
 	DialogTitle,
+	IconButton,
 	TextField,
 } from '@mui/material';
+import { Delete as DeleteIcon, Save as SaveIcon } from '@mui/icons-material';
 import { IDictionarySentence } from '../../../../../Document/Dictionary';
+import { LoadingButton } from '@mui/lab';
 
 export interface ISentenceModalProps {
 	visible: boolean;
@@ -112,11 +115,12 @@ const SentenceEditorModal: React.FC<ISentenceModalProps> = ({
 	return (
 		<Dialog open={visible} onClose={close}>
 			<DialogTitle>Sentence Editor</DialogTitle>
-			<DialogContent>
+			<DialogContent sx={{ minWidth: '500px' }}>
 				<p>{sentenceKey}</p>
 				<TextField
 					placeholder="Translation..."
 					value={translationInput}
+					fullWidth
 					onChange={(e) => {
 						setTranslationInput(e.target.value);
 					}}
@@ -129,7 +133,12 @@ const SentenceEditorModal: React.FC<ISentenceModalProps> = ({
 			</DialogContent>
 			<DialogActions>
 				<Button key="discard" onClick={cancel} />
-				<Button key="save" onClick={() => finish()} />
+				<IconButton key="discard" onClick={cancel}>
+					<DeleteIcon />
+				</IconButton>
+				<IconButton key="save" onClick={finish}>
+					<SaveIcon />
+				</IconButton>
 			</DialogActions>
 		</Dialog>
 	);

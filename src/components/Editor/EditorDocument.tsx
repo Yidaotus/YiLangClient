@@ -170,7 +170,7 @@ const EditorDocument: React.FC = () => {
 	const editor = useSlateStatic();
 
 	return (
-		<div style={{ position: 'relative', fontSize: '1.3em' }}>
+		<div style={{ position: 'relative', fontSize: '1.1em' }}>
 			<Editable
 				onPaste={(event) => {
 					videoBlockPasteAction(event, editor);

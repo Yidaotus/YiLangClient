@@ -3,7 +3,7 @@
 	"version": "0.1.1",
 	"private": true,
 	"dependencies": {
-		"@craco/craco": "^5.9.0",
+		"@craco/craco": "^6.4.3",
 		"@emotion/react": "^11.7.1",
 		"@emotion/styled": "^11.6.0",
 		"@hookform/resolvers": "^2.8.5",
@@ -23,6 +23,7 @@
 		"react": "^17.0.2",
 		"react-colorful": "^5.2.3",
 		"react-dom": "^17.0.2",
+		"react-draggable": "^4.4.4",
 		"react-highlight-words": "^0.17.0",
 		"react-hook-form": "^7.22.4",
 		"react-query": "^3.27.0",

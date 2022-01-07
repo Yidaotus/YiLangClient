@@ -29,7 +29,10 @@ const baseTheme = createTheme({
 	palette: {
 		mode: 'light',
 		primary: {
-			main: '#24424b',
+			main: '#2F2D2E',
+		},
+		secondary: {
+			main: '#F8E5EE',
 		},
 	},
 });
@@ -113,8 +116,14 @@ const theme = createTheme(baseTheme, {
 		},
 		MuiAutocomplete: {
 			styleOverrides: {
+				root: {},
 				paper: {
 					borderRadius: '0px',
+					'& .MuiAutocomplete-option': {
+						'&[aria-selected=true]': {
+							backgroundColor: baseTheme.palette.secondary.dark,
+						},
+					},
 				},
 			},
 			defaultProps: {

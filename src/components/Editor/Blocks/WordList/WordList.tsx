@@ -16,7 +16,7 @@ import {
 	useSlate,
 } from 'slate-react';
 import { Link as LinkIcon } from '@mui/icons-material';
-import { Button, IconButton } from '@mui/material';
+import { Box, Button, IconButton, Stack, Typography } from '@mui/material';
 
 const WordList: React.FC<RenderElementProps> = ({ children, attributes }) => {
 	const editor = useSlate();
@@ -54,7 +54,7 @@ const WordList: React.FC<RenderElementProps> = ({ children, attributes }) => {
 	}
 
 	return (
-		<div
+		<Box
 			{...attributes}
 			onDragStart={(e) => {
 				e.preventDefault();
@@ -81,19 +81,23 @@ const WordList: React.FC<RenderElementProps> = ({ children, attributes }) => {
 			</Button>
 			{children}
 			<div contentEditable={false} style={{ fontSize: '0.95rem' }}>
-				<h3 className="bp3-heading">Added Words</h3>
-				{vocabs.map(([v, path]) => (
-					<div className="dictentry-row-wrapper" key={v.dictId}>
-						<DictionaryEntryRow
-							entryId={v.dictId}
-							key={v.dictId}
-							path={path}
-							editor={editor}
-						/>
-					</div>
-				))}
-				{vocabs.length < 1 && <span>No words added yet!</span>}
-				<h3 className="bp3-heading">Added Sentences</h3>
+				<Typography>Added Words</Typography>
+				<Stack>
+					{vocabs.map(([vocab, path]) => (
+						<Box key={vocab.dictId}>
+							<DictionaryEntryRow
+								entryId={vocab.dictId}
+								key={vocab.dictId}
+								path={path}
+								editor={editor}
+							/>
+						</Box>
+					))}
+				</Stack>
+				{vocabs.length < 1 && (
+					<Typography>No words added yet!</Typography>
+				)}
+				<Typography>Added Sentences</Typography>
 				{sentences.map(([s, spath]) => (
 					<div className="sentence-row" key={s.sentenceId}>
 						<p>{SlateNode.string(s)}</p>
@@ -126,7 +130,7 @@ const WordList: React.FC<RenderElementProps> = ({ children, attributes }) => {
 
 				{sentences.length < 1 && <span>No sentences added yet!</span>}
 			</div>
-		</div>
+		</Box>
 	);
 };
 

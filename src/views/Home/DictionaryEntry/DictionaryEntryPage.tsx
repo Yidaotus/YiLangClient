@@ -37,9 +37,12 @@ const DictionaryEntryPage: React.FC = () => {
 			{loadingMain && <CircularProgress />}
 			{entry && (
 				<DictEntryWithEdit
-					dictEntry={entry}
+					entry={entry}
 					canRemove
 					removeCallback={afterRemove}
+					onRootSelect={(rootId) => {
+						navigate(`../dictionary/${rootId}`);
+					}}
 				/>
 			)}
 			{!entry && !loadingMain && <span>Entry not found</span>}
