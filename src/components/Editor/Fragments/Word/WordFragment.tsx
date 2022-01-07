@@ -89,7 +89,7 @@ const WordFragment: React.FC<IWordFragmentData> = ({
 						data-spelling={dictEntry.spelling}
 						key={dictEntry.id}
 						className={`word-fragment ${
-							dictEntry.spelling && 'kanji'
+							dictEntry.spelling && 'word-spelling'
 						}`}
 						style={{
 							position: 'relative',

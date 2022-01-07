@@ -47,6 +47,7 @@ const YiEditor: React.FC = () => {
 	const updateEditorDocument = useUpdateEditorDocument();
 	const [loadingDocument, dbDocument] = useEditorDocument(id);
 
+	const [showSpelling, setShowSpelling] = useState(false);
 	const editor = useMemo(() => withReact(withYiLang(createEditor())), []);
 	const [selection, setSelection] = useSelection(editor);
 	const [editorNodes, setEditorNodes] = useState<Array<Descendant>>([]);
@@ -158,7 +159,11 @@ const YiEditor: React.FC = () => {
 			<div>
 				{loadingDocument && <CircularProgress />}
 				<div>
-					<div className="editor-container">
+					<div
+						className={`editor-container ${
+							showSpelling && 'furigana-enabled'
+						}`}
+					>
 						<Slate
 							editor={editor}
 							value={editorNodes}
@@ -178,6 +183,10 @@ const YiEditor: React.FC = () => {
 										setWordEditorVisible(true);
 									}}
 									updateDocument={updateDocument}
+									setShowSpelling={(show: boolean) =>
+										setShowSpelling(show)
+									}
+									showSpelling={showSpelling}
 									isEditorDirty={isEditorDirty}
 								/>
 								<WordEditorModal

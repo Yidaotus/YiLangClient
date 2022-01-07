@@ -85,7 +85,7 @@ const DraggableDictionary: React.FC<DraggableDictionaryProps> = ({
 					<StyledAccordion expanded={expanded}>
 						<AccordionSummary
 							sx={(theme) => ({
-								backgroundColor: theme.palette.secondary.main,
+								backgroundColor: theme.palette.secondary.light,
 							})}
 							expandIcon={<ExpandMoreIcon />}
 							aria-controls="panel1a-content"

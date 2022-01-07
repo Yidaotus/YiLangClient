@@ -60,6 +60,8 @@ export interface IToolbarProps {
 	showWordEditor: () => void;
 	showSentenceEditor: () => void;
 	updateDocument: () => void;
+	setShowSpelling: (show: boolean) => void;
+	showSpelling: boolean;
 	isEditorDirty: boolean;
 }
 
@@ -68,28 +70,18 @@ const Toolbar: React.FC<IToolbarProps> = ({
 	showWordEditor,
 	showSentenceEditor,
 	updateDocument,
+	showSpelling,
+	setShowSpelling,
 	isEditorDirty,
 }) => {
 	const editor = useSlateStatic();
 	const toolbarRef = useRef(null);
-	const [menus, setMenus] = useState<Record<string, boolean>>({});
 	const lookupSources = useLookupSources();
-
-	useClickOutside(toolbarRef, () => {
-		setMenus({});
-	});
 
 	const sharedProps = {
 		editor,
 		selection,
 		onChange: () => {},
-	};
-
-	const menuProps = {
-		menus,
-		onMenuToggle: (type: string) => {
-			setMenus({ [type]: !menus[type] });
-		},
 	};
 
 	const lookupButtonActive =
@@ -147,7 +139,6 @@ const Toolbar: React.FC<IToolbarProps> = ({
 					icon={<SearchIcon />}
 					title="Lookup Word"
 					enabled={lookupButtonActive}
-					{...menuProps}
 				>
 					{lookupSources.map((luSource) => (
 						<LookupSourceButton
@@ -194,11 +185,7 @@ const Toolbar: React.FC<IToolbarProps> = ({
 				value="none"
 				aria-label="text alignment"
 			>
-				<ToolbarMenu
-					icon={<WidgetsIcon />}
-					title="Block Type"
-					{...menuProps}
-				>
+				<ToolbarMenu icon={<WidgetsIcon />} title="Block Type">
 					<StyledToggleButtonGroup
 						size="small"
 						exclusive
@@ -243,11 +230,7 @@ const Toolbar: React.FC<IToolbarProps> = ({
 					</StyledToggleButtonGroup>
 				</ToolbarMenu>
 
-				<ToolbarMenu
-					icon={<FormatColorText />}
-					title="Font Color"
-					{...menuProps}
-				>
+				<ToolbarMenu icon={<FormatColorText />} title="Font Color">
 					<StyledToggleButtonGroup
 						size="small"
 						exclusive
@@ -269,11 +252,7 @@ const Toolbar: React.FC<IToolbarProps> = ({
 					</StyledToggleButtonGroup>
 				</ToolbarMenu>
 
-				<ToolbarMenu
-					icon={<EmojiSymbolsIcon />}
-					title="Glyphs"
-					{...menuProps}
-				>
+				<ToolbarMenu icon={<EmojiSymbolsIcon />} title="Glyphs">
 					<StyledToggleButtonGroup
 						size="small"
 						exclusive
@@ -366,6 +345,16 @@ const Toolbar: React.FC<IToolbarProps> = ({
 						updateDocument();
 					}}
 					enabled={isEditorDirty}
+				/>
+				<ToolbarButton
+					icon={<TranslateIcon />}
+					title="Show Spellings"
+					tooltip="Show Spellings"
+					active={showSpelling}
+					action={() => {
+						setShowSpelling(!showSpelling);
+					}}
+					enabled
 				/>
 			</StyledToggleButtonGroup>
 		</Paper>

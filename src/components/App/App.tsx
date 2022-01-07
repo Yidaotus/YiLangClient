@@ -29,10 +29,10 @@ const baseTheme = createTheme({
 	palette: {
 		mode: 'light',
 		primary: {
-			main: '#2F2D2E',
+			main: '#1E2D2F',
 		},
 		secondary: {
-			main: '#F8E5EE',
+			main: '#E8EDED',
 		},
 	},
 });

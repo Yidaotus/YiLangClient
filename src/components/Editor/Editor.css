@@ -30,9 +30,26 @@ body {
 	font-size: 15pt;
 }
 .furigana-enabled {
-	line-height: 1.5em;
+	line-height: 1.8em;
 	vertical-align: text-bottom;
 }
+
+.furigana-enabled .word-spelling {
+	position: relative;
+}
+
+.furigana-enabled .word-spelling::before {
+	content: attr(data-spelling);
+	color: gray;
+	font-size: 0.66em;
+	line-height: 1;
+	position: absolute;
+	top: -0.65em;
+	width: 100%;
+	text-align: center;
+	white-space: nowrap;
+}
+
 .japanese-gothic {
 	font-family: 'HiraKakuPro-W3', 'Hiragino Kaku Gothic Pro W3',
 		'Hiragino Kaku Gothic Pro', 'ヒラギノ角ゴ Pro W3', 'メイリオ', Meiryo,
