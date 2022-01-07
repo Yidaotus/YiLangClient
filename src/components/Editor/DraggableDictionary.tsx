@@ -8,6 +8,7 @@ import {
 	AccordionDetails,
 	Box,
 	styled,
+	Collapse,
 } from '@mui/material';
 import {
 	ExpandMore as ExpandMoreIcon,

@@ -24,7 +24,6 @@ import {
 	useAddDictionaryEntry,
 	useUpdateDictionaryEntry,
 } from '@hooks/DictionaryQueryHooks';
-import { CircularProgress } from '@mui/material';
 import EntryForm, {
 	entrySchema,
 	IDictionaryEntryInForm,
@@ -290,28 +289,16 @@ const WordInput: React.ForwardRefRenderFunction<
 							wordEditorState.stateHistory[
 								wordEditorState.stateHistory.length - 1
 							];
-						let targetForm;
-						if (previousState === 'word') {
-							targetForm = wordForm;
-							const currentFormValues = targetForm.getValues();
-							targetForm.reset({
-								...currentFormValues,
-								tags: [
-									...(currentFormValues.tags || []),
-									tagValues,
-								],
-							});
-						} else {
-							targetForm = rootForm;
-							const currentFormValues = targetForm.getValues();
-							targetForm.reset({
-								...currentFormValues,
-								tags: [
-									...(currentFormValues.tags || []),
-									tagValues,
-								],
-							});
-						}
+						let targetForm =
+							previousState === 'word' ? wordForm : rootForm;
+						const currentFormValues = targetForm.getValues();
+						targetForm.reset({
+							...currentFormValues,
+							tags: [
+								...(currentFormValues.tags || []),
+								tagValues,
+							],
+						});
 					}
 					dispatchWordEditorState({
 						type: 'popState',
@@ -387,7 +374,6 @@ const WordInput: React.ForwardRefRenderFunction<
 	const canEditRoot = typeof entryKey === 'string' && entryKey === '';
 	return (
 		<div>
-			{(addTag.isLoading || addEntry.isLoading) && <CircularProgress />}
 			<div
 				style={{
 					display:

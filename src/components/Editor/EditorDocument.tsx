@@ -151,6 +151,7 @@ const Element = (props: RenderElementProps) => {
 				<Box
 					sx={{
 						display: 'flex',
+						alignItems: 'center',
 						p: 1,
 						'& span': {
 							fontWeight: 'bold',
@@ -158,7 +159,14 @@ const Element = (props: RenderElementProps) => {
 					}}
 					{...attributes}
 				>
-					<div style={{ userSelect: 'none' }} contentEditable="false">
+					<div
+						style={{
+							userSelect: 'none',
+							display: 'flex',
+							alignItems: 'center',
+						}}
+						contentEditable="false"
+					>
 						<AccountCircleTwoToneIcon
 							color="primary"
 							sx={{ paddingRight: 1 }}

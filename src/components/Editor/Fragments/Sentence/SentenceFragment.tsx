@@ -1,7 +1,26 @@
 import React from 'react';
 import { RenderElementProps } from 'slate-react';
 import { SentenceElement } from '@components/Editor/YiEditor';
-import { Tooltip } from '@mui/material';
+import {
+	styled,
+	Tooltip,
+	tooltipClasses,
+	TooltipProps,
+	Zoom,
+} from '@mui/material';
+
+const SentenceTooltip = styled(({ className, ...props }: TooltipProps) => (
+	<Tooltip {...props} classes={{ popper: className }} />
+))(({ theme }) => ({
+	[`& .${tooltipClasses.tooltip}`]: {
+		backgroundColor: theme.palette.secondary.light,
+		maxWidth: 500,
+		marginTop: '5px !important',
+		color: 'rgba(0, 0, 0, 0.87)',
+		fontSize: theme.typography.pxToRem(14),
+		border: `1px solid ${theme.palette.secondary.dark}`,
+	},
+}));
 
 export type SentenceFragmentProps = Omit<RenderElementProps, 'element'> & {
 	element: SentenceElement;
@@ -18,9 +37,15 @@ const SentenceFragment: React.FC<SentenceFragmentProps> = ({
 				borderBottom: '1px dashed #8DA46E',
 			}}
 		>
-			<Tooltip title={element.translation}>
+			<SentenceTooltip
+				title={element.translation}
+				TransitionComponent={Zoom}
+				enterDelay={1000}
+				leaveDelay={500}
+				PopperProps={{ contentEditable: false }}
+			>
 				<span>{children}</span>
-			</Tooltip>
+			</SentenceTooltip>
 		</span>
 	);
 };

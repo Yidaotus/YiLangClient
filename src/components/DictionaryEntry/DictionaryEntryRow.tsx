@@ -1,4 +1,3 @@
-import './DictionaryEntryRow.css';
 import React from 'react';
 import { IGrammarPoint, IDictionaryTag } from 'Document/Dictionary';
 import { useDictionaryEntryResolved } from '@hooks/DictionaryQueryHooks';
@@ -6,7 +5,14 @@ import { Editor, Path, Transforms } from 'slate';
 import { ReactEditor } from 'slate-react';
 import { useNavigate } from 'react-router';
 import { Book as BookIcon, Link as LinkIcon } from '@mui/icons-material';
-import { IconButton, Chip, CircularProgress, Stack, Box } from '@mui/material';
+import {
+	IconButton,
+	Chip,
+	CircularProgress,
+	TableCell,
+	TableRow,
+	Stack,
+} from '@mui/material';
 
 type IDictEntryRowProps = {
 	editor: Editor;
@@ -49,69 +55,64 @@ const DictionaryEntryRow: React.FC<IDictEntryRowProps> = ({
 	path,
 	editor,
 }) => {
-	const [loading, entryResolved] = useDictionaryEntryResolved(entryId);
+	const [loading, entry] = useDictionaryEntryResolved(entryId);
 	const navigate = useNavigate();
 
-	return (
+	return entry ? (
+		<TableRow
+			key={entry.key}
+			sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
+		>
+			<TableCell component="th" scope="row">
+				{entry.key}
+			</TableCell>
+			<TableCell align="right">{entry.spelling}</TableCell>
+			<TableCell align="right">{entry.translations.join(', ')}</TableCell>
+			<TableCell align="right">
+				<Stack spacing={1} direction="row">
+					{entry.tags.map((tag) => (
+						<EntryTag tag={tag} key={tag.id} />
+					))}
+				</Stack>
+			</TableCell>
+			<TableCell align="right">
+				<IconButton
+					onMouseUp={() => {
+						navigate(`/home/dictionary/${entry.id}`);
+					}}
+				>
+					<BookIcon />
+				</IconButton>
+			</TableCell>
+			<TableCell align="right">
+				<IconButton
+					onMouseUp={(e) => {
+						setTimeout(() => {
+							Transforms.select(editor, path);
+							if (editor.selection) {
+								const domNode = ReactEditor.toDOMRange(
+									editor,
+									editor.selection
+								);
+								domNode.commonAncestorContainer.parentElement?.scrollIntoView(
+									{
+										behavior: 'smooth',
+										block: 'center',
+									}
+								);
+							}
+						});
+						e.preventDefault();
+					}}
+				>
+					<LinkIcon />
+				</IconButton>
+			</TableCell>
+		</TableRow>
+	) : (
 		<>
-			{entryResolved && (
-				<div className="dictentry-row">
-					<span className="dictentry-col">
-						{entryResolved.key}
-						{entryResolved.spelling && (
-							<span className="dictentry-spelling">
-								{entryResolved.spelling}
-							</span>
-						)}
-					</span>
-					<span className="dictentry-col dictentry-comment">
-						{entryResolved.comment}
-					</span>
-					<span className="dictentry-col">
-						{entryResolved.translations.join(', ')}
-					</span>
-					<span className="dictentry-col">
-						<Stack spacing={1} direction="row" flexWrap="wrap">
-							{entryResolved.tags.map((tag) => (
-								<Box>
-									<EntryTag tag={tag} />
-								</Box>
-							))}
-						</Stack>
-					</span>
-					<IconButton
-						onMouseUp={() => {
-							navigate(`/home/dictionary/${entryResolved.id}`);
-						}}
-					>
-						<BookIcon />
-					</IconButton>
-					<IconButton
-						onMouseUp={(e) => {
-							setTimeout(() => {
-								Transforms.select(editor, path);
-								if (editor.selection) {
-									const domNode = ReactEditor.toDOMRange(
-										editor,
-										editor.selection
-									);
-									domNode.commonAncestorContainer.parentElement?.scrollIntoView(
-										{
-											behavior: 'smooth',
-											block: 'center',
-										}
-									);
-								}
-							});
-							e.preventDefault();
-						}}
-					>
-						<LinkIcon />
-					</IconButton>
-				</div>
-			)}
 			{loading && <CircularProgress />}
-			{!loading && !entryResolved && <span>ERROR</span>}
+			{!loading && !entry && <span>ERROR</span>}
 		</>
 	);
 };

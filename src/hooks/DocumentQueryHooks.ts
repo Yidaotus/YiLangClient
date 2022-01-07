@@ -120,12 +120,14 @@ const useUpdateEditorDocument = (): UseMutationResult<
 		},
 		{
 			onSuccess: (_, { id }) => {
+				/*
 				queryClient.invalidateQueries(
 					documentKeys(activeLanguage?.id).lists()
 				);
 				queryClient.invalidateQueries(
 					documentKeys(activeLanguage?.id).detail(id)
 				);
+				*/
 			},
 			onError: (response: IApiResponse<void>) => {
 				handleError(response);

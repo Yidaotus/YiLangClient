@@ -23,7 +23,13 @@ const TagInput: React.FC<TagInputProps> = ({
 	const sanitizedOnChange = useCallback(
 		(data: Array<string>) => {
 			const sanitizedData = data
-				.map((dataInput) => dataInput.split(';').flat())
+				.map((dataInput) =>
+					dataInput
+						.trim()
+						.split(';')
+						.map((splitData) => splitData.trim())
+						.flat()
+				)
 				.flat();
 			onChange(sanitizedData);
 		},

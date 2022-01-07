@@ -98,7 +98,14 @@ const DictionaryEntry: React.FC<IDictionaryEntryProps> = ({
 
 	return (
 		<Box sx={{ ...rootDynamicSxProps, display: 'flex' }}>
-			<Box sx={{ display: 'flex', flexDirection: 'column', p: 1 }}>
+			<Box
+				sx={{
+					display: 'flex',
+					flexDirection: 'column',
+					p: 1,
+					flexShrink: 0,
+				}}
+			>
 				<Typography variant="subtitle2" component="div">
 					{entry.spelling}
 				</Typography>

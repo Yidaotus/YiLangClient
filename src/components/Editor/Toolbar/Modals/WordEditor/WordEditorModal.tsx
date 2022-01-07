@@ -173,7 +173,6 @@ const WordEditorModal: React.FC<IWordInputProps> = ({ visible, close }) => {
 
 	return (
 		<Dialog open={visible} onClose={() => close(true)}>
-			{fetchingRoot && <CircularProgress />}
 			<DialogTitle>
 				<Stack
 					justifyContent="space-between"
