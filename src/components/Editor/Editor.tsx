@@ -124,7 +124,6 @@ const YiEditor: React.FC = () => {
 
 	const onEditorChange = useCallback(
 		(newValue) => {
-			console.log(editor.operations);
 			const isAstChange = editor.operations.some(
 				(op) => op.type !== 'set_selection'
 			);
