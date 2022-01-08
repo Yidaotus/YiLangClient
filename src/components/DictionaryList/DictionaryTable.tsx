@@ -68,6 +68,11 @@ const headCells: readonly HeadCell[] = [
 		disablePadding: false,
 		label: 'Translations',
 	},
+	{
+		id: 'createdAt',
+		disablePadding: false,
+		label: 'Created at',
+	},
 ];
 
 interface FilterableTableHeadCellProps<T extends { id: unknown }> {
@@ -413,7 +418,13 @@ const DictionaryTable: React.FC = () => {
 										tabIndex={-1}
 										key={entry.id}
 									>
-										<TableCell>
+										<TableCell
+											align="left"
+											sx={{
+												whiteSpace: 'nowrap',
+												flexShrink: 0,
+											}}
+										>
 											<Link
 												component="button"
 												variant="body2"
@@ -491,6 +502,20 @@ const DictionaryTable: React.FC = () => {
 											}}
 										>
 											{entry.translations.join(', ')}
+										</TableCell>
+										<TableCell
+											align="right"
+											sx={{
+												whiteSpace: 'nowrap',
+												overflow: 'hidden',
+												textOverflow: 'ellipsis',
+												width: '200px',
+												maxWidth: '200px',
+											}}
+										>
+											{new Date(
+												entry.createdAt
+											).toLocaleDateString()}
 										</TableCell>
 									</TableRow>
 								);
