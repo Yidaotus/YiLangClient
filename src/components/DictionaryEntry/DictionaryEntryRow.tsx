@@ -13,11 +13,12 @@ import {
 	TableRow,
 	Stack,
 } from '@mui/material';
+import { scrollIdIntoView } from '@helpers/DomHelper';
 
 type IDictEntryRowProps = {
-	editor: Editor;
 	path: Path;
 	entryId: string;
+	scrollToPath: (path: Path) => void;
 };
 
 export const GrammarPoint: React.FC<{
@@ -53,7 +54,7 @@ const EntryTag: React.FC<{ tag: IDictionaryTag }> = ({ tag }) => (
 const DictionaryEntryRow: React.FC<IDictEntryRowProps> = ({
 	entryId,
 	path,
-	editor,
+	scrollToPath,
 }) => {
 	const [loading, entry] = useDictionaryEntryResolved(entryId);
 	const navigate = useNavigate();
@@ -85,26 +86,7 @@ const DictionaryEntryRow: React.FC<IDictEntryRowProps> = ({
 				</IconButton>
 			</TableCell>
 			<TableCell align="right" width={1}>
-				<IconButton
-					onMouseUp={(e) => {
-						setTimeout(() => {
-							Transforms.select(editor, path);
-							if (editor.selection) {
-								const domNode = ReactEditor.toDOMRange(
-									editor,
-									editor.selection
-								);
-								domNode.commonAncestorContainer.parentElement?.scrollIntoView(
-									{
-										behavior: 'smooth',
-										block: 'center',
-									}
-								);
-							}
-						});
-						e.preventDefault();
-					}}
-				>
+				<IconButton onMouseUp={() => scrollToPath(path)}>
 					<LinkIcon />
 				</IconButton>
 			</TableCell>

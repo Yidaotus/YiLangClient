@@ -24,7 +24,7 @@ import {
 	ExpandMore as ExpandMoreIcon,
 	Link as LinkIcon,
 } from '@mui/icons-material';
-import React from 'react';
+import React, { useCallback } from 'react';
 import {
 	NodeEntry,
 	Path,
@@ -69,6 +69,31 @@ const WordListTable: React.FC<WordListTableProps> = ({ editor }) => {
 			}
 		}
 	}
+
+	const scrollToPath = useCallback(
+		(path: Path) => {
+			setTimeout(() => {
+				Transforms.select(editor, path);
+				if (editor.selection) {
+					const domNode = ReactEditor.toDOMRange(
+						editor,
+						editor.selection
+					);
+					const parentElement =
+						domNode.commonAncestorContainer.parentElement;
+					if (parentElement) {
+						parentElement.scrollIntoView({
+							behavior: 'smooth',
+							block: 'center',
+						});
+						parentElement.click();
+					}
+				}
+			});
+		},
+		[editor]
+	);
+
 	return (
 		<>
 			<Accordion>
@@ -92,7 +117,7 @@ const WordListTable: React.FC<WordListTableProps> = ({ editor }) => {
 										entryId={vocab.dictId}
 										key={`${vocab.dictId}-${path.join('')}`}
 										path={path}
-										editor={editor}
+										scrollToPath={scrollToPath}
 									/>
 								))}
 							</TableBody>
@@ -137,56 +162,51 @@ const WordListTable: React.FC<WordListTableProps> = ({ editor }) => {
 							size="small"
 						>
 							<TableBody>
-								{sentences.map(([sentence, spath]) => (
-									<TableRow
-										key={sentence.sentenceId}
-										sx={{
-											'&:last-child td, &:last-child th':
-												{ border: 0 },
-										}}
-									>
-										<TableCell component="th" scope="row">
-											<Typography>
-												{SlateNode.string(sentence)}
-											</Typography>
-										</TableCell>
-										<TableCell component="th" scope="row">
-											<Typography>
-												{sentence.translation}
-											</Typography>
-										</TableCell>
-										<TableCell component="th" scope="row">
-											<IconButton
-												size="small"
-												onMouseUp={(e) => {
-													setTimeout(() => {
-														Transforms.select(
-															editor,
-															spath
-														);
-														if (editor.selection) {
-															const domNode =
-																ReactEditor.toDOMRange(
-																	editor,
-																	editor.selection
-																);
-															domNode.commonAncestorContainer.parentElement?.scrollIntoView(
-																{
-																	behavior:
-																		'smooth',
-																	block: 'center',
-																}
-															);
-														}
-													});
-													e.preventDefault();
-												}}
+								{sentences.map(
+									([sentenceNode, sentencePath]) => (
+										<TableRow
+											key={sentenceNode.sentenceId}
+											sx={{
+												'&:last-child td, &:last-child th':
+													{ border: 0 },
+											}}
+										>
+											<TableCell
+												component="th"
+												scope="row"
 											>
-												<LinkIcon />
-											</IconButton>
-										</TableCell>
-									</TableRow>
-								))}
+												<Typography>
+													{SlateNode.string(
+														sentenceNode
+													)}
+												</Typography>
+											</TableCell>
+											<TableCell
+												component="th"
+												scope="row"
+											>
+												<Typography>
+													{sentenceNode.translation}
+												</Typography>
+											</TableCell>
+											<TableCell
+												component="th"
+												scope="row"
+											>
+												<IconButton
+													size="small"
+													onMouseUp={() =>
+														scrollToPath(
+															sentencePath
+														)
+													}
+												>
+													<LinkIcon />
+												</IconButton>
+											</TableCell>
+										</TableRow>
+									)
+								)}
 							</TableBody>
 						</Table>
 					</TableContainer>

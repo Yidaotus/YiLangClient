@@ -432,28 +432,7 @@ const withList = (editor: Editor): CustomEditor => {
 };
 
 const withDialog = (editor: Editor): CustomEditor => {
-	const { deleteBackward, insertBreak, normalizeNode } = editor;
-
-	// eslint-disable-next-line no-param-reassign
-	editor.normalizeNode = (entry) => {
-		const [node, path] = entry;
-		// merge dialog nodes
-		if (SlateElement.isElement(node) && node.type === 'dialog') {
-			const nextNode = Editor.next(editor, { at: path });
-			if (nextNode) {
-				const [nextNodeElement, nextNodePath] = nextNode;
-				if (
-					SlateElement.isElement(nextNodeElement) &&
-					nextNodeElement.type === 'dialog'
-				) {
-					// merge
-					Transforms.mergeNodes(editor, { at: nextNodePath });
-				}
-			}
-		}
-
-		normalizeNode(entry);
-	};
+	const { deleteBackward, insertBreak } = editor;
 
 	// eslint-disable-next-line no-param-reassign
 	editor.deleteBackward = (unit) => {

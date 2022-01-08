@@ -1,6 +1,6 @@
 import './WordList.css';
 import React from 'react';
-import { RenderElementProps, useSelected, useSlate } from 'slate-react';
+import { RenderElementProps, useSlate } from 'slate-react';
 import { Box } from '@mui/material';
 import WordListTable from './WordListTable';
 
