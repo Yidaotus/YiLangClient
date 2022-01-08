@@ -7,7 +7,7 @@ import Login from '@views/Login';
 import Verify from '@views/Verify';
 import AuthProvider, { Role } from '@components/AuthProvider/AuthProvider';
 import { ReactQueryDevtools } from 'react-query/devtools';
-import { QueryClient, QueryClientProvider } from 'react-query';
+import { QueryClientProvider } from 'react-query';
 
 import Overview from '@views/Home/Overview/Overview';
 import Documents from '@views/Home/Documents/Documents';
@@ -15,15 +15,12 @@ import DictionaryEntryPage from '@views/Home/DictionaryEntry/DictionaryEntryPage
 import Dictionary from '@views/Home/Dictionary/Dictionary';
 import Editor from '@editor/Editor';
 import Settings from '@views/Home/Settings/Settings';
+import queryClient from '@helpers/QueryClient';
 
 import { SnackbarProvider } from 'notistack';
 
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 import CloseSharpIcon from '@mui/icons-material/CloseSharp';
-
-const queryClient = new QueryClient({
-	defaultOptions: { queries: { staleTime: 60000 } },
-});
 
 const baseTheme = createTheme({
 	palette: {
@@ -32,7 +29,7 @@ const baseTheme = createTheme({
 			main: '#1E2D2F',
 		},
 		secondary: {
-			main: '#E8EDED',
+			main: '#dde6ff',
 		},
 	},
 });

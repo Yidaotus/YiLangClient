@@ -23,6 +23,7 @@ import {
 import {
 	ExpandMore as ExpandMoreIcon,
 	Link as LinkIcon,
+	Save as SaveIcon,
 } from '@mui/icons-material';
 import React, { useCallback } from 'react';
 import {
@@ -33,12 +34,16 @@ import {
 	Node as SlateNode,
 } from 'slate';
 import { ReactEditor } from 'slate-react';
+import { resolveEntryIdsAndExport } from '@helpers/CSVExporter';
+import { useActiveLanguageConf } from '@hooks/ConfigQueryHooks';
 
 interface WordListTableProps {
 	editor: CustomEditor;
 }
 
 const WordListTable: React.FC<WordListTableProps> = ({ editor }) => {
+	const activeLanguage = useActiveLanguageConf();
+
 	const vocabs: Array<[WordElement, Path]> = [];
 	const sentences: Array<[SentenceElement, Path]> = [];
 
@@ -130,17 +135,13 @@ const WordListTable: React.FC<WordListTableProps> = ({ editor }) => {
 				<AccordionActions>
 					<Button
 						onClick={() => {
-							const csv = 'test123';
-							const element = document.createElement('a');
-							const file = new Blob([csv], {
-								type: 'text/plain',
-							});
-							element.href = URL.createObjectURL(file);
-							element.download = 'myFile.txt';
-							document.body.appendChild(element);
-							element.click();
-							document.body.removeChild(element);
+							resolveEntryIdsAndExport(
+								vocabs.map(([vocab]) => vocab.dictId),
+								activeLanguage?.id || ''
+							);
 						}}
+						endIcon={<SaveIcon />}
+						variant="contained"
 					>
 						Export
 					</Button>
@@ -222,6 +223,7 @@ const WordListTable: React.FC<WordListTableProps> = ({ editor }) => {
 /**
  * Rendering this Table is a serious bottleneck. The easiest way is
  * to just rerender when we remove or insert word/sentences elements.
+ * TODO: Extract this to a hook or component to reuse in other components
  */
 export default React.memo(
 	WordListTable,

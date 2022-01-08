@@ -28,6 +28,7 @@ import { useActiveLanguageConf } from '@hooks/ConfigQueryHooks';
 import useUiErrorHandler from '@helpers/Error';
 import DraggableDictionary from './DraggableDictionary';
 import useDebounce from '@hooks/useDebounce';
+import DraggableSRS from './SRS/DraggableSRS';
 
 const AVERAGE_ACTIONS_PER_COMMAND = 15;
 const SAVE_EVERY_ACTIONS = 5 * AVERAGE_ACTIONS_PER_COMMAND;
@@ -218,6 +219,7 @@ const YiEditor: React.FC = () => {
 								{!loadingDocument && !dbDocument && (
 									<Typography>Document not found</Typography>
 								)}
+								<DraggableSRS editor={editor} />
 							</div>
 						</Slate>
 					</div>

@@ -26,4 +26,4 @@ const WordList: React.FC<RenderElementProps> = ({ children, attributes }) => {
 	);
 };
 
-export default React.memo(WordList);
+export default WordList;
