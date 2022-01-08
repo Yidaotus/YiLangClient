@@ -1,10 +1,11 @@
 import './DictEntryWithEdit.css';
 import React, { useCallback, useRef, useState } from 'react';
 import { useDeleteDictionaryEntry } from '@hooks/DictionaryQueryHooks';
-import { Button, IconButton } from '@mui/material';
+import { Box, Button, IconButton, Stack } from '@mui/material';
 import { Delete as DeleteIcon, Edit as EditIcon } from '@mui/icons-material';
 import DictionaryEntry, { IDictionaryEntryProps } from '../DictionaryEntry';
 import DictEntryEdit, { IWordInputRef } from '../DictEntryEdit/DictEntryEdit';
+import ConfirmButton from '@components/ConfirmButton/ConfirmButton';
 
 type IDictEntryWithEditProps = IDictionaryEntryProps & {
 	canRemove?: boolean;
@@ -47,29 +48,15 @@ const DictEntryWithEdit: React.FC<IDictEntryWithEditProps> = ({
 	}, [deleteEntry, entry.id, removeCallback]);
 
 	return (
-		<div className="entry-with-edit-container">
-			{!editing && (
-				<div className="entry-with-edit-controlls-top">
-					<IconButton
-						onClick={() => setEditing((editState) => !editState)}
-					>
-						<EditIcon />
-					</IconButton>
-					{canRemove && (
-						<IconButton onClick={remove}>
-							<DeleteIcon />
-						</IconButton>
-					)}
-				</div>
-			)}
+		<Box sx={{ display: 'flex' }}>
 			{editing && (
-				<div>
+				<Box sx={{ width: '100%' }}>
 					<DictEntryEdit entryKey={entry} ref={dictEntryEdit} />
-					<div className="entry-with-edit-controlls-bottom">
+					<Box>
 						<Button onClick={cancel}>Cancel</Button>
 						<Button onClick={finish}>Save</Button>
-					</div>
-				</div>
+					</Box>
+				</Box>
 			)}
 			{!editing && (
 				<DictionaryEntry
@@ -79,7 +66,26 @@ const DictEntryWithEdit: React.FC<IDictEntryWithEditProps> = ({
 					size={size}
 				/>
 			)}
-		</div>
+			{!editing && (
+				<Box sx={{ marginLeft: 'auto' }}>
+					<Stack spacing={1} direction="row">
+						<IconButton
+							onClick={() =>
+								setEditing((editState) => !editState)
+							}
+						>
+							<EditIcon />
+						</IconButton>
+						{canRemove && (
+							<ConfirmButton
+								onConfirm={remove}
+								icon={<DeleteIcon />}
+							/>
+						)}
+					</Stack>
+				</Box>
+			)}
+		</Box>
 	);
 };
 

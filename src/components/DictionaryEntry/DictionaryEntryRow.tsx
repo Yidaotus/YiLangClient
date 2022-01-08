@@ -69,7 +69,13 @@ const DictionaryEntryRow: React.FC<IDictEntryRowProps> = ({
 			</TableCell>
 			<TableCell align="right">{entry.spelling}</TableCell>
 			<TableCell align="right">{entry.translations.join(', ')}</TableCell>
-			<TableCell align="right">
+			<TableCell
+				align="right"
+				sx={{
+					maxWidth: '300px',
+					overflow: 'hidden',
+				}}
+			>
 				<Stack spacing={1} direction="row">
 					{entry.tags.map((tag) => (
 						<EntryTag tag={tag} key={tag.id} />
