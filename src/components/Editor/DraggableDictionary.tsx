@@ -8,7 +8,6 @@ import {
 	AccordionDetails,
 	Box,
 	styled,
-	Collapse,
 } from '@mui/material';
 import {
 	ExpandMore as ExpandMoreIcon,
@@ -92,7 +91,7 @@ const DraggableDictionary: React.FC<DraggableDictionaryProps> = ({
 							aria-controls="panel1a-content"
 							style={{ cursor: 'move' }}
 							id="draggable-dialog-title"
-							onClick={(e) => {
+							onClick={() => {
 								if (!isDragging.current) {
 									setExpanded(!expanded);
 								}
@@ -126,4 +125,4 @@ const DraggableDictionary: React.FC<DraggableDictionaryProps> = ({
 	);
 };
 
-export default DraggableDictionary;
+export default React.memo(DraggableDictionary);

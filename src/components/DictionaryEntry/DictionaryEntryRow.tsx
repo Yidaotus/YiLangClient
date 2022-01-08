@@ -117,4 +117,4 @@ const DictionaryEntryRow: React.FC<IDictEntryRowProps> = ({
 	);
 };
 
-export default DictionaryEntryRow;
+export default React.memo(DictionaryEntryRow);

@@ -1,7 +1,7 @@
 import './Toolbar.css';
-import React, { useRef, useState } from 'react';
+import React, { useCallback, useRef, useState } from 'react';
 import { useSlateStatic } from 'slate-react';
-import { BaseSelection, Range as SlateRange } from 'slate';
+import { BaseSelection, Editor, Range as SlateRange } from 'slate';
 import useClickOutside from '@hooks/useClickOutside';
 import { useLookupSources } from '@hooks/ConfigQueryHooks';
 import LookupSourceButton from '@components/LookupSourceButton';
@@ -38,6 +38,9 @@ import BlockButton from './Tools/BlockButton';
 import InsertButton from './Tools/InsertButton';
 import ElementButton from './Tools/ElementButton';
 import InputWrapperButton from './Tools/InputWrapperButton';
+import { useUpdateEditorDocument } from '@hooks/DocumentQueryHooks';
+import { SavingState } from '../SavingIndicator/SavingIndicator';
+import useUiErrorHandler from '@helpers/Error';
 
 const StyledToggleButtonGroup = styled(ToggleButtonGroup)(({ theme }) => ({
 	'& .MuiToggleButtonGroup-grouped': {
@@ -59,24 +62,53 @@ export interface IToolbarProps {
 	selection: BaseSelection;
 	showWordEditor: () => void;
 	showSentenceEditor: () => void;
-	updateDocument: () => void;
 	setShowSpelling: (show: boolean) => void;
 	showSpelling: boolean;
 	isEditorDirty: boolean;
+	updateDocument: () => void;
 }
 
 const Toolbar: React.FC<IToolbarProps> = ({
 	selection,
 	showWordEditor,
 	showSentenceEditor,
-	updateDocument,
 	showSpelling,
 	setShowSpelling,
 	isEditorDirty,
+	updateDocument,
 }) => {
 	const editor = useSlateStatic();
 	const toolbarRef = useRef(null);
 	const lookupSources = useLookupSources();
+	const [savingIndicator, setSavingIndicator] = useState<SavingState>('IDLE');
+	const updateEditorDocument = useUpdateEditorDocument();
+	const handleError = useUiErrorHandler();
+
+	const updateDocument2 = useCallback(async () => {
+		try {
+			setSavingIndicator('LOADING');
+			const title = Editor.string(editor, [0], { voids: true });
+			const serializedDocument = JSON.stringify(editor.children);
+			await updateEditorDocument.mutateAsync({
+				id: 'what',
+				title,
+				serializedDocument,
+			});
+
+			// Hacky but feels better for the user to actually see the saving process
+			setTimeout(() => {
+				setSavingIndicator('SUCCESS');
+				setTimeout(() => {
+					setSavingIndicator('IDLE');
+				}, 2000);
+			}, 1000);
+		} catch (error) {
+			setSavingIndicator('ERROR');
+			handleError(error);
+		} finally {
+			// setIsEditorDirty(false);
+		}
+	}, [editor, handleError, updateEditorDocument]);
 
 	const sharedProps = {
 		editor,
@@ -361,4 +393,4 @@ const Toolbar: React.FC<IToolbarProps> = ({
 	);
 };
 
-export default Toolbar;
+export default React.memo(Toolbar);

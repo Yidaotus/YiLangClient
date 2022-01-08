@@ -96,7 +96,6 @@ const useUpdateEditorDocument = (): UseMutationResult<
 	unknown
 > => {
 	const activeLanguage = useActiveLanguageConf();
-	const queryClient = useQueryClient();
 	const handleError = useUiErrorHandler();
 
 	return useMutation(

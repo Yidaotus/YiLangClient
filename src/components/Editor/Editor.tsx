@@ -44,11 +44,13 @@ const YiEditor: React.FC = () => {
 		null
 	);
 	const { id } = useParams<{ id: string }>();
-	const updateEditorDocument = useUpdateEditorDocument();
+	// the returned object does change, only the functions themselves are referentially stable
+	// destruct so it can serve as a dependency. See: https://github.com/facebook/react/issues/15924#issuecomment-521253636
+	const { mutateAsync: updateDocumentAsync } = useUpdateEditorDocument();
 	const [loadingDocument, dbDocument] = useEditorDocument(id);
 
 	const [showSpelling, setShowSpelling] = useState(false);
-	const [editor, setEditor] = useState(withReact(withYiLang(createEditor())));
+	const [editor] = useState(withReact(withYiLang(createEditor())));
 	const [selection, setSelection] = useSelection(editor);
 	const [editorNodes, setEditorNodes] = useState<Array<Descendant>>([]);
 	const navigate = useNavigate();
@@ -80,9 +82,10 @@ const YiEditor: React.FC = () => {
 	const updateDocument = useCallback(async () => {
 		try {
 			setSavingIndicator('LOADING');
+
 			const title = Editor.string(editor, [0], { voids: true });
-			const serializedDocument = JSON.stringify(editorNodes);
-			await updateEditorDocument.mutateAsync({
+			const serializedDocument = JSON.stringify(editor.children);
+			await updateDocumentAsync({
 				id: id || 'what',
 				title,
 				serializedDocument,
@@ -101,7 +104,7 @@ const YiEditor: React.FC = () => {
 		} finally {
 			setIsEditorDirty(false);
 		}
-	}, [editor, editorNodes, handleError, id, updateEditorDocument]);
+	}, [editor, handleError, id, updateDocumentAsync]);
 
 	const closeSentenceEditorModal = useCallback(() => {
 		setSentenceEditorVisible(false);
@@ -121,8 +124,7 @@ const YiEditor: React.FC = () => {
 
 	const onEditorChange = useCallback(
 		(newValue) => {
-			setEditorNodes(newValue);
-			/*
+			console.log(editor.operations);
 			const isAstChange = editor.operations.some(
 				(op) => op.type !== 'set_selection'
 			);
@@ -141,10 +143,10 @@ const YiEditor: React.FC = () => {
 							(op) => op.type !== 'set_selection'
 						).length
 				);
+				setEditorNodes(newValue);
 			}
-			*/
 		},
-		[setEditorNodes]
+		[editor.operations, editor.selection, setSelection]
 	);
 
 	const closeWordEditorModal = useCallback(
@@ -156,6 +158,16 @@ const YiEditor: React.FC = () => {
 		},
 		[editor, savedSelection]
 	);
+
+	const toolbarShowSentenceEditorHandle = useCallback(() => {
+		setSentenceEditorVisible(true);
+	}, []);
+	const toolbarShowWordEditorHandle = useCallback(() => {
+		setWordEditorVisible(true);
+	}, []);
+	const toolbarShowSpellingHandle = useCallback((show: boolean) => {
+		setShowSpelling(show);
+	}, []);
 
 	return (
 		<div>
@@ -179,18 +191,13 @@ const YiEditor: React.FC = () => {
 							>
 								<Toolbar
 									selection={selection}
-									showSentenceEditor={() => {
-										setSentenceEditorVisible(true);
-									}}
-									showWordEditor={() => {
-										setSavedSelection(editor.selection);
-										setWordEditorVisible(true);
-									}}
-									updateDocument={updateDocument}
-									setShowSpelling={(show: boolean) =>
-										setShowSpelling(show)
+									showSentenceEditor={
+										toolbarShowSentenceEditorHandle
 									}
+									showWordEditor={toolbarShowWordEditorHandle}
+									setShowSpelling={toolbarShowSpellingHandle}
 									showSpelling={showSpelling}
+									updateDocument={updateDocument}
 									isEditorDirty={isEditorDirty}
 								/>
 								<WordEditorModal
