@@ -10,7 +10,7 @@ import ToolbarButton, { IToolbarItem } from './ToolbarButton';
 export interface IListButtonProps extends IToolbarItem {
 	type: NumberedListElement['type'] | BulletedListElement['type'];
 	editor: Editor;
-	onChange: () => void;
+	toolbarChanged: () => void;
 	className?: string;
 }
 
@@ -19,7 +19,7 @@ const ListButton: React.FC<IListButtonProps> = ({
 	icon,
 	title,
 	editor,
-	onChange,
+	toolbarChanged,
 	className,
 }) => {
 	const selectedBlockType = YiEditor.getTextBlockStyle(editor);
@@ -37,20 +37,20 @@ const ListButton: React.FC<IListButtonProps> = ({
 				split: true,
 			});
 			YiEditor.toggleBlockType(editor, 'paragraph', true);
-			return onChange();
+			return toolbarChanged();
 		}
 
 		if (inList && editor.selection) {
 			// Todo selection after unwrap invalid??
 			YiEditor.toggleBlockType(editor, type, true);
-			return onChange();
+			return toolbarChanged();
 		}
 
 		YiEditor.toggleBlockType(editor, 'listItem', true);
 		const block = { type, children: [] };
 		Transforms.wrapNodes(editor, block);
-		return onChange();
-	}, [editor, inList, onChange, selectedBlockType, type]);
+		return toolbarChanged();
+	}, [editor, inList, toolbarChanged, selectedBlockType, type]);
 
 	return (
 		<ToolbarButton

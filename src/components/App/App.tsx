@@ -147,7 +147,13 @@ const App: React.FC = () => {
 	return (
 		<QueryClientProvider client={queryClient}>
 			<ThemeProvider theme={theme}>
-				<SnackbarProvider maxSnack={3}>
+				<SnackbarProvider
+					maxSnack={3}
+					anchorOrigin={{
+						vertical: 'top',
+						horizontal: 'right',
+					}}
+				>
 					<AuthProvider>
 						<BrowserRouter>
 							<Routes>

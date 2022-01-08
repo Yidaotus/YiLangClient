@@ -6,7 +6,7 @@ import ToolbarButton, { IToolbarItem } from './ToolbarButton';
 export interface IToolbarWrapperItem extends IToolbarItem {
 	type: EditorInlineElement['type'];
 	editor: Editor;
-	onChange: () => void;
+	toolbarChanged: () => void;
 	createElement: () => EditorInlineElement;
 	className?: string;
 }
@@ -16,7 +16,7 @@ const ElementButton: React.FC<IToolbarWrapperItem> = ({
 	icon,
 	title,
 	editor,
-	onChange,
+	toolbarChanged,
 	createElement,
 	className,
 }): JSX.Element => {
@@ -45,7 +45,7 @@ const ElementButton: React.FC<IToolbarWrapperItem> = ({
 						});
 					}
 				}
-				onChange();
+				toolbarChanged();
 			}}
 			enabled={
 				isActive ||

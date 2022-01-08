@@ -7,7 +7,7 @@ import { Tooltip, ToggleButton } from '@mui/material';
 
 export interface IInputWrapperButtonProps {
 	editor: Editor;
-	onChange: () => void;
+	toolbarChanged: () => void;
 	type: SlateElement['type'];
 	title: string;
 	icon: React.ReactElement | string;
@@ -17,7 +17,7 @@ export interface IInputWrapperButtonProps {
 
 const InputWrapperButton: React.FC<IInputWrapperButtonProps> = ({
 	editor,
-	onChange,
+	toolbarChanged,
 	type,
 	title,
 	icon,
@@ -40,7 +40,7 @@ const InputWrapperButton: React.FC<IInputWrapperButtonProps> = ({
 				} else {
 					showInput();
 				}
-				onChange();
+				toolbarChanged();
 			}}
 			enabled={
 				isActive ||

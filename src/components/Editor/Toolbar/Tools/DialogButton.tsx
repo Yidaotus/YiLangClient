@@ -10,7 +10,7 @@ import ToolbarButton, { IToolbarItem } from './ToolbarButton';
 
 export interface IDialogButtonProps extends IToolbarItem {
 	editor: Editor;
-	onChange: () => void;
+	toolbarChanged: () => void;
 	className?: string;
 }
 
@@ -18,7 +18,7 @@ const DialogButton: React.FC<IDialogButtonProps> = ({
 	icon,
 	title,
 	editor,
-	onChange,
+	toolbarChanged,
 	className,
 }) => {
 	const type = 'dialog';
@@ -108,8 +108,8 @@ const DialogButton: React.FC<IDialogButtonProps> = ({
 				Transforms.move(editor, { reverse: true });
 			}
 		}
-		return onChange();
-	}, [editor, inDialog, onChange]);
+		return toolbarChanged();
+	}, [editor, inDialog, toolbarChanged]);
 
 	return (
 		<ToolbarButton

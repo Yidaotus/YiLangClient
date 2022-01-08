@@ -6,7 +6,7 @@ import ToolbarButton, { IToolbarItem } from './ToolbarButton';
 export interface IToolbarWrapperItem extends IToolbarItem {
 	type: EditorBlockElement['type'];
 	editor: Editor;
-	onChange: () => void;
+	toolbarChanged: () => void;
 	className?: string;
 }
 
@@ -15,7 +15,7 @@ const WrapperItem: React.FC<IToolbarWrapperItem> = ({
 	icon,
 	title,
 	editor,
-	onChange,
+	toolbarChanged,
 	className,
 }): JSX.Element => {
 	const isActive = YiEditor.getTextBlockStyle(editor) === type;
@@ -26,7 +26,7 @@ const WrapperItem: React.FC<IToolbarWrapperItem> = ({
 			title={title}
 			action={() => {
 				YiEditor.toggleBlockType(editor, type);
-				onChange();
+				toolbarChanged();
 			}}
 			active={isActive}
 			icon={icon}

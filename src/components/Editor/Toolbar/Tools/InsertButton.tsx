@@ -4,7 +4,7 @@ import ToolbarButton, { IToolbarItem } from './ToolbarButton';
 
 export interface IInsertButtonProps extends IToolbarItem {
 	text: string;
-	onChange: () => void;
+	toolbarChanged: () => void;
 	editor: Editor;
 	className?: string;
 }
@@ -12,7 +12,7 @@ export interface IInsertButtonProps extends IToolbarItem {
 const InsertButton: React.FC<IInsertButtonProps> = ({
 	text,
 	title,
-	onChange,
+	toolbarChanged,
 	editor,
 	className,
 }) => (
@@ -22,7 +22,7 @@ const InsertButton: React.FC<IInsertButtonProps> = ({
 		icon={text}
 		action={() => {
 			Editor.insertText(editor, text);
-			onChange();
+			toolbarChanged();
 		}}
 		className={className}
 	/>

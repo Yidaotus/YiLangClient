@@ -25,7 +25,7 @@ const toggleAlign = (
 
 export interface IAlignButtonProps extends IToolbarItem {
 	align: AlignValue;
-	onChange: () => void;
+	toolbarChanged: () => void;
 	editor: Editor;
 	className?: string;
 }
@@ -35,7 +35,7 @@ const AlignButton: React.FC<IAlignButtonProps> = ({
 	icon,
 	title,
 	editor,
-	onChange,
+	toolbarChanged,
 	className,
 }) => {
 	const currentAlign = YiEditor.getAlign(editor);
@@ -47,7 +47,7 @@ const AlignButton: React.FC<IAlignButtonProps> = ({
 			tooltip={title}
 			action={() => {
 				toggleAlign(editor, currentAlign, align);
-				return onChange();
+				return toolbarChanged();
 			}}
 			active={currentAlign === align}
 			className={className}
