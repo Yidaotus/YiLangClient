@@ -1,213 +1,119 @@
 import './DictionarySelect.css';
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import useDebounce from '@hooks/useDebounce';
-import { StoreMap } from '@store/index';
-import { Button, Empty, Select, SelectProps, Spin } from 'antd';
-import { getEntry, searchDictionary } from 'api/dictionary.service';
-import { IDictionaryEntry } from 'Document/Dictionary';
-import { notUndefined } from 'Document/Utility';
-import { UUID } from 'Document/UUID';
-import { useSelector } from 'react-redux';
-import { selectActiveLanguageConfig } from '@store/user/selectors';
-import handleError from '@helpers/Error';
+import { useDictionarySearch } from '@hooks/DictionaryQueryHooks';
+import { Box, TextField, Autocomplete, InputAdornment } from '@mui/material';
+import { Search } from '@mui/icons-material';
+import { isNotString, isString } from 'Document/Utility';
+import { IDictionaryEntryInput } from '../EntryForm/EntryForm';
 
-export interface IRootSelectProps extends SelectProps<IDictionaryEntry | UUID> {
+export interface IRootSelectProps {
+	value: IDictionaryEntryInput['roots'];
 	placeholder: string;
-	createRoot?: (input: string) => void;
-	localDictionary?: StoreMap<IDictionaryEntry>;
+	createRoot: (input: string) => void;
+	onChange: (roots: IDictionaryEntryInput['roots']) => void;
 }
-
-const entryLabel = (entry: IDictionaryEntry) => (
-	<div className="entry-preview">
-		<div className="entry-preview-item">
-			<span>{entry.key}</span>
-			{entry.spelling && (
-				<span className="entry-preview-spelling">{entry.spelling}</span>
-			)}
-		</div>
-		<div className="entry-preview-item">{entry.translations.join(',')}</div>
-	</div>
-);
 
 const DictionarySelect: React.FC<IRootSelectProps> = ({
 	createRoot,
-	localDictionary,
 	value,
 	placeholder,
 	onChange,
 }) => {
-	const [wordSearchInput, setWordSearchInput] = useState('');
-	const [loading, setLoading] = useState(false);
-	const [initialized, setInitialized] = useState(false);
-	const debouncedSeach = useDebounce(wordSearchInput, 500);
-	const [rootOptions, setRootOptions] = useState<
-		SelectProps<Record<string, IDictionaryEntry>>['options']
-	>([]);
-	const selectedLanguage = useSelector(selectActiveLanguageConfig);
-
-	const fetchEntries = useCallback(
-		async (searchTerm: string) => {
-			let options: SelectProps<Record<string, unknown>>['options'] = [];
-			if (!searchTerm) {
-				setLoading(false);
-				return;
-			}
-
-			try {
-				if (!selectedLanguage) {
-					throw new Error('No language selected!');
-				}
-				const cachHitEntries = Object.values(
-					localDictionary || {}
-				).filter((entry) => {
-					return (
-						entry &&
-						entry.key
-							.toLowerCase()
-							.includes(searchTerm.toLowerCase())
-					);
-				});
-				let foundEntries: Array<IDictionaryEntry> = [];
-				if (cachHitEntries && cachHitEntries.length > 0) {
-					foundEntries = cachHitEntries.filter(notUndefined);
-				}
-
-				const serverEntries = await searchDictionary({
-					lang: selectedLanguage.key,
-					key: searchTerm,
-				});
-				if (serverEntries) {
-					foundEntries = [
-						...foundEntries,
-						...serverEntries.filter(notUndefined),
-					];
-				}
-				if (foundEntries) {
-					options = foundEntries.map((entry) => ({
-						value: entry.id,
-						label: entryLabel(entry),
-					}));
-					setRootOptions(options);
-				}
-			} catch (e) {
-				handleError(e);
-			}
-			setLoading(false);
-		},
-		[localDictionary, selectedLanguage]
-	);
-
-	const findValueById = useCallback(
-		async (id: UUID) => {
-			try {
-				if (!selectedLanguage) {
-					throw new Error('No language selected!');
-				}
-
-				let foundEntry;
-				const foundLocalEntry = (localDictionary || {})[id];
-				if (foundLocalEntry) {
-					foundEntry = foundLocalEntry;
-				} else {
-					const remoteEntry = await getEntry({
-						id,
-						language: selectedLanguage.key,
-					});
-					foundEntry = remoteEntry.entry;
-				}
-				setRootOptions([
-					{
-						value: foundEntry.id,
-						label: entryLabel(foundEntry),
-					},
-				]);
-			} catch (e) {
-				handleError(e);
-			}
-		},
-		[localDictionary, selectedLanguage]
-	);
+	const [query, setQuery] = useState('');
+	const debouncedSeach = useDebounce(query, 200);
+	const [, searchEntries] = useDictionarySearch(debouncedSeach);
+	const [isLoading, setIsLoading] = useState(false);
 
 	useEffect(() => {
-		fetchEntries(debouncedSeach);
-	}, [debouncedSeach, fetchEntries]);
+		setIsLoading(true);
+	}, [query]);
 
 	useEffect(() => {
-		const initializeValue = async () => {
-			if (value && !initialized) {
-				if (typeof value === 'object') {
-					setRootOptions([
-						{
-							value: value.id,
-							label: entryLabel(value),
-						},
-					]);
-				} else {
-					setLoading(true);
-					try {
-						await findValueById(value);
-					} catch (e) {
-						handleError(e);
-					}
-					setLoading(false);
-				}
-				setInitialized(true);
-			}
-		};
-		initializeValue();
-	}, [findValueById, initialized, rootOptions, value]);
+		setIsLoading(false);
+	}, [searchEntries]);
+
+	const autoCompletOptions = useMemo(() => {
+		let options: Array<IDictionaryEntryInput['roots'][number] | string> =
+			[];
+		if (!isLoading) {
+			const searchEntriesDeduplicated = searchEntries.filter(
+				(opt) => !value.find((v) => v.key === opt.key)
+			);
+			options = [...value, ...searchEntriesDeduplicated];
+		}
+		return options;
+	}, [isLoading, searchEntries, value]);
 
 	return (
-		<Select
-			loading={loading}
+		<Autocomplete
 			placeholder={placeholder}
-			onChange={onChange}
-			value={typeof value === 'object' ? value.id : value}
-			notFoundContent={
-				loading ? (
-					<Spin
-						className="content-not-found-spinner"
-						size="default"
-					/>
-				) : (
-					<div>
-						<Empty
-							image={Empty.PRESENTED_IMAGE_SIMPLE}
-							imageStyle={{
-								height: 50,
-							}}
-							description={
-								wordSearchInput &&
-								`${wordSearchInput} not found!`
-							}
-						>
-							{!!createRoot && wordSearchInput.length > 0 && (
-								<Button
-									type="primary"
-									onClick={() => createRoot(wordSearchInput)}
-								>
-									Create Root
-								</Button>
-							)}
-						</Empty>
-					</div>
-				)
-			}
-			options={rootOptions}
-			className="search-autocomplete"
-			searchValue={wordSearchInput}
-			onSearch={(e) => {
-				setWordSearchInput(e);
-				if (e) {
-					setLoading(true);
-					setRootOptions([]);
-				} else {
-					setLoading(false);
+			id="country-select-demo"
+			multiple
+			fullWidth
+			loading={isLoading}
+			clearOnBlur
+			filterOptions={(options, state) => {
+				const newOptions = [...options];
+				const { inputValue } = state;
+				if (
+					inputValue &&
+					!isLoading &&
+					!options
+						.filter(isNotString)
+						.find((v) => v.key === inputValue)
+				) {
+					newOptions.push(inputValue);
 				}
+				return newOptions;
 			}}
-			filterOption={false}
-			showSearch
-			allowClear
+			value={value}
+			onChange={(_, newValue) => {
+				const valuesToCreate = newValue.filter(isString);
+				const otherValues = newValue.filter(isNotString);
+				for (const valueToCreate of valuesToCreate) {
+					createRoot(valueToCreate);
+				}
+				onChange(otherValues);
+			}}
+			options={autoCompletOptions}
+			autoHighlight
+			getOptionLabel={(option) =>
+				typeof option === 'string' ? option : option.key
+			}
+			renderOption={(props, option) => {
+				return typeof option !== 'string' ? (
+					<Box component="li" {...props}>
+						<span>{option.key}</span>
+						<span>{option.translations.join(' ,')}</span>
+						<span>{option.comment}</span>
+					</Box>
+				) : (
+					<Box component="li" {...props}>
+						<span>{`Create ${option}`}</span>
+					</Box>
+				);
+			}}
+			renderInput={(params) => (
+				<TextField
+					{...params}
+					variant="outlined"
+					label={placeholder}
+					value={query}
+					onChange={(e) => setQuery(e.target.value)}
+					InputProps={{
+						...params.InputProps,
+						startAdornment: (
+							<>
+								<InputAdornment position="start">
+									<Search />
+								</InputAdornment>
+								{params.InputProps.startAdornment}
+							</>
+						),
+					}}
+				/>
+			)}
 		/>
 	);
 };

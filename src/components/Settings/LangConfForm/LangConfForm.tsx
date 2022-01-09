@@ -1,109 +1,104 @@
 import './LangConfForm.css';
-import {
-	InfoCircleOutlined,
-	MinusCircleOutlined,
-	PlusOutlined,
-} from '@ant-design/icons';
-import {
-	Button,
-	Divider,
-	Form,
-	FormInstance,
-	Input,
-	Space,
-	Tooltip,
-} from 'antd';
-import { ILanguageConfig } from 'Document/Config';
 import React from 'react';
+import { Controller, useFieldArray, UseFormReturn } from 'react-hook-form';
+import {
+	Info as InfoIcon,
+	Remove as RemoveIcon,
+	Add as AddIcon,
+} from '@mui/icons-material';
+import {
+	Box,
+	Tooltip,
+	TextField,
+	IconButton,
+	Button,
+	Stack,
+} from '@mui/material';
+import { ILanguageConfig } from '../../../Document/Config';
 
-interface ILangFormProps {
-	form: FormInstance<ILanguageConfig>;
-}
+type ILangFormProps = UseFormReturn<ILanguageConfig>;
 
-const LangConfForm: React.FC<ILangFormProps> = ({ form }) => {
+const LangConfForm: React.FC<ILangFormProps> = ({ control, register }) => {
+	const { fields, append, remove } = useFieldArray({
+		control,
+		name: 'lookupSources',
+	});
 	return (
-		<Form
-			form={form}
-			layout="vertical"
-			className="tag-input-form-container"
-		>
-			<h3>Name</h3>
-			<Form.Item name="key" hidden>
-				<Input />
-			</Form.Item>
-			<Form.Item name="name">
-				<Input placeholder="Language name" />
-			</Form.Item>
-			<Divider />
-			<Space align="baseline">
+		<>
+			<input hidden {...register('id')} />
+			<Controller
+				name="name"
+				control={control}
+				defaultValue=""
+				render={({ field }) => (
+					<TextField {...field} placeholder="Name" label="Name" />
+				)}
+			/>
+			<Box
+				sx={{
+					display: 'flex',
+					alignItems: 'center',
+				}}
+			>
 				<h3>Lookup Sources</h3>
 				<Tooltip
-					placement="bottom"
 					title='
 						To create a lookup source enter a name and the URL for
 						the source. Important: replace the search string with
 						"&#123;&#125;". YiLang will substitude
 						"&#123;&#125;" with the given search string.'
 				>
-					<InfoCircleOutlined />
+					<InfoIcon sx={{ height: '20px' }} />
 				</Tooltip>
-			</Space>
-			<Form.List name="lookupSources">
-				{(fields, { add, remove }) => (
-					<>
-						{fields.map(({ key, name, fieldKey, ...restField }) => (
-							<div className="source-sub-form" key={key}>
-								<Form.Item
-									{...restField}
-									name={[name, 'name']}
-									fieldKey={[fieldKey, 'name']}
-									rules={[
-										{
-											required: true,
-											message: 'Missing name',
-										},
-									]}
-								>
-									<Input placeholder="Name" />
-								</Form.Item>
-								<Form.Item
-									{...restField}
-									name={[name, 'source']}
-									fieldKey={[fieldKey, 'source']}
-									rules={[
-										{
-											required: true,
-											message: 'Missing source',
-										},
-										{
-											pattern: new RegExp('{}'),
-											message:
-												'Source must contain the {} placeholder',
-										},
-									]}
-									style={{ flexGrow: 1 }}
-								>
-									<Input placeholder="Source" />
-								</Form.Item>
-								<MinusCircleOutlined
-									onClick={() => remove(name)}
+			</Box>
+			<Stack spacing={2}>
+				{fields.map((fieldEntry, index) => (
+					<Stack direction="row" spacing={1} key={fieldEntry.id}>
+						<Controller
+							name={`lookupSources.${index}.priority`}
+							defaultValue={fieldEntry.priority}
+							control={control}
+							render={({ field }) => <input hidden {...field} />}
+						/>
+						<Controller
+							name={`lookupSources.${index}.name`}
+							defaultValue={fieldEntry.name}
+							control={control}
+							render={({ field }) => (
+								<TextField
+									{...field}
+									label="Source Name"
+									placeholder="Source Name"
 								/>
-							</div>
-						))}
-						<Form.Item>
-							<Button
-								type="dashed"
-								onClick={() => add()}
-								block
-								icon={<PlusOutlined />}
-							>
-								Add Source
-							</Button>
-						</Form.Item>
-					</>
-				)}
-			</Form.List>
-		</Form>
+							)}
+						/>
+						<Controller
+							name={`lookupSources.${index}.source`}
+							defaultValue={fieldEntry.source}
+							control={control}
+							render={({ field }) => (
+								<TextField
+									{...field}
+									label="Source URL"
+									placeholder=""
+									sx={{ flexGrow: 1 }}
+								/>
+							)}
+						/>
+						<IconButton onClick={() => remove(index)}>
+							<RemoveIcon />
+						</IconButton>
+					</Stack>
+				))}
+			</Stack>
+			<Button
+				onClick={() => append({ name: '', source: '', priority: 0 })}
+				endIcon={<AddIcon />}
+				variant="outlined"
+			>
+				Add Source
+			</Button>
+		</>
 	);
 };
 

@@ -1,41 +1,68 @@
-import { IDocument } from 'Document/Document';
-
+import { IDocumentSerialized } from 'Document/Document';
 import {
-	ApiPaths,
 	IApiResponse,
 	IListDocumentResult,
 	IListDocumentsParams,
 } from './definitions/api';
 import ApiService from './api.service';
 
-const DocumentEndpoints = ApiPaths.document.endpoints;
-const DocumentPath = (endpoint: string) =>
-	`${ApiPaths.document.path}/${endpoint}`;
-
-const remove = async (id: string): Promise<void> => {
-	const { path } = DocumentEndpoints.remove;
-	await ApiService.delete<IApiResponse<void>>(`${DocumentPath(path)}/${id}`);
+const remove = async ({
+	id,
+	language,
+}: {
+	id: string;
+	language: string;
+}): Promise<void> => {
+	await ApiService.delete<IApiResponse<void>>(`documents/${language}/${id}`);
 };
 
-const save = async (document: IDocument): Promise<void> => {
-	const { path } = DocumentEndpoints.save;
-	await ApiService.post<IApiResponse<void>>(DocumentPath(path), document);
-};
-
-const getDocument = async (id: string): Promise<IDocument> => {
-	const { path } = DocumentEndpoints.getById;
-	const response = await ApiService.get<IApiResponse<IDocument>>(
-		`${DocumentPath(path)}/${id}`
+const create = async (langId: string): Promise<string> => {
+	const res = await ApiService.post<IApiResponse<string>>(
+		`documents/${langId}`
 	);
-	return response.data.payload as IDocument;
+	return res.data.payload as string;
+};
+
+const update = async ({
+	id,
+	language,
+	document,
+}: {
+	id: string;
+	// TODO serialized doc should not be partial use other helper
+	language: string;
+	document: Partial<
+		Omit<
+			IDocumentSerialized,
+			'id' | 'createdAt' | 'updatedAt' | 'serializedDocument'
+		>
+	> &
+		Pick<IDocumentSerialized, 'serializedDocument'>;
+}): Promise<void> => {
+	await ApiService.post<IApiResponse<void>>(
+		`documents/${language}/${id}`,
+		document
+	);
+};
+
+const getDocument = async ({
+	id,
+	language,
+}: {
+	id: string;
+	language: string;
+}): Promise<IDocumentSerialized> => {
+	const response = await ApiService.get<IApiResponse<IDocumentSerialized>>(
+		`documents/${language}/${id}`
+	);
+	return response.data.payload as IDocumentSerialized;
 };
 
 const listDocuments = async (
 	listParams: IListDocumentsParams
 ): Promise<IListDocumentResult> => {
-	const { path } = DocumentEndpoints.list;
 	const response = await ApiService.post<IApiResponse<IListDocumentResult>>(
-		DocumentPath(path),
+		`documents/${listParams.lang}/list`,
 		listParams
 	);
 	const documentResult = response.data.payload;
@@ -50,4 +77,4 @@ const listDocuments = async (
 	} as IListDocumentResult;
 };
 
-export { save, getDocument, listDocuments, remove };
+export { create, update, getDocument, listDocuments, remove };

@@ -27,3 +27,22 @@
 .single-constructor > :first-child {
 	width: 100%;
 }
+
+.tag-form-line {
+	display: flex;
+	align-items: baseline;
+	justify-items: start;
+	margin-top: 5px;
+}
+
+.tag-form-line > * {
+	margin-right: 5px;
+}
+
+.tag-form-line > *:last-child {
+	margin-right: 0px;
+}
+
+.tag-form-center {
+	justify-content: center;
+}

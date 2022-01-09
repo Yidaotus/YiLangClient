@@ -1,0 +1,10 @@
+.add-form-actions {
+	display: flex;
+	align-items: baseline;
+	justify-content: space-between;
+}
+
+.editor-config-panel {
+	width: 100%;
+	min-height: 700px;
+}

@@ -1,7 +1,5 @@
 import React, { FC, useState, useEffect } from 'react';
-import { useDispatch } from 'react-redux';
-import { useParams, useHistory } from 'react-router-dom';
-import { verify as verifyDispatcher } from '../store/user/actions';
+import { useParams, useNavigate } from 'react-router-dom';
 
 export interface IRegisterData {
 	email: string;
@@ -17,22 +15,18 @@ export interface ILoginData {
 const VerifyView: FC = () => {
 	const { code } = useParams<{ code: string }>();
 	const [errors, setErrors] = useState<string[]>(new Array<string>());
-	const dispatch = useDispatch();
-	const history = useHistory();
+	const navigate = useNavigate();
 
 	useEffect(() => {
 		const verifyCB = async () => {
 			setErrors([]);
-			try {
-				await dispatch(verifyDispatcher({ token: code }));
-				history.push('/login');
-			} catch (err) {
-				setErrors((state) => [...state, err.message]);
-			}
+			// @TODO Verify
+			// await dispatch(verifyDispatcher({ token: code }));
+			navigate('/login');
 		};
 
 		verifyCB();
-	}, [code, dispatch, history]);
+	}, [code, navigate]);
 
 	return (
 		<div className="rounded-t-lg overflow-hidden border-t border-l border-r border-gray-400 flex justify-center p-8">

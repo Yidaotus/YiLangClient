@@ -1,29 +1,21 @@
 import React from 'react';
-import { Route, Redirect } from 'react-router-dom';
-import { useSelector } from 'react-redux';
-import { Role } from 'store/user/types';
-import { selectActiveUser } from '@store/user/selectors';
+import { Navigate, useLocation } from 'react-router-dom';
+import { useUserContext } from '@hooks/useUserContext';
+import { Role } from 'api/user.service';
 
 interface IPrivateRouteProps {
-	component: React.FC;
-	path: string;
-	exact: boolean;
 	roles: Role[];
 }
 
-const PrivateRoute: React.FC<IPrivateRouteProps> = ({
-	path,
-	exact,
-	component,
-	roles,
-}: IPrivateRouteProps) => {
-	const user = useSelector(selectActiveUser);
+const PrivateRoute: React.FC<IPrivateRouteProps> = ({ children, roles }) => {
+	const user = useUserContext();
+	const location = useLocation();
 
-	return user && roles.includes(user.role) ? (
-		<Route path={path} exact={exact} component={component} />
-	) : (
-		<Redirect to="/login" />
-	);
+	if (user && roles.includes(user.role)) {
+		// See https://github.com/DefinitelyTyped/DefinitelyTyped/issues/33006
+		return <>{children}</>;
+	}
+	return <Navigate to="/login" state={{ from: location }} replace />;
 };
 
 export default PrivateRoute;

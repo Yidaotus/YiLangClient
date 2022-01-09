@@ -1,0 +1,6 @@
+.inline-block {
+	margin-left: 2px;
+	margin-right: 2px;
+	display: inline-block;
+	position: relative;
+}

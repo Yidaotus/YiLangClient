@@ -1,0 +1,51 @@
+.dictentry-row {
+	display: flex;
+	gap: 10px 10px;
+	width: 100%;
+	border-bottom: solid 1px grey;
+	padding-top: 5px;
+	padding-bottom: 5px;
+}
+
+.dictentry-spelling::before {
+	content: '(';
+}
+
+.dictentry-spelling::after {
+	content: ')';
+}
+
+.dictentry-comment {
+	color: grey;
+}
+
+.dictentry-spelling {
+	font-size: 0.8em;
+	color: grey;
+	margin-left: 5px;
+}
+
+.dictentry-row ul {
+	list-style-type: none;
+	margin-bottom: 0;
+	padding-left: 0;
+	display: flex;
+	flex-wrap: wrap;
+}
+
+.dictentry-row ul li {
+	margin-bottom: 0;
+}
+
+.dictentry-col {
+	margin-left: 5px;
+	width: 100%;
+}
+
+.dictentry-col:last-child {
+	margin-left: auto;
+	padding-left: 5px;
+	padding-right: 5px;
+	width: 50px;
+}
+

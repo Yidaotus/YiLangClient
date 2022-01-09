@@ -1,0 +1,16 @@
+.dictentry-row-wrapper {
+	width: 100%;
+}
+
+.sentence-row-wrapper {
+	width: 100%;
+}
+
+.sentence-row {
+	display: flex;
+	gap: 10px 10px;
+	width: 100%;
+	border-bottom: solid 1px grey;
+	padding-top: 5px;
+	padding-bottom: 5px;
+}

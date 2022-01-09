@@ -1,7 +1,7 @@
 import './HSLColorPicker.css';
 import React, { useMemo } from 'react';
-import Slider from 'rc-slider';
 import 'rc-slider/assets/index.css';
+import Slider from 'rc-slider';
 
 interface IHSLColorSliderProps {
 	value: number;
@@ -10,7 +10,7 @@ interface IHSLColorSliderProps {
 	lightness: number;
 }
 
-const ColorPicker: React.FC<IHSLColorSliderProps> = ({
+const HSLColorPicker: React.FC<IHSLColorSliderProps> = ({
 	value,
 	onChange,
 	saturation,
@@ -46,4 +46,4 @@ const ColorPicker: React.FC<IHSLColorSliderProps> = ({
 	);
 };
 
-export default ColorPicker;
+export default HSLColorPicker;

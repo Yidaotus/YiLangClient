@@ -1,108 +1,197 @@
 import './EntryForm.css';
 import React from 'react';
-import { Divider, Form, Input } from 'antd';
 import { IDictionaryEntry, IDictionaryTag } from 'Document/Dictionary';
-import { FormInstance, RuleObject } from 'antd/lib/form';
 import DictionarySelect from '@components/DictionaryEntry/DictionarySelect/DictionarySelect';
-import { StoreMap } from '@store/index';
-import YiSelect from '@components/DictionaryEntry/YiSelect';
-import YiTagsInput from '@components/DictionaryEntry/YiTagsInput/YiTagsInput';
-import { IDictionaryEntryInput } from '@store/dictionary/actions';
+import TagSelect from '@components/DictionaryEntry/TagSelect/TagSelect';
+import { TextField, Stack } from '@mui/material';
+import { Controller, UseFormReturn } from 'react-hook-form';
+import * as Yup from 'yup';
+import { IDictionaryTagInput } from '../TagForm/TagForm';
+import TagInput from '../TagInput';
 
-export type IEntryFormFields = IDictionaryEntryInput;
+const INITIAL_ROOT_FORM: IRootsInput = {
+	key: '',
+	comment: '',
+	tags: [],
+	translations: [],
+	roots: [],
+};
+
+const INITIAL_ENTRY_FORM: IDictionaryEntryInput = {
+	key: '',
+	comment: '',
+	tags: [],
+	translations: [],
+	roots: [],
+};
+
+// react-hook-form v7 can't handle branded types so we need to create a plain
+// string version for these types. I don't want to loose the branding in
+// the rest of the code, so a new type is the only solution right now
+export type IDictionaryTagInForm = Omit<IDictionaryTag, 'id'> & { id: string };
+export type IDictionaryEntryInForm = Omit<
+	IDictionaryEntry,
+	'firstSeen' | 'id' | 'tags' | 'roots' | 'lang' | 'createdAt'
+> & { id: string; roots: Array<string>; tags: Array<string> };
+
+// react-hook-form v7 does not allow circular references so
+// we need to abstract an additional rootsinput type
+export type IRootsInput = Omit<
+	IDictionaryEntry,
+	'firstSeen' | 'id' | 'tags' | 'roots' | 'lang' | 'createdAt'
+> & {
+	tags: Array<IDictionaryTagInForm | IDictionaryTagInput>;
+	roots: [];
+};
+
+export type IDictionaryEntryInput = Omit<
+	IDictionaryEntry,
+	'firstSeen' | 'id' | 'tags' | 'roots' | 'lang' | 'createdAt'
+> & {
+	id?: string;
+	tags: Array<IDictionaryTagInForm | IDictionaryTagInput>;
+	roots: Array<IDictionaryEntryInForm | IRootsInput>;
+};
+
 export interface IEntryFormProps {
-	form: FormInstance<IEntryFormFields>;
-	createTag?: (tagName: string) => void;
+	form: UseFormReturn<IDictionaryEntryInput>;
+	createTag: (tagName: string) => void;
 	createRoot?: (key: string) => void;
-	allTags: Array<IDictionaryTag>;
-	localDictionary?: StoreMap<IDictionaryEntry>;
 	canEditRoot?: boolean;
 }
 
-const arrayLengthValidator =
-	(size: number) => (_: RuleObject, value: Array<string>) => {
-		if (value && value.length >= size) {
-			return Promise.resolve();
-		}
-		return Promise.reject(
-			new Error(
-				`Please enter at least ${size} value${size > 1 ? 's' : ''}!`
-			)
-		);
-	};
+const entrySchema = Yup.object({
+	key: Yup.string().required('A valid key is required!'),
+	translations: Yup.array(Yup.string())
+		.min(1, 'Please enter at least one translation')
+		.required('Translation(s) are required'),
+});
 
 const EntryForm: React.FC<IEntryFormProps> = ({
 	form,
 	createTag,
 	createRoot,
-	allTags,
-	localDictionary,
-	canEditRoot,
 }) => {
+	const {
+		formState: { isSubmitting },
+	} = form;
 	return (
 		<div>
-			<Form form={form} layout="vertical" className="word-root-form">
-				<Form.Item name="id" hidden>
-					<Input />
-				</Form.Item>
-				<Form.Item name="key" className="key">
-					<Input
-						className="key-autocomplete"
-						autoFocus
-						disabled={!canEditRoot}
-						allowClear
-						placeholder="Entry"
+			<form noValidate>
+				<Stack spacing={2}>
+					<input hidden defaultValue="" {...form.register('id')} />
+					<Controller
+						name="key"
+						control={form.control}
+						defaultValue=""
+						render={({ field, fieldState: { error } }) => (
+							<TextField
+								{...field}
+								error={!!error}
+								disabled
+								variant="outlined"
+								helperText={error?.message || null}
+								label="Key"
+								placeholder="Key"
+							/>
+						)}
 					/>
-				</Form.Item>
-				<Form.Item name="spelling">
-					<Input
-						autoComplete="off"
-						placeholder="Spelling"
-						allowClear
+
+					<Controller
+						name="translations"
+						control={form.control}
+						defaultValue={[]}
+						render={({ field, fieldState: { error } }) => (
+							<TagInput
+								value={field.value}
+								onChange={field.onChange}
+								disabled={isSubmitting}
+								error={error?.message || undefined}
+								label="Translation(s)"
+								placeholder="Translation(s)"
+							/>
+						)}
 					/>
-				</Form.Item>
-				<Form.Item
-					name="translations"
-					rules={[
-						{
-							required: true,
-							message: '',
-							type: 'array',
-						},
-						{
-							validator: arrayLengthValidator(1),
-						},
-					]}
-					required
-				>
-					<YiSelect
-						mode="tags"
-						placeholder="Translation(s)"
-						allowClear
-						notFoundContent=""
+
+					<Controller
+						name="spelling"
+						control={form.control}
+						defaultValue=""
+						render={({ field, fieldState: { error } }) => (
+							<TextField
+								{...field}
+								variant="outlined"
+								disabled={isSubmitting}
+								error={!!error}
+								helperText={error?.message || null}
+								label="Spelling"
+								placeholder="Spelling"
+								autoComplete="off"
+							/>
+						)}
 					/>
-				</Form.Item>
-				<Form.Item name="comment">
-					<Input
-						autoComplete="off"
-						placeholder="Comment"
-						allowClear
+
+					<Controller
+						name="comment"
+						control={form.control}
+						defaultValue=""
+						render={({ field, fieldState: { error } }) => (
+							<TextField
+								{...field}
+								variant="outlined"
+								error={!!error}
+								helperText={error?.message || null}
+								label="Comment"
+								placeholder="Comment"
+								autoComplete="off"
+							/>
+						)}
 					/>
-				</Form.Item>
-				<Form.Item name="tags" initialValue={[]}>
-					<YiTagsInput createTag={createTag} allTags={allTags} />
-				</Form.Item>
-				<Divider />
-				<Form.Item name="root">
-					<DictionarySelect
-						placeholder="Select a root entry"
-						createRoot={createRoot}
-						localDictionary={localDictionary}
+
+					<Controller
+						name="tags"
+						control={form.control}
+						defaultValue={[]}
+						render={({ field }) => (
+							<TagSelect
+								value={
+									field.value as IDictionaryEntryInput['tags']
+								}
+								onChange={(newValue) => {
+									field.onChange(newValue);
+								}}
+								placeholder="Tags"
+								create={createTag}
+							/>
+						)}
 					/>
-				</Form.Item>
-			</Form>
+
+					{createRoot && (
+						<Controller
+							name="roots"
+							control={form.control}
+							defaultValue={[]}
+							render={({ field }) => (
+								<DictionarySelect
+									value={
+										// react hook form seems to be unable to resolve
+										// tagged types
+										field.value as IDictionaryEntryInput['roots']
+									}
+									onChange={(newValue) => {
+										field.onChange(newValue);
+									}}
+									placeholder="Root entries"
+									createRoot={createRoot}
+								/>
+							)}
+						/>
+					)}
+				</Stack>
+			</form>
 		</div>
 	);
 };
 
 export default EntryForm;
+export { INITIAL_ENTRY_FORM, INITIAL_ROOT_FORM, entrySchema };

@@ -8,3 +8,20 @@
 .lu-description {
 	color: rgb(155, 155, 155);
 }
+
+.input-grow {
+	flex-grow: 1;
+}
+
+.lu-title {
+	display: flex;
+	align-items: baseline;
+}
+
+.lu-title > * {
+	margin-right: 5px;
+}
+
+.lu-add {
+	margin-bottom: 10px;
+}

@@ -1,19 +1,19 @@
 .toolbar {
-	margin: 1px;
-	background: #fff;
-	border-radius: 5px;
-	box-shadow: 0px 0px 5px 0px rgb(173, 173, 173);
-	z-index: 20;
-	box-sizing: border-box;
-	white-space: nowrap;
-	border: 1px solid #e0e0e0;
+	width: 100%;
+	margin: auto;
 	display: flex;
+	top: 0px;
+	z-index: 20;
+	position: sticky;
 	flex-direction: row;
 	flex-wrap: nowrap;
-	justify-content: flex-start;
-	align-content: stretch;
+	justify-content: center;
+	align-content: center;
 	align-items: center;
+	border-bottom: 2px solid #dddddd;
+	background: #fff;
 }
+
 @keyframes fadeOut {
 	0% {
 		opacity: 1;
@@ -77,4 +77,8 @@
 	background: transparent;
 	width: 241px;
 	padding-bottom: 6px;
+}
+
+.toolbar-divider {
+	height: 20px;
 }

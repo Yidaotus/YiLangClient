@@ -1,0 +1,35 @@
+.image-block-container {
+	width: 100%;
+}
+
+.flow-left {
+	display: flex;
+	flex-direction: row;
+	align-content: center;
+}
+
+.flow-left > span {
+	margin-left: 20px;
+}
+
+.flow-right {
+	display: flex;
+	align-content: center;
+	flex-direction: row-reverse;
+	justify-content: space-between;
+}
+
+.flow-right > span {
+	margin-right: 20px;
+}
+
+.flow-down {
+	display: flex;
+	flex-direction: column;
+	flex-wrap: nowrap;
+	align-items: center;
+}
+
+.flow-down > span {
+	margin-top: 20px;
+}

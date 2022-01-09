@@ -27,12 +27,12 @@ const useClickOutside = (
 
 		document.addEventListener('mousedown', validateEventStart);
 		document.addEventListener('touchstart', validateEventStart);
-		document.addEventListener('click', listener);
+		document.addEventListener('mousedown', listener);
 
 		return () => {
 			document.removeEventListener('mousedown', validateEventStart);
 			document.removeEventListener('touchstart', validateEventStart);
-			document.removeEventListener('click', listener);
+			document.removeEventListener('mousedown', listener);
 		};
 	}, [ref, handler]);
 };

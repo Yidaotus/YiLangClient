@@ -1,18 +1,18 @@
 import React from 'react';
-import Floating, { FloatingState } from './Floating';
+import Floating from './Floating';
 import './SimpleDisplay.css';
 
 interface ISimpleInputProps {
-	popupState: FloatingState;
+	rootElement: React.RefObject<HTMLElement>;
 	content: string | null;
 }
 
 const SimpleDisplay: React.FC<ISimpleInputProps> = ({
-	popupState,
 	content,
+	rootElement,
 }) => {
 	return (
-		<Floating state={popupState} arrow>
+		<Floating visible parentElement={rootElement} relativeBounding={null}>
 			<div
 				className="simple-display-container"
 				onKeyDown={() => {}}

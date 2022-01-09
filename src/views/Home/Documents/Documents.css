@@ -1,0 +1,15 @@
+.excerpt-list > div {
+	margin-bottom: 25px;
+}
+
+.paginate-container {
+	display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.paginate-page {
+    margin-left: 10px;
+    margin-right: 10px;
+	list-style: none;
+}

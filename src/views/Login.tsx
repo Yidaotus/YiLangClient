@@ -1,19 +1,14 @@
 import './Login.css';
 
 import React, { useState } from 'react';
-import { useDispatch } from 'react-redux';
-import { useHistory } from 'react-router-dom';
-import { Button, Col, Row, Spin } from 'antd';
-import RegisterForm from 'components/Login/RegisterFormAnt';
-import UIError from 'components/Error/UIError';
-import { IUIError } from 'store/ui/types';
-import { getUUID } from 'Document/UUID';
-import { IRootDispatch } from '@store/index';
-import LoginForm from '../components/Login/LoginFormAnt';
-import {
-	login as loginDispatcher,
-	register as registerDispatcher,
-} from '../store/user/actions';
+import { Navigate } from 'react-router-dom';
+import RegisterForm from 'components/Login/RegisterForm';
+import { useUserContext } from '@hooks/useUserContext';
+import { LS_TOKEN_POINTER } from 'api/api.service';
+import { useQueryClient } from 'react-query';
+import { login, register } from 'api/user.service';
+import { Paper, Box, Stack, Grid, Alert, Button, Link } from '@mui/material';
+import LoginForm from '../components/Login/LoginForm';
 
 export interface IRegisterData {
 	email: string;
@@ -27,93 +22,107 @@ export interface ILoginData {
 }
 
 const LoginView: React.FC = () => {
-	const history = useHistory();
+	const queryClient = useQueryClient();
+	const user = useUserContext();
 
 	const [isLoading, setIsLoading] = useState(false);
-	const [errors, setErrors] = useState(new Array<IUIError>());
+	const [errors, setErrors] = useState(new Array<string>());
 
 	const [isRegister, setRegister] = useState<boolean>(false);
 	const [infoMsg, setInfoMsg] = useState<string>('');
-
-	const dispatch: IRootDispatch = useDispatch();
 
 	const toggleRegister = () => {
 		setRegister(!isRegister);
 	};
 
 	const loginCB = async (loginData: { email: string; password: string }) => {
+		setErrors([]);
+		setInfoMsg('');
 		setIsLoading(true);
 		try {
-			await dispatch(loginDispatcher(loginData));
-			history.push('/');
+			const { token } = await login(loginData);
+			localStorage.setItem(LS_TOKEN_POINTER, token);
+			queryClient.invalidateQueries('user');
 		} catch (e) {
 			if (e instanceof Error) {
 				const { message } = e;
-				setErrors((stateErrors) => [
-					...stateErrors,
-					{ message, id: getUUID(), type: 'error' },
-				]);
+				setErrors((stateErrors) => [...stateErrors, message]);
 			}
 		}
 		setIsLoading(false);
 	};
 
 	const registerCB = async (registerData: IRegisterData) => {
-		dispatch(registerDispatcher(registerData));
-		setInfoMsg(
-			'Registration complete! Please check your emails and validate your Account'
-		);
-		setRegister(false);
+		setErrors([]);
+		setInfoMsg('');
+		setIsLoading(true);
+		try {
+			await register(registerData);
+			setInfoMsg(
+				'Registration complete! Please check your emails and validate your Account'
+			);
+			setRegister(false);
+		} catch (e) {
+			if (e instanceof Error) {
+				const { message } = e;
+				setErrors((stateErrors) => [...stateErrors, message]);
+			}
+		}
+		setIsLoading(false);
 	};
 
-	return (
-		<Row justify="center">
-			<Col span={6}>
-				<div className="login-logo">
-					<img src="yilang.png" alt="YiText" />
-				</div>
-				<Spin spinning={isLoading}>
-					{isRegister ? (
-						<RegisterForm register={registerCB} />
-					) : (
-						<LoginForm
-							initialEmail=""
-							initialPassword=""
-							login={loginCB}
-						/>
-					)}
-				</Spin>
-				<div className="sub-form">
-					<p>
-						Need to
-						<Button
-							size="small"
-							type="link"
-							onClick={toggleRegister}
-							onKeyDown={toggleRegister}
-						>
-							{isRegister ? ' login' : ' register'}?
-						</Button>
-					</p>
-				</div>
-				{errors.length > 0 && (
-					<div className="flex justify-center pt-4">
-						<span className="text-md text-red-600">
+	return user ? (
+		<Navigate to="/home" replace />
+	) : (
+		<Grid
+			container
+			direction="row"
+			alignItems="center"
+			justifyContent="center"
+			height="100vh"
+		>
+			<Paper
+				elevation={3}
+				sx={{
+					p: 3,
+					width: '400px',
+				}}
+			>
+				<Stack spacing={4} alignItems="center">
+					<img src="yilang.png" alt="YiText" width="200px" />
+					{errors.length > 0 && (
+						<Alert severity="error" sx={{ width: '100%' }}>
 							{errors.map((err) => (
-								<UIError {...err} />
+								<span>{err}</span>
 							))}
-						</span>
-					</div>
-				)}
-				{infoMsg && (
-					<div className="flex justify-center pt-4">
-						<span className="text-md text-green-600">
+						</Alert>
+					)}
+					{infoMsg && (
+						<Alert severity="info" sx={{ width: '100%' }}>
 							{infoMsg}
-						</span>
-					</div>
-				)}
-			</Col>
-		</Row>
+						</Alert>
+					)}
+					<Box sx={{ width: '100%' }}>
+						{isRegister ? (
+							<RegisterForm submit={registerCB} />
+						) : (
+							<LoginForm
+								initialEmail=""
+								initialPassword=""
+								submit={loginCB}
+							/>
+						)}
+					</Box>
+					<Link
+						component="button"
+						variant="body2"
+						onClick={toggleRegister}
+					>
+						Need to {isRegister ? ' login' : ' register'}?
+					</Link>
+				</Stack>
+			</Paper>
+		</Grid>
 	);
 };
 

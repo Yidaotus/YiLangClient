@@ -13,15 +13,18 @@
 }
 
 .yi-content {
-	padding: 50px 50px;
 	flex-grow: 1;
-	background-color: #90b0ca26;
+	max-width: 1200px;
+	width: 100%;
+	padding: 50px 50px;
+	align-self: center;
 }
 
 .yi-layout {
 	min-height: 100vh;
 	display: flex;
 	flex-direction: column;
+	background-color: #90b0ca26;
 }
 
 .yi-footer-container {

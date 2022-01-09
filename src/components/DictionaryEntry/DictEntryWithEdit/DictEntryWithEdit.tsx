@@ -1,48 +1,33 @@
-/* eslint-disable react/destructuring-assignment */
 import './DictEntryWithEdit.css';
-import React, { useRef, useState } from 'react';
-import { Button, Dropdown, Menu, Modal } from 'antd';
-import {
-	CloseOutlined,
-	DeleteOutlined,
-	EditOutlined,
-	ExclamationCircleOutlined,
-	MoreOutlined,
-	SaveFilled,
-} from '@ant-design/icons';
-import { IDictionaryEntryResolved } from 'Document/Dictionary';
-import { useSelector } from 'react-redux';
-import {
-	selectAddedDictionaryEntries,
-	selectUserTags,
-} from '@store/dictionary/selectors';
-import { UUID } from 'Document/UUID';
-import DictEntry from '../DictionaryEntry';
+import React, { useCallback, useRef, useState } from 'react';
+import { useDeleteDictionaryEntry } from '@hooks/DictionaryQueryHooks';
+import { Box, Button, IconButton, Stack } from '@mui/material';
+import { Delete as DeleteIcon, Edit as EditIcon } from '@mui/icons-material';
+import DictionaryEntry, { IDictionaryEntryProps } from '../DictionaryEntry';
 import DictEntryEdit, { IWordInputRef } from '../DictEntryEdit/DictEntryEdit';
-import { IEntryFormFields } from '../EntryForm/EntryForm';
+import ConfirmButton from '@components/ConfirmButton/ConfirmButton';
 
-const { confirm } = Modal;
-
-type IDictEntryWithEditProps = {
-	dictEntry: IDictionaryEntryResolved;
-	canLink?: boolean;
-	saveEntry: (entry: IEntryFormFields) => void;
-	removeEntry?: (entryId: UUID) => void;
+type IDictEntryWithEditProps = IDictionaryEntryProps & {
+	canRemove?: boolean;
+	removeCallback?: () => void;
 };
 
-const DictEntryWithEdit: React.FC<IDictEntryWithEditProps> = (props) => {
-	const { dictEntry, canLink, saveEntry, removeEntry } = props;
+const DictEntryWithEdit: React.FC<IDictEntryWithEditProps> = ({
+	entry,
+	canLink,
+	canRemove,
+	removeCallback,
+	size,
+	onRootSelect,
+}) => {
 	const [editing, setEditing] = useState(false);
+	const deleteEntry = useDeleteDictionaryEntry();
 	const dictEntryEdit = useRef<IWordInputRef>(null);
-
-	const userTags = useSelector(selectUserTags);
-	const localDictionary = useSelector(selectAddedDictionaryEntries);
 
 	const finish = async () => {
 		if (dictEntryEdit.current) {
 			const editResult = await dictEntryEdit.current.finish();
 			if (editResult.isDone) {
-				saveEntry(editResult.entry);
 				setEditing(false);
 			}
 		}
@@ -57,86 +42,50 @@ const DictEntryWithEdit: React.FC<IDictEntryWithEditProps> = (props) => {
 		}
 	};
 
-	const showDeleteConfirm = () => {
-		confirm({
-			title: 'Are you sure to delete this entry?',
-			icon: <ExclamationCircleOutlined />,
-			content: `Deleted entries can't be recovered!`,
-			okText: 'Yes',
-			okType: 'danger',
-			cancelText: 'No',
-			onOk() {
-				removeEntry?.(dictEntry.id);
-			},
-		});
-	};
-
-	const moreDropdown = (
-		<Menu>
-			<Menu.Item
-				key="1"
-				icon={<EditOutlined />}
-				onClick={() => setEditing((editState) => !editState)}
-			>
-				Edit
-			</Menu.Item>
-			<Menu.Item
-				key="2"
-				icon={<DeleteOutlined />}
-				onClick={showDeleteConfirm}
-				danger
-			>
-				Delete
-			</Menu.Item>
-		</Menu>
-	);
+	const remove = useCallback(async () => {
+		await deleteEntry.mutateAsync(entry.id);
+		removeCallback?.();
+	}, [deleteEntry, entry.id, removeCallback]);
 
 	return (
-		<div className="entry-with-edit-container">
-			<div className="entry-with-edit-controlls-top">
-				{removeEntry ? (
-					<Dropdown overlay={moreDropdown}>
-						<Button type="text">
-							<MoreOutlined rotate={90} />
-						</Button>
-					</Dropdown>
-				) : (
-					<Button
-						type="text"
-						size="small"
-						icon={<EditOutlined />}
-						onClick={() => setEditing((editState) => !editState)}
-					/>
-				)}
-			</div>
+		<Box sx={{ display: 'flex' }}>
 			{editing && (
-				<div>
-					<DictEntryEdit
-						root={{
-							...dictEntry,
-							tags: dictEntry.tags.map((tag) => tag.id),
-							root: dictEntry.root?.id,
-						}}
-						ref={dictEntryEdit}
-						userTags={userTags}
-						localDictionary={localDictionary}
-					/>
-					<div className="entry-with-edit-controlls-bottom">
-						<Button onClick={cancel} icon={<CloseOutlined />}>
-							Cancel
-						</Button>
-						<Button
-							type="primary"
-							onClick={finish}
-							icon={<SaveFilled />}
-						>
-							Save
-						</Button>
-					</div>
-				</div>
+				<Box sx={{ width: '100%' }}>
+					<DictEntryEdit entryKey={entry} ref={dictEntryEdit} />
+					<Box>
+						<Button onClick={cancel}>Cancel</Button>
+						<Button onClick={finish}>Save</Button>
+					</Box>
+				</Box>
 			)}
-			{!editing && <DictEntry dictEntry={dictEntry} canLink={canLink} />}
-		</div>
+			{!editing && (
+				<DictionaryEntry
+					entry={entry}
+					canLink={canLink}
+					onRootSelect={onRootSelect}
+					size={size}
+				/>
+			)}
+			{!editing && (
+				<Box sx={{ marginLeft: 'auto' }}>
+					<Stack spacing={1} direction="row">
+						<IconButton
+							onClick={() =>
+								setEditing((editState) => !editState)
+							}
+						>
+							<EditIcon />
+						</IconButton>
+						{canRemove && (
+							<ConfirmButton
+								onConfirm={remove}
+								icon={<DeleteIcon />}
+							/>
+						)}
+					</Stack>
+				</Box>
+			)}
+		</Box>
 	);
 };
 

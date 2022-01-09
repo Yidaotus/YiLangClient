@@ -1,226 +1,229 @@
 import './Editor.css';
-import React, { useCallback, useRef, useState } from 'react';
-
-import { Tabs, Divider, Button, Spin, notification, Modal, Empty } from 'antd';
+import React, {
+	useCallback,
+	useEffect,
+	useMemo,
+	useRef,
+	useState,
+} from 'react';
+import { Slate, withReact } from 'slate-react';
+import { BaseRange, createEditor, Descendant, Editor, Transforms } from 'slate';
+import useSelection from '@hooks/useSelection';
+import { useNavigate, useParams } from 'react-router-dom';
+import SentenceEditorModal from '@editor/Toolbar/Modals/SentenceEditor/SentenceEditorModal';
 import {
-	MinusOutlined,
-	PlusOutlined,
-	DeleteOutlined,
-	SaveOutlined,
-	ExclamationCircleOutlined,
-} from '@ant-design/icons';
-
-import { useDispatch, useSelector } from 'react-redux';
-import { DocumentBlock } from 'Document/Block';
-import { HTML5Backend } from 'react-dnd-html5-backend';
-import { DndProvider } from 'react-dnd';
-import { selectActiveLanguageConfig } from '@store/user/selectors';
-import {
-	fetchTags,
-	resetDictionary,
-	saveDictionary,
-	saveTags,
-} from 'store/dictionary/actions';
-import { IRootDispatch, IRootState } from 'store';
-import handleError from '@helpers/Error';
-import AddBlockPanel from './Panels/AddBlockPanel';
-import WordsPanel from './Panels/WordsPanel';
-
+	useEditorDocument,
+	useUpdateEditorDocument,
+} from '@hooks/DocumentQueryHooks';
+import { CircularProgress, Typography } from '@mui/material';
 import EditorDocument from './EditorDocument';
+import DictPopupController from './Popups/DictPopupController';
+import Toolbar from './Toolbar/Toolbar';
+import { withYiLang } from './YiEditor';
+import WordEditorModal from './Toolbar/Modals/WordEditor/WordEditorModal';
+import SavingIndicator, {
+	SavingState,
+} from './SavingIndicator/SavingIndicator';
+import { useActiveLanguageConf } from '@hooks/ConfigQueryHooks';
+import useUiErrorHandler from '@helpers/Error';
+import DraggableDictionary from './DraggableDictionary';
+import useDebounce from '@hooks/useDebounce';
+import DraggableSRS from './SRS/DraggableSRS';
 
-import {
-	addBlock,
-	loadDocument,
-	resetEditor,
-	saveDocument,
-} from '../../store/editor/actions';
-import SentencesPanel from './Panels/SentencesPanel';
-
-const { TabPane } = Tabs;
-const { confirm } = Modal;
+const AVERAGE_ACTIONS_PER_COMMAND = 15;
+const SAVE_EVERY_ACTIONS = 5 * AVERAGE_ACTIONS_PER_COMMAND;
 
 const YiEditor: React.FC = () => {
-	const dispatch: IRootDispatch = useDispatch();
-
-	const [loading, setLoading] = useState<string | null>(null);
-	const [showAddBlockPanel, setShowAddBlockPanel] = useState(false);
-	const editorDocument = useSelector(
-		(state: IRootState) => state.editor.document
+	const editorContainer = useRef(null);
+	const [savingIndicator, setSavingIndicator] = useState<SavingState>('IDLE');
+	const [actionCount, setActionCount] = useState(0);
+	const actionCountDebounced = useDebounce(actionCount, 500);
+	const [wordEditorVisible, setWordEditorVisible] = useState(false);
+	const [sentenceEditorVisible, setSentenceEditorVisible] = useState(false);
+	const [isEditorDirty, setIsEditorDirty] = useState(false);
+	const [savedSelection, setSavedSelection] = useState<BaseRange | null>(
+		null
 	);
-	const currentLanguage = useSelector(selectActiveLanguageConfig);
-	const editorHasBlocks =
-		editorDocument && Object.values(editorDocument.blocks).length > 0;
-	const documentModified = useSelector(
-		(state: IRootState) => state.editor.documentModified
-	);
+	const { id } = useParams<{ id: string }>();
+	// the returned object does change, only the functions themselves are referentially stable
+	// destruct so it can serve as a dependency. See: https://github.com/facebook/react/issues/15924#issuecomment-521253636
+	const { mutateAsync: updateDocumentAsync } = useUpdateEditorDocument();
+	const [loadingDocument, dbDocument] = useEditorDocument(id);
 
-	const save = useCallback(async () => {
-		setLoading('Saving Dictionary');
-		try {
-			setLoading('Saving Dictionary');
-			await dispatch(saveDictionary());
-			setLoading('Saving Tags');
-			await dispatch(saveTags());
-			setLoading('Saving Document');
-			await dispatch(saveDocument());
-			notification.open({
-				message: 'Done',
-				description: 'Document saved',
-				type: 'success',
-			});
-		} catch (e) {
-			handleError(e);
+	const [showSpelling, setShowSpelling] = useState(false);
+	const [editor] = useState(withReact(withYiLang(createEditor())));
+	const [selection, setSelection] = useSelection(editor);
+	const [editorNodes, setEditorNodes] = useState<Array<Descendant>>([]);
+	const navigate = useNavigate();
+	const activeLanguage = useActiveLanguageConf();
+	const handleError = useUiErrorHandler();
+
+	useEffect(() => {
+		if (dbDocument && dbDocument?.lang !== activeLanguage?.id) {
+			navigate('/home');
 		}
-		setLoading(null);
-	}, [dispatch]);
+	}, [activeLanguage?.id, dbDocument, navigate]);
 
-	const createEditorDocument = useCallback(async () => {
-		try {
-			await dispatch(loadDocument({ type: 'new' }));
-			notification.open({
-				message: 'Done',
-				description: 'New Document created',
-				type: 'success',
-			});
-		} catch (e) {
-			handleError(e);
-		}
-	}, [dispatch]);
-
-	const resetEditorDocument = useCallback(async () => {
-		try {
-			dispatch(resetEditor());
-			dispatch(resetDictionary());
-			if (currentLanguage) {
-				await dispatch(fetchTags(currentLanguage.key));
+	useEffect(() => {
+		const fetch = async () => {
+			try {
+				if (dbDocument) {
+					const deserializedDocument = JSON.parse(
+						dbDocument.serializedDocument
+					) as Descendant[];
+					setEditorNodes(deserializedDocument);
+				}
+			} catch (error) {
+				handleError(error);
 			}
-			notification.open({
-				message: 'Done',
-				description: 'Editor Reset',
-				type: 'success',
-			});
-		} catch (e) {
-			handleError(e);
-		}
-	}, [currentLanguage, dispatch]);
+		};
+		fetch();
+	}, [dbDocument, handleError, setEditorNodes]);
 
-	const confirmReset = useCallback(async () => {
-		if (documentModified) {
-			confirm({
-				title: 'Resetting Document',
-				icon: <ExclamationCircleOutlined />,
-				content: `This will reset the currently loaded Document. Continue?`,
-				okText: 'Yes',
-				okType: 'primary',
-				cancelText: 'No',
-				async onOk() {
-					resetEditorDocument();
-				},
-			});
-		} else {
-			resetEditorDocument();
-		}
-	}, [documentModified, resetEditorDocument]);
+	const updateDocument = useCallback(async () => {
+		try {
+			setSavingIndicator('LOADING');
 
-	// If we change our Document we need to check if we have stored caret
-	// and restore if this is the case.
+			const title = Editor.string(editor, [0], { voids: true });
+			const serializedDocument = JSON.stringify(editor.children);
+			await updateDocumentAsync({
+				id: id || 'what',
+				title,
+				serializedDocument,
+			});
+
+			// Hacky but feels better for the user to actually see the saving process
+			setTimeout(() => {
+				setSavingIndicator('SUCCESS');
+				setTimeout(() => {
+					setSavingIndicator('IDLE');
+				}, 2000);
+			}, 1000);
+		} catch (error) {
+			setSavingIndicator('ERROR');
+			handleError(error);
+		} finally {
+			setIsEditorDirty(false);
+		}
+	}, [editor, handleError, id, updateDocumentAsync]);
+
+	const closeSentenceEditorModal = useCallback(() => {
+		setSentenceEditorVisible(false);
+	}, [setSentenceEditorVisible]);
+
+	/*
+	useEffect(() => {
+		if (
+			actionCountDebounced >= SAVE_EVERY_ACTIONS &&
+			savingIndicator === 'IDLE'
+		) {
+			updateDocument();
+			setActionCount(0);
+		}
+	}, [actionCountDebounced, savingIndicator, updateDocument]);
+	*/
+
+	const onEditorChange = useCallback(
+		(newValue) => {
+			const isAstChange = editor.operations.some(
+				(op) => op.type !== 'set_selection'
+			);
+			const isSelectionChanged = editor.operations.some(
+				(op) => op.type === 'set_selection'
+			);
+			if (isSelectionChanged) {
+				setSelection(editor.selection);
+			}
+			if (isAstChange) {
+				setIsEditorDirty(true);
+				setActionCount(
+					(count) =>
+						count +
+						editor.operations.filter(
+							(op) => op.type !== 'set_selection'
+						).length
+				);
+				setEditorNodes(newValue);
+			}
+		},
+		[editor.operations, editor.selection, setSelection]
+	);
+
+	const closeWordEditorModal = useCallback(
+		(restoreSelection = false) => {
+			setWordEditorVisible(false);
+			if (savedSelection && restoreSelection) {
+				Transforms.select(editor, savedSelection);
+			}
+		},
+		[editor, savedSelection]
+	);
+
+	const toolbarShowSentenceEditorHandle = useCallback(() => {
+		setSentenceEditorVisible(true);
+	}, []);
+	const toolbarShowWordEditorHandle = useCallback(() => {
+		setWordEditorVisible(true);
+	}, []);
+	const toolbarShowSpellingHandle = useCallback((show: boolean) => {
+		setShowSpelling(show);
+	}, []);
+
 	return (
 		<div>
-			<div style={{ position: 'relative' }}>
-				<Spin
-					spinning={!!loading}
-					size="large"
-					tip={loading || undefined}
-				>
-					<div>
-						<div className="editor-container">
-							<Tabs
-								defaultActiveKey="1"
-								centered
-								tabBarStyle={{
-									position: 'sticky',
-								}}
+			<SavingIndicator savingState={savingIndicator} />
+			<div>
+				{loadingDocument && <CircularProgress />}
+				<div>
+					<div
+						className={`editor-container ${
+							showSpelling && 'furigana-enabled'
+						}`}
+					>
+						<Slate
+							editor={editor}
+							value={editorNodes}
+							onChange={onEditorChange}
+						>
+							<div
+								ref={editorContainer}
+								style={{ position: 'relative' }}
 							>
-								<TabPane tab="Document" key="1">
-									{editorDocument ? (
-										<DndProvider backend={HTML5Backend}>
-											<EditorDocument
-												document={editorDocument}
-											/>
-										</DndProvider>
-									) : (
-										<Empty
-											image={Empty.PRESENTED_IMAGE_SIMPLE}
-											description={
-												<span>No Document loaded.</span>
-											}
-										>
-											<Button
-												type="primary"
-												onClick={createEditorDocument}
-											>
-												Create Now
-											</Button>
-										</Empty>
-									)}
-								</TabPane>
-								<TabPane tab="Elements" key="2">
-									<SentencesPanel />
-									<Divider />
-									<WordsPanel />
-								</TabPane>
-							</Tabs>
-
-							<ul className="editor-menu">
-								<li>
-									<Button
-										type="text"
-										icon={<DeleteOutlined />}
-										onClick={confirmReset}
-										disabled={!editorHasBlocks}
-									/>
-								</li>
-								<li>
-									<Button
-										type="text"
-										icon={
-											showAddBlockPanel ? (
-												<MinusOutlined />
-											) : (
-												<PlusOutlined />
-											)
-										}
-										onClick={() =>
-											setShowAddBlockPanel(
-												(current) => !current
-											)
-										}
-										disabled={!editorDocument}
-									/>
-								</li>
-								<li>
-									<Button
-										type="text"
-										icon={<SaveOutlined />}
-										disabled={
-											!editorHasBlocks ||
-											!documentModified
-										}
-										onClick={() => save()}
-									/>
-								</li>
-							</ul>
-							{showAddBlockPanel && (
-								<AddBlockPanel
-									addBlockCB={(block: DocumentBlock) => {
-										dispatch(addBlock(block));
-										setShowAddBlockPanel(false);
-									}}
+								<Toolbar
+									selection={selection}
+									showSentenceEditor={
+										toolbarShowSentenceEditorHandle
+									}
+									showWordEditor={toolbarShowWordEditorHandle}
+									setShowSpelling={toolbarShowSpellingHandle}
+									showSpelling={showSpelling}
+									updateDocument={updateDocument}
+									isEditorDirty={isEditorDirty}
 								/>
-							)}
-						</div>
+								<WordEditorModal
+									visible={wordEditorVisible}
+									close={closeWordEditorModal}
+								/>
+								<SentenceEditorModal
+									visible={sentenceEditorVisible}
+									close={closeSentenceEditorModal}
+								/>
+								{/*
+								<DictPopupController
+									rootElement={editorContainer}
+									selection={selection}
+								/>
+								*/}
+								<DraggableDictionary selection={selection} />
+								<EditorDocument />
+								{!loadingDocument && !dbDocument && (
+									<Typography>Document not found</Typography>
+								)}
+								<DraggableSRS editor={editor} />
+							</div>
+						</Slate>
 					</div>
-				</Spin>
+				</div>
 			</div>
 		</div>
 	);

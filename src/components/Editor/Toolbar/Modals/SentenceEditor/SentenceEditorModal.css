@@ -1,0 +1,9 @@
+.sentence-input-head {
+	margin: auto;
+}
+
+.sentence-input-form > p {
+	font-size: 1.1rem;
+	padding-bottom: 10px;
+	border-bottom: 1px solid lightgray;
+}

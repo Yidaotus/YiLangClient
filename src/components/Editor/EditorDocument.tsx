@@ -1,239 +1,264 @@
 import './EditorDocument.css';
-import React, { useState, useRef } from 'react';
-import { Empty, Button, Tooltip, Select } from 'antd';
+import React, { useCallback } from 'react';
+import { Transforms, Range } from 'slate';
 import {
-	MinusCircleOutlined,
-	PlusCircleOutlined,
-	ArrowDownOutlined,
-	EyeTwoTone,
-	EyeInvisibleOutlined,
-} from '@ant-design/icons';
-import useSelectedText from '@hooks/useSelectedText';
-import { useDispatch, useSelector } from 'react-redux';
-import { DocumentNormalized, IEditorState } from '@store/editor/types';
-import { changeLayer, toggleSpelling } from '@store/editor/actions';
-import BlockContainer from '@editor/Blocks/BlockContainer/BlockContainer';
-import Toolbar from '@editor/Toolbar/Toolbar';
-import DropEdge from '@editor/Blocks/DropEdge/DropEdge';
-import {
-	selectAvailableLayers,
-	selectShowSpelling,
-} from '@store/editor/selectors';
-import { IRootState } from '@store/index';
-import { getUUID } from 'Document/UUID';
-import DictPopupController from './Popups/DictPopupController';
-import SentencePopupController from './Popups/SentencePopupController';
+	Editable,
+	RenderLeafProps,
+	RenderElementProps,
+	useSlateStatic,
+} from 'slate-react';
+import MarkFragment from './Fragments/Mark/MarkFragment';
+import SentenceFragment from './Fragments/Sentence/SentenceFragment';
+import WordFragment from './Fragments/Word/WordFragment';
+import ImageBlock from './Blocks/Image/Image';
+import WordList from './Blocks/WordList/WordList';
+import VideoBlock, { videoBlockPasteAction } from './Blocks/Video/Video';
+import { Person as PersonIcon } from '@mui/icons-material';
+import { Box, Grid, Paper, Typography } from '@mui/material';
+import AccountCircleTwoToneIcon from '@mui/icons-material/AccountCircleTwoTone';
 
-const { Option } = Select;
-
-export interface IEditorOption {
-	name: string;
-	icon: React.ReactNode;
-	handler: () => void;
-	tooltip: string;
-}
-
-export interface IEditorBlocksProps {
-	editorDocument: IEditorState;
-}
-
-interface IEditorDocumentProps {
-	document: DocumentNormalized;
-}
-
-/**
- * Render the passed document.
- *
- * @param editorDocument The document to render.
- */
-const EditorDocument: React.FC<IEditorDocumentProps> = ({ document }) => {
-	const [fontSize, setFontSize] = useState(1.3);
-	const dispatch = useDispatch();
-
-	const availableLayers = useSelector(selectAvailableLayers);
-	const activeLayer = useSelector(
-		(state: IRootState) => state.editor.selectedFragmentLayer
+const Leaf = ({ attributes, leaf, children }: RenderLeafProps) => {
+	return (
+		<span
+			{...attributes}
+			style={{
+				fontWeight: leaf.bold ? 'bold' : 'normal',
+				color: leaf.color,
+			}}
+		>
+			{children}
+		</span>
 	);
-	const showSpellingActive = useSelector(selectShowSpelling);
-	const editorContainer = useRef<HTMLDivElement | null>(null);
-	useSelectedText(editorContainer);
-	const { renderMap } = document || [];
+};
 
-	const options: IEditorOption[] = [
-		{
-			name: 'fontSizeIncrease',
-			icon: <PlusCircleOutlined />,
-			handler: () => {
-				setFontSize((currentFontSize) => currentFontSize + 0.1);
-			},
-			tooltip: 'Increase font size',
-		},
-		{
-			name: 'fontSizeDecrease',
-			icon: <MinusCircleOutlined />,
-			handler: () => {
-				setFontSize((currentFontSize) => currentFontSize - 0.1);
-			},
-			tooltip: 'Decrease font size',
-		},
-		{
-			name: 'toggleSpelling',
-			icon: showSpellingActive ? (
-				<EyeTwoTone />
-			) : (
-				<EyeInvisibleOutlined />
-			),
-			handler: () => {
-				dispatch(toggleSpelling());
-			},
-			tooltip: 'Toggle spelling visibility',
-		},
-	];
-
-	const renderWidthFractions = new Set<number>();
-
-	for (const row of renderMap) {
-		let columnWidth = 0;
-		for (const renderEntry of row) {
-			const scalar = renderEntry.scale ? renderEntry.scale : 1;
-			columnWidth += scalar;
+const Element = (props: RenderElementProps) => {
+	const { children, attributes, element } = props;
+	switch (element.type) {
+		case 'sentence':
+			return (
+				<SentenceFragment attributes={attributes} element={element}>
+					{children}
+				</SentenceFragment>
+			);
+		case 'documentTitle': {
+			return (
+				<Typography
+					sx={(theme) => ({
+						borderBottom: `5px solid ${theme.palette.secondary.light}`,
+						m: 2,
+					})}
+					variant="h3"
+					component="div"
+					{...attributes}
+				>
+					{children}
+				</Typography>
+			);
 		}
-		renderWidthFractions.add(columnWidth);
-	}
-
-	const renderedMap = renderMap.map((row, y) => {
-		const columnWidth = row.reduce((accu, entry) => accu + entry.scale, 0);
-		const rowKey = y * 20;
-		const renderedRow = (
-			<React.Fragment key={rowKey}>
-				<div className="block-row">
-					<>
-						{row.map((renderEntry, x) => {
-							const cssCalcWidth = `calc(100% * ${renderEntry.scale}/${columnWidth})`;
-							const renderCell =
-								renderEntry.type === 'block' ? (
-									<div
-										style={{
-											width: cssCalcWidth,
-										}}
-									>
-										<BlockContainer
-											fontSize={fontSize}
-											rowIndex={y}
-											columnIndex={x}
-											isSplitRow={row.length > 1}
-											blockId={renderEntry.id}
-										/>
-									</div>
-								) : (
-									<div
-										style={{
-											// custom-ident can't start with a number
-											border: '2px dashed #c1c1c1',
-											width: cssCalcWidth,
-										}}
-									>
-										<Empty
-											image={Empty.PRESENTED_IMAGE_SIMPLE}
-											description={false}
-										/>
-									</div>
-								);
-							return (
-								<React.Fragment key={renderEntry.id}>
-									<DropEdge
-										rowIndex={y}
-										columnIndex={x}
-										type="vertical"
-									/>
-									{renderCell}
-								</React.Fragment>
-							);
-						})}
-						<DropEdge
-							rowIndex={y}
-							columnIndex={row.length + 1}
-							type="vertical"
-							key={`RenderEdge${rowKey}`}
-						/>
-					</>
-				</div>
-				<div className="block-row">
-					<div style={{ width: '100%' }}>
-						<DropEdge
-							columnIndex={0}
-							rowIndex={y + 1}
-							type="horizontal"
+		case 'title': {
+			return (
+				<h1
+					{...attributes}
+					style={{ textAlign: element.align || 'left' }}
+				>
+					{children}
+				</h1>
+			);
+		}
+		case 'subtitle': {
+			return (
+				<h2
+					{...attributes}
+					style={{ textAlign: element.align || 'left' }}
+				>
+					{children}
+				</h2>
+			);
+		}
+		case 'highlight':
+			return element.role === 'highlight' ? (
+				<span
+					style={{ color: 'black' }}
+					{...attributes}
+					contentEditable={false}
+				>
+					{children}
+				</span>
+			) : (
+				<span
+					style={{ color: 'lightgray' }}
+					{...attributes}
+					contentEditable={false}
+				>
+					{children}
+				</span>
+			);
+		case 'image':
+			return (
+				<ImageBlock attributes={attributes} element={element}>
+					{children}
+				</ImageBlock>
+			);
+		case 'word':
+			return (
+				<WordFragment
+					attributes={attributes}
+					element={element}
+					// eslint-disable-next-line react/no-children-prop
+					children={children}
+				/>
+			);
+		case 'mark':
+			return (
+				<MarkFragment attributes={attributes} element={element}>
+					{children}
+				</MarkFragment>
+			);
+		case 'dialog':
+			return (
+				<Paper
+					sx={(theme) => ({
+						display: 'flex',
+						flexDirection: 'column',
+						borderRadius: '3px',
+						m: 2,
+						p: 1,
+					})}
+					{...attributes}
+				>
+					{children}
+				</Paper>
+			);
+		case 'dialogLine':
+			return (
+				<Box
+					sx={(theme) => ({
+						wordBreak: 'break-all',
+						whiteSpace: 'pre-wrap',
+						'&:nth-child(2n)': {
+							backgroundColor: theme.palette.secondary.light,
+							borderRadius: '2px',
+						},
+					})}
+					{...attributes}
+				>
+					{children}
+				</Box>
+			);
+		case 'dialogLineActor':
+			return (
+				<Box
+					sx={{
+						display: 'flex',
+						alignItems: 'center',
+						p: 1,
+						'& span': {
+							fontWeight: 'bold',
+						},
+					}}
+					{...attributes}
+				>
+					<div
+						style={{
+							userSelect: 'none',
+							display: 'flex',
+							alignItems: 'center',
+						}}
+						contentEditable="false"
+					>
+						<AccountCircleTwoToneIcon
+							color="primary"
+							sx={{ paddingRight: 1 }}
 						/>
 					</div>
-				</div>
-			</React.Fragment>
-		);
-		return renderedRow;
-	});
+					{children}
+				</Box>
+			);
+		case 'dialogLineSpeech':
+			return (
+				<Grid
+					item
+					xs="auto"
+					sx={{
+						paddingBottom: 1,
+						paddingLeft: 1,
+					}}
+					{...attributes}
+				>
+					{children}
+				</Grid>
+			);
+		case 'listItem':
+			return <li {...attributes}>{children}</li>;
+		case 'numberedList':
+			return <ol {...attributes}>{children}</ol>;
+		case 'bulletedList':
+			return <ul {...attributes}>{children}</ul>;
+		case 'wordList':
+			return (
+				<WordList attributes={attributes} element={element}>
+					{children}
+				</WordList>
+			);
+		case 'blockQuote':
+			return (
+				<blockquote
+					{...attributes}
+					style={{ textAlign: element.align || 'left' }}
+				>
+					{children}
+				</blockquote>
+			);
+		case 'video':
+			return (
+				<VideoBlock attributes={attributes} element={element}>
+					{children}
+				</VideoBlock>
+			);
+		default:
+			return (
+				<Box
+					{...attributes}
+					sx={{ textAlign: element.align || 'left', p: 1 }}
+				>
+					{children}
+				</Box>
+			);
+	}
+};
+
+const EditorDocument: React.FC = () => {
+	const renderLeaf = useCallback((props) => {
+		return <Leaf {...props} />;
+	}, []);
+	const renderElement = useCallback((props) => <Element {...props} />, []);
+	const editor = useSlateStatic();
 
 	return (
-		<div style={{ position: 'relative' }}>
-			<div className="editor-options-panel">
-				<Select
-					defaultValue={activeLayer || ''}
-					style={{ width: 160 }}
-					onChange={(id) => {
-						dispatch(changeLayer(getUUID(id as string)));
-					}}
-				>
-					{availableLayers.map((layer) => (
-						<Option value={layer.id} key={layer.id}>
-							{layer.name}
-						</Option>
-					))}
-				</Select>
-				{options.map((option) => (
-					<Tooltip
-						title={option.tooltip}
-						key={option.name}
-						placement="bottom"
-					>
-						<Button
-							shape="circle"
-							type="text"
-							size="large"
-							icon={option.icon}
-							onClick={option.handler}
-						/>
-					</Tooltip>
-				))}
-			</div>
-			<Toolbar />
-			<div ref={editorContainer}>
-				<SentencePopupController />
-				<DictPopupController />
-				{Object.values(renderMap).length < 1 ? (
-					<Empty
-						key="Empty"
-						image={Empty.PRESENTED_IMAGE_SIMPLE}
-						description={
-							<>
-								<p>Add a block to start</p>
-								<ArrowDownOutlined
-									style={{ fontSize: '1.8em' }}
-								/>
-							</>
+		<div style={{ position: 'relative', fontSize: '1.1em' }}>
+			<Editable
+				onPaste={(event) => {
+					videoBlockPasteAction(event, editor);
+				}}
+				className="editor-container"
+				renderElement={renderElement}
+				renderLeaf={renderLeaf}
+				onMouseDown={() => {
+					if (
+						editor.selection &&
+						!Range.isCollapsed(editor.selection)
+					) {
+						if (
+							editor.operations[editor.operations.length - 1]
+								?.type !== 'set_selection'
+						) {
+							Transforms.collapse(editor);
 						}
-					/>
-				) : (
-					<>
-						<DropEdge
-							columnIndex={0}
-							rowIndex={0}
-							type="horizontal"
-						/>
-						{renderedMap}
-					</>
-				)}
-			</div>
+					}
+				}}
+			/>
 		</div>
 	);
 };
 
-export default React.memo(EditorDocument);
+export default EditorDocument;

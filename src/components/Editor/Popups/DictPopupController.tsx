@@ -1,43 +1,84 @@
-import { selectClickedFragmentSelector } from '@store/editor/selectors';
-import { isFragmentType } from 'Document/Fragment';
-import React from 'react';
-import { useSelector } from 'react-redux';
-import DictPopup from './DictPopup';
+import DictEntryWithEdit from '@components/DictionaryEntry/DictEntryWithEdit/DictEntryWithEdit';
+import { useDictionaryEntryResolved } from '@hooks/DictionaryQueryHooks';
+import useClickOutside from '@hooks/useClickOutside';
+import { Box } from '@mui/material';
+import { DictionaryEntryID } from 'Document/Utility';
+import React, { useEffect, useRef, useState } from 'react';
+import { BaseSelection, Editor, Range } from 'slate';
+import { ReactEditor, useSlateStatic } from 'slate-react';
+import { WordElement, YiEditor } from '../YiEditor';
+import Floating from './Floating';
 
-const DictPopupController: React.FC = () => {
-	const clickedFragment = useSelector(selectClickedFragmentSelector);
+export interface IDictPopupControllerProps {
+	rootElement: React.RefObject<HTMLElement>;
+	selection: BaseSelection;
+}
 
-	let popupState = {
-		visible: false,
-		position: {
-			x: 0,
-			y: 0,
-			width: 0,
-			height: 0,
-		},
-	};
+const DictPopupController: React.FC<IDictPopupControllerProps> = ({
+	rootElement,
+	selection,
+}) => {
+	const editor = useSlateStatic();
+	const floatingRef = useRef<HTMLDivElement>(null);
+	const [visible, setVisible] = useState(false);
+	const [hasFocus, setHasFocus] = useState(false);
+	const [dictId, setDictId] = useState<DictionaryEntryID>();
+	const [, entry] = useDictionaryEntryResolved(dictId);
+	const [relativeBounding, setRelativeBounding] = useState<DOMRect | null>(
+		null
+	);
+	useClickOutside(floatingRef, () => {
+		setHasFocus(false);
+		setRelativeBounding(null);
+	});
 
-	let wordFragment;
-	if (
-		clickedFragment?.fragmentSelection.fragment &&
-		isFragmentType('Word')(clickedFragment.fragmentSelection.fragment)
-	) {
-		wordFragment = clickedFragment.fragmentSelection.fragment;
-		popupState = {
-			visible: true,
-			position: {
-				x: clickedFragment.position.x,
-				y: clickedFragment.position.y + 5,
-				width: clickedFragment.position.width,
-				height: clickedFragment.position.height,
-			},
-		};
-	}
+	useEffect(() => {
+		if (hasFocus || dictId) {
+			setVisible(true);
+		} else {
+			setVisible(false);
+		}
+	}, [dictId, hasFocus]);
+
+	useEffect(() => {
+		const clickedVocab = YiEditor.isNodeAtSelection(
+			editor,
+			selection,
+			'word'
+		);
+
+		if (clickedVocab && selection && Range.isCollapsed(selection)) {
+			const wordFragment = Editor.above(editor);
+			if (wordFragment) {
+				const wordNode = wordFragment[0] as WordElement;
+				const range = ReactEditor.toDOMNode(editor, wordNode);
+				const bounding = range.getBoundingClientRect();
+				setHasFocus(true);
+				setDictId(wordNode.dictId);
+				setRelativeBounding(bounding);
+			}
+		} else {
+			setDictId(undefined);
+		}
+	}, [editor, selection]);
+
 	return (
-		<DictPopup
-			popupState={popupState}
-			dictId={wordFragment?.data.dictId || null}
-		/>
+		<Floating
+			visible={visible}
+			parentElement={rootElement}
+			relativeBounding={relativeBounding}
+			arrow
+			ref={floatingRef}
+		>
+			<Box sx={{ p: 1, maxWidth: '500px' }}>
+				{entry && (
+					<DictEntryWithEdit
+						entry={entry}
+						onRootSelect={(rootId) => {}}
+					/>
+				)}
+			</Box>
+		</Floating>
 	);
 };
 

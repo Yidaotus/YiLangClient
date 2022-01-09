@@ -1,15 +1,31 @@
-import { notification } from 'antd';
+import { IApiResponse } from 'api/definitions/api';
+import { useSnackbar } from 'notistack';
+import { useCallback } from 'react';
 
-const handleError = (e: unknown): void => {
-	let description = 'Unkown Error!';
-	if (e instanceof Error) {
-		description = e.message;
-	}
-	notification.open({
-		message: 'Error',
-		description,
-		type: 'error',
-	});
+const isApiResponse = (e: unknown): e is IApiResponse<void> => {
+	return (
+		(e as IApiResponse<void>).status !== undefined &&
+		(e as IApiResponse<void>).message !== undefined
+	);
 };
 
-export default handleError;
+const useUiErrorHandler = () => {
+	const { enqueueSnackbar } = useSnackbar();
+
+	const handleError = useCallback(
+		(e: unknown): void => {
+			let description = 'Unkown Error!';
+			if (e instanceof Error) {
+				description = e.message;
+			} else if (isApiResponse(e)) {
+				description = e.message;
+			}
+			enqueueSnackbar(description, { variant: 'error' });
+		},
+		[enqueueSnackbar]
+	);
+
+	return handleError;
+};
+
+export default useUiErrorHandler;

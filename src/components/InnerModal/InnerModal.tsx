@@ -12,7 +12,7 @@ const InnerModal: React.FC<IModalProps> = ({ onClose, children, width }) => {
 	useClickOutside(innerContainer, onClose);
 
 	return (
-		<div className="modal-outer" role="none">
+		<div className="modal-outer">
 			<div className="modal-table">
 				<div
 					className="modal-inner"

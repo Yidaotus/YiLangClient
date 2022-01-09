@@ -1,472 +1,371 @@
 import './Toolbar.css';
-import React, { useEffect, useMemo, useReducer, useRef, useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import { selectedFragmentsSelector } from 'store/editor/selectors';
-import { Divider, Modal } from 'antd';
-import { ISelection, SELECTIONBLOCKER } from 'hooks/useSelectedText';
+import React, { useCallback, useRef, useState } from 'react';
+import { useSlateStatic } from 'slate-react';
+import { BaseSelection, Range as SlateRange } from 'slate';
+import { useLookupSources } from '@hooks/ConfigQueryHooks';
+import LookupSourceButton from '@components/LookupSourceButton';
+import DialogButton from '@editor/Toolbar/Tools/DialogButton';
+import { Divider, Paper, styled, ToggleButtonGroup } from '@mui/material';
 import {
-	getFragmentTypesInSelection,
-	IMarkFragmentData,
-	ISentenceFragmentData,
-	isFragmentDataType,
-	IWordFragmentData,
-} from 'Document/Fragment';
-import {
-	HighlightOutlined,
-	PicRightOutlined,
-	QuestionCircleOutlined,
-	SearchOutlined,
-	TranslationOutlined,
-} from '@ant-design/icons';
-import { IEditorState } from 'store/editor/types';
-import {
-	clearHighlight,
-	highlightSelection,
-	linkSelectionToDictionary,
-	restorePosition,
-	storePosition,
-	unwrapSelectionForType,
-	wrapSelectionWithFragment,
-} from 'store/editor/actions';
+	FormatAlignCenter,
+	FormatAlignLeft,
+	FormatAlignRight,
+	FormatColorText,
+	DriveFileRenameOutline,
+	Translate as TranslateIcon,
+	Bookmark as BookmarkIcon,
+	Widgets as WidgetsIcon,
+	Search as SearchIcon,
+	Save as SaveIcon,
+	Undo as UndoIcon,
+	Redo as RedoIcon,
+	EmojiSymbols as EmojiSymbolsIcon,
+	FormatListNumbered,
+	FormatListBulleted,
+	Title as TitleIcon,
+	ChatBubble,
+	ImportContacts,
+} from '@mui/icons-material';
 
-import { IRootDispatch, IRootState } from 'store';
+import AlignButton from './Tools/AlignButton';
+import ListButton from './Tools/ListButton';
+import ToolbarButton from './Tools/ToolbarButton';
+import ToolbarMenu from './Tools/ToolbarMenu';
+import TextColors from './TextColors';
+import ColorButton from './Tools/ColorButton';
+import BlockButton from './Tools/BlockButton';
+import InsertButton from './Tools/InsertButton';
+import ElementButton from './Tools/ElementButton';
+import InputWrapperButton from './Tools/InputWrapperButton';
 
-import {
-	checkSelectedWordExists,
-	removeEntry,
-	saveOrUpdateEntryInput,
-} from 'store/dictionary/actions';
-import { ICaretPosition, restoreCaretPosition } from '@helpers/DomHelper';
-import { selectActiveLookupSources } from '@store/user/selectors';
-import { formatURL } from '@components/LookupSourceLink';
-import HSLColorPicker from '@components/HSLColorPicker/HSLColorPicker';
-import { UUID } from 'Document/UUID';
-import WrapperItem, { IToolbarWrapperItem } from './Tools/WrapperItem';
-import DropdownItem, { IToolbarDropdownItem } from './Tools/DropdownItem';
-import ActionItem, { IToolbarActionItem } from './Tools/ActionItem';
-import SimpleInput, { useSimpleInput } from './Modals/SimpleInput';
-import Floating, { floatingReducer } from '../Popups/Floating';
-
-import WordInput, { useWordInput } from './Modals/WordEditor/WordEditor';
+const StyledToggleButtonGroup = styled(ToggleButtonGroup)(({ theme }) => ({
+	'& .MuiToggleButtonGroup-grouped': {
+		margin: theme.spacing(0.5),
+		border: 0,
+		'&.Mui-disabled': {
+			border: 0,
+		},
+		'&:not(:first-of-type)': {
+			marginLeft: 1,
+			border: 0,
+			borderRadius: theme.shape.borderRadius,
+		},
+		'&:first-of-type': {
+			border: 0,
+			borderRadius: theme.shape.borderRadius,
+		},
+	},
+}));
 
 export interface IToolbarProps {
-	selection: ISelection | null;
-	editorDocument: IEditorState;
+	selection: BaseSelection;
+	showWordEditor: () => void;
+	showSentenceEditor: () => void;
+	setShowSpelling: (show: boolean) => void;
+	showSpelling: boolean;
+	isEditorDirty: boolean;
+	updateDocument: () => void;
 }
 
-export type ToolbarItem =
-	| IToolbarWrapperItem
-	| IToolbarDropdownItem
-	| IToolbarActionItem;
+const Toolbar: React.FC<IToolbarProps> = ({
+	selection,
+	showWordEditor,
+	showSentenceEditor,
+	showSpelling,
+	setShowSpelling,
+	isEditorDirty,
+	updateDocument,
+}) => {
+	const editor = useSlateStatic();
+	const toolbarRef = useRef(null);
+	const [, forceReRender] = useState({});
+	const lookupSources = useLookupSources();
 
-const { confirm } = Modal;
+	const toolbarChanged = useCallback(() => {
+		forceReRender({});
+	}, []);
 
-/*
-const markColors = [0, 1, 2, 3, 4, 5, 6, 7, 8].map((number) => {
-	const start = (360 / 9) * number;
-	const end = (360 / 9) * (number + 1);
-	const range = end - start;
-	const lightColor = [
-		start + range * Math.random(),
-		25 + 80 * Math.random(),
-		85 + 10 * Math.random(),
-	];
-	return `hsl(${lightColor[0]},${lightColor[1]}%,${lightColor[2]}%`;
-});
-*/
+	const sharedProps = {
+		editor,
+		selection,
+		toolbarChanged,
+	};
 
-type IToolbarState =
-	| {
-			actionBarVisible: true;
-			simpleInputVisible: false;
-			wordInputVisible: false;
-	  }
-	| {
-			actionBarVisible: false;
-			simpleInputVisible: true;
-			wordInputVisible: false;
-	  }
-	| {
-			actionBarVisible: false;
-			simpleInputVisible: false;
-			wordInputVisible: true;
-	  };
-
-const defaultToolbarState: IToolbarState = {
-	actionBarVisible: true,
-	simpleInputVisible: false,
-	wordInputVisible: false,
-} as const;
-
-const Toolbar: React.FC = () => {
-	const caretRestore = useRef<ICaretPosition | null>(null);
-	const { simpleInputState, getUserInput } = useSimpleInput();
-	const { wordInputState, getUserWord } = useWordInput();
-
-	const dispatch: IRootDispatch = useDispatch();
-	const selection = useSelector(
-		(state: IRootState) => state.editor.selection
-	);
-	const lookupSources = useSelector(selectActiveLookupSources);
-
-	const fragmentSelector = useMemo(() => selectedFragmentsSelector, []);
-	const selectedFragments = useSelector(fragmentSelector);
-
-	const [toolbarState, setToolbarState] =
-		useState<IToolbarState>(defaultToolbarState);
-	const [toolbarContainerState, dispatchToolbarContainerState] = useReducer(
-		floatingReducer,
-		{
-			visible: false,
-			position: {
-				x: 0,
-				y: 0,
-				width: 0,
-				height: 0,
-			},
-		}
-	);
-
-	useEffect(() => {
-		if (
-			!toolbarState.simpleInputVisible &&
-			!toolbarState.wordInputVisible
-		) {
-			if (selection && !selection.collapsed) {
-				dispatchToolbarContainerState({
-					type: 'show',
-					position: { ...selection.screenPosition, offsetY: 5 },
-				});
-			} else {
-				dispatchToolbarContainerState({ type: 'hide' });
-			}
-		}
-	}, [selection, toolbarState]);
-
-	const [selectedColorValue, setSelectedColorValue] = useState(0);
-	const saturation = 40;
-	const lightness = 80;
-	const selectedColor = useMemo(() => {
-		return `hsl(${selectedColorValue}, ${saturation}%, ${lightness}%)`;
-	}, [selectedColorValue]);
-
-	const toolsActive = useMemo(() => {
-		return getFragmentTypesInSelection(selectedFragments);
-	}, [selectedFragments]);
-
-	const toolVisible = useMemo(
-		() => ({
-			marker: !selectedFragments
-				.filter((sf) => sf.fragment.type === 'Sentence')
-				.find((sf) => sf.intersectType === 'inside'),
-			wordMarker: true,
-			sentenceMarker: true,
-			lookup: true,
-		}),
-		[selectedFragments]
-	);
-
-	useEffect(() => {
-		if (caretRestore.current) {
-			restoreCaretPosition({
-				caretPosition: caretRestore.current,
-				offset: 0,
-			});
-			caretRestore.current = null;
-		}
-	}, [selection]);
-
-	const toolbarItems: Array<ToolbarItem> = [
-		{
-			type: 'Wrapper',
-			visible: toolVisible.marker,
-			name: 'Mark',
-			icon: <HighlightOutlined />,
-			tooltip: 'Highlight selection',
-			tooltipActive: 'Remove highlighted(s)',
-			options: (
-				<div
-					className="toolbar-color-picker"
-					data-type={SELECTIONBLOCKER}
-				>
-					<HSLColorPicker
-						value={selectedColorValue}
-						onChange={setSelectedColorValue}
-						saturation={saturation}
-						lightness={lightness}
-					/>
-				</div>
-			),
-			fragmentType: 'Mark',
-			active: toolsActive.includes('Mark'),
-			wrap: async () => {
-				dispatch(storePosition());
-				const fragment: IMarkFragmentData = {
-					type: 'Mark',
-					color: selectedColor,
-				};
-				dispatch(wrapSelectionWithFragment(fragment));
-				dispatch(restorePosition());
-			},
-			unwrap: async () => {
-				dispatch(storePosition());
-				dispatch(unwrapSelectionForType('Mark'));
-				dispatch(restorePosition());
-			},
-		},
-		{
-			type: 'Wrapper',
-			visible: toolVisible.sentenceMarker,
-			name: 'Sentence',
-			icon: <PicRightOutlined />,
-			tooltip: 'Add Sentence',
-			tooltipActive: 'Sentence Word(s)',
-			fragmentType: 'Sentence',
-			active: toolsActive.includes('Sentence'),
-			wrap: async () => {
-				dispatch(storePosition());
-				dispatch(highlightSelection());
-				setToolbarState({
-					actionBarVisible: false,
-					simpleInputVisible: true,
-					wordInputVisible: false,
-				});
-				const input = await getUserInput('Get User Input ...');
-				if (input) {
-					const sentenceFragment: ISentenceFragmentData = {
-						type: 'Sentence',
-						translation: input,
-						words: [],
-					};
-					dispatch(wrapSelectionWithFragment(sentenceFragment));
-				}
-				dispatch(clearHighlight());
-				dispatch(restorePosition());
-				setToolbarState({
-					actionBarVisible: true,
-					simpleInputVisible: false,
-					wordInputVisible: false,
-				});
-			},
-			unwrap: async () => {
-				dispatch(storePosition());
-				dispatch(unwrapSelectionForType('Sentence'));
-				dispatch(clearHighlight());
-				dispatch(restorePosition());
-				setToolbarState({
-					actionBarVisible: true,
-					simpleInputVisible: false,
-					wordInputVisible: false,
-				});
-			},
-		},
-		{
-			type: 'Wrapper',
-			visible: toolVisible.wordMarker,
-			name: 'Word',
-			icon: <TranslationOutlined />,
-			tooltip: 'Add Word',
-			tooltipActive: 'Remove Word(s)',
-			fragmentType: 'Word',
-			active: toolsActive.includes('Word'),
-			wrap: async () => {
-				dispatch(storePosition());
-				dispatch(highlightSelection());
-				let success = true;
-				const foundId = await dispatch(checkSelectedWordExists());
-				if (foundId) {
-					await confirm({
-						title: 'Entry already found!',
-						icon: <QuestionCircleOutlined />,
-						content: `This entry is already found in your dictionary. Link Entry instead?`,
-						okText: 'Yes',
-						okType: 'primary',
-						cancelText: 'No',
-						onOk() {
-							const wordFragment: IWordFragmentData = {
-								type: 'Word',
-								dictId: foundId,
-							};
-							const fragmentId = dispatch(
-								wrapSelectionWithFragment(wordFragment)
-							);
-							if (!fragmentId) {
-								throw new Error('No fragment entry');
-							}
-							dispatch(linkSelectionToDictionary(foundId));
-							dispatch(clearHighlight());
-						},
-						onCancel() {
-							dispatch(clearHighlight());
-							dispatch(restorePosition());
-						},
-						afterClose() {
-							setToolbarState({
-								actionBarVisible: true,
-								simpleInputVisible: false,
-								wordInputVisible: false,
-							});
-						},
-					});
-				} else {
-					setToolbarState({
-						actionBarVisible: false,
-						simpleInputVisible: false,
-						wordInputVisible: true,
-					});
-					try {
-						const editResult = await getUserWord(
-							selection?.value || ''
-						);
-						if (!editResult) {
-							throw new Error('No input recieved');
-						}
-						const dictEntryId = dispatch(
-							saveOrUpdateEntryInput(editResult)
-						);
-						if (!dictEntryId) {
-							throw new Error('Error saving entry');
-						}
-
-						let mainId: UUID | null = null;
-						let rootId: UUID | null = null;
-						if (typeof dictEntryId === 'string') {
-							mainId = dictEntryId;
-						} else {
-							[mainId, rootId] = dictEntryId;
-						}
-
-						if (mainId) {
-							const wordFragment: IWordFragmentData = {
-								type: 'Word',
-								dictId: mainId,
-							};
-							const fragmentId = dispatch(
-								wrapSelectionWithFragment(wordFragment)
-							);
-							if (!fragmentId) {
-								throw new Error('No fragment entry');
-							}
-							dispatch(linkSelectionToDictionary(mainId));
-						}
-
-						if (rootId) {
-							dispatch(linkSelectionToDictionary(rootId));
-						}
-					} catch (e) {
-						success = false;
-					}
-					dispatch(clearHighlight());
-					if (!success) {
-						dispatch(restorePosition());
-					}
-					setToolbarState({
-						actionBarVisible: true,
-						simpleInputVisible: false,
-						wordInputVisible: false,
-					});
-				}
-			},
-			unwrap: async () => {
-				dispatch(storePosition());
-				const fragmentsData = await dispatch(
-					unwrapSelectionForType('Word')
-				);
-				const wordFragmentData = fragmentsData.filter(
-					isFragmentDataType('Word')
-				);
-				for (const wordData of wordFragmentData) {
-					dispatch(removeEntry(wordData.dictId));
-				}
-				dispatch(clearHighlight());
-				dispatch(restorePosition());
-				setToolbarState({
-					actionBarVisible: true,
-					simpleInputVisible: false,
-					wordInputVisible: false,
-				});
-			},
-		},
-		{
-			type: 'Dropdown',
-			name: 'Lookup sources',
-			icon: <SearchOutlined />,
-			items: lookupSources.map((source) => ({
-				type: 'Action',
-				name: source.name,
-				action: () => {
-					const url = formatURL({
-						source,
-						searchTerm: selection?.value || '',
-					});
-					window.open(url);
-				},
-			})),
-			visible: toolVisible.lookup,
-		},
-	];
+	const lookupButtonActive =
+		!!editor.selection && !SlateRange.isCollapsed(editor.selection);
 
 	return (
-		<Floating state={toolbarContainerState}>
-			{toolbarState.simpleInputVisible && (
-				<div tabIndex={0} role="button" data-type={SELECTIONBLOCKER}>
-					<SimpleInput {...simpleInputState} />
-				</div>
-			)}
-			{toolbarState.wordInputVisible && (
-				<div tabIndex={0} role="button" data-type={SELECTIONBLOCKER}>
-					<WordInput {...wordInputState} />
-				</div>
-			)}
-			{toolbarState.actionBarVisible && (
-				<div
-					className="toolbar"
-					onMouseDown={(e) => {
-						// We don't want to lose selection if the user clicks on the toolbar
-						e.preventDefault();
-					}}
-					aria-hidden
+		<Paper
+			elevation={0}
+			sx={{
+				display: 'flex',
+				border: (theme) => `1px solid ${theme.palette.divider}`,
+				flexWrap: 'wrap',
+				justifyContent: 'center',
+				position: 'sticky',
+				top: '10px',
+				zIndex: 15,
+			}}
+			onMouseDown={(e) => {
+				e.preventDefault();
+			}}
+			ref={toolbarRef}
+		>
+			<StyledToggleButtonGroup
+				size="small"
+				exclusive
+				value="none"
+				aria-label="text alignment"
+			>
+				<InputWrapperButton
+					showInput={showWordEditor}
+					icon={<TranslateIcon />}
+					title="Word"
+					type="word"
+					{...sharedProps}
+				/>
+				<InputWrapperButton
+					showInput={showSentenceEditor}
+					type="sentence"
+					title="Sentence"
+					icon={<DriveFileRenameOutline />}
+					{...sharedProps}
+				/>
+				<ElementButton
+					type="mark"
+					title="Mark"
+					icon={<BookmarkIcon />}
+					createElement={() => ({
+						type: 'mark',
+						color: '#FFB30F',
+						children: [],
+					})}
+					{...sharedProps}
+				/>
+				<ToolbarMenu
+					icon={<SearchIcon />}
+					title="Lookup Word"
+					enabled={lookupButtonActive}
 				>
-					{toolbarItems
-						.filter((item) => item.visible)
-						.map((item, index, items) => {
-							let renderedItem = null;
-							switch (item.type) {
-								case 'Wrapper':
-									renderedItem = <WrapperItem {...item} />;
-									break;
-								case 'Action':
-									renderedItem = <ActionItem {...item} />;
-									break;
-								case 'Dropdown':
-									renderedItem = <DropdownItem {...item} />;
-									break;
-								default:
-							}
-							return (
-								<React.Fragment key={item.name}>
-									{index >= items.length - 1 ? (
-										renderedItem
-									) : (
-										<>
-											{renderedItem}
-											<Divider
-												type="vertical"
-												style={{
-													margin: '0 0px !important',
-													borderLeft:
-														'1px solid rgb(0 0 0 / 27%)',
-												}}
-											/>
-										</>
-									)}
-								</React.Fragment>
-							);
-						})}
-				</div>
-			)}
-		</Floating>
+					{lookupSources.map((luSource) => (
+						<LookupSourceButton
+							source={luSource}
+							key={luSource.name}
+						/>
+					))}
+				</ToolbarMenu>
+			</StyledToggleButtonGroup>
+
+			<Divider flexItem orientation="vertical" sx={{ mx: 0.5, my: 1 }} />
+
+			<StyledToggleButtonGroup
+				size="small"
+				exclusive
+				value="none"
+				aria-label="text alignment"
+			>
+				<AlignButton
+					align="left"
+					icon={<FormatAlignLeft />}
+					title="Left Align"
+					{...sharedProps}
+				/>
+				<AlignButton
+					align="center"
+					icon={<FormatAlignCenter />}
+					title="Center Align"
+					{...sharedProps}
+				/>
+				<AlignButton
+					align="right"
+					icon={<FormatAlignRight />}
+					title="Right Align"
+					{...sharedProps}
+				/>
+			</StyledToggleButtonGroup>
+
+			<Divider flexItem orientation="vertical" sx={{ mx: 0.5, my: 1 }} />
+
+			<StyledToggleButtonGroup
+				size="small"
+				exclusive
+				value="none"
+				aria-label="text alignment"
+			>
+				<ToolbarMenu icon={<WidgetsIcon />} title="Block Type">
+					<StyledToggleButtonGroup
+						size="small"
+						exclusive
+						value="none"
+						aria-label="text alignment"
+					>
+						<BlockButton
+							type="wordList"
+							title="Words and Sentences"
+							{...sharedProps}
+							icon={<ImportContacts />}
+						/>
+						<DialogButton
+							icon={<ChatBubble />}
+							title="Dialog"
+							{...sharedProps}
+						/>
+						<BlockButton
+							type="title"
+							title="Title"
+							{...sharedProps}
+							icon={<TitleIcon />}
+						/>
+						<BlockButton
+							type="subtitle"
+							title="Subtitle"
+							{...sharedProps}
+							icon={<TitleIcon />}
+						/>
+						<ListButton
+							type="numberedList"
+							icon={<FormatListNumbered />}
+							title="Numbered List"
+							{...sharedProps}
+						/>
+						<ListButton
+							type="bulletedList"
+							icon={<FormatListBulleted />}
+							title="Bulleted List"
+							{...sharedProps}
+						/>
+					</StyledToggleButtonGroup>
+				</ToolbarMenu>
+
+				<ToolbarMenu icon={<FormatColorText />} title="Font Color">
+					<StyledToggleButtonGroup
+						size="small"
+						exclusive
+						value="none"
+						aria-label="text alignment"
+					>
+						{Object.entries(TextColors).map(
+							([color, colorProps]) => (
+								<ColorButton
+									color={colorProps.color}
+									key={color}
+									title={`${colorProps.title} (${
+										colorProps.hotkey || 'No shortcut'
+									})`}
+									{...sharedProps}
+								/>
+							)
+						)}
+					</StyledToggleButtonGroup>
+				</ToolbarMenu>
+
+				<ToolbarMenu icon={<EmojiSymbolsIcon />} title="Glyphs">
+					<StyledToggleButtonGroup
+						size="small"
+						exclusive
+						value="none"
+						aria-label="text alignment"
+					>
+						<InsertButton
+							text="←"
+							title="Left Arrow"
+							{...sharedProps}
+						/>
+						<InsertButton
+							text="→"
+							title="Right Arrow"
+							{...sharedProps}
+						/>
+						<InsertButton
+							text="↔"
+							title="Left Right Arrow"
+							{...sharedProps}
+						/>
+						<InsertButton
+							text="⇐"
+							title="Leftwards Double Arrow"
+							{...sharedProps}
+						/>
+						<InsertButton
+							text="⇒"
+							title="Rightwards Double Arrow"
+							{...sharedProps}
+						/>
+						<InsertButton
+							text="…"
+							title="Ellipsis"
+							{...sharedProps}
+						/>
+						<InsertButton
+							text="«"
+							title="Double Low Quote"
+							{...sharedProps}
+						/>
+						<InsertButton
+							text="»"
+							title="Double High Quote"
+							{...sharedProps}
+						/>
+						<InsertButton
+							text="„"
+							title="Double Angle Left Quote"
+							{...sharedProps}
+						/>
+						<InsertButton
+							text="”"
+							title="Double Angle Right Quote"
+							{...sharedProps}
+						/>
+					</StyledToggleButtonGroup>
+				</ToolbarMenu>
+			</StyledToggleButtonGroup>
+
+			<Divider flexItem orientation="vertical" sx={{ mx: 0.5, my: 1 }} />
+
+			<StyledToggleButtonGroup
+				size="small"
+				exclusive
+				value="none"
+				aria-label="text alignment"
+			>
+				<ToolbarButton
+					icon={<UndoIcon />}
+					tooltip="Undo"
+					title="Undo"
+					action={() => {
+						editor.undo();
+					}}
+				/>
+				<ToolbarButton
+					icon={<RedoIcon />}
+					title="Redo"
+					tooltip="Redo"
+					action={() => {
+						editor.redo();
+					}}
+				/>
+				<ToolbarButton
+					icon={<SaveIcon />}
+					title="Save"
+					tooltip="Save"
+					action={() => {
+						updateDocument();
+					}}
+					enabled={isEditorDirty}
+				/>
+				<ToolbarButton
+					icon={<TranslateIcon />}
+					title="Show Spellings"
+					tooltip="Show Spellings"
+					active={showSpelling}
+					action={() => {
+						setShowSpelling(!showSpelling);
+					}}
+					enabled
+				/>
+			</StyledToggleButtonGroup>
+		</Paper>
 	);
 };
 
-export default Toolbar;
+export default React.memo(Toolbar);

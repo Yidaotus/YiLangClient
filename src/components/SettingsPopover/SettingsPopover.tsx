@@ -1,126 +1,125 @@
-import './SettingsPopover.css';
 import React, { useCallback } from 'react';
-import { Select, Modal, Divider, Button } from 'antd';
+import { useNavigate } from 'react-router';
 import {
-	ExclamationCircleOutlined,
-	LogoutOutlined,
-	SettingOutlined,
-	TranslationOutlined,
-} from '@ant-design/icons';
-import { IRootDispatch, IRootState } from '@store/index';
-import { logout, selectLanguage } from '@store/user/actions';
-import { resetEditor } from '@store/editor/actions';
-import { useDispatch, useSelector } from 'react-redux';
-import { useHistory } from 'react-router';
+	useActiveLanguageConf,
+	useLanguageConfigs,
+	useSetActiveLanguage,
+} from '@hooks/ConfigQueryHooks';
 import {
-	selectActiveLanguageConfig,
-	selectAvailableLanguageConfigs,
-} from '@store/user/selectors';
-
-const { Option } = Select;
-const { confirm } = Modal;
+	Language as LanguageIcon,
+	Logout,
+	Logout as LogoutIcon,
+	Settings,
+	SettingsApplications as SettingsApplicationsIcon,
+} from '@mui/icons-material';
+import {
+	Divider,
+	Stack,
+	Box,
+	Select,
+	FormControl,
+	InputLabel,
+	MenuItem,
+	SelectChangeEvent,
+	ListItemIcon,
+} from '@mui/material';
+import { useActiveDocument } from '@hooks/useUserContext';
 
 const SettingsPopover: React.FC = () => {
-	const documentLoaded = useSelector(
-		(state: IRootState) => !!state.editor.document
-	);
-	const documentModified = useSelector(
-		(state: IRootState) => !!state.editor.documentModified
-	);
-	const selectedLanguage = useSelector(selectActiveLanguageConfig);
-	const availableLanguages = useSelector(selectAvailableLanguageConfigs);
-	const dispatch: IRootDispatch = useDispatch();
-	const history = useHistory();
+	const activeLanguage = useActiveLanguageConf();
+	const availableLanguages = useLanguageConfigs();
+	const setActiveLanguage = useSetActiveLanguage();
+	const navigate = useNavigate();
+	const [, changeActiveDocument] = useActiveDocument();
 
 	const logoutConfirm = useCallback(() => {
-		if (documentModified) {
-			confirm({
-				title: 'Unsaved Document',
-				icon: <ExclamationCircleOutlined />,
-				content: `The current document was modified but not saved. Logging out without saving?`,
-				okText: 'Yes',
-				okType: 'primary',
-				cancelText: 'No',
-				onOk() {
-					dispatch(logout());
-				},
-			});
-		} else {
-			dispatch(logout());
-		}
-	}, [dispatch, documentModified]);
+		window.localStorage.clear();
+		window.location.reload();
+	}, []);
 
 	const changeLanguage = useCallback(
-		(configKey: string) => {
-			if (documentLoaded) {
-				confirm({
-					title: 'Changing language',
-					icon: <ExclamationCircleOutlined />,
-					content: `This will reset the currently loaded Document. Continue?`,
-					okText: 'Yes',
-					okType: 'primary',
-					cancelText: 'No',
-					onOk() {
-						const languageConfig = availableLanguages.find(
-							(langConf) => langConf.key === configKey
-						);
-						if (languageConfig) {
-							dispatch(resetEditor());
-							dispatch(selectLanguage(languageConfig));
-						}
-					},
-				});
-			} else {
-				const languageConfig = availableLanguages.find(
-					(langConf) => langConf.key === configKey
-				);
-				if (languageConfig) {
-					dispatch(selectLanguage(languageConfig));
-				}
+		(selectedLanguageId: string) => {
+			const languageConfig = availableLanguages.find(
+				(langConf) => langConf.id === selectedLanguageId
+			);
+			if (languageConfig) {
+				setActiveLanguage.mutate(selectedLanguageId);
+				changeActiveDocument(null);
 			}
 		},
-		[availableLanguages, dispatch, documentLoaded]
+		[availableLanguages, changeActiveDocument, setActiveLanguage]
+	);
+
+	const handleLanguageChange = useCallback(
+		(event: SelectChangeEvent<string | null>) => {
+			if (event.target.value) {
+				changeLanguage(event.target.value);
+			}
+		},
+		[changeLanguage]
 	);
 
 	return (
-		<div className="settings-popover">
-			<div className="settings-language">
-				<TranslationOutlined />
-				<Select
-					defaultValue={selectedLanguage?.key || ''}
-					value={selectedLanguage?.key}
-					onChange={changeLanguage}
-					className="settings-language-select"
+		<>
+			<MenuItem>
+				<Stack
+					spacing={2}
+					direction="row"
+					alignItems="center"
+					sx={{
+						display: 'flex',
+						width: '100%',
+					}}
 				>
-					{availableLanguages.map((lang) => (
-						<Option key={lang.key} value={lang.key}>
-							{lang.name}
-						</Option>
-					))}
-				</Select>
-			</div>
-			<Divider style={{ marginTop: '12px', marginBottom: '12px' }} />
-			<Button
-				type="default"
-				icon={<SettingOutlined />}
-				style={{ width: '100%' }}
+					<LanguageIcon />
+					<Box sx={{ flexGrow: 1 }}>
+						<FormControl
+							variant="standard"
+							size="small"
+							sx={{ m: 1, minWidth: 120 }}
+						>
+							<InputLabel id="active-language-label">
+								Active Language Config
+							</InputLabel>
+							<Select
+								labelId="active-language-label"
+								id="activa-language-select"
+								value={activeLanguage?.id || ''}
+								onChange={handleLanguageChange}
+								label="Active Language"
+							>
+								{availableLanguages.map((language) => (
+									<MenuItem value={language.id}>
+										{language.name}
+									</MenuItem>
+								))}
+							</Select>
+						</FormControl>
+					</Box>
+				</Stack>
+			</MenuItem>
+			<Divider variant="middle" sx={{ width: '100%' }} />
+			<MenuItem
 				onClick={() => {
-					history.push(`/home/settings`);
+					navigate(`/home/settings`);
 				}}
 			>
+				<ListItemIcon>
+					<Settings fontSize="small" />
+				</ListItemIcon>
 				Settings
-			</Button>
-			<Divider style={{ marginTop: '12px', marginBottom: '12px' }} />
-			<Button
-				danger
-				type="default"
-				icon={<LogoutOutlined />}
-				style={{ width: '100%' }}
-				onClick={logoutConfirm}
+			</MenuItem>
+			<MenuItem
+				onClick={() => {
+					logoutConfirm();
+				}}
 			>
+				<ListItemIcon>
+					<LogoutIcon fontSize="small" />
+				</ListItemIcon>
 				Logout
-			</Button>
-		</div>
+			</MenuItem>
+		</>
 	);
 };
 

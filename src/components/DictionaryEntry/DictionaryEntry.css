@@ -23,6 +23,10 @@
 	cursor: pointer;
 }
 
+.popover-class {
+	z-index: 40;
+}
+
 .dictentry-panel {
 	width: 100%;
 }

@@ -1,0 +1,35 @@
+INFO [neovide::window] window created
+INFO [neovide::window] renderer created
+INFO [neovide::window] Starting window event loop
+TRACE [neovide::editor::grid] Editor resized
+TRACE [neovide::editor::grid] Editor cleared
+TRACE [neovide::editor::grid] Editor cleared
+TRACE [neovide::redraw_scheduler] Next frame queued
+TRACE [neovide::redraw_scheduler] Next frame queued
+TRACE [neovide::redraw_scheduler] Next frame queued
+DEBUG [neovide::window] Render Triggered
+TRACE [neovide::renderer] Rendering
+TRACE [neovide::editor] Draw commands sent
+TRACE [neovide::redraw_scheduler] Next frame queued
+DEBUG [neovide::window] Render Triggered
+TRACE [neovide::renderer] Rendering
+TRACE [neovide::editor] Draw commands sent
+TRACE [neovide::redraw_scheduler] Next frame queued
+INFO [neovide::bridge] Close watcher started
+DEBUG [neovide::window] Render Triggered
+TRACE [neovide::renderer] Rendering
+TRACE [neovide::editor] Draw commands sent
+TRACE [neovide::redraw_scheduler] Next frame queued
+DEBUG [neovide::window] Render Triggered
+TRACE [neovide::renderer] Rendering
+TRACE [neovide::editor] Draw commands sent
+TRACE [neovide::redraw_scheduler] Next frame queued
+DEBUG [neovide::window] Render Triggered
+TRACE [neovide::renderer] Rendering
+TRACE [neovide::editor] Draw commands sent
+TRACE [neovide::redraw_scheduler] Next frame queued
+DEBUG [neovide::window] Render Triggered
+TRACE [neovide::renderer] Rendering
+TRACE [neovide::editor] Draw commands sent
+TRACE [neovide::redraw_scheduler] Next frame queued
+ERROR [neovide::bridge] Neovide requires version 0.4 or higher
