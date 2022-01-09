@@ -9,7 +9,7 @@ import {
 	Typography,
 } from '@mui/material';
 import { DictionaryEntryID } from 'Document/Utility';
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import SRSCard from './SRSCard';
 
@@ -57,12 +57,11 @@ const BasicSRS: React.FC<BasicSRSProps> = ({ entryIds }) => {
 		setSRSState('Running');
 	};
 
-	const selectNextCard = () => {
+	const selectNextCard = useCallback(() => {
 		const sortedEntries = [...memoryMap.entries()].sort(
 			([, memoryFactorA], [, memoryFactorB]) =>
 				memoryFactorA - memoryFactorB
 		);
-		//are we done?
 		const allDone = sortedEntries[0][1] >= LEARNED_TARGET;
 		if (allDone) {
 			setSRSState('Finish');
@@ -70,45 +69,60 @@ const BasicSRS: React.FC<BasicSRSProps> = ({ entryIds }) => {
 			return;
 		}
 
-		//sort
 		const [, lowestMemory] = sortedEntries[0];
 		const selectionThreshold =
 			lowestMemory + LEARNED_TARGET * SELECTION_RANDOMNESS;
 		const entriesInThreshold = sortedEntries.filter(
-			([, memoryFactor]) =>
+			([entryId, memoryFactor]) =>
 				memoryFactor < LEARNED_TARGET &&
-				memoryFactor <= selectionThreshold
+				memoryFactor <= selectionThreshold &&
+				entryId !== activeId
 		);
-		const randomIndexInThreshold = Math.floor(
-			Math.random() * entriesInThreshold.length
-		);
-
-		const [nextEntryId] = entriesInThreshold[randomIndexInThreshold];
+		let nextEntryId: DictionaryEntryID;
+		if (entriesInThreshold.length > 0) {
+			const randomIndexInThreshold = Math.floor(
+				Math.random() * entriesInThreshold.length
+			);
+			nextEntryId = entriesInThreshold[randomIndexInThreshold][0];
+		} else {
+			// Fallback to the lowest rated entry
+			nextEntryId = sortedEntries[0][0];
+		}
 		setActiveId(nextEntryId);
 		setCardFace('Front');
-	};
+	}, [activeId, memoryMap]);
 
-	const answerCard = (answer: SRSAnswer) => {
-		if (!activeId) {
-			return;
+	const answerCard = useCallback(
+		(answer: SRSAnswer) => {
+			if (srsState === 'Running' && cardFace === 'Back') {
+				if (!activeId) {
+					return;
+				}
+				const learnFactor = SRSFactorMap[answer];
+				const currentMemory = memoryMap.get(activeId) || 0;
+				setMemoryMap(
+					new Map([
+						...memoryMap,
+						[
+							activeId,
+							Math.min(
+								currentMemory + learnFactor,
+								LEARNED_TARGET
+							),
+						],
+					])
+				);
+				selectNextCard();
+			}
+		},
+		[activeId, cardFace, memoryMap, selectNextCard, srsState]
+	);
+
+	const showAnswer = useCallback(() => {
+		if (srsState === 'Running' && cardFace === 'Front') {
+			setCardFace('Back');
 		}
-		const learnFactor = SRSFactorMap[answer];
-		const currentMemory = memoryMap.get(activeId) || 0;
-		setMemoryMap(
-			new Map([
-				...memoryMap,
-				[
-					activeId,
-					Math.min(currentMemory + learnFactor, LEARNED_TARGET),
-				],
-			])
-		);
-		selectNextCard();
-	};
-
-	const showAnswer = () => {
-		setCardFace('Back');
-	};
+	}, [cardFace, srsState]);
 
 	const progress = useMemo(() => {
 		const currentMemoryEntries = [...memoryMap.entries()];
@@ -165,7 +179,7 @@ const BasicSRS: React.FC<BasicSRSProps> = ({ entryIds }) => {
 					onClick={() => showAnswer()}
 					sx={{ margin: 'auto' }}
 				>
-					Show Answer
+					Show Answer (Space)
 				</Button>
 			) : (
 				<>
@@ -174,28 +188,49 @@ const BasicSRS: React.FC<BasicSRSProps> = ({ entryIds }) => {
 						variant="outlined"
 						onClick={() => answerCard('Again')}
 					>
-						Again
+						Again (1)
 					</Button>
 					<Button
 						size="small"
 						variant="outlined"
 						onClick={() => answerCard('Good')}
 					>
-						Good
+						Good (2)
 					</Button>
 					<Button
 						size="small"
 						variant="outlined"
 						onClick={() => answerCard('Easy')}
 					>
-						Easy
+						Easy (3)
 					</Button>
 				</>
 			);
 	}
 
+	const keyboardHandler = useCallback(
+		(e: React.KeyboardEvent<HTMLDivElement>) => {
+			switch (e.key) {
+				case ' ':
+					showAnswer();
+					e.preventDefault();
+					break;
+				case '1':
+					answerCard('Again');
+					break;
+				case '2':
+					answerCard('Good');
+					break;
+				case '3':
+					answerCard('Easy');
+					break;
+			}
+		},
+		[answerCard, showAnswer]
+	);
+
 	return (
-		<Card>
+		<Card onKeyPress={keyboardHandler} tabIndex={0}>
 			<LinearProgress variant="determinate" value={progress} />
 			<CardHeader>
 				<Typography>SRS</Typography>
