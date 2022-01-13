@@ -2,10 +2,21 @@ import './DictionarySelect.css';
 import React, { useState, useEffect, useMemo } from 'react';
 import useDebounce from '@hooks/useDebounce';
 import { useDictionarySearch } from '@hooks/DictionaryQueryHooks';
-import { Box, TextField, Autocomplete, InputAdornment } from '@mui/material';
+import {
+	Box,
+	TextField,
+	Autocomplete,
+	InputAdornment,
+	AutocompleteRenderInputParams,
+} from '@mui/material';
 import { Search } from '@mui/icons-material';
 import { isNotString, isString } from 'Document/Utility';
-import { IDictionaryEntryInput } from '../EntryForm/EntryForm';
+import {
+	IDictionaryEntryInForm,
+	IDictionaryEntryInput,
+	IRootsInput,
+} from '../EntryForm/EntryForm';
+import { searchTags } from 'api/tags.service';
 
 export interface IRootSelectProps {
 	value: IDictionaryEntryInput['roots'];
@@ -33,10 +44,10 @@ const DictionarySelect: React.FC<IRootSelectProps> = ({
 		setIsLoading(false);
 	}, [searchEntries]);
 
-	const autoCompletOptions = useMemo(() => {
+	const autoCompleteOptions = useMemo(() => {
 		let options: Array<IDictionaryEntryInput['roots'][number] | string> =
 			[];
-		if (!isLoading) {
+		if (!isLoading && searchEntries) {
 			const searchEntriesDeduplicated = searchEntries.filter(
 				(opt) => !value.find((v) => v.key === opt.key)
 			);
@@ -44,6 +55,73 @@ const DictionarySelect: React.FC<IRootSelectProps> = ({
 		}
 		return options;
 	}, [isLoading, searchEntries, value]);
+
+	const filterOptions = (
+		options: (string | IDictionaryEntryInForm | IRootsInput)[]
+	) => {
+		const newOptions = [...options];
+		const inputInOptions = !!options
+			.filter(isNotString)
+			.find((v) => v.key === query);
+		if (query && !isLoading && !inputInOptions) {
+			newOptions.push(query);
+		}
+		return newOptions;
+	};
+
+	const renderOption = (
+		props: React.HTMLAttributes<HTMLLIElement>,
+		option: string | IDictionaryEntryInForm | IRootsInput
+	) => {
+		return typeof option !== 'string' ? (
+			<Box component="li" {...props}>
+				<span>{option.key}</span>
+				<span>{option.translations.join(' ,')}</span>
+				<span>{option.comment}</span>
+			</Box>
+		) : (
+			<Box component="li" {...props}>
+				<span>{`Create ${option}`}</span>
+			</Box>
+		);
+	};
+	const renderInput = (params: AutocompleteRenderInputParams) => (
+		<TextField
+			{...params}
+			variant="outlined"
+			label={placeholder}
+			value={query}
+			onChange={(e) => setQuery(e.target.value)}
+			InputProps={{
+				...params.InputProps,
+				startAdornment: (
+					<>
+						<InputAdornment position="start">
+							<Search />
+						</InputAdornment>
+						{params.InputProps.startAdornment}
+					</>
+				),
+			}}
+		/>
+	);
+
+	const onChangeHandler = (
+		newValue: Array<string | IDictionaryEntryInForm | IRootsInput>
+	) => {
+		const valuesToCreate = newValue.filter(isString);
+		const otherValues = newValue.filter(isNotString);
+		for (const valueToCreate of valuesToCreate) {
+			createRoot(valueToCreate);
+		}
+		onChange(otherValues);
+	};
+
+	const getOptionLabel = (
+		option: string | IDictionaryEntryInForm | IRootsInput
+	) => {
+		return typeof option === 'string' ? option : option.key;
+	};
 
 	return (
 		<Autocomplete
@@ -53,67 +131,14 @@ const DictionarySelect: React.FC<IRootSelectProps> = ({
 			fullWidth
 			loading={isLoading}
 			clearOnBlur
-			filterOptions={(options, state) => {
-				const newOptions = [...options];
-				const { inputValue } = state;
-				if (
-					inputValue &&
-					!isLoading &&
-					!options
-						.filter(isNotString)
-						.find((v) => v.key === inputValue)
-				) {
-					newOptions.push(inputValue);
-				}
-				return newOptions;
-			}}
+			filterOptions={filterOptions}
 			value={value}
-			onChange={(_, newValue) => {
-				const valuesToCreate = newValue.filter(isString);
-				const otherValues = newValue.filter(isNotString);
-				for (const valueToCreate of valuesToCreate) {
-					createRoot(valueToCreate);
-				}
-				onChange(otherValues);
-			}}
-			options={autoCompletOptions}
+			onChange={(_, newValue) => onChangeHandler(newValue)}
+			options={autoCompleteOptions}
 			autoHighlight
-			getOptionLabel={(option) =>
-				typeof option === 'string' ? option : option.key
-			}
-			renderOption={(props, option) => {
-				return typeof option !== 'string' ? (
-					<Box component="li" {...props}>
-						<span>{option.key}</span>
-						<span>{option.translations.join(' ,')}</span>
-						<span>{option.comment}</span>
-					</Box>
-				) : (
-					<Box component="li" {...props}>
-						<span>{`Create ${option}`}</span>
-					</Box>
-				);
-			}}
-			renderInput={(params) => (
-				<TextField
-					{...params}
-					variant="outlined"
-					label={placeholder}
-					value={query}
-					onChange={(e) => setQuery(e.target.value)}
-					InputProps={{
-						...params.InputProps,
-						startAdornment: (
-							<>
-								<InputAdornment position="start">
-									<Search />
-								</InputAdornment>
-								{params.InputProps.startAdornment}
-							</>
-						),
-					}}
-				/>
-			)}
+			getOptionLabel={getOptionLabel}
+			renderOption={renderOption}
+			renderInput={renderInput}
 		/>
 	);
 };

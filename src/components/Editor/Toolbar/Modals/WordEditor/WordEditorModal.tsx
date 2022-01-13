@@ -26,7 +26,6 @@ import {
 	Checkbox,
 	DialogActions,
 	IconButton,
-	CircularProgress,
 	FormControlLabel,
 	FormGroup,
 	Stack,
@@ -133,13 +132,15 @@ const WordEditorModal: React.FC<IWordInputProps> = ({ visible, close }) => {
 	}, [editor, editor.selection, visible, visibleBefore]);
 
 	useEffect(() => {
-		const foundInDictionary = rootInDictionary.find(
-			(entry) => entry.key === entryKey
-		);
-		if (foundInDictionary) {
-			setEntryInDictionary(foundInDictionary);
-		} else {
-			setEntryInDictionary(undefined);
+		if (rootInDictionary) {
+			const foundInDictionary = rootInDictionary.find(
+				(entry) => entry.key === entryKey
+			);
+			if (foundInDictionary) {
+				setEntryInDictionary(foundInDictionary);
+			} else {
+				setEntryInDictionary(undefined);
+			}
 		}
 	}, [entryKey, rootInDictionary]);
 

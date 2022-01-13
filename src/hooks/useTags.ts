@@ -117,7 +117,7 @@ const useAddDictionaryTag = (): UseMutationResult<
 
 const useTagSearch = (
 	searchTerm: string | undefined
-): [boolean, Array<IDictionaryTag>] => {
+): [boolean, Array<IDictionaryTag> | undefined] => {
 	const activeLanguage = useActiveLanguageConf();
 
 	const { data, isLoading } = useQuery(
@@ -137,7 +137,7 @@ const useTagSearch = (
 		}
 	);
 
-	return [isLoading, data || []];
+	return [isLoading, data];
 };
 
 export {

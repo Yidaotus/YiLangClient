@@ -148,7 +148,7 @@ const defaultValue = {
 
 const useDictionarySearch = (
 	searchTerm: string | undefined
-): [boolean, Array<IDictionaryEntry>] => {
+): [boolean, Array<IDictionaryEntry> | undefined] => {
 	const activeLanguage = useActiveLanguageConf();
 
 	const { data, isLoading } = useQuery(
@@ -168,7 +168,7 @@ const useDictionarySearch = (
 		}
 	);
 
-	return [isLoading, data || []];
+	return [isLoading, data];
 };
 
 const useListDictionaryEntries = (

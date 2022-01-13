@@ -1,11 +1,5 @@
 import './Editor.css';
-import React, {
-	useCallback,
-	useEffect,
-	useMemo,
-	useRef,
-	useState,
-} from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Slate, withReact } from 'slate-react';
 import { BaseRange, createEditor, Descendant, Editor, Transforms } from 'slate';
 import useSelection from '@hooks/useSelection';
@@ -17,7 +11,6 @@ import {
 } from '@hooks/DocumentQueryHooks';
 import { CircularProgress, Typography } from '@mui/material';
 import EditorDocument from './EditorDocument';
-import DictPopupController from './Popups/DictPopupController';
 import Toolbar from './Toolbar/Toolbar';
 import { withYiLang } from './YiEditor';
 import WordEditorModal from './Toolbar/Modals/WordEditor/WordEditorModal';

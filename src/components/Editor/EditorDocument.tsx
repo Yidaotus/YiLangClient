@@ -13,7 +13,6 @@ import WordFragment from './Fragments/Word/WordFragment';
 import ImageBlock from './Blocks/Image/Image';
 import WordList from './Blocks/WordList/WordList';
 import VideoBlock, { videoBlockPasteAction } from './Blocks/Video/Video';
-import { Person as PersonIcon } from '@mui/icons-material';
 import { Box, Grid, Paper, Typography } from '@mui/material';
 import AccountCircleTwoToneIcon from '@mui/icons-material/AccountCircleTwoTone';
 
@@ -117,13 +116,13 @@ const Element = (props: RenderElementProps) => {
 		case 'dialog':
 			return (
 				<Paper
-					sx={(theme) => ({
+					sx={{
 						display: 'flex',
 						flexDirection: 'column',
 						borderRadius: '3px',
 						m: 2,
 						p: 1,
-					})}
+					}}
 					{...attributes}
 				>
 					{children}

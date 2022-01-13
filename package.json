@@ -38,13 +38,14 @@
 	"scripts": {
 		"start": "cross-env PORT=3001 craco start",
 		"build": "craco build",
-		"test": "craco test",
+		"test": "react-scripts test",
 		"eject": "craco eject",
 		"postinstall": "npx patch-package"
 	},
 	"jest": {
 		"moduleNameMapper": {
 			"^@hooks(.*)$": "<rootDir>/src/hooks$1",
+			"^@components(.*)$": "<rootDir>/src/components$1",
 			"^@helpers(.*)$": "<rootDir>/src/helpers$1"
 		}
 	},
