@@ -1,8 +1,7 @@
 import React from 'react';
 import { IGrammarPoint, IDictionaryTag } from 'Document/Dictionary';
 import { useDictionaryEntryResolved } from '@hooks/DictionaryQueryHooks';
-import { Editor, Path, Transforms } from 'slate';
-import { ReactEditor } from 'slate-react';
+import { Path } from 'slate';
 import { useNavigate } from 'react-router';
 import { Link as LinkIcon, MenuBookOutlined } from '@mui/icons-material';
 import {
@@ -13,7 +12,6 @@ import {
 	TableRow,
 	Stack,
 } from '@mui/material';
-import { scrollIdIntoView } from '@helpers/DomHelper';
 
 type IDictEntryRowProps = {
 	path: Path;

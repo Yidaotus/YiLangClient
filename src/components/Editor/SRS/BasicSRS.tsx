@@ -25,9 +25,47 @@ const SELECTION_RANDOMNESS = 0.05; //5%
 
 const SRSFactorMap: Record<SRSAnswer, number> = {
 	Again: -(LEARNED_TARGET / 2),
-	Good: LEARNED_TARGET / 3,
-	Easy: LEARNED_TARGET / 2,
+	Good: LEARNED_TARGET / 2,
+	Easy: LEARNED_TARGET / 1,
 } as const;
+
+type CalculateIndexResult =
+	| { done: true }
+	| { done: false; nextId: DictionaryEntryID };
+
+const calculateNextIndex = (
+	memoryMap: Map<DictionaryEntryID, number>,
+	activeId: DictionaryEntryID
+): CalculateIndexResult => {
+	const sortedEntries = [...memoryMap.entries()].sort(
+		([, memoryFactorA], [, memoryFactorB]) => memoryFactorA - memoryFactorB
+	);
+	const allDone = sortedEntries[0][1] >= LEARNED_TARGET;
+	if (allDone) {
+		return { done: true };
+	}
+
+	const [, lowestMemory] = sortedEntries[0];
+	const selectionThreshold =
+		lowestMemory + LEARNED_TARGET * SELECTION_RANDOMNESS;
+	const entriesInThreshold = sortedEntries.filter(
+		([entryId, memoryFactor]) =>
+			memoryFactor < LEARNED_TARGET &&
+			memoryFactor <= selectionThreshold &&
+			entryId !== activeId
+	);
+	let nextId: DictionaryEntryID;
+	if (entriesInThreshold.length > 0) {
+		const randomIndexInThreshold = Math.floor(
+			Math.random() * entriesInThreshold.length
+		);
+		nextId = entriesInThreshold[randomIndexInThreshold][0];
+	} else {
+		// Fallback to the lowest rated entry
+		nextId = sortedEntries[0][0];
+	}
+	return { done: false, nextId };
+};
 
 const BasicSRS: React.FC<BasicSRSProps> = ({ entryIds }) => {
 	const [cardFace, setCardFace] = useState<'Front' | 'Back'>('Front');
@@ -39,6 +77,7 @@ const BasicSRS: React.FC<BasicSRSProps> = ({ entryIds }) => {
 
 	useEffect(() => {
 		setSRSState('Start');
+		setCardFace('Front');
 	}, [entryIds]);
 
 	const initializeMemoryMap = () => {
@@ -54,43 +93,9 @@ const BasicSRS: React.FC<BasicSRSProps> = ({ entryIds }) => {
 		const randomId = entryIds[randomIndex];
 		initializeMemoryMap();
 		setActiveId(randomId);
+		setCardFace('Front');
 		setSRSState('Running');
 	};
-
-	const selectNextCard = useCallback(() => {
-		const sortedEntries = [...memoryMap.entries()].sort(
-			([, memoryFactorA], [, memoryFactorB]) =>
-				memoryFactorA - memoryFactorB
-		);
-		const allDone = sortedEntries[0][1] >= LEARNED_TARGET;
-		if (allDone) {
-			setSRSState('Finish');
-			setActiveId(null);
-			return;
-		}
-
-		const [, lowestMemory] = sortedEntries[0];
-		const selectionThreshold =
-			lowestMemory + LEARNED_TARGET * SELECTION_RANDOMNESS;
-		const entriesInThreshold = sortedEntries.filter(
-			([entryId, memoryFactor]) =>
-				memoryFactor < LEARNED_TARGET &&
-				memoryFactor <= selectionThreshold &&
-				entryId !== activeId
-		);
-		let nextEntryId: DictionaryEntryID;
-		if (entriesInThreshold.length > 0) {
-			const randomIndexInThreshold = Math.floor(
-				Math.random() * entriesInThreshold.length
-			);
-			nextEntryId = entriesInThreshold[randomIndexInThreshold][0];
-		} else {
-			// Fallback to the lowest rated entry
-			nextEntryId = sortedEntries[0][0];
-		}
-		setActiveId(nextEntryId);
-		setCardFace('Front');
-	}, [activeId, memoryMap]);
 
 	const answerCard = useCallback(
 		(answer: SRSAnswer) => {
@@ -100,22 +105,28 @@ const BasicSRS: React.FC<BasicSRSProps> = ({ entryIds }) => {
 				}
 				const learnFactor = SRSFactorMap[answer];
 				const currentMemory = memoryMap.get(activeId) || 0;
-				setMemoryMap(
-					new Map([
-						...memoryMap,
-						[
-							activeId,
-							Math.min(
-								currentMemory + learnFactor,
-								LEARNED_TARGET
-							),
-						],
-					])
+				const newMemoryMap = new Map([
+					...memoryMap,
+					[
+						activeId,
+						Math.min(currentMemory + learnFactor, LEARNED_TARGET),
+					],
+				]);
+				setMemoryMap(newMemoryMap);
+				const nextEntryResult = calculateNextIndex(
+					newMemoryMap,
+					activeId
 				);
-				selectNextCard();
+				if (nextEntryResult.done) {
+					setActiveId(null);
+					setSRSState('Finish');
+				} else {
+					setActiveId(nextEntryResult.nextId);
+					setCardFace('Front');
+				}
 			}
 		},
-		[activeId, cardFace, memoryMap, selectNextCard, srsState]
+		[activeId, cardFace, memoryMap, srsState]
 	);
 
 	const showAnswer = useCallback(() => {

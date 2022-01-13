@@ -46,7 +46,6 @@ const TagSelect: React.FC<ITagSelectProps> = ({
 	return (
 		<Autocomplete
 			placeholder={placeholder}
-			id="country-select-demo"
 			fullWidth
 			multiple
 			loading={isLoading}
@@ -81,11 +80,15 @@ const TagSelect: React.FC<ITagSelectProps> = ({
 			}
 			renderOption={(props, option) => {
 				return typeof option !== 'string' ? (
-					<Box component="li" {...props}>
+					<Box component="li" {...props} id="tag-select-options">
 						<span>{option.name}</span>
 					</Box>
 				) : (
-					<Box component="li" {...props}>
+					<Box
+						component="li"
+						{...props}
+						id="tag-select-create-option"
+					>
 						<span>{`Create ${option}`}</span>
 					</Box>
 				);
@@ -93,6 +96,7 @@ const TagSelect: React.FC<ITagSelectProps> = ({
 			renderInput={(params) => (
 				<TextField
 					{...params}
+					id="tag-select-input"
 					label={placeholder}
 					value={query}
 					onChange={(e) => setQuery(e.target.value)}
