@@ -11,12 +11,10 @@ import {
 } from '@mui/material';
 import { Search } from '@mui/icons-material';
 import { isNotString, isString } from 'Document/Utility';
-import {
-	IDictionaryEntryInForm,
-	IDictionaryEntryInput,
-	IRootsInput,
-} from '../EntryForm/EntryForm';
-import { searchTags } from 'api/tags.service';
+import { IDictionaryEntryInput } from '../EntryForm/EntryForm';
+
+type EntryInputType = IDictionaryEntryInput['roots'];
+type EntryInputEntryType = EntryInputType[number];
 
 export interface IRootSelectProps {
 	value: IDictionaryEntryInput['roots'];
@@ -56,9 +54,7 @@ const DictionarySelect: React.FC<IRootSelectProps> = ({
 		return options;
 	}, [isLoading, searchEntries, value]);
 
-	const filterOptions = (
-		options: (string | IDictionaryEntryInForm | IRootsInput)[]
-	) => {
+	const filterOptions = (options: (string | EntryInputEntryType)[]) => {
 		const newOptions = [...options];
 		const inputInOptions = !!options
 			.filter(isNotString)
@@ -71,7 +67,7 @@ const DictionarySelect: React.FC<IRootSelectProps> = ({
 
 	const renderOption = (
 		props: React.HTMLAttributes<HTMLLIElement>,
-		option: string | IDictionaryEntryInForm | IRootsInput
+		option: string | EntryInputEntryType
 	) => {
 		return typeof option !== 'string' ? (
 			<Box component="li" {...props}>
@@ -106,9 +102,7 @@ const DictionarySelect: React.FC<IRootSelectProps> = ({
 		/>
 	);
 
-	const onChangeHandler = (
-		newValue: Array<string | IDictionaryEntryInForm | IRootsInput>
-	) => {
+	const onChangeHandler = (newValue: Array<string | EntryInputEntryType>) => {
 		const valuesToCreate = newValue.filter(isString);
 		const otherValues = newValue.filter(isNotString);
 		for (const valueToCreate of valuesToCreate) {
@@ -117,9 +111,7 @@ const DictionarySelect: React.FC<IRootSelectProps> = ({
 		onChange(otherValues);
 	};
 
-	const getOptionLabel = (
-		option: string | IDictionaryEntryInForm | IRootsInput
-	) => {
+	const getOptionLabel = (option: string | EntryInputEntryType) => {
 		return typeof option === 'string' ? option : option.key;
 	};
 

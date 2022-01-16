@@ -33,6 +33,7 @@
 		"slate": "^0.66.5",
 		"slate-history": "^0.66.0",
 		"slate-react": "^0.66.7",
+		"superstruct": "^0.15.3",
 		"yup": "^0.32.11"
 	},
 	"scripts": {

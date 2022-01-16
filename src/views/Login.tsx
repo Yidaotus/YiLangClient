@@ -7,8 +7,9 @@ import { useUserContext } from '@hooks/useUserContext';
 import { LS_TOKEN_POINTER } from 'api/api.service';
 import { useQueryClient } from 'react-query';
 import { login, register } from 'api/user.service';
-import { Paper, Box, Stack, Grid, Alert, Button, Link } from '@mui/material';
+import { Paper, Box, Stack, Grid, Alert, Link } from '@mui/material';
 import LoginForm from '../components/Login/LoginForm';
+import { isApiResponse } from 'Document/Utility';
 
 export interface IRegisterData {
 	email: string;
@@ -44,9 +45,15 @@ const LoginView: React.FC = () => {
 			localStorage.setItem(LS_TOKEN_POINTER, token);
 			queryClient.invalidateQueries('user');
 		} catch (e) {
-			if (e instanceof Error) {
+			if (isApiResponse(e)) {
 				const { message } = e;
 				setErrors((stateErrors) => [...stateErrors, message]);
+			} else {
+				const unknownErrorMessage = 'An unknown Error has occurred';
+				setErrors((stateErrors) => [
+					...stateErrors,
+					unknownErrorMessage,
+				]);
 			}
 		}
 		setIsLoading(false);

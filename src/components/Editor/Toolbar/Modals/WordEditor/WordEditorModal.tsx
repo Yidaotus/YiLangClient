@@ -1,17 +1,9 @@
-import './WordEditor.css';
-import React, {
-	useCallback,
-	useEffect,
-	useMemo,
-	useRef,
-	useState,
-} from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { IDictionaryEntry } from 'Document/Dictionary';
 import DictEntryEdit, {
-	IWordInputRef,
-	WordEditorMode,
-} from '@components/DictionaryEntry/DictEntryEdit/DictEntryEdit';
-import { Delete, Save, ArrowBack } from '@mui/icons-material';
+	EntryInputMode,
+} from '@components/DictionaryEntry/DictionaryEntryInput/DictionaryEntryInput';
+import { Delete, ArrowBack } from '@mui/icons-material';
 import { Editor, Transforms, Text, Range, Selection } from 'slate';
 import { useSlateStatic } from 'slate-react';
 import { CustomText, WordElement } from '@components/Editor/YiEditor';
@@ -30,7 +22,6 @@ import {
 	FormGroup,
 	Stack,
 } from '@mui/material';
-import LoadingButton from '@mui/lab/LoadingButton';
 import LookupSourceMenu from './LookupSouceMenu';
 
 export interface IWordInputProps {
@@ -41,8 +32,7 @@ export interface IWordInputProps {
 const WordEditorModal: React.FC<IWordInputProps> = ({ visible, close }) => {
 	const editor = useSlateStatic();
 	const visibleBefore = usePrevious(visible);
-	const dictEntryEdit = useRef<IWordInputRef>(null);
-	const [editMode, setEditMode] = useState<WordEditorMode>('word');
+	const [editMode, setEditMode] = useState<EntryInputMode>('word');
 	const [savedSelection, setSavedSelection] = useState<Selection>();
 	const [entryKey, setEntryKey] = useState('');
 	const [entryInDictionary, setEntryInDictionary] =
@@ -144,32 +134,15 @@ const WordEditorModal: React.FC<IWordInputProps> = ({ visible, close }) => {
 		}
 	}, [entryKey, rootInDictionary]);
 
-	const finish = async () => {
+	const finish = async (entryId: DictionaryEntryID) => {
 		setSaving(true);
-		if (dictEntryEdit.current) {
-			const editResult = await dictEntryEdit.current.finish();
-			if (editResult.isDone && editResult.entryId) {
-				wrapWithWord(editResult.entryId);
-				close(false);
-			}
-		}
-		if (entryInDictionary) {
-			wrapWithWord(entryInDictionary.id);
-			close(false);
-		}
+		wrapWithWord(entryId);
 		setSaving(false);
+		close(false);
 	};
 
 	const cancel = () => {
-		if (dictEntryEdit.current) {
-			const isDone = dictEntryEdit.current.cancel();
-			if (isDone) {
-				close(false);
-			}
-		}
-		if (entryInDictionary) {
-			close(false);
-		}
+		close(false);
 	};
 
 	return (
@@ -193,9 +166,10 @@ const WordEditorModal: React.FC<IWordInputProps> = ({ visible, close }) => {
 						</span>
 					) : (
 						<DictEntryEdit
-							ref={dictEntryEdit}
 							entryKey={entryKey}
 							stateChanged={setEditMode}
+							onCancel={cancel}
+							onFinish={finish}
 						/>
 					)}
 				</DialogContentText>
@@ -215,23 +189,6 @@ const WordEditorModal: React.FC<IWordInputProps> = ({ visible, close }) => {
 							}
 						/>
 					</FormGroup>
-					{editMode === 'word' ? (
-						<IconButton key="discard" onClick={cancel}>
-							<Delete />
-						</IconButton>
-					) : (
-						<IconButton key="discard" onClick={cancel}>
-							<ArrowBack />
-						</IconButton>
-					)}
-					<LoadingButton
-						key="save"
-						onClick={() => finish()}
-						loading={saving}
-						startIcon={<Save />}
-					>
-						Save
-					</LoadingButton>
 				</DialogActions>
 			</DialogContent>
 		</Dialog>

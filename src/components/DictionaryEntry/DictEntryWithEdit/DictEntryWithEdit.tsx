@@ -1,10 +1,9 @@
-import './DictEntryWithEdit.css';
-import React, { useCallback, useRef, useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import { useDeleteDictionaryEntry } from '@hooks/DictionaryQueryHooks';
 import { Box, Button, IconButton, Stack } from '@mui/material';
 import { Delete as DeleteIcon, Edit as EditIcon } from '@mui/icons-material';
 import DictionaryEntry, { IDictionaryEntryProps } from '../DictionaryEntry';
-import DictEntryEdit, { IWordInputRef } from '../DictEntryEdit/DictEntryEdit';
+import DictEntryEdit from '../DictionaryEntryInput/DictionaryEntryInput';
 import ConfirmButton from '@components/ConfirmButton/ConfirmButton';
 
 type IDictEntryWithEditProps = IDictionaryEntryProps & {
@@ -22,24 +21,13 @@ const DictEntryWithEdit: React.FC<IDictEntryWithEditProps> = ({
 }) => {
 	const [editing, setEditing] = useState(false);
 	const deleteEntry = useDeleteDictionaryEntry();
-	const dictEntryEdit = useRef<IWordInputRef>(null);
 
-	const finish = async () => {
-		if (dictEntryEdit.current) {
-			const editResult = await dictEntryEdit.current.finish();
-			if (editResult.isDone) {
-				setEditing(false);
-			}
-		}
+	const finish = () => {
+		setEditing(false);
 	};
 
 	const cancel = () => {
-		if (dictEntryEdit.current) {
-			const isDone = dictEntryEdit.current.cancel();
-			if (isDone) {
-				setEditing(false);
-			}
-		}
+		setEditing(false);
 	};
 
 	const remove = useCallback(async () => {
@@ -51,7 +39,11 @@ const DictEntryWithEdit: React.FC<IDictEntryWithEditProps> = ({
 		<Box sx={{ display: 'flex' }}>
 			{editing && (
 				<Box sx={{ width: '100%' }}>
-					<DictEntryEdit entryKey={entry} ref={dictEntryEdit} />
+					<DictEntryEdit
+						entryKey={entry}
+						onCancel={cancel}
+						onFinish={finish}
+					/>
 					<Box>
 						<Button onClick={cancel}>Cancel</Button>
 						<Button onClick={finish}>Save</Button>

@@ -4,7 +4,6 @@ import {
 	IDictionaryEntryResolved,
 	IDictionaryTag,
 } from 'Document/Dictionary';
-import DictionarySelect from '@components/DictionaryEntry/DictionarySelect/DictionarySelect';
 import TagSelect from '@components/DictionaryEntry/TagSelect/TagSelect';
 import { TextField, Stack, Button } from '@mui/material';
 import { Controller } from 'react-hook-form';
@@ -13,36 +12,24 @@ import { ITagFormOutput } from '../TagForm/TagForm';
 import TagInput from '../TagInput';
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
-import { DictionaryEntryID } from 'Document/Utility';
-import { IRootFormOutput } from '../RootForm/RootForm';
 
-export type IDictionaryEntryInput = Omit<
+export type IDictionaryRootInput = Omit<
 	IDictionaryEntry,
 	'firstSeen' | 'id' | 'tags' | 'roots' | 'lang' | 'createdAt'
 > & {
-	id?: DictionaryEntryID;
 	tags: Array<IDictionaryTag | ITagFormOutput>;
-	roots: Array<IDictionaryEntry | IRootFormOutput>;
 };
-export type IEntryFormDefaults = Partial<IDictionaryEntryResolved>;
-export type IEntryFormOutput = Omit<
-	IDictionaryEntry,
-	'firstSeen' | 'id' | 'tags' | 'roots' | 'lang' | 'createdAt'
-> & {
-	id?: DictionaryEntryID;
-	tags: Array<IDictionaryTag | ITagFormOutput>;
-	roots: Array<IDictionaryEntry | IRootFormOutput>;
-};
+export type IRootFormDefaults = Partial<IDictionaryEntryResolved>;
+export type IRootFormOutput = IDictionaryRootInput;
 
-export interface IEntryFormProps {
-	createTag: (tagName: string, formState: IDictionaryEntryInput) => void;
-	createRoot: (key: string, formState: IDictionaryEntryInput) => void;
-	onSubmit: (entry: IEntryFormOutput) => void;
+export interface IRootFormProps {
+	createTag: (tagName: string, formState: IDictionaryRootInput) => void;
+	onSubmit: (entry: IRootFormOutput) => void;
 	onCancel: () => void;
 	submitLabel: string | React.ReactElement;
 	cancelLabel: string | React.ReactElement;
-	defaultValues?: IEntryFormDefaults;
-	formState?: IDictionaryEntryInput;
+	defaultValues?: IRootFormDefaults;
+	formState?: IDictionaryRootInput;
 }
 
 const entrySchema = Yup.object({
@@ -52,17 +39,15 @@ const entrySchema = Yup.object({
 		.required('Translation(s) are required'),
 });
 
-const INITIAL_ENTRY_FORM_VALUES: IDictionaryEntryInput = {
+const INITIAL_ROOT_FORM_VALUES: IDictionaryRootInput = {
 	key: '',
 	comment: '',
 	tags: [],
 	translations: [],
-	roots: [],
 };
 
-const EntryForm: React.FC<IEntryFormProps> = ({
+const EntryForm: React.FC<IRootFormProps> = ({
 	createTag,
-	createRoot,
 	onSubmit,
 	onCancel,
 	submitLabel,
@@ -72,15 +57,14 @@ const EntryForm: React.FC<IEntryFormProps> = ({
 }) => {
 	const {
 		control,
-		register,
 		handleSubmit,
 		getValues,
 		reset,
 		formState: { isSubmitting },
-	} = useForm<IDictionaryEntryInput>({
+	} = useForm<IDictionaryRootInput>({
 		resolver: yupResolver(entrySchema),
 		reValidateMode: 'onChange',
-		defaultValues: defaultValues || INITIAL_ENTRY_FORM_VALUES,
+		defaultValues: defaultValues || INITIAL_ROOT_FORM_VALUES,
 	});
 
 	useEffect(() => {
@@ -94,16 +78,10 @@ const EntryForm: React.FC<IEntryFormProps> = ({
 		createTag(tagName, currentFormState);
 	};
 
-	const createRootCB = (rootKey: string) => {
-		const currentFormState = getValues();
-		createRoot(rootKey, currentFormState);
-	};
-
 	return (
 		<div>
 			<form onSubmit={handleSubmit(onSubmit)}>
 				<Stack spacing={2}>
-					<input hidden defaultValue="" {...register('id')} />
 					<Controller
 						name="key"
 						control={control}
@@ -187,22 +165,6 @@ const EntryForm: React.FC<IEntryFormProps> = ({
 							/>
 						)}
 					/>
-
-					<Controller
-						name="roots"
-						control={control}
-						defaultValue={[]}
-						render={({ field }) => (
-							<DictionarySelect
-								value={field.value}
-								onChange={(newValue) => {
-									field.onChange(newValue);
-								}}
-								placeholder="Root entries"
-								createRoot={createRootCB}
-							/>
-						)}
-					/>
 				</Stack>
 				<Stack>
 					<Button type="submit">{submitLabel}</Button>
@@ -214,4 +176,4 @@ const EntryForm: React.FC<IEntryFormProps> = ({
 };
 
 export default EntryForm;
-export { INITIAL_ENTRY_FORM_VALUES };
+export { INITIAL_ROOT_FORM_VALUES };

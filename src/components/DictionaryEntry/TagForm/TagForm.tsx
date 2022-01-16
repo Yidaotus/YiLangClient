@@ -1,9 +1,10 @@
-import './TagForm.css';
 import { IDictionaryTag, IGrammarPoint } from 'Document/Dictionary';
-import React, { useCallback, useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import YiColorPickerField from '@components/DictionaryEntry/YiColorPickerField/YiColorPickerField';
 import { Add, Remove } from '@mui/icons-material';
-import { Controller, useFieldArray, UseFormReturn } from 'react-hook-form';
+import * as Yup from 'yup';
+import { yupResolver } from '@hookform/resolvers/yup';
+import { Controller, useFieldArray, useForm } from 'react-hook-form';
 import {
 	IconButton,
 	Button,
@@ -14,6 +15,7 @@ import {
 	FormGroup,
 	FormControlLabel,
 } from '@mui/material';
+import { DictionaryTagID, Optional } from 'Document/Utility';
 
 // This is the special type for the dynamic form input as
 // react hook form does not support flat arrays we need to
@@ -27,12 +29,24 @@ export type IDictionaryTagInput = Omit<
 	IDictionaryTag,
 	'id' | 'grammarPoint' | 'lang'
 > & {
+	id?: string;
 	grammarPoint: RHFGrammarPoint;
 };
 
+export type ITagFormDefaults = Partial<IDictionaryTag>;
+export type ITagFormOutput = Optional<Omit<IDictionaryTag, 'lang'>, 'id'>;
+
 interface ITagFormProps {
-	form: UseFormReturn<IDictionaryTagInput>;
+	onSubmit: (newTag: ITagFormOutput) => void;
+	onCancel: () => void;
+	submitLabel: string | React.ReactElement;
+	cancelLabel: string | React.ReactElement;
+	defaultValues?: ITagFormDefaults;
 }
+
+const tagSchema = Yup.object({
+	name: Yup.string().required('A valid name is required!'),
+});
 
 export const INITIAL_TAG_FORM_VALUES: IDictionaryTagInput = {
 	name: '',
@@ -44,12 +58,45 @@ export const INITIAL_TAG_FORM_VALUES: IDictionaryTagInput = {
 	},
 };
 
-const TagForm: React.FC<ITagFormProps> = ({ form }) => {
+const TagForm: React.FC<ITagFormProps> = ({
+	onSubmit,
+	onCancel,
+	submitLabel,
+	cancelLabel,
+	defaultValues,
+}) => {
+	const formattedDefaultValues = useMemo(() => {
+		if (!defaultValues) {
+			return null;
+		}
+		const flattenedConstruction =
+			defaultValues?.grammarPoint?.construction || [];
+		const unflattenedConstructions = flattenedConstruction.map(
+			(construction) => ({ point: construction })
+		);
+		return {
+			...defaultValues,
+			grammarPoint: {
+				...defaultValues.grammarPoint,
+				construction: unflattenedConstructions,
+			},
+		};
+	}, [defaultValues]);
+
+	const { handleSubmit, getValues, control, register } =
+		useForm<IDictionaryTagInput>({
+			defaultValues: formattedDefaultValues || INITIAL_TAG_FORM_VALUES,
+			resolver: yupResolver(tagSchema),
+		});
+	const { fields, append, remove } = useFieldArray({
+		control: control,
+		name: 'grammarPoint.construction',
+	});
 	const [showAddConstButton, setShowAddConstButton] = useState(false);
 	const [hasGrammarPoint, setHasGrammarPoint] = useState(false);
 
-	const updateShowConstButton = useCallback(() => {
-		const formValues = form.getValues();
+	const updateShowConstButton = () => {
+		const formValues = getValues();
 		let showAddButton = true;
 		if (formValues.grammarPoint.construction) {
 			showAddButton = !!formValues.grammarPoint.construction.every(
@@ -57,17 +104,30 @@ const TagForm: React.FC<ITagFormProps> = ({ form }) => {
 			);
 		}
 		setShowAddConstButton(showAddButton);
-	}, [form]);
+	};
 
-	const { fields, append, remove } = useFieldArray({
-		control: form.control,
-		name: 'grammarPoint.construction',
-	});
+	const sanitizeFormData = (formTag: IDictionaryTagInput) => {
+		const cleanedUpGrammarPoint: IGrammarPoint = {
+			...formTag.grammarPoint,
+			construction:
+				formTag.grammarPoint.construction?.map((gmc) => gmc.point) ||
+				[],
+		};
+		const result: ITagFormOutput = {
+			...formTag,
+			id: formTag.id ? (formTag.id as DictionaryTagID) : undefined,
+			grammarPoint: cleanedUpGrammarPoint.name
+				? cleanedUpGrammarPoint
+				: undefined,
+		};
+		onSubmit(result);
+	};
 
 	return (
 		<form
 			className="tag-input-form-container"
 			onChange={updateShowConstButton}
+			onSubmit={handleSubmit(sanitizeFormData)}
 		>
 			<Stack spacing={2}>
 				<Stack
@@ -79,15 +139,17 @@ const TagForm: React.FC<ITagFormProps> = ({ form }) => {
 						width: '100%',
 					}}
 				>
+					<input hidden defaultValue="" {...register('id')} />
 					<Box sx={{ flexGrow: 1 }}>
 						<Controller
 							name="name"
-							control={form.control}
+							control={control}
 							defaultValue=""
-							rules={{ required: true, minLength: 1 }}
-							render={({ field }) => (
+							render={({ field, fieldState: { error } }) => (
 								<TextField
 									{...field}
+									error={!!error}
+									helperText={error?.message || null}
 									fullWidth
 									placeholder="name"
 								/>
@@ -96,7 +158,7 @@ const TagForm: React.FC<ITagFormProps> = ({ form }) => {
 					</Box>
 					<Controller
 						name="color"
-						control={form.control}
+						control={control}
 						defaultValue=""
 						render={({ field }) => (
 							<YiColorPickerField {...field} />
@@ -123,11 +185,13 @@ const TagForm: React.FC<ITagFormProps> = ({ form }) => {
 				<Controller
 					name="grammarPoint.name"
 					defaultValue=""
-					control={form.control}
-					render={({ field }) => (
+					control={control}
+					render={({ field, fieldState: { error } }) => (
 						<TextField
 							{...field}
 							placeholder="Name"
+							error={!!error}
+							helperText={error?.message || null}
 							fullWidth
 							disabled={!hasGrammarPoint}
 						/>
@@ -136,10 +200,12 @@ const TagForm: React.FC<ITagFormProps> = ({ form }) => {
 				<Controller
 					name="grammarPoint.description"
 					defaultValue=""
-					control={form.control}
-					render={({ field }) => (
+					control={control}
+					render={({ field, fieldState: { error } }) => (
 						<TextField
 							placeholder="Desc"
+							error={!!error}
+							helperText={error?.message || null}
 							fullWidth
 							disabled={!hasGrammarPoint}
 							{...field}
@@ -162,10 +228,17 @@ const TagForm: React.FC<ITagFormProps> = ({ form }) => {
 									<Controller
 										name={`grammarPoint.construction.${index}.point`}
 										defaultValue={field.point}
-										control={form.control}
+										control={control}
 										render={(subField) => (
 											<TextField
 												{...subField.field}
+												error={
+													!!subField.fieldState.error
+												}
+												helperText={
+													subField.fieldState.error
+														?.message || null
+												}
 												fullWidth
 												placeholder="Point"
 											/>
@@ -189,6 +262,10 @@ const TagForm: React.FC<ITagFormProps> = ({ form }) => {
 						Add Constructor
 					</Button>
 				)}
+			</Stack>
+			<Stack>
+				<Button type="submit">{submitLabel}</Button>
+				<Button onClick={onCancel}>{cancelLabel}</Button>
 			</Stack>
 		</form>
 	);

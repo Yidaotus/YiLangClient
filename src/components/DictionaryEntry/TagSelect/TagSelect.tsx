@@ -8,19 +8,18 @@ import {
 	AutocompleteRenderInputParams,
 } from '@mui/material';
 import { Search } from '@mui/icons-material';
-import { isNotString, isString } from 'Document/Utility';
 import { useTagSearch } from '@hooks/useTags';
-import {
-	IDictionaryEntryInput,
-	IDictionaryTagInForm,
-} from '../EntryForm/EntryForm';
-import { IDictionaryTagInput } from '../TagForm/TagForm';
+import { IDictionaryEntryInput } from '../EntryForm/EntryForm';
+import { isNotString, isString } from 'Document/Utility';
+
+type TagInputType = IDictionaryEntryInput['tags'];
+type TagInputEntryType = TagInputType[number];
 
 export interface ITagSelectProps {
-	value: IDictionaryEntryInput['tags'];
+	value: TagInputType;
 	placeholder: string;
 	create: (input: string) => void;
-	onChange: (tags: IDictionaryEntryInput['tags']) => void;
+	onChange: (tags: TagInputType) => void;
 }
 
 const TagSelect: React.FC<ITagSelectProps> = ({
@@ -43,7 +42,7 @@ const TagSelect: React.FC<ITagSelectProps> = ({
 	}, [searchTags]);
 
 	const autoCompleteOptions = useMemo(() => {
-		let options: Array<IDictionaryEntryInput['tags'][number] | string> = [];
+		let options: Array<string | TagInputEntryType> = [];
 		if (!isLoading && value && searchTags) {
 			const searchEntriesDeduplicated = searchTags.filter(
 				(opt) => !value.find((v) => v.name === opt.name)
@@ -53,9 +52,7 @@ const TagSelect: React.FC<ITagSelectProps> = ({
 		return options;
 	}, [isLoading, searchTags, value]);
 
-	const filterOptions = (
-		options: (string | IDictionaryTagInForm | IDictionaryTagInput)[]
-	) => {
+	const filterOptions = (options: Array<string | TagInputEntryType>) => {
 		const newOptions = [...options];
 		const inputInOptions = !!options
 			.filter(isNotString)
@@ -65,24 +62,21 @@ const TagSelect: React.FC<ITagSelectProps> = ({
 		}
 		return newOptions;
 	};
-	const onChangeHandler = (
-		newValue: Array<string | IDictionaryTagInForm | IDictionaryTagInput>
-	) => {
+	const onChangeHandler = (newValue: Array<string | TagInputEntryType>) => {
 		const valuesToCreate = newValue.filter(isString);
-		const otherValues = newValue.filter(isNotString);
+		const otherValues: TagInputType = newValue.filter(isNotString);
 		for (const valueToCreate of valuesToCreate) {
 			create(valueToCreate);
 		}
 		onChange(otherValues);
 	};
 
-	const getOptionLabel = (
-		option: string | IDictionaryTagInForm | IDictionaryTagInput
-	) => (typeof option === 'string' ? option : option.name);
+	const getOptionLabel = (option: string | TagInputEntryType) =>
+		typeof option === 'string' ? option : option.name;
 
 	const renderOption = (
 		props: React.HTMLAttributes<HTMLLIElement>,
-		option: string | IDictionaryTagInForm | IDictionaryTagInput
+		option: string | TagInputEntryType
 	) => {
 		return typeof option !== 'string' ? (
 			<Box component="li" {...props} id="tag-select-options">
