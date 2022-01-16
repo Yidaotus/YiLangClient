@@ -83,7 +83,7 @@ const INITIAL_ENTRY_INPUT_REDUCER_STATE: EntryInputReducerState = {
 
 interface DictionaryEntryInputProps {
 	entryKey: string | IDictionaryEntryResolved;
-	stateChanged?: (stage: EntryInputMode) => void;
+	onStateChange?: (state: EntryInputMode) => void;
 	onCancel: () => void;
 	onFinish: (resultId: DictionaryEntryID) => void;
 }
@@ -96,7 +96,7 @@ const isEntryInput = (
 
 const DictionaryEntryInput: React.FC<DictionaryEntryInputProps> = ({
 	entryKey,
-	stateChanged,
+	onStateChange,
 	onCancel,
 	onFinish,
 }) => {
@@ -136,10 +136,10 @@ const DictionaryEntryInput: React.FC<DictionaryEntryInputProps> = ({
 			}
 			dispatchEntryInputState({
 				type: 'pushState',
-				payload: { newState: 'tag', stateChanged },
+				payload: { newState: 'tag', stateChanged: onStateChange },
 			});
 		},
-		[stateChanged]
+		[onStateChange]
 	);
 
 	const createRoot = useCallback(
@@ -148,10 +148,10 @@ const DictionaryEntryInput: React.FC<DictionaryEntryInputProps> = ({
 			setEntryFormState(formState);
 			dispatchEntryInputState({
 				type: 'pushState',
-				payload: { newState: 'root', stateChanged },
+				payload: { newState: 'root', stateChanged: onStateChange },
 			});
 		},
-		[rootFormState, stateChanged]
+		[rootFormState, onStateChange]
 	);
 
 	const saveEntry = useCallback(
@@ -215,7 +215,7 @@ const DictionaryEntryInput: React.FC<DictionaryEntryInputProps> = ({
 		});
 		dispatchEntryInputState({
 			type: 'popState',
-			payload: { stateChanged },
+			payload: { stateChanged: onStateChange },
 		});
 	};
 
@@ -237,7 +237,7 @@ const DictionaryEntryInput: React.FC<DictionaryEntryInputProps> = ({
 		}
 		dispatchEntryInputState({
 			type: 'popState',
-			payload: { stateChanged },
+			payload: { stateChanged: onStateChange },
 		});
 	};
 
@@ -246,12 +246,12 @@ const DictionaryEntryInput: React.FC<DictionaryEntryInputProps> = ({
 		if (!isDone) {
 			dispatchEntryInputState({
 				type: 'popState',
-				payload: { stateChanged },
+				payload: { stateChanged: onStateChange },
 			});
 		} else {
 			onCancel();
 		}
-	}, [stateChanged, entryInputState.currentState, onCancel]);
+	}, [onStateChange, entryInputState.currentState, onCancel]);
 
 	return (
 		<div>

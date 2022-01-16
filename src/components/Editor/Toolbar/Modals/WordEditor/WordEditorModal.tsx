@@ -167,7 +167,7 @@ const WordEditorModal: React.FC<IWordInputProps> = ({ visible, close }) => {
 					) : (
 						<DictEntryEdit
 							entryKey={entryKey}
-							stateChanged={setEditMode}
+							onStateChange={setEditMode}
 							onCancel={cancel}
 							onFinish={finish}
 						/>

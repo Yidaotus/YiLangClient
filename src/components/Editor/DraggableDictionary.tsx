@@ -20,7 +20,7 @@ import { useDictionaryEntryResolved } from '@hooks/DictionaryQueryHooks';
 import { DictionaryEntryID } from 'Document/Utility';
 import DictEntryWithEdit from '@components/DictionaryEntry/DictEntryWithEdit/DictEntryWithEdit';
 
-const StyledAccordion = styled(Accordion)(({ theme }) => ({
+const StyledAccordion = styled(Accordion)(() => ({
 	'& .MuiAccordionSummary-root.Mui-expanded': {
 		minHeight: '48px',
 		height: '48px',
@@ -38,26 +38,35 @@ const DraggableDictionary: React.FC<DraggableDictionaryProps> = ({
 	const [expanded, setExpanded] = useState(false);
 	const editor = useSlateStatic();
 	const [dictId, setDictId] = useState<DictionaryEntryID>();
+	const [isEditing, setIsEditing] = useState(false);
 	const [, entry] = useDictionaryEntryResolved(dictId);
 
 	useEffect(() => {
-		const clickedVocab = YiEditor.isNodeAtSelection(
-			editor,
-			selection,
-			'word'
-		);
+		if (!isEditing) {
+			const clickedVocab = YiEditor.isNodeAtSelection(
+				editor,
+				selection,
+				'word'
+			);
 
-		if (clickedVocab && selection && SlateRange.isCollapsed(selection)) {
-			const wordFragment = Editor.above(editor);
-			if (wordFragment) {
-				const wordNode = wordFragment[0] as WordElement;
-				setExpanded(true);
-				setDictId(wordNode.dictId);
+			if (
+				clickedVocab &&
+				selection &&
+				SlateRange.isCollapsed(selection)
+			) {
+				const wordFragment = Editor.above(editor);
+				if (wordFragment) {
+					const wordNode = wordFragment[0] as WordElement;
+					setExpanded(true);
+					setDictId(wordNode.dictId);
+				}
 			}
-		} else {
-			setDictId(undefined);
 		}
-	}, [editor, selection]);
+	}, [editor, isEditing, selection]);
+
+	const onStateChange = (editingState: boolean) => {
+		setIsEditing(editingState);
+	};
 
 	return (
 		<Box
@@ -115,6 +124,7 @@ const DraggableDictionary: React.FC<DraggableDictionaryProps> = ({
 									onRootSelect={(rootId) => {
 										setDictId(rootId);
 									}}
+									onStateChange={onStateChange}
 								/>
 							)}
 						</AccordionDetails>

@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { useDeleteDictionaryEntry } from '@hooks/DictionaryQueryHooks';
 import { Box, Button, IconButton, Stack } from '@mui/material';
 import { Delete as DeleteIcon, Edit as EditIcon } from '@mui/icons-material';
@@ -7,6 +7,7 @@ import DictEntryEdit from '../DictionaryEntryInput/DictionaryEntryInput';
 import ConfirmButton from '@components/ConfirmButton/ConfirmButton';
 
 type IDictEntryWithEditProps = IDictionaryEntryProps & {
+	onStateChange?: (editing: boolean) => void;
 	canRemove?: boolean;
 	removeCallback?: () => void;
 };
@@ -18,9 +19,14 @@ const DictEntryWithEdit: React.FC<IDictEntryWithEditProps> = ({
 	removeCallback,
 	size,
 	onRootSelect,
+	onStateChange,
 }) => {
 	const [editing, setEditing] = useState(false);
 	const deleteEntry = useDeleteDictionaryEntry();
+
+	useEffect(() => {
+		onStateChange?.(editing);
+	}, [onStateChange, editing]);
 
 	const finish = () => {
 		setEditing(false);

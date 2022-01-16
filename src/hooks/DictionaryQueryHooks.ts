@@ -95,7 +95,7 @@ const useDictionaryEntry = (
 		},
 		{
 			enabled: !!id && !!activeLanguage,
-			keepPreviousData: true,
+			keepPreviousData: false,
 			refetchOnWindowFocus: false,
 		}
 	);
