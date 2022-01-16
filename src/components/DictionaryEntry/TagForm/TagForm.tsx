@@ -267,8 +267,10 @@ const TagForm: React.FC<ITagFormProps> = ({
 				direction="row"
 				sx={{ justifyContent: 'space-between', mt: 1 }}
 			>
-				<Button onClick={onCancel}>{cancelLabel}</Button>
-				<Button variant="contained" type="submit">
+				<Button aria-label="cancel" onClick={onCancel}>
+					{cancelLabel}
+				</Button>
+				<Button aria-label="save" variant="contained" type="submit">
 					{submitLabel}
 				</Button>
 			</Stack>
