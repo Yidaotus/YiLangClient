@@ -148,6 +148,7 @@ const TagForm: React.FC<ITagFormProps> = ({
 							render={({ field, fieldState: { error } }) => (
 								<TextField
 									{...field}
+									label="name"
 									error={!!error}
 									helperText={error?.message || null}
 									fullWidth

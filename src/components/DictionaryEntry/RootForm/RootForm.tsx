@@ -78,9 +78,13 @@ const EntryForm: React.FC<IRootFormProps> = ({
 		createTag(tagName, currentFormState);
 	};
 
+	const onSubmitCB = (formOutput: IRootFormOutput) => {
+		onSubmit(formOutput);
+	};
+
 	return (
 		<div>
-			<form onSubmit={handleSubmit(onSubmit)}>
+			<form onSubmit={handleSubmit(onSubmitCB)}>
 				<Stack spacing={2}>
 					<Controller
 						name="key"
@@ -170,8 +174,10 @@ const EntryForm: React.FC<IRootFormProps> = ({
 					direction="row"
 					sx={{ justifyContent: 'space-between', mt: 1 }}
 				>
-					<Button onClick={onCancel}>{cancelLabel}</Button>
-					<Button variant="contained" type="submit">
+					<Button aria-label="cancel" onClick={onCancel}>
+						{cancelLabel}
+					</Button>
+					<Button aria-label="save" variant="contained" type="submit">
 						{submitLabel}
 					</Button>
 				</Stack>

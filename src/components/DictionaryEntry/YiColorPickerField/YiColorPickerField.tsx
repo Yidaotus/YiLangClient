@@ -6,6 +6,12 @@ import HSLColorPicker from '@components/HSLColorPicker/HSLColorPicker';
 import { ColorLens } from '@mui/icons-material';
 import { IconButton } from '@mui/material';
 
+const DEFAULT_TAG_COLOR = {
+	colorValue: 0,
+	saturation: 50,
+	lightness: 70,
+};
+
 export interface YiColorPickerFieldProps {
 	value?: string;
 	onChange?: (value: string) => void;
@@ -14,9 +20,11 @@ const YiColorPickerField: React.FC<YiColorPickerFieldProps> = (
 	props: YiColorPickerFieldProps
 ) => {
 	const { value, onChange } = props;
-	const [selectedColorValue, setSelectedColorValue] = useState(0);
-	const saturation = 50;
-	const lightness = 70;
+	const [selectedColorValue, setSelectedColorValue] = useState(
+		DEFAULT_TAG_COLOR.colorValue
+	);
+	const saturation = DEFAULT_TAG_COLOR.saturation;
+	const lightness = DEFAULT_TAG_COLOR.lightness;
 
 	useEffect(() => {
 		if (onChange) {
@@ -24,7 +32,7 @@ const YiColorPickerField: React.FC<YiColorPickerFieldProps> = (
 				`hsl(${selectedColorValue}, ${saturation}%, ${lightness}%)`
 			);
 		}
-	}, [onChange, selectedColorValue]);
+	}, [lightness, onChange, saturation, selectedColorValue]);
 
 	const [pickerVisible, setPickerVisible] = useState(false);
 	const popover = useRef<HTMLDivElement>(null);
@@ -70,3 +78,4 @@ const YiColorPickerField: React.FC<YiColorPickerFieldProps> = (
 };
 
 export default YiColorPickerField;
+export { DEFAULT_TAG_COLOR };
