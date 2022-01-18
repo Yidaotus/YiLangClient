@@ -13,8 +13,7 @@ import WordFragment from './Fragments/Word/WordFragment';
 import ImageBlock from './Blocks/Image/Image';
 import WordList from './Blocks/WordList/WordList';
 import VideoBlock, { videoBlockPasteAction } from './Blocks/Video/Video';
-import { Box, Grid, Paper, Typography } from '@mui/material';
-import AccountCircleTwoToneIcon from '@mui/icons-material/AccountCircleTwoTone';
+import { Avatar, Box, Grid, Paper, Typography } from '@mui/material';
 
 const Leaf = ({ attributes, leaf, children }: RenderLeafProps) => {
 	return (
@@ -100,12 +99,9 @@ const Element = (props: RenderElementProps) => {
 			);
 		case 'word':
 			return (
-				<WordFragment
-					attributes={attributes}
-					element={element}
-					// eslint-disable-next-line react/no-children-prop
-					children={children}
-				/>
+				<WordFragment attributes={attributes} element={element}>
+					{children}
+				</WordFragment>
 			);
 		case 'mark':
 			return (
@@ -165,9 +161,8 @@ const Element = (props: RenderElementProps) => {
 						}}
 						contentEditable="false"
 					>
-						<AccountCircleTwoToneIcon
-							color="primary"
-							sx={{ paddingRight: 1 }}
+						<Avatar
+							sx={{ width: 24, height: 24, marginRight: 1 }}
 						/>
 					</div>
 					{children}

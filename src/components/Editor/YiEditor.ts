@@ -151,6 +151,7 @@ export type ImageElement = {
 	type: 'image';
 	src: string;
 	align: AlignValue;
+	width: number;
 	caption?: string;
 	children: CustomText[];
 };
@@ -375,16 +376,20 @@ const getAlign = (editor: Editor): AlignValue | null => {
 	return blockAlign;
 };
 
-const toggleBlockType = (
+const toggleBlockType = <T extends EditorElement['type']>(
 	editor: Editor,
-	blockType: EditorElement['type'],
-	applyToRoot?: boolean
+	blockType: T,
+	applyToRoot?: boolean,
+	blockProps?: Omit<
+		Extract<EditorBlockElement, { type: T }>,
+		'type' | 'children'
+	>
 ): void => {
 	const currentBlockType = getTextBlockStyle(editor);
 	const changeTo = currentBlockType === blockType ? 'paragraph' : blockType;
 	Transforms.setNodes(
 		editor,
-		{ type: changeTo },
+		{ type: changeTo, ...blockProps },
 		{
 			match: (n) => Editor.isBlock(editor, n),
 			mode: applyToRoot ? 'highest' : 'lowest',

@@ -6,13 +6,14 @@ import {
 } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import DictionarySelect from './DictionarySelect';
-import { testDicitonarySearchResponse as testDictionarySearchResponse } from '../../../../test/testData';
+import { testDictionarySearchResponse } from '../../../../test/testData';
 import { renderWithDefaultProvider } from '../../../../test/testHelper';
-import { IDictionaryEntryInForm, IRootsInput } from '../EntryForm/EntryForm';
+import { IDictionaryEntry } from 'Document/Dictionary';
+import { IDictionaryRootInput } from '../RootForm/RootForm';
 
 describe('Tag Select', () => {
 	it('Render provided value correctly', async () => {
-		const initialValue: Array<IDictionaryEntryInForm | IRootsInput> = [
+		const initialValue: Array<IDictionaryEntry | IDictionaryRootInput> = [
 			{
 				id: 'testId',
 				key: 'testKey',
@@ -56,7 +57,7 @@ describe('Tag Select', () => {
 
 	it(`Don't show create option on input with the same name as found option`, async () => {
 		const initialEntryKey = 'testEntryKey';
-		const initialValue: Array<IDictionaryEntryInForm | IRootsInput> = [
+		const initialValue: Array<IDictionaryEntry | IDictionaryRootInput> = [
 			{
 				id: 'testId',
 				key: initialEntryKey,
@@ -93,7 +94,7 @@ describe('Tag Select', () => {
 	});
 
 	it('Show and dispatch create option', async () => {
-		const initialValue: Array<IDictionaryEntryInForm | IRootsInput> = [
+		const initialValue: Array<IDictionaryEntry | IDictionaryRootInput> = [
 			{
 				id: 'testId',
 				key: 'testKey',

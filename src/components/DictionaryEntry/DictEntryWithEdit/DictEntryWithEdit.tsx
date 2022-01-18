@@ -50,10 +50,6 @@ const DictEntryWithEdit: React.FC<IDictEntryWithEditProps> = ({
 						onCancel={cancel}
 						onFinish={finish}
 					/>
-					<Box>
-						<Button onClick={cancel}>Cancel</Button>
-						<Button onClick={finish}>Save</Button>
-					</Box>
 				</Box>
 			)}
 			{!editing && (

@@ -1,18 +1,47 @@
 import './Image.css';
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import {
+	ReactEditor,
 	RenderElementProps,
 	useFocused,
 	useSelected,
 	useSlateStatic,
 } from 'slate-react';
 import { ImageElement } from '@components/Editor/YiEditor';
-import { Editor, Element as SlateElement, Transforms } from 'slate';
+import { Transforms } from 'slate';
 import isHotkey from 'is-hotkey';
 import { TextField } from '@mui/material';
+import { Resizable } from 're-resizable';
 
 export type IImageBlockData = Omit<RenderElementProps, 'element'> & {
 	element: ImageElement;
+};
+
+interface ResizeHandleProps {
+	active: boolean;
+	position: 'left' | 'right';
+}
+
+const ResizeHandle: React.FC<ResizeHandleProps> = ({ active, position }) => {
+	const positionStyles =
+		position === 'right'
+			? {
+					alignItems: 'end',
+					right: '-.75rem',
+			  }
+			: {
+					left: '-.75rem',
+			  };
+	const activeStyles = active ? { opacity: '100%' } : { opacity: '0%' };
+	return (
+		<div
+			className="image-handle"
+			style={{
+				...positionStyles,
+				...activeStyles,
+			}}
+		/>
+	);
 };
 
 /**
@@ -28,26 +57,39 @@ const ImageBlock: React.FC<IImageBlockData> = ({
 }) => {
 	const [isEditingCaption, setIsEditingCaption] = useState(false);
 	const [captionEdit, setCaptionEdit] = useState(element.caption || '');
+	const [width, setWidth] = useState(element.width);
 	const editor = useSlateStatic();
 	const selected = useSelected();
 	const focused = useFocused();
 
+	useEffect(() => {
+		setWidth(element.width);
+	}, [element.width]);
+
+	const applyNodeWith = useCallback(
+		(w: number) => {
+			const path = ReactEditor.findPath(editor, element);
+
+			if (w === element.width) {
+				Transforms.select(editor, path);
+			} else {
+				Transforms.setNodes(editor, { width: w }, { at: path });
+			}
+		},
+		[editor, element]
+	);
+
 	const applyCaptionChange = useCallback(
 		(captionInput) => {
-			const imageNodeEntry = Editor.above(editor, {
-				match: (n) => SlateElement.isElement(n) && n.type === 'image',
-			});
-			if (imageNodeEntry == null) {
-				return;
-			}
+			const path = ReactEditor.findPath(editor, element);
 
 			Transforms.setNodes(
 				editor,
 				{ caption: captionInput },
-				{ at: imageNodeEntry[1] }
+				{ at: path }
 			);
 		},
-		[editor]
+		[editor, element]
 	);
 
 	const onKeyDown = useCallback(
@@ -83,27 +125,66 @@ const ImageBlock: React.FC<IImageBlockData> = ({
 			<div
 				contentEditable={false}
 				style={{
+					display: 'flex',
+					flexDirection: 'column',
+					alignItems: 'center',
+					justifyContent: 'center',
 					marginTop: '15px',
 					marginBottom: '15px',
 				}}
 			>
-				<img
-					alt="lul"
-					src={element.src}
-					style={{
-						display: 'block',
-						marginLeft:
-							element.align === 'center' ||
-							element.align === 'right'
-								? 'auto'
-								: '0',
-						marginRight: element.align === 'center' ? 'auto' : '0',
-						maxHeight: '20em',
-						boxShadow:
-							selected && focused ? '0 0 0 3px #B4D5FF' : 'none',
+				<Resizable
+					size={{ width, height: '100%' }}
+					maxWidth="100%"
+					lockAspectRatio
+					resizeRatio={2}
+					handleComponent={{
+						left: (
+							<ResizeHandle
+								active={focused && selected}
+								position="left"
+							/>
+						),
+						right: (
+							<ResizeHandle
+								active={focused && selected}
+								position="right"
+							/>
+						),
 					}}
-				/>
-				{isEditingCaption ? (
+					enable={{
+						left: true,
+						right: true,
+					}}
+					onResize={(e, direction, ref) => {
+						setWidth(ref.offsetWidth);
+					}}
+					onResizeStop={(e, direction, ref) =>
+						applyNodeWith(ref.offsetWidth)
+					}
+					minWidth={100}
+				>
+					<img
+						alt="yilang-image-container"
+						src={element.src}
+						style={{
+							display: 'block',
+							maxWidth: '100%',
+							paddingLeft: '0px',
+							paddingRight: '0px',
+							cursor: 'pointer',
+							width: '100%',
+							borderRadius: '3px',
+							objectFit: 'cover',
+							boxShadow:
+								selected && focused
+									? '0 0 0 3px #B4D5FF'
+									: 'none',
+						}}
+						width={width}
+					/>
+				</Resizable>
+				{isEditingCaption && (
 					<TextField
 						autoFocus
 						type="text"
@@ -112,7 +193,8 @@ const ImageBlock: React.FC<IImageBlockData> = ({
 						onChange={onCaptionChange}
 						onBlur={onToggleCaptionEditMode}
 					/>
-				) : (
+				)}
+				{!isEditingCaption && element.caption && (
 					<div
 						style={{
 							margin: 'auto',
@@ -124,6 +206,20 @@ const ImageBlock: React.FC<IImageBlockData> = ({
 						onClick={onToggleCaptionEditMode}
 					>
 						{element.caption}
+					</div>
+				)}
+				{selected && !isEditingCaption && !element.caption && (
+					<div
+						style={{
+							margin: 'auto',
+							textAlign: 'center',
+							marginBottom: '10px',
+							color: 'lightgray',
+						}}
+						role="none"
+						onClick={onToggleCaptionEditMode}
+					>
+						Edit your caption
 					</div>
 				)}
 			</div>

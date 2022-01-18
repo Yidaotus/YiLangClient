@@ -71,5 +71,5 @@ const testTagSearchResponse: ReadonlyArray<IDictionaryTag> = [
 export {
 	testLanguageConfig,
 	testTagSearchResponse,
-	testDictionarySearchResponse as testDicitonarySearchResponse,
+	testDictionarySearchResponse,
 };

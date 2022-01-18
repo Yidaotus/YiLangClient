@@ -33,3 +33,35 @@
 .flow-down > span {
 	margin-top: 20px;
 }
+
+.image-handle {
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	position: absolute;
+	user-select: none;
+	height: 100%;
+	width: 25px;
+	margin-right: -0.75rem;
+	padding-right: 0.75rem;
+	cursor: col-resize;
+}
+
+.image-handle::after {
+	display: flex;
+	background-color: rgb(156, 163, 175);
+	content: ' ';
+	width: 3px;
+	height: 64px;
+	border-radius: 6px;
+}
+
+.image-handle:active::after {
+	background-color: rgb(156, 163, 255);
+}
+.image-handle:focus::after {
+	background-color: rgb(156, 163, 255);
+}
+.image-handle:hover::after {
+	background-color: rgb(156, 163, 255);
+}

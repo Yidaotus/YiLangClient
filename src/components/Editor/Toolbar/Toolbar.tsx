@@ -25,6 +25,7 @@ import {
 	Title as TitleIcon,
 	ChatBubble,
 	ImportContacts,
+	Image,
 } from '@mui/icons-material';
 
 import AlignButton from './Tools/AlignButton';
@@ -37,6 +38,7 @@ import BlockButton from './Tools/BlockButton';
 import InsertButton from './Tools/InsertButton';
 import ElementButton from './Tools/ElementButton';
 import InputWrapperButton from './Tools/InputWrapperButton';
+import ImageButton from './Tools/ImageButton';
 
 const StyledToggleButtonGroup = styled(ToggleButtonGroup)(({ theme }) => ({
 	'& .MuiToggleButtonGroup-grouped': {
@@ -204,6 +206,11 @@ const Toolbar: React.FC<IToolbarProps> = ({
 							title="Words and Sentences"
 							{...sharedProps}
 							icon={<ImportContacts />}
+						/>
+						<ImageButton
+							title="Image"
+							{...sharedProps}
+							icon={<Image />}
 						/>
 						<DialogButton
 							icon={<ChatBubble />}
