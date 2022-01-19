@@ -1,38 +1,53 @@
 import './SavingIndicator.css';
-import React from 'react';
-import { Box, Alert, Snackbar, CircularProgress } from '@mui/material';
+import { useEffect, useState } from 'react';
+import { SnackbarKey, useSnackbar } from 'notistack';
+import usePrevious from '@hooks/usePreviousState';
 
 export type SavingState = 'LOADING' | 'SUCCESS' | 'ERROR' | 'IDLE';
 
-const SavingIndicator: React.FC<{ savingState: SavingState }> = ({
-	savingState,
-}) => (
-	<Snackbar
-		open={savingState !== 'IDLE'}
-		anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
-	>
-		<Box>
-			{savingState === 'LOADING' && (
-				<Alert
-					icon={<CircularProgress size={20} />}
-					severity="info"
-					sx={{ width: '100%' }}
-				>
-					Saving document...
-				</Alert>
-			)}
-			{savingState === 'ERROR' && (
-				<Alert severity="error" sx={{ width: '100%' }}>
-					Something went wrong
-				</Alert>
-			)}
-			{savingState === 'SUCCESS' && (
-				<Alert severity="success" sx={{ width: '100%' }}>
-					Document saved
-				</Alert>
-			)}
-		</Box>
-	</Snackbar>
-);
+const useSavingIndicator = (savingState: SavingState) => {
+	const [currentSnackKey, setCurrentSnackKey] = useState<SnackbarKey>();
+	const { enqueueSnackbar, closeSnackbar } = useSnackbar();
+	const previousState = usePrevious(savingState);
 
-export default SavingIndicator;
+	const stateSwitched = previousState !== savingState;
+
+	useEffect(() => {
+		if (currentSnackKey && stateSwitched) {
+			closeSnackbar(currentSnackKey);
+		}
+	}, [closeSnackbar, currentSnackKey, previousState, stateSwitched]);
+
+	useEffect(() => {
+		switch (savingState) {
+			case 'LOADING':
+				setCurrentSnackKey(
+					enqueueSnackbar('Saving document...', {
+						variant: 'info',
+					})
+				);
+				break;
+			case 'ERROR':
+				setCurrentSnackKey(
+					enqueueSnackbar(
+						'Something went wrong while trying to save the Document',
+						{
+							variant: 'error',
+						}
+					)
+				);
+				break;
+			case 'SUCCESS':
+				setCurrentSnackKey(
+					enqueueSnackbar('Document saved successfully', {
+						variant: 'success',
+					})
+				);
+				break;
+			default:
+				break;
+		}
+	}, [closeSnackbar, enqueueSnackbar, savingState]);
+};
+
+export default useSavingIndicator;

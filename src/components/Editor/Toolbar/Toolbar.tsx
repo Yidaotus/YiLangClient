@@ -26,6 +26,7 @@ import {
 	ChatBubble,
 	ImportContacts,
 	Image,
+	FormatAlignJustify,
 } from '@mui/icons-material';
 
 import AlignButton from './Tools/AlignButton';
@@ -182,6 +183,12 @@ const Toolbar: React.FC<IToolbarProps> = ({
 					align="right"
 					icon={<FormatAlignRight />}
 					title="Right Align"
+					{...sharedProps}
+				/>
+				<AlignButton
+					align="justify"
+					icon={<FormatAlignJustify />}
+					title="Justify"
 					{...sharedProps}
 				/>
 			</StyledToggleButtonGroup>

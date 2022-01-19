@@ -24,7 +24,7 @@ import EntryForm, {
 	IEntryFormOutput,
 	INITIAL_ENTRY_FORM_VALUES,
 } from '../EntryForm/EntryForm';
-import useUiErrorHandler from '@helpers/Error';
+import useUiErrorHandler from '@helpers/useUiErrorHandler';
 import RootForm, {
 	IDictionaryRootInput,
 	INITIAL_ROOT_FORM_VALUES,

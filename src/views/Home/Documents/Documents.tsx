@@ -24,7 +24,7 @@ import {
 	Paper,
 } from '@mui/material';
 import ConfirmButton from '@components/ConfirmButton/ConfirmButton';
-import useUiErrorHandler from '@helpers/Error';
+import useUiErrorHandler from '@helpers/useUiErrorHandler';
 
 const excerptLength = 100;
 const pageSize = 10;

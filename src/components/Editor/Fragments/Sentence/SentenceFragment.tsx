@@ -2,6 +2,7 @@ import React from 'react';
 import { RenderElementProps, useSelected } from 'slate-react';
 import { SentenceElement } from '@components/Editor/YiEditor';
 import {
+	ClickAwayListener,
 	styled,
 	Tooltip,
 	tooltipClasses,
@@ -31,6 +32,15 @@ const SentenceFragment: React.FC<SentenceFragmentProps> = ({
 	attributes,
 }) => {
 	const selected = useSelected();
+	const [open, setOpen] = React.useState(false);
+
+	const handleTooltipClose = () => {
+		setOpen(false);
+	};
+
+	const handleTooltipOpen = () => {
+		setOpen(true);
+	};
 
 	return (
 		<span
@@ -39,21 +49,34 @@ const SentenceFragment: React.FC<SentenceFragmentProps> = ({
 				borderBottom: '1px dashed #8DA46E',
 			}}
 		>
-			<SentenceTooltip
-				title={element.translation}
-				TransitionComponent={Zoom}
-				enterDelay={300}
-				PopperProps={{ contentEditable: false }}
-			>
-				<span
-					style={{
-						borderRadius: '2px',
-						backgroundColor: selected ? '#d4ecff' : '',
-					}}
-				>
-					{children}
-				</span>
-			</SentenceTooltip>
+			<ClickAwayListener onClickAway={handleTooltipClose}>
+				<div style={{ display: 'inline-block' }}>
+					<SentenceTooltip
+						title={element.translation}
+						TransitionComponent={Zoom}
+						enterDelay={300}
+						PopperProps={{
+							disablePortal: true,
+							contentEditable: false,
+						}}
+						onClose={handleTooltipClose}
+						open={open}
+						disableFocusListener
+						disableHoverListener
+						disableTouchListener
+					>
+						<span
+							style={{
+								borderRadius: '2px',
+								backgroundColor: selected ? '#d4ecff' : '',
+							}}
+							onClick={handleTooltipOpen}
+						>
+							{children}
+						</span>
+					</SentenceTooltip>
+				</div>
+			</ClickAwayListener>
 		</span>
 	);
 };

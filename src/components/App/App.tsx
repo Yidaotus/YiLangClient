@@ -148,7 +148,7 @@ const App: React.FC = () => {
 					maxSnack={3}
 					anchorOrigin={{
 						vertical: 'top',
-						horizontal: 'right',
+						horizontal: 'center',
 					}}
 				>
 					<AuthProvider>
@@ -169,7 +169,7 @@ const App: React.FC = () => {
 										<PrivateRoute
 											roles={[Role.ADMIN, Role.USER]}
 										>
-											<Home />{' '}
+											<Home />
 										</PrivateRoute>
 									}
 								>

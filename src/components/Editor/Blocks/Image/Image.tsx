@@ -18,11 +18,10 @@ export type IImageBlockData = Omit<RenderElementProps, 'element'> & {
 };
 
 interface ResizeHandleProps {
-	active: boolean;
 	position: 'left' | 'right';
 }
 
-const ResizeHandle: React.FC<ResizeHandleProps> = ({ active, position }) => {
+const ResizeHandle: React.FC<ResizeHandleProps> = ({ position }) => {
 	const positionStyles =
 		position === 'right'
 			? {
@@ -32,13 +31,11 @@ const ResizeHandle: React.FC<ResizeHandleProps> = ({ active, position }) => {
 			: {
 					left: '-.75rem',
 			  };
-	const activeStyles = active ? { opacity: '100%' } : { opacity: '0%' };
 	return (
 		<div
 			className="image-handle"
 			style={{
 				...positionStyles,
-				...activeStyles,
 			}}
 		/>
 	);
@@ -139,18 +136,8 @@ const ImageBlock: React.FC<IImageBlockData> = ({
 					lockAspectRatio
 					resizeRatio={2}
 					handleComponent={{
-						left: (
-							<ResizeHandle
-								active={focused && selected}
-								position="left"
-							/>
-						),
-						right: (
-							<ResizeHandle
-								active={focused && selected}
-								position="right"
-							/>
-						),
+						left: <ResizeHandle position="left" />,
+						right: <ResizeHandle position="right" />,
 					}}
 					enable={{
 						left: true,
@@ -163,6 +150,7 @@ const ImageBlock: React.FC<IImageBlockData> = ({
 						applyNodeWith(ref.offsetWidth)
 					}
 					minWidth={100}
+					className="resize-group"
 				>
 					<img
 						alt="yilang-image-container"
@@ -191,7 +179,12 @@ const ImageBlock: React.FC<IImageBlockData> = ({
 						defaultValue={element.caption}
 						onKeyDown={onKeyDown}
 						onChange={onCaptionChange}
+						variant="standard"
 						onBlur={onToggleCaptionEditMode}
+						inputProps={{ style: { textAlign: 'center' } }}
+						placeholder="Caption"
+						size="small"
+						sx={{ width: '80%', pt: 1 }}
 					/>
 				)}
 				{!isEditingCaption && element.caption && (

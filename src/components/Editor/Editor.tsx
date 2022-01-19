@@ -18,10 +18,13 @@ import SavingIndicator, {
 	SavingState,
 } from './SavingIndicator/SavingIndicator';
 import { useActiveLanguageConf } from '@hooks/ConfigQueryHooks';
-import useUiErrorHandler from '@helpers/Error';
+import useUiErrorHandler from '@helpers/useUiErrorHandler';
 import DraggableDictionary from './DraggableDictionary';
 import useDebounce from '@hooks/useDebounce';
 import DraggableSRS from './SRS/DraggableSRS';
+import { Plate } from '@udecode/plate';
+import { useSnackbar } from 'notistack';
+import useSavingIndicator from './SavingIndicator/SavingIndicator';
 
 const AVERAGE_ACTIONS_PER_COMMAND = 15;
 const SAVE_EVERY_ACTIONS = 5 * AVERAGE_ACTIONS_PER_COMMAND;
@@ -51,6 +54,8 @@ const YiEditor: React.FC = () => {
 	const activeLanguage = useActiveLanguageConf();
 	const handleError = useUiErrorHandler();
 
+	useSavingIndicator(savingIndicator);
+
 	useEffect(() => {
 		if (dbDocument && dbDocument?.lang !== activeLanguage?.id) {
 			navigate('/home');
@@ -75,23 +80,26 @@ const YiEditor: React.FC = () => {
 
 	const updateDocument = useCallback(async () => {
 		try {
-			setSavingIndicator('LOADING');
-
 			const title = Editor.string(editor, [0], { voids: true });
-			const serializedDocument = JSON.stringify(editor.children);
-			await updateDocumentAsync({
-				id: id || 'what',
-				title,
-				serializedDocument,
-			});
+			if (title) {
+				setSavingIndicator('LOADING');
+				const serializedDocument = JSON.stringify(editor.children);
+				await updateDocumentAsync({
+					id: id || 'what',
+					title,
+					serializedDocument,
+				});
 
-			// Hacky but feels better for the user to actually see the saving process
-			setTimeout(() => {
-				setSavingIndicator('SUCCESS');
+				// Hacky but feels better for the user to actually see the saving process
 				setTimeout(() => {
-					setSavingIndicator('IDLE');
-				}, 2000);
-			}, 1000);
+					setSavingIndicator('SUCCESS');
+					setTimeout(() => {
+						setSavingIndicator('IDLE');
+					}, 2000);
+				}, 1000);
+			} else {
+				handleError(new Error('Bitte einen Titel angeben!'));
+			}
 		} catch (error) {
 			setSavingIndicator('ERROR');
 			handleError(error);
@@ -164,7 +172,6 @@ const YiEditor: React.FC = () => {
 
 	return (
 		<div>
-			<SavingIndicator savingState={savingIndicator} />
 			<div>
 				{loadingDocument && <CircularProgress />}
 				<div>
@@ -215,6 +222,9 @@ const YiEditor: React.FC = () => {
 								<DraggableSRS editor={editor} />
 							</div>
 						</Slate>
+						<pre id="json">
+							{JSON.stringify(editorNodes, null, '\t')}
+						</pre>
 					</div>
 				</div>
 			</div>

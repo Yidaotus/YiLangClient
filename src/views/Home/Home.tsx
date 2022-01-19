@@ -5,7 +5,7 @@ import { Outlet } from 'react-router-dom';
 import { useActiveLanguageConf } from '@hooks/ConfigQueryHooks';
 import { useSnackbar } from 'notistack';
 import ResponsiveAppBar from './AppBar';
-import useUiErrorHandler from '@helpers/Error';
+import useUiErrorHandler from '@helpers/useUiErrorHandler';
 
 const HomeView: React.FC = () => {
 	const [loading, setLoading] = useState(false);

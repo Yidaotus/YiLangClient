@@ -46,7 +46,7 @@ const ListButton: React.FC<IListButtonProps> = ({
 			return toolbarChanged();
 		}
 
-		YiEditor.toggleBlockType(editor, 'listItem', true);
+		YiEditor.toggleBlockType(editor, type, true);
 		const block = { type, children: [] };
 		Transforms.wrapNodes(editor, block);
 		return toolbarChanged();

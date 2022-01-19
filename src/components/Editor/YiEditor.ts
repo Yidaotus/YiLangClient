@@ -50,7 +50,7 @@ const ElementTypeLabels: {
 	blockQuote: 'Quote',
 };
 
-export type AlignValue = 'left' | 'right' | 'center' | null;
+export type AlignValue = 'left' | 'right' | 'center' | 'justify' | null;
 
 export type HighlightElement = {
 	type: 'highlight';
@@ -192,7 +192,12 @@ export type EditorInlineElement =
 	| SentenceElement;
 
 export type EditorElement = EditorBlockElement | EditorInlineElement;
-export type FormattedText = { text: string; bold?: true; color?: string };
+export type FormattedText = {
+	text: string;
+	bold?: true;
+	color?: string;
+	placeholder?: boolean;
+};
 export type CustomText = FormattedText;
 
 declare module 'slate' {
@@ -398,7 +403,59 @@ const toggleBlockType = <T extends EditorElement['type']>(
 };
 
 const withList = (editor: Editor): CustomEditor => {
-	const { insertBreak } = editor;
+	const { insertBreak, normalizeNode } = editor;
+
+	// eslint-disable-next-line no-param-reassign
+	editor.normalizeNode = (entry) => {
+		const listNodes: Array<EditorElement['type']> = [
+			'numberedList',
+			'bulletedList',
+		];
+		const [node, path] = entry;
+
+		if (SlateElement.isElement(node) && node.type === 'listItem') {
+			for (const [child, childPath] of SlateNode.children(editor, path)) {
+				if (SlateElement.isElement(child)) {
+					Transforms.unwrapNodes(editor, { at: childPath });
+				}
+			}
+			return;
+		}
+
+		// If the element is a paragraph, ensure its children are valid.
+		if (SlateElement.isElement(node) && listNodes.includes(node.type)) {
+			for (const [child, childPath] of SlateNode.children(editor, path)) {
+				const childRootPath = [childPath[0], childPath[1]];
+				if (
+					SlateElement.isElement(child) &&
+					child.type !== 'listItem'
+				) {
+					Transforms.wrapNodes(
+						editor,
+						{
+							type: 'listItem',
+							children: [],
+						},
+						{ at: childRootPath }
+					);
+				}
+				if (!SlateElement.isElement(child)) {
+					Transforms.wrapNodes(
+						editor,
+						{
+							type: 'listItem',
+							children: [],
+						},
+						{ at: childRootPath }
+					);
+				}
+			}
+			return;
+		}
+
+		// Fall back to the original `normalizeNode` to enforce other constraints.
+		normalizeNode(entry);
+	};
 
 	// eslint-disable-next-line no-param-reassign
 	editor.insertBreak = () => {
@@ -437,7 +494,42 @@ const withList = (editor: Editor): CustomEditor => {
 };
 
 const withDialog = (editor: Editor): CustomEditor => {
-	const { deleteBackward, insertBreak } = editor;
+	const { deleteBackward, insertBreak, normalizeNode } = editor;
+
+	// eslint-disable-next-line no-param-reassign
+	editor.normalizeNode = (entry) => {
+		const [node, path] = entry;
+
+		// If the element is a paragraph, ensure its children are valid.
+		if (SlateElement.isElement(node) && node.type === 'dialogLine') {
+			if (node.children.length > 2) {
+				node.children.splice(2);
+			}
+			if (node.children.length < 2) {
+				Transforms.insertNodes(
+					editor,
+					{ type: 'dialogLineActor', children: [{ text: '' }] },
+					{ at: [...path, 0] }
+				);
+				Transforms.insertNodes(
+					editor,
+					{ type: 'dialogLineSpeech', children: [{ text: '' }] },
+					{ at: [...path, 0] }
+				);
+				return;
+			}
+		}
+
+		if (SlateElement.isElement(node) && node.type === 'dialog') {
+			if (node.children.length < 1) {
+				Transforms.removeNodes(editor, { at: path });
+				return;
+			}
+		}
+
+		// Fall back to the original `normalizeNode` to enforce other constraints.
+		normalizeNode(entry);
+	};
 
 	// eslint-disable-next-line no-param-reassign
 	editor.deleteBackward = (unit) => {
@@ -601,11 +693,6 @@ const withLayout = (editor: Editor): CustomEditor => {
 						Transforms.setNodes(editor, newProperties, {
 							at: childPath,
 						});
-						if (elementType === 'documentTitle') {
-							if (child.children.length > 0) {
-								child.children = [{ text: 'Untitled' }];
-							}
-						}
 					}
 				};
 

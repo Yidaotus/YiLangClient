@@ -49,7 +49,7 @@ const UserProvider: React.FC = ({ children }) => {
 		cacheTime: Infinity,
 		refetchOnWindowFocus: false,
 	});
-	const [user, setUser] = useState<IUser | null>(null);
+	const [user, setUser] = useState<IUser | null>();
 	const [activeDocument, setActiveDocument] = useState<string | null>(null);
 
 	const changeActiveDocument = useCallback(
@@ -64,10 +64,14 @@ const UserProvider: React.FC = ({ children }) => {
 	}, [setUser]);
 
 	useEffect(() => {
-		setUser(
-			serverUser.data ? { ...serverUser?.data, role: Role.USER } : null
-		);
-	}, [serverUser.data, setUser]);
+		if (!serverUser.isLoading) {
+			setUser(
+				serverUser.data
+					? { ...serverUser?.data, role: Role.USER }
+					: null
+			);
+		}
+	}, [serverUser.data, serverUser.isLoading, setUser]);
 
 	useEffect(() => {
 		const interceptorId = ApiService.interceptors.response.use(
@@ -94,7 +98,7 @@ const UserProvider: React.FC = ({ children }) => {
 				if (!error.status) {
 					return Promise.reject(new Error('Server unavailiable'));
 				}
-				// throw new Error('Invalid ApiResponce Object so Fatal!');
+				// throw new Error('Invalid ApiResponse Object so Fatal!');
 				return Promise.reject();
 			}
 		);
@@ -106,11 +110,12 @@ const UserProvider: React.FC = ({ children }) => {
 
 	return (
 		<>
-			{serverUser.isLoading ? (
+			{serverUser.isLoading && (
 				<div>
 					<p>Checking user credentials</p>
 				</div>
-			) : (
+			)}
+			{user !== undefined && (
 				<UserContext.Provider
 					value={{
 						user,

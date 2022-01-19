@@ -1,4 +1,4 @@
-import useUiErrorHandler from '@helpers/Error';
+import useUiErrorHandler from '@helpers/useUiErrorHandler';
 import {
 	removeLanguageConfig,
 	addLanguageConfig,

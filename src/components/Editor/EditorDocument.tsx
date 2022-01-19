@@ -1,6 +1,13 @@
 import './EditorDocument.css';
 import React, { useCallback } from 'react';
-import { Transforms, Range } from 'slate';
+import {
+	Transforms,
+	Range,
+	Editor,
+	Element as SlateElement,
+	Node as SlateNode,
+	NodeEntry,
+} from 'slate';
 import {
 	Editable,
 	RenderLeafProps,
@@ -22,8 +29,23 @@ const Leaf = ({ attributes, leaf, children }: RenderLeafProps) => {
 			style={{
 				fontWeight: leaf.bold ? 'bold' : 'normal',
 				color: leaf.color,
+				position: 'relative',
 			}}
 		>
+			{leaf.placeholder && (
+				<span
+					style={{
+						opacity: 0.3,
+						position: 'absolute',
+						minWidth: '20rem',
+						userSelect: 'none',
+						pointerEvents: 'none',
+					}}
+					contentEditable={false}
+				>
+					Type something
+				</span>
+			)}
 			{children}
 		</span>
 	);
@@ -39,10 +61,14 @@ const Element = (props: RenderElementProps) => {
 				</SentenceFragment>
 			);
 		case 'documentTitle': {
+			const empty =
+				element.children.length < 1 ||
+				element.children[0].text.length < 1;
 			return (
 				<Typography
 					sx={(theme) => ({
 						borderBottom: `5px solid ${theme.palette.secondary.light}`,
+						position: 'relative',
 						m: 2,
 					})}
 					variant="h3"
@@ -50,6 +76,21 @@ const Element = (props: RenderElementProps) => {
 					{...attributes}
 				>
 					{children}
+					{empty && (
+						<span
+							style={{
+								position: 'absolute',
+								color: 'lightgray',
+								left: 0,
+								top: 0,
+								userSelect: 'none',
+								pointerEvents: 'none',
+							}}
+							contentEditable="false"
+						>
+							Untitled
+						</span>
+					)}
 				</Typography>
 			);
 		}
@@ -228,6 +269,54 @@ const EditorDocument: React.FC = () => {
 	const renderElement = useCallback((props) => <Element {...props} />, []);
 	const editor = useSlateStatic();
 
+	const decorate = useCallback(
+		(entry: NodeEntry<SlateNode>) => {
+			const [node, path] = entry;
+			const hasParent = path.length > 1;
+			let isDocumentTitle = false;
+			if (hasParent) {
+				const parent = SlateNode.get(editor, [path[0]]);
+				isDocumentTitle =
+					SlateElement.isElement(parent) &&
+					parent.type === 'documentTitle';
+			} else {
+				isDocumentTitle =
+					SlateElement.isElement(node) &&
+					node.type === 'documentTitle';
+			}
+			if (editor.selection != null) {
+				if (
+					!Editor.isEditor(node) &&
+					!Editor.isVoid(editor, node) &&
+					Editor.string(editor, [path[0]]) === '' &&
+					Range.includes(editor.selection, path) &&
+					Range.isCollapsed(editor.selection) &&
+					!isDocumentTitle
+				) {
+					return [
+						{
+							...editor.selection,
+							placeholder: true,
+						},
+					];
+				}
+			}
+			return [];
+		},
+		[editor]
+	);
+
+	const onMouseDown = useCallback(() => {
+		if (editor.selection && !Range.isCollapsed(editor.selection)) {
+			if (
+				editor.operations[editor.operations.length - 1]?.type !==
+				'set_selection'
+			) {
+				Transforms.collapse(editor);
+			}
+		}
+	}, [editor]);
+
 	return (
 		<div style={{ position: 'relative', fontSize: '1.1em' }}>
 			<Editable
@@ -237,22 +326,11 @@ const EditorDocument: React.FC = () => {
 				className="editor-container"
 				renderElement={renderElement}
 				renderLeaf={renderLeaf}
-				onMouseDown={() => {
-					if (
-						editor.selection &&
-						!Range.isCollapsed(editor.selection)
-					) {
-						if (
-							editor.operations[editor.operations.length - 1]
-								?.type !== 'set_selection'
-						) {
-							Transforms.collapse(editor);
-						}
-					}
-				}}
+				onMouseDown={onMouseDown}
+				decorate={decorate}
 			/>
 		</div>
 	);
 };
 
-export default EditorDocument;
+export default React.memo(EditorDocument);
