@@ -51,6 +51,13 @@ const ElementTypeLabels: {
 };
 
 export type AlignValue = 'left' | 'right' | 'center' | 'justify' | null;
+export type FormattedText = {
+	text: string;
+	bold?: true;
+	color?: string;
+	placeholder?: boolean;
+};
+export type CustomText = FormattedText;
 
 export type HighlightElement = {
 	type: 'highlight';
@@ -63,11 +70,11 @@ export type ListItemElement = {
 	children: CustomText[];
 };
 
-export type BlockQuoteElement = {
+export interface BlockQuoteElement {
 	type: 'blockQuote';
 	align: AlignValue;
 	children: CustomText[];
-};
+}
 
 export type DialogLineSpeech = {
 	type: 'dialogLineSpeech';
@@ -192,13 +199,6 @@ export type EditorInlineElement =
 	| SentenceElement;
 
 export type EditorElement = EditorBlockElement | EditorInlineElement;
-export type FormattedText = {
-	text: string;
-	bold?: true;
-	color?: string;
-	placeholder?: boolean;
-};
-export type CustomText = FormattedText;
 
 declare module 'slate' {
 	interface CustomTypes {

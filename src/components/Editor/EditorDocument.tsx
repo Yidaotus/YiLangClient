@@ -21,6 +21,9 @@ import ImageBlock from './Blocks/Image/Image';
 import WordList from './Blocks/WordList/WordList';
 import VideoBlock, { videoBlockPasteAction } from './Blocks/Video/Video';
 import { Avatar, Box, Grid, Paper, Typography } from '@mui/material';
+import { DndProvider } from 'react-dnd';
+import { HTML5Backend } from 'react-dnd-html5-backend';
+import Paragraph from './Blocks/Paragraph/Paragraph';
 
 const Leaf = ({ attributes, leaf, children }: RenderLeafProps) => {
 	return (
@@ -252,12 +255,9 @@ const Element = (props: RenderElementProps) => {
 			);
 		default:
 			return (
-				<Box
-					{...attributes}
-					sx={{ textAlign: element.align || 'left', p: 1 }}
-				>
+				<Paragraph element={element} attributes={attributes}>
 					{children}
-				</Box>
+				</Paragraph>
 			);
 	}
 };
@@ -319,16 +319,22 @@ const EditorDocument: React.FC = () => {
 
 	return (
 		<div style={{ position: 'relative', fontSize: '1.1em' }}>
-			<Editable
-				onPaste={(event) => {
-					videoBlockPasteAction(event, editor);
-				}}
-				className="editor-container"
-				renderElement={renderElement}
-				renderLeaf={renderLeaf}
-				onMouseDown={onMouseDown}
-				decorate={decorate}
-			/>
+			<DndProvider backend={HTML5Backend}>
+				<Editable
+					onPaste={(event) => {
+						videoBlockPasteAction(event, editor);
+					}}
+					className="editor-container"
+					renderElement={renderElement}
+					renderLeaf={renderLeaf}
+					onMouseDown={onMouseDown}
+					decorate={decorate}
+					draggable={false}
+					onDrop={() => {
+						return true;
+					}}
+				/>
+			</DndProvider>
 		</div>
 	);
 };

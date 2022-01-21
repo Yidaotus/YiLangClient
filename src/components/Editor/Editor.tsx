@@ -126,6 +126,7 @@ const YiEditor: React.FC = () => {
 
 	const onEditorChange = useCallback(
 		(newValue) => {
+			setEditorNodes(newValue);
 			const isAstChange = editor.operations.some(
 				(op) => op.type !== 'set_selection'
 			);
@@ -144,7 +145,6 @@ const YiEditor: React.FC = () => {
 							(op) => op.type !== 'set_selection'
 						).length
 				);
-				setEditorNodes(newValue);
 			}
 		},
 		[editor.operations, editor.selection, setSelection]
