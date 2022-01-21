@@ -24,6 +24,13 @@ import { Avatar, Box, Grid, Paper, Typography } from '@mui/material';
 import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
 import Paragraph from './Blocks/Paragraph/Paragraph';
+import Dialog from './Blocks/Dialog/Dialog';
+import DialogLineSpeech from './Blocks/Dialog/DialogLineSpeech';
+import DialogLineActor from './Blocks/Dialog/DialogLineActor';
+import DialogLine from './Blocks/Dialog/DialogLine';
+import DocumentTitle from './Blocks/DocumentTitle/DocumentTitle';
+import NumberedList from './Blocks/List/NumberedList';
+import BulletedList from './Blocks/List/BulletedList';
 
 const Leaf = ({ attributes, leaf, children }: RenderLeafProps) => {
 	return (
@@ -64,37 +71,10 @@ const Element = (props: RenderElementProps) => {
 				</SentenceFragment>
 			);
 		case 'documentTitle': {
-			const empty =
-				element.children.length < 1 ||
-				element.children[0].text.length < 1;
 			return (
-				<Typography
-					sx={(theme) => ({
-						borderBottom: `5px solid ${theme.palette.secondary.light}`,
-						position: 'relative',
-						m: 2,
-					})}
-					variant="h3"
-					component="div"
-					{...attributes}
-				>
+				<DocumentTitle attributes={attributes} element={element}>
 					{children}
-					{empty && (
-						<span
-							style={{
-								position: 'absolute',
-								color: 'lightgray',
-								left: 0,
-								top: 0,
-								userSelect: 'none',
-								pointerEvents: 'none',
-							}}
-							contentEditable="false"
-						>
-							Untitled
-						</span>
-					)}
-				</Typography>
+				</DocumentTitle>
 			);
 		}
 		case 'title': {
@@ -155,83 +135,38 @@ const Element = (props: RenderElementProps) => {
 			);
 		case 'dialog':
 			return (
-				<Paper
-					sx={{
-						display: 'flex',
-						flexDirection: 'column',
-						borderRadius: '3px',
-						m: 2,
-						p: 1,
-					}}
-					{...attributes}
-				>
+				<Dialog attributes={attributes} element={element}>
 					{children}
-				</Paper>
+				</Dialog>
 			);
 		case 'dialogLine':
-			return (
-				<Box
-					sx={(theme) => ({
-						wordBreak: 'break-all',
-						whiteSpace: 'pre-wrap',
-						'&:nth-child(2n)': {
-							backgroundColor: theme.palette.secondary.light,
-							borderRadius: '2px',
-						},
-					})}
-					{...attributes}
-				>
-					{children}
-				</Box>
-			);
+			return <DialogLine attributes={attributes}>{children}</DialogLine>;
 		case 'dialogLineActor':
 			return (
-				<Box
-					sx={{
-						display: 'flex',
-						alignItems: 'center',
-						p: 1,
-						'& span': {
-							fontWeight: 'bold',
-						},
-					}}
-					{...attributes}
-				>
-					<div
-						style={{
-							userSelect: 'none',
-							display: 'flex',
-							alignItems: 'center',
-						}}
-						contentEditable="false"
-					>
-						<Avatar
-							sx={{ width: 24, height: 24, marginRight: 1 }}
-						/>
-					</div>
+				<DialogLineActor attributes={attributes}>
 					{children}
-				</Box>
+				</DialogLineActor>
 			);
 		case 'dialogLineSpeech':
 			return (
-				<Grid
-					item
-					xs="auto"
-					sx={{
-						paddingBottom: 1,
-						paddingLeft: 1,
-					}}
-					{...attributes}
-				>
+				<DialogLineSpeech attributes={attributes}>
 					{children}
-				</Grid>
+				</DialogLineSpeech>
 			);
 		case 'listItem':
 			return <li {...attributes}>{children}</li>;
 		case 'numberedList':
-			return <ol {...attributes}>{children}</ol>;
+			return (
+				<NumberedList attributes={attributes} element={element}>
+					{children}
+				</NumberedList>
+			);
 		case 'bulletedList':
-			return <ul {...attributes}>{children}</ul>;
+			return (
+				<BulletedList attributes={attributes} element={element}>
+					{children}
+				</BulletedList>
+			);
 		case 'wordList':
 			return (
 				<WordList attributes={attributes} element={element}>

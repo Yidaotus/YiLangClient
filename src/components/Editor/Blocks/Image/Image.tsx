@@ -10,8 +10,10 @@ import {
 import { ImageElement } from '@components/Editor/YiEditor';
 import { Transforms } from 'slate';
 import isHotkey from 'is-hotkey';
-import { TextField } from '@mui/material';
+import { Box, TextField } from '@mui/material';
 import { Resizable } from 're-resizable';
+import useDraggableElement from '@components/Editor/DnD/useDraggableElement';
+import DragHandle from '@components/Editor/DnD/DragHandle';
 
 export type IImageBlockData = Omit<RenderElementProps, 'element'> & {
 	element: ImageElement;
@@ -58,6 +60,8 @@ const ImageBlock: React.FC<IImageBlockData> = ({
 	const editor = useSlateStatic();
 	const selected = useSelected();
 	const focused = useFocused();
+	const { hovering, opacity, dragRef, dropRef, preview } =
+		useDraggableElement(element);
 
 	useEffect(() => {
 		setWidth(element.width);
@@ -117,8 +121,28 @@ const ImageBlock: React.FC<IImageBlockData> = ({
 	}, [isEditingCaption, applyCaptionChange, captionEdit]);
 
 	return (
-		<div {...attributes}>
+		<Box
+			{...attributes}
+			ref={(ref: HTMLDivElement) => {
+				dropRef(ref);
+				// eslint-disable-next-line no-param-reassign
+				attributes.ref.current = ref;
+			}}
+			sx={{
+				p: 1,
+				position: 'relative',
+				backgroundColor: hovering ? '#eeeeee40' : 'white',
+				opacity,
+				'& .drag-handle': {
+					opacity: '0%',
+				},
+				'&:hover .drag-handle': {
+					opacity: '100%',
+				},
+			}}
+		>
 			{children}
+			<DragHandle ref={dragRef} />
 			<div
 				contentEditable={false}
 				style={{
@@ -170,6 +194,7 @@ const ImageBlock: React.FC<IImageBlockData> = ({
 									: 'none',
 						}}
 						width={width}
+						ref={preview}
 					/>
 				</Resizable>
 				{isEditingCaption && (
@@ -216,7 +241,7 @@ const ImageBlock: React.FC<IImageBlockData> = ({
 					</div>
 				)}
 			</div>
-		</div>
+		</Box>
 	);
 };
 

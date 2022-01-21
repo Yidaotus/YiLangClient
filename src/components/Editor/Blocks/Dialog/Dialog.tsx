@@ -1,30 +1,26 @@
-import { ParagraphElement } from '@components/Editor/YiEditor';
-import { Box } from '@mui/material';
+import { DialogElement } from '@components/Editor/YiEditor';
+import { Paper } from '@mui/material';
 import React from 'react';
 import { RenderElementProps } from 'slate-react';
 import DragHandle from '@components/Editor/DnD/DragHandle';
 import useDraggableElement from '@components/Editor/DnD/useDraggableElement';
 
-interface ParagraphProps extends RenderElementProps {
-	element: ParagraphElement;
+interface DialogProps extends RenderElementProps {
+	element: DialogElement;
 }
 
-const Paragraph: React.FC<ParagraphProps> = ({
-	children,
-	attributes,
-	element,
-}) => {
+const Dialog: React.FC<DialogProps> = ({ children, attributes, element }) => {
 	const { hovering, opacity, dragRef, dropRef, preview } =
 		useDraggableElement(element);
 
 	return (
-		<Box
+		<Paper
 			{...attributes}
 			sx={{
-				textAlign: element.align || 'left',
 				p: 1,
+				m: 1,
 				position: 'relative',
-				backgroundColor: hovering ? '#eeeeee40' : 'white',
+				backgroundColor: hovering ? '#eeeeee40' : '',
 				opacity,
 				'& .drag-handle': {
 					opacity: '0%',
@@ -41,8 +37,8 @@ const Paragraph: React.FC<ParagraphProps> = ({
 		>
 			<div ref={preview}>{children}</div>
 			<DragHandle ref={dragRef} />
-		</Box>
+		</Paper>
 	);
 };
 
-export default Paragraph;
+export default Dialog;

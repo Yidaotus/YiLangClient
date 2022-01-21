@@ -1,15 +1,15 @@
-import { ParagraphElement } from '@components/Editor/YiEditor';
-import { Box } from '@mui/material';
 import React from 'react';
+import { NumberedListElement } from '@components/Editor/YiEditor';
+import { Box } from '@mui/material';
 import { RenderElementProps } from 'slate-react';
 import DragHandle from '@components/Editor/DnD/DragHandle';
 import useDraggableElement from '@components/Editor/DnD/useDraggableElement';
 
-interface ParagraphProps extends RenderElementProps {
-	element: ParagraphElement;
+interface NumberedListProps extends RenderElementProps {
+	element: NumberedListElement;
 }
 
-const Paragraph: React.FC<ParagraphProps> = ({
+const NumberedList: React.FC<NumberedListProps> = ({
 	children,
 	attributes,
 	element,
@@ -21,7 +21,6 @@ const Paragraph: React.FC<ParagraphProps> = ({
 		<Box
 			{...attributes}
 			sx={{
-				textAlign: element.align || 'left',
 				p: 1,
 				position: 'relative',
 				backgroundColor: hovering ? '#eeeeee40' : 'white',
@@ -39,10 +38,12 @@ const Paragraph: React.FC<ParagraphProps> = ({
 				attributes.ref.current = ref;
 			}}
 		>
-			<div ref={preview}>{children}</div>
+			<div ref={preview}>
+				<ol>{children}</ol>
+			</div>
 			<DragHandle ref={dragRef} />
 		</Box>
 	);
 };
 
-export default Paragraph;
+export default NumberedList;

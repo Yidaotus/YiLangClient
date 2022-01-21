@@ -1,15 +1,15 @@
-import { ParagraphElement } from '@components/Editor/YiEditor';
-import { Box } from '@mui/material';
 import React from 'react';
+import { BulletedListElement } from '@components/Editor/YiEditor';
+import { Box } from '@mui/material';
 import { RenderElementProps } from 'slate-react';
 import DragHandle from '@components/Editor/DnD/DragHandle';
 import useDraggableElement from '@components/Editor/DnD/useDraggableElement';
 
-interface ParagraphProps extends RenderElementProps {
-	element: ParagraphElement;
+interface BulletedListProps extends RenderElementProps {
+	element: BulletedListElement;
 }
 
-const Paragraph: React.FC<ParagraphProps> = ({
+const BulletedList: React.FC<BulletedListProps> = ({
 	children,
 	attributes,
 	element,
@@ -21,8 +21,7 @@ const Paragraph: React.FC<ParagraphProps> = ({
 		<Box
 			{...attributes}
 			sx={{
-				textAlign: element.align || 'left',
-				p: 1,
+				p: 0,
 				position: 'relative',
 				backgroundColor: hovering ? '#eeeeee40' : 'white',
 				opacity,
@@ -39,10 +38,12 @@ const Paragraph: React.FC<ParagraphProps> = ({
 				attributes.ref.current = ref;
 			}}
 		>
-			<div ref={preview}>{children}</div>
+			<div ref={preview}>
+				<ul>{children}</ul>
+			</div>
 			<DragHandle ref={dragRef} />
 		</Box>
 	);
 };
 
-export default Paragraph;
+export default BulletedList;
