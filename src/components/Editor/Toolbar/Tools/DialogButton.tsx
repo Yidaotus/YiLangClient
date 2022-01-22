@@ -61,6 +61,7 @@ const DialogButton: React.FC<IDialogButtonProps> = ({
 					type: 'dialog',
 					children: currentTexts.map(([actor, speech]) => ({
 						type: 'dialogLine',
+						alignment: 'left',
 						children: [
 							{
 								type: 'dialogLineActor',

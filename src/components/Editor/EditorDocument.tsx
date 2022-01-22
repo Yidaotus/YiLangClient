@@ -140,10 +140,14 @@ const Element = (props: RenderElementProps) => {
 				</Dialog>
 			);
 		case 'dialogLine':
-			return <DialogLine attributes={attributes}>{children}</DialogLine>;
+			return (
+				<DialogLine attributes={attributes} element={element}>
+					{children}
+				</DialogLine>
+			);
 		case 'dialogLineActor':
 			return (
-				<DialogLineActor attributes={attributes}>
+				<DialogLineActor attributes={attributes} element={element}>
 					{children}
 				</DialogLineActor>
 			);

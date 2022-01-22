@@ -12,10 +12,14 @@ const DialogLineSpeech: React.FC<DialogLineSpeechProps> = ({
 		<Grid
 			item
 			xs="auto"
-			sx={{
+			sx={(theme) => ({
 				paddingBottom: 1,
 				paddingLeft: 1,
-			}}
+				borderRadius: 1,
+				width: '100%',
+				p: 1,
+				backgroundColor: theme.palette.secondary.main,
+			})}
 			{...attributes}
 		>
 			{children}

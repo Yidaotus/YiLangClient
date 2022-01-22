@@ -83,11 +83,14 @@ export type DialogLineSpeech = {
 
 export type DialogLineActor = {
 	type: 'dialogLineActor';
+	name?: string;
+	color?: string;
 	children: CustomText[];
 };
 
 export type DialogLine = {
 	type: 'dialogLine';
+	alignment: 'left' | 'right';
 	children: [DialogLineActor, DialogLineSpeech];
 };
 
@@ -608,6 +611,7 @@ const withDialog = (editor: Editor): CustomEditor => {
 				const [, speechPath] = dialogSpeechElement;
 				const dialogLineNode: DialogLine = {
 					type: 'dialogLine',
+					alignment: 'left',
 					children: [
 						{
 							type: 'dialogLineActor',
@@ -735,6 +739,7 @@ const withYiLang = (editor: Editor): CustomEditor => {
 		'image',
 		'video',
 		'wordList',
+		'dialogLineActor',
 	];
 
 	// eslint-disable-next-line no-param-reassign
