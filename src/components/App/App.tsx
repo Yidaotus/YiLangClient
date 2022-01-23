@@ -29,7 +29,7 @@ const baseTheme = createTheme({
 			main: '#1E2D2F',
 		},
 		secondary: {
-			main: '#dde6ff',
+			main: '#F1EDEE',
 		},
 	},
 });

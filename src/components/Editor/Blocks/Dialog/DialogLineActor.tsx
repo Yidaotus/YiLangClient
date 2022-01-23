@@ -1,6 +1,7 @@
 import {
 	Avatar,
 	Box,
+	Divider,
 	IconButton,
 	Popover,
 	Stack,
@@ -22,9 +23,18 @@ const RoundIconButton = styled(IconButton)(() => ({
 	borderRadius: 100,
 }));
 
-const RoundToggleButton = styled(ToggleButton)(() => ({
-	borderRadius: 100,
+const SmallToggleButton = styled(ToggleButton)(() => ({
+	width: 32,
+	height: 32,
 }));
+
+const ACTOR_COLOR_INTENSITY = 300;
+const AvailableActorColors = [
+	green[ACTOR_COLOR_INTENSITY],
+	blue[ACTOR_COLOR_INTENSITY],
+	red[ACTOR_COLOR_INTENSITY],
+	orange[ACTOR_COLOR_INTENSITY],
+];
 
 const DialogLineActor: React.FC<{ element: DialogLine }> = ({ element }) => {
 	const editor = useSlateStatic();
@@ -118,40 +128,44 @@ const DialogLineActor: React.FC<{ element: DialogLine }> = ({ element }) => {
 							onChange={(e) => setNameState(e.target.value)}
 							onKeyPress={keyPressHandler}
 						/>
-						<Box sx={{ display: 'flex' }}>
+						<Box
+							sx={{
+								display: 'flex',
+								justifyContent: 'space-between',
+							}}
+						>
 							<ToggleButtonGroup
 								value={colorState}
 								onChange={colorButtonHandler}
 								exclusive
 								size="small"
 							>
-								<ToggleButton value="green">
-									<CircleIcon sx={{ color: green[500] }} />
-								</ToggleButton>
-								<ToggleButton value="blue">
-									<CircleIcon sx={{ color: blue[500] }} />
-								</ToggleButton>
-								<ToggleButton value="orange">
-									<CircleIcon sx={{ color: orange[500] }} />
-								</ToggleButton>
-								<ToggleButton value="red">
-									<CircleIcon sx={{ color: red[500] }} />
-								</ToggleButton>
+								{AvailableActorColors.map((color) => (
+									<SmallToggleButton
+										value={color}
+										key={color}
+									>
+										<CircleIcon sx={{ color }} />
+									</SmallToggleButton>
+								))}
 							</ToggleButtonGroup>
-						</Box>
-						<Box sx={{ display: 'flex' }}>
+							<Divider
+								flexItem
+								orientation="vertical"
+								sx={{ mx: 0.5, my: 1 }}
+							/>
 							<ToggleButtonGroup
 								value={alignmentState}
 								onChange={alignmentButtonHandler}
 								exclusive
 								size="small"
 							>
-								<ToggleButton value="left">
+								<SmallToggleButton value="left">
 									<AlignHorizontalLeftIcon />
-								</ToggleButton>
-								<ToggleButton value="right">
+								</SmallToggleButton>
+								<SmallToggleButton value="right">
 									<AlignHorizontalRightIcon />
-								</ToggleButton>
+								</SmallToggleButton>
 							</ToggleButtonGroup>
 						</Box>
 					</Stack>
