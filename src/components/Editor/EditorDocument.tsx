@@ -20,16 +20,15 @@ import WordFragment from './Fragments/Word/WordFragment';
 import ImageBlock from './Blocks/Image/Image';
 import WordList from './Blocks/WordList/WordList';
 import VideoBlock, { videoBlockPasteAction } from './Blocks/Video/Video';
-import { Avatar, Box, Grid, Paper, Typography } from '@mui/material';
 import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
 import Paragraph from './Blocks/Paragraph/Paragraph';
 import Dialog from './Blocks/Dialog/Dialog';
-import DialogLineActor from './Blocks/Dialog/DialogLineActor';
 import DialogLine from './Blocks/Dialog/DialogLine';
 import DocumentTitle from './Blocks/DocumentTitle/DocumentTitle';
 import NumberedList from './Blocks/List/NumberedList';
 import BulletedList from './Blocks/List/BulletedList';
+import Title from './Blocks/Title/Title';
 
 const Leaf = ({ attributes, leaf, children }: RenderLeafProps) => {
 	return (
@@ -78,12 +77,9 @@ const Element = (props: RenderElementProps) => {
 		}
 		case 'title': {
 			return (
-				<h1
-					{...attributes}
-					style={{ textAlign: element.align || 'left' }}
-				>
+				<Title attributes={attributes} element={element}>
 					{children}
-				</h1>
+				</Title>
 			);
 		}
 		case 'subtitle': {

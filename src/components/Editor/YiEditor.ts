@@ -68,13 +68,13 @@ export type HighlightElement = {
 
 export type ListItemElement = {
 	type: 'listItem';
-	children: CustomText[];
+	children: Array<CustomText | EditorInlineElement>;
 };
 
 export interface BlockQuoteElement {
 	type: 'blockQuote';
 	align: AlignValue;
-	children: CustomText[];
+	children: Array<CustomText | EditorInlineElement>;
 }
 
 export type DialogLine = {
@@ -82,7 +82,7 @@ export type DialogLine = {
 	alignment: 'left' | 'right';
 	name: string;
 	color: string;
-	children: CustomText[];
+	children: Array<CustomText | EditorInlineElement>;
 };
 
 export type DialogElement = {
@@ -109,7 +109,7 @@ export type SentenceElement = {
 	type: 'sentence';
 	sentenceId: string;
 	translation: string;
-	children: CustomText[];
+	children: Array<CustomText | EditorInlineElement>;
 };
 
 export type WordElement = {
@@ -122,13 +122,13 @@ export type WordElement = {
 export type SubtitleElement = {
 	type: 'subtitle';
 	align: AlignValue;
-	children: CustomText[];
+	children: Array<CustomText | EditorInlineElement>;
 };
 
 export type TitleElement = {
 	type: 'title';
 	align: AlignValue;
-	children: CustomText[];
+	children: Array<CustomText | EditorInlineElement>;
 };
 
 export type VideoElement = {
@@ -145,7 +145,7 @@ export type WordListElement = {
 export type ParagraphElement = {
 	type: 'paragraph';
 	align: AlignValue;
-	children: Descendant[];
+	children: Array<CustomText | EditorInlineElement>;
 };
 
 export type ImageElement = {
@@ -494,21 +494,18 @@ const withDialog = (editor: Editor): CustomEditor => {
 
 		// If the element is a paragraph, ensure its children are valid.
 		if (SlateElement.isElement(node) && node.type === 'dialogLine') {
-			if (node.children.length > 1) {
-				const iterations = node.children.length - 1;
-				for (
-					let childToRemove = 1;
-					childToRemove < iterations + 1;
-					childToRemove++
+			for (const [childNode, childPath] of SlateNode.children(
+				editor,
+				path
+			)) {
+				if (
+					SlateElement.isElement(childNode) &&
+					!Editor.isInline(editor, childNode)
 				) {
-					Transforms.removeNodes(editor, {
-						at: [...path, childToRemove],
-					});
+					Transforms.unwrapNodes(editor, { at: childPath });
 				}
 			}
-			if (SlateElement.isElement(node.children[0])) {
-				Transforms.unwrapNodes(editor, { at: [...path, 0] });
-			}
+
 			if (node.children.length < 1) {
 				Transforms.insertNodes(
 					editor,

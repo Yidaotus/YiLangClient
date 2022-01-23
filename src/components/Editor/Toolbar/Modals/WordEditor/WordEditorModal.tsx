@@ -3,9 +3,9 @@ import { IDictionaryEntry } from 'Document/Dictionary';
 import DictEntryEdit, {
 	EntryInputMode,
 } from '@components/DictionaryEntry/DictionaryEntryInput/DictionaryEntryInput';
-import { Delete, ArrowBack } from '@mui/icons-material';
+import { SaveOutlined } from '@mui/icons-material';
 import { Editor, Transforms, Text, Range, Selection } from 'slate';
-import { useSlateStatic } from 'slate-react';
+import { ReactEditor, useSlateStatic } from 'slate-react';
 import { CustomText, WordElement } from '@components/Editor/YiEditor';
 import { useDictionarySearch } from '@hooks/DictionaryQueryHooks';
 import usePrevious from '@hooks/usePreviousState';
@@ -189,6 +189,13 @@ const WordEditorModal: React.FC<IWordInputProps> = ({ visible, close }) => {
 							}
 						/>
 					</FormGroup>
+					{entryInDictionary && (
+						<IconButton
+							onClick={() => finish(entryInDictionary.id)}
+						>
+							<SaveOutlined />
+						</IconButton>
+					)}
 				</DialogActions>
 			</DialogContent>
 		</Dialog>
