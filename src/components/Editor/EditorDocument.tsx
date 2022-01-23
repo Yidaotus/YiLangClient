@@ -25,7 +25,6 @@ import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
 import Paragraph from './Blocks/Paragraph/Paragraph';
 import Dialog from './Blocks/Dialog/Dialog';
-import DialogLineSpeech from './Blocks/Dialog/DialogLineSpeech';
 import DialogLineActor from './Blocks/Dialog/DialogLineActor';
 import DialogLine from './Blocks/Dialog/DialogLine';
 import DocumentTitle from './Blocks/DocumentTitle/DocumentTitle';
@@ -144,18 +143,6 @@ const Element = (props: RenderElementProps) => {
 				<DialogLine attributes={attributes} element={element}>
 					{children}
 				</DialogLine>
-			);
-		case 'dialogLineActor':
-			return (
-				<DialogLineActor attributes={attributes} element={element}>
-					{children}
-				</DialogLineActor>
-			);
-		case 'dialogLineSpeech':
-			return (
-				<DialogLineSpeech attributes={attributes}>
-					{children}
-				</DialogLineSpeech>
 			);
 		case 'listItem':
 			return <li {...attributes}>{children}</li>;

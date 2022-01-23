@@ -3,6 +3,7 @@ import {
 	Box,
 	IconButton,
 	Popover,
+	Stack,
 	styled,
 	TextField,
 	ToggleButton,
@@ -10,14 +11,12 @@ import {
 } from '@mui/material';
 import React, { useState } from 'react';
 import CircleIcon from '@mui/icons-material/Circle';
+import AlignHorizontalLeftIcon from '@mui/icons-material/AlignHorizontalLeft';
+import AlignHorizontalRightIcon from '@mui/icons-material/AlignHorizontalRight';
 import { green, blue, orange, red } from '@mui/material/colors';
-import { ReactEditor, RenderElementProps, useSlateStatic } from 'slate-react';
-import { DialogLineActor as DialogLineActorElement } from '@components/Editor/YiEditor';
+import { ReactEditor, useSlateStatic } from 'slate-react';
 import { Transforms } from 'slate';
-
-type DialogLineActorProps = RenderElementProps & {
-	element: DialogLineActorElement;
-};
+import { DialogLine } from '@components/Editor/YiEditor';
 
 const RoundIconButton = styled(IconButton)(() => ({
 	borderRadius: 100,
@@ -27,15 +26,12 @@ const RoundToggleButton = styled(ToggleButton)(() => ({
 	borderRadius: 100,
 }));
 
-const DialogLineActor: React.FC<DialogLineActorProps> = ({
-	children,
-	element,
-	attributes,
-}) => {
+const DialogLineActor: React.FC<{ element: DialogLine }> = ({ element }) => {
 	const editor = useSlateStatic();
 	const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null);
 	const [nameState, setNameState] = useState(element.name);
 	const [colorState, setColorState] = useState(element.color);
+	const [alignmentState, setAlignmentState] = useState(element.alignment);
 
 	const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
 		setAnchorEl(event.currentTarget);
@@ -45,7 +41,11 @@ const DialogLineActor: React.FC<DialogLineActorProps> = ({
 		if (path) {
 			Transforms.setNodes(
 				editor,
-				{ name: nameState, color: colorState },
+				{
+					name: nameState,
+					color: colorState,
+					alignment: alignmentState,
+				},
 				{ at: path }
 			);
 		}
@@ -54,9 +54,16 @@ const DialogLineActor: React.FC<DialogLineActorProps> = ({
 
 	const colorButtonHandler = (
 		event: React.MouseEvent<HTMLElement>,
-		newColor: string | null
+		newColor: string
 	) => {
-		setColorState(newColor || undefined);
+		setColorState(newColor);
+	};
+
+	const alignmentButtonHandler = (
+		event: React.MouseEvent<HTMLElement>,
+		newAlignment: 'left' | 'right'
+	) => {
+		setAlignmentState(newAlignment);
 	};
 
 	const keyPressHandler = (e: React.KeyboardEvent) => {
@@ -73,19 +80,20 @@ const DialogLineActor: React.FC<DialogLineActorProps> = ({
 			sx={{
 				display: 'flex',
 				alignItems: 'center',
+				paddingX: 1,
 				'& span': {
 					fontWeight: 'bold',
 				},
+				userSelect: 'none',
 			}}
-			{...attributes}
+			contentEditable={false}
 		>
 			<div
 				style={{
-					userSelect: 'none',
 					display: 'flex',
 					alignItems: 'center',
+					justifyContent: 'center',
 				}}
-				contentEditable={false}
 			>
 				<RoundIconButton aria-describedby={id} onClick={handleClick}>
 					<Avatar sx={{ width: 30, height: 30, bgcolor: colorState }}>
@@ -102,9 +110,7 @@ const DialogLineActor: React.FC<DialogLineActorProps> = ({
 						horizontal: 'left',
 					}}
 				>
-					<Box
-						sx={{ display: 'flex', flexDirection: 'column', p: 1 }}
-					>
+					<Stack spacing={1} direction="column" sx={{ p: 1 }}>
 						<TextField
 							placeholder="Name"
 							size="small"
@@ -133,10 +139,24 @@ const DialogLineActor: React.FC<DialogLineActorProps> = ({
 								</ToggleButton>
 							</ToggleButtonGroup>
 						</Box>
-					</Box>
+						<Box sx={{ display: 'flex' }}>
+							<ToggleButtonGroup
+								value={alignmentState}
+								onChange={alignmentButtonHandler}
+								exclusive
+								size="small"
+							>
+								<ToggleButton value="left">
+									<AlignHorizontalLeftIcon />
+								</ToggleButton>
+								<ToggleButton value="right">
+									<AlignHorizontalRightIcon />
+								</ToggleButton>
+							</ToggleButtonGroup>
+						</Box>
+					</Stack>
 				</Popover>
 			</div>
-			{children}
 		</Box>
 	);
 };

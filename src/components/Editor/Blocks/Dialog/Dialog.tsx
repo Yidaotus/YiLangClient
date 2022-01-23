@@ -17,7 +17,7 @@ const Dialog: React.FC<DialogProps> = ({ children, attributes, element }) => {
 		<Paper
 			{...attributes}
 			sx={{
-				p: 1,
+				paddingY: 1,
 				m: 1,
 				position: 'relative',
 				backgroundColor: hovering ? '#eeeeee40' : '',

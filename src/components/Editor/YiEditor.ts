@@ -10,6 +10,7 @@ import {
 	Node as SlateNode,
 	Transforms,
 	Point,
+	NodeEntry,
 } from 'slate';
 import { ReactEditor } from 'slate-react';
 import { HistoryEditor, withHistory } from 'slate-history';
@@ -76,22 +77,12 @@ export interface BlockQuoteElement {
 	children: CustomText[];
 }
 
-export type DialogLineSpeech = {
-	type: 'dialogLineSpeech';
-	children: CustomText[];
-};
-
-export type DialogLineActor = {
-	type: 'dialogLineActor';
-	name?: string;
-	color?: string;
-	children: CustomText[];
-};
-
 export type DialogLine = {
 	type: 'dialogLine';
 	alignment: 'left' | 'right';
-	children: [DialogLineActor, DialogLineSpeech];
+	name: string;
+	color: string;
+	children: CustomText[];
 };
 
 export type DialogElement = {
@@ -191,8 +182,6 @@ export type EditorBlockElement =
 	| WordListElement
 	| DialogElement
 	| DialogLine
-	| DialogLineActor
-	| DialogLineSpeech
 	| SubtitleElement;
 
 export type EditorInlineElement =
@@ -505,22 +494,35 @@ const withDialog = (editor: Editor): CustomEditor => {
 
 		// If the element is a paragraph, ensure its children are valid.
 		if (SlateElement.isElement(node) && node.type === 'dialogLine') {
-			if (node.children.length > 2) {
-				node.children.splice(2);
+			if (node.children.length > 1) {
+				const iterations = node.children.length - 1;
+				for (
+					let childToRemove = 1;
+					childToRemove < iterations + 1;
+					childToRemove++
+				) {
+					Transforms.removeNodes(editor, {
+						at: [...path, childToRemove],
+					});
+				}
 			}
-			if (node.children.length < 2) {
+			if (SlateElement.isElement(node.children[0])) {
+				Transforms.unwrapNodes(editor, { at: [...path, 0] });
+			}
+			if (node.children.length < 1) {
 				Transforms.insertNodes(
 					editor,
-					{ type: 'dialogLineActor', children: [{ text: '' }] },
+					{
+						type: 'dialogLine',
+						color: '',
+						name: '',
+						alignment: 'left',
+						children: [{ text: '' }],
+					},
 					{ at: [...path, 0] }
 				);
-				Transforms.insertNodes(
-					editor,
-					{ type: 'dialogLineSpeech', children: [{ text: '' }] },
-					{ at: [...path, 0] }
-				);
-				return;
 			}
+			return;
 		}
 
 		if (SlateElement.isElement(node) && node.type === 'dialog') {
@@ -539,31 +541,15 @@ const withDialog = (editor: Editor): CustomEditor => {
 		const { selection } = editor;
 
 		if (selection && Range.isCollapsed(selection)) {
-			const [dialogSpeechElement] = Editor.nodes(editor, {
+			const [dialogLineElement] = Editor.nodes(editor, {
 				match: (n) =>
 					!Editor.isEditor(n) &&
 					SlateElement.isElement(n) &&
-					n.type === 'dialogLineSpeech',
-			});
-			if (dialogSpeechElement) {
-				const [, cellPath] = dialogSpeechElement;
-				const start = Editor.start(editor, cellPath);
-
-				if (Point.equals(selection.anchor, start)) {
-					Transforms.move(editor, { reverse: true });
-					return;
-				}
-			}
-
-			const [dialogActorElement] = Editor.nodes(editor, {
-				match: (n) =>
-					!Editor.isEditor(n) &&
-					SlateElement.isElement(n) &&
-					n.type === 'dialogLineActor',
+					n.type === 'dialogLine',
 			});
 
-			if (dialogActorElement) {
-				const [, cellPath] = dialogActorElement;
+			if (dialogLineElement) {
+				const [, cellPath] = dialogLineElement;
 				const start = Editor.start(editor, cellPath);
 
 				if (Point.equals(selection.anchor, start)) {
@@ -592,60 +578,43 @@ const withDialog = (editor: Editor): CustomEditor => {
 		const { selection } = editor;
 
 		if (selection) {
-			const [dialogSpeechElement] = Editor.nodes(editor, {
+			const [dialogLineElement] = Editor.nodes(editor, {
 				mode: 'highest',
 				match: (n) =>
 					!Editor.isEditor(n) &&
 					SlateElement.isElement(n) &&
-					n.type === 'dialogLineSpeech',
-			});
-			const [dialogActorElement] = Editor.nodes(editor, {
-				mode: 'highest',
-				match: (n) =>
-					!Editor.isEditor(n) &&
-					SlateElement.isElement(n) &&
-					n.type === 'dialogLineActor',
+					n.type === 'dialogLine',
 			});
 
-			if (dialogSpeechElement) {
-				const [, speechPath] = dialogSpeechElement;
-				const dialogLineNode: DialogLine = {
-					type: 'dialogLine',
-					alignment: 'left',
-					children: [
-						{
-							type: 'dialogLineActor',
-							children: [{ text: '' }],
-						},
-						{
-							type: 'dialogLineSpeech',
-							children: [{ text: '' }],
-						},
-					],
-				};
-				const [, parentPath] = Editor.parent(editor, speechPath);
-				parentPath.splice(
-					parentPath.length - 1,
-					1,
-					parentPath[parentPath.length - 1] + 1
-				);
-				Transforms.insertNodes(editor, dialogLineNode, {
-					at: parentPath,
-				});
-				Transforms.select(editor, Editor.start(editor, parentPath));
-				return;
-			}
-
-			if (dialogActorElement && Range.isCollapsed(selection)) {
-				const [actorNode, actorPath] = dialogActorElement;
-				if (!SlateNode.string(actorNode)) {
+			if (dialogLineElement) {
+				const [element, path] =
+					dialogLineElement as NodeEntry<DialogLine>;
+				const [parent, parentPath] = Editor.parent(editor, path);
+				const speech = Editor.string(editor, path);
+				if (speech.length > 0) {
+					const dialogLineNode: DialogLine = {
+						type: 'dialogLine',
+						alignment:
+							element.alignment === 'left' ? 'right' : 'left',
+						color: '',
+						name: '',
+						children: [{ text: '' }],
+					};
+					const targetPositionInDialog = path[path.length - 1];
+					const targetPath = [...path];
+					targetPath.splice(-1, 1, targetPositionInDialog + 1);
+					Transforms.insertNodes(editor, dialogLineNode, {
+						at: targetPath,
+					});
+					Transforms.select(editor, Editor.start(editor, targetPath));
+				} else {
 					const emptyParagraph: ParagraphElement = {
 						type: 'paragraph',
 						align: 'left',
 						children: [{ text: '' }],
 					};
-					const dialogRootPath = actorPath[0];
-					const dialogLinePath = actorPath[1];
+					const dialogRootPath = path[0];
+					const dialogLinePath = path[1];
 					Transforms.removeNodes(editor, {
 						at: [dialogRootPath, dialogLinePath],
 					});
@@ -653,14 +622,8 @@ const withDialog = (editor: Editor): CustomEditor => {
 						at: [dialogRootPath + 1],
 					});
 					Transforms.move(editor);
-					return;
 				}
-
-				const end = Editor.end(editor, actorPath);
-				if (Point.equals(selection.anchor, end)) {
-					Transforms.move(editor);
-					return;
-				}
+				return;
 			}
 		}
 
@@ -739,7 +702,6 @@ const withYiLang = (editor: Editor): CustomEditor => {
 		'image',
 		'video',
 		'wordList',
-		'dialogLineActor',
 	];
 
 	// eslint-disable-next-line no-param-reassign
