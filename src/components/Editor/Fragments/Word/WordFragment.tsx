@@ -19,7 +19,7 @@ const WordFragment: React.FC<IWordFragmentData> = ({
 		element.dictId
 	);
 
-	let gradiantStyle: CSSProperties = {
+	let gradientStyle: CSSProperties = {
 		background: 'black',
 		borderRadius: '10px',
 		width: '100%',
@@ -36,12 +36,12 @@ const WordFragment: React.FC<IWordFragmentData> = ({
 		const lengthPerTag = 100 / (numberOfTags || 1);
 
 		const defaultTagColor = '#aabbcc';
-		const defaultGradiant = [
+		const defaultGradient = [
 			`${defaultTagColor} 0%`,
 			`${defaultTagColor} 100%`,
 		];
 
-		const gradiants =
+		const gradients =
 			numberOfTags > 0
 				? wordTagsWithColor?.reduce<Array<string>>(
 						(reducer, tag, index) => {
@@ -57,9 +57,9 @@ const WordFragment: React.FC<IWordFragmentData> = ({
 						},
 						[]
 				  )
-				: defaultGradiant;
-		gradiantStyle = {
-			background: `linear-gradient(to right, ${gradiants?.map(
+				: defaultGradient;
+		gradientStyle = {
+			background: `linear-gradient(to right, ${gradients?.map(
 				(gradiant) => `${gradiant}`
 			)})`,
 			borderRadius: '10px',
@@ -99,7 +99,7 @@ const WordFragment: React.FC<IWordFragmentData> = ({
 						}}
 					>
 						{dictEntry.key}
-						<span style={gradiantStyle} />
+						<span style={gradientStyle} />
 					</span>
 				)}
 				{!dictEntry && (

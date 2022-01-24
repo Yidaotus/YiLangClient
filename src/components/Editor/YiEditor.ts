@@ -395,7 +395,33 @@ const toggleBlockType = <T extends EditorElement['type']>(
 };
 
 const withList = (editor: Editor): CustomEditor => {
-	const { insertBreak, normalizeNode } = editor;
+	const { insertBreak, normalizeNode, deleteBackward } = editor;
+
+	// eslint-disable-next-line no-param-reassign
+	editor.deleteBackward = (unit) => {
+		const { selection } = editor;
+
+		if (selection && Range.isCollapsed(selection)) {
+			const [listItemNode] = Editor.nodes(editor, {
+				match: (n) =>
+					!Editor.isEditor(n) &&
+					SlateElement.isElement(n) &&
+					n.type === 'listItem',
+			});
+
+			if (listItemNode) {
+				const [, listItemPath] = listItemNode;
+				const start = Editor.start(editor, listItemPath);
+
+				if (Point.equals(selection.anchor, start)) {
+					Transforms.removeNodes(editor, { at: listItemPath });
+					return;
+				}
+			}
+		}
+
+		deleteBackward(unit);
+	};
 
 	// eslint-disable-next-line no-param-reassign
 	editor.normalizeNode = (entry) => {
@@ -407,7 +433,10 @@ const withList = (editor: Editor): CustomEditor => {
 
 		if (SlateElement.isElement(node) && node.type === 'listItem') {
 			for (const [child, childPath] of SlateNode.children(editor, path)) {
-				if (SlateElement.isElement(child)) {
+				if (
+					SlateElement.isElement(child) &&
+					!Editor.isInline(editor, child)
+				) {
 					Transforms.unwrapNodes(editor, { at: childPath });
 				}
 			}
@@ -416,30 +445,37 @@ const withList = (editor: Editor): CustomEditor => {
 
 		// If the element is a paragraph, ensure its children are valid.
 		if (SlateElement.isElement(node) && listNodes.includes(node.type)) {
-			for (const [child, childPath] of SlateNode.children(editor, path)) {
-				const childRootPath = [childPath[0], childPath[1]];
-				if (
-					SlateElement.isElement(child) &&
-					child.type !== 'listItem'
-				) {
-					Transforms.wrapNodes(
-						editor,
-						{
-							type: 'listItem',
-							children: [],
-						},
-						{ at: childRootPath }
-					);
-				}
-				if (!SlateElement.isElement(child)) {
-					Transforms.wrapNodes(
-						editor,
-						{
-							type: 'listItem',
-							children: [],
-						},
-						{ at: childRootPath }
-					);
+			if (node.children.length < 1) {
+				Transforms.removeNodes(editor, { at: path });
+			} else {
+				for (const [child, childPath] of SlateNode.children(
+					editor,
+					path
+				)) {
+					const childRootPath = [childPath[0], childPath[1]];
+					if (
+						SlateElement.isElement(child) &&
+						child.type !== 'listItem'
+					) {
+						Transforms.wrapNodes(
+							editor,
+							{
+								type: 'listItem',
+								children: [],
+							},
+							{ at: childRootPath }
+						);
+					}
+					if (!SlateElement.isElement(child)) {
+						Transforms.wrapNodes(
+							editor,
+							{
+								type: 'listItem',
+								children: [],
+							},
+							{ at: childRootPath }
+						);
+					}
 				}
 			}
 			return;

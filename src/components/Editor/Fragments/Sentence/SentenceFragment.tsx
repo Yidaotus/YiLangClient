@@ -14,12 +14,12 @@ const SentenceTooltip = styled(({ className, ...props }: TooltipProps) => (
 	<Tooltip {...props} classes={{ popper: className }} />
 ))(({ theme }) => ({
 	[`& .${tooltipClasses.tooltip}`]: {
-		backgroundColor: theme.palette.secondary.light,
+		backgroundColor: theme.palette.primary.light,
 		maxWidth: 500,
 		marginTop: '5px !important',
-		color: 'rgba(0, 0, 0, 0.87)',
+		color: theme.palette.secondary.light,
 		fontSize: theme.typography.pxToRem(14),
-		border: `1px solid ${theme.palette.secondary.dark}`,
+		border: `1px solid ${theme.palette.primary.dark}`,
 	},
 }));
 

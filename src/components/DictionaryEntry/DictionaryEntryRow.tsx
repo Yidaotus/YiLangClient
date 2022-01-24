@@ -11,6 +11,8 @@ import {
 	TableCell,
 	TableRow,
 	Stack,
+	Box,
+	Typography,
 } from '@mui/material';
 
 type IDictEntryRowProps = {
@@ -64,21 +66,43 @@ const DictionaryEntryRow: React.FC<IDictEntryRowProps> = ({
 		>
 			<TableCell component="th" scope="row">
 				{entry.key}
+				{entry.spelling && (
+					<Typography
+						variant="caption"
+						sx={{
+							display: 'inline-block',
+							marginLeft: 1,
+						}}
+					>
+						({entry.spelling})
+					</Typography>
+				)}
 			</TableCell>
-			<TableCell align="right">{entry.spelling}</TableCell>
-			<TableCell align="right">{entry.translations.join(', ')}</TableCell>
+			<TableCell align="left">{entry.translations.join(', ')}</TableCell>
 			<TableCell
 				align="right"
 				sx={{
-					maxWidth: '300px',
+					width: '110px',
 					overflow: 'hidden',
 				}}
 			>
-				<Stack spacing={1} direction="row">
-					{entry.tags.map((tag) => (
-						<EntryTag tag={tag} key={tag.id} />
+				<Box
+					sx={{
+						position: 'relative',
+					}}
+				>
+					{entry.tags.map((tag, i) => (
+						<Box
+							sx={{
+								position: 'absolute',
+								left: i * 10,
+								top: -10,
+							}}
+						>
+							<EntryTag tag={tag} key={tag.id} />
+						</Box>
 					))}
-				</Stack>
+				</Box>
 			</TableCell>
 			<TableCell align="right" width={1}>
 				<IconButton

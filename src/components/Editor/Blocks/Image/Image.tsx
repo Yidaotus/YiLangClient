@@ -10,7 +10,7 @@ import {
 import { ImageElement } from '@components/Editor/YiEditor';
 import { Transforms } from 'slate';
 import isHotkey from 'is-hotkey';
-import { Box, TextField } from '@mui/material';
+import { Box, TextField, useTheme } from '@mui/material';
 import { Resizable } from 're-resizable';
 import useDraggableElement from '@components/Editor/DnD/useDraggableElement';
 import DragHandle from '@components/Editor/DnD/DragHandle';
@@ -60,6 +60,8 @@ const ImageBlock: React.FC<IImageBlockData> = ({
 	const editor = useSlateStatic();
 	const selected = useSelected();
 	const focused = useFocused();
+	const uiTheme = useTheme();
+
 	const { hovering, opacity, dragRef, dropRef, preview } =
 		useDraggableElement(element);
 
@@ -131,7 +133,7 @@ const ImageBlock: React.FC<IImageBlockData> = ({
 			sx={{
 				p: 1,
 				position: 'relative',
-				backgroundColor: hovering ? '#eeeeee40' : 'white',
+				backgroundColor: hovering ? '#4e4e4e10' : 'white',
 				opacity,
 				'& .drag-handle': {
 					opacity: '0%',
@@ -154,51 +156,73 @@ const ImageBlock: React.FC<IImageBlockData> = ({
 					marginBottom: '15px',
 				}}
 			>
-				<Resizable
-					size={{ width, height: '100%' }}
-					maxWidth="100%"
-					lockAspectRatio
-					resizeRatio={2}
-					handleComponent={{
-						left: <ResizeHandle position="left" />,
-						right: <ResizeHandle position="right" />,
-					}}
-					enable={{
-						left: true,
-						right: true,
-					}}
-					onResize={(e, direction, ref) => {
-						setWidth(ref.offsetWidth);
-					}}
-					onResizeStop={(e, direction, ref) =>
-						applyNodeWith(ref.offsetWidth)
-					}
-					minWidth={100}
-					className="resize-group"
+				<Box
+					sx={(theme) => ({
+						position: 'relative',
+						maxWidth: '100%',
+						width: '100%',
+						display: 'flex',
+						justifyContent: 'center',
+						alignItems: 'center',
+						'&:active .image-handle::after': {
+							opacity: '100%',
+							backgroundColor: theme.palette.secondary.main,
+						},
+						'&:focus .image-handle::after': {
+							opacity: '100%',
+							backgroundColor: theme.palette.secondary.main,
+						},
+						'&:hover .image-handle::after': {
+							opacity: '100%',
+							backgroundColor: theme.palette.secondary.main,
+						},
+					})}
 				>
-					<img
-						alt="yilang-image-container"
-						src={element.src}
-						draggable={false}
-						style={{
-							display: 'block',
-							maxWidth: '100%',
-							paddingLeft: '0px',
-							paddingRight: '0px',
-							cursor: 'pointer',
-							width: '100%',
-							borderRadius: '3px',
-							objectFit: 'cover',
-							border: '1px solid lightgray',
-							boxShadow:
-								selected && focused
-									? '0 0 0 3px #B4D5FF'
-									: 'none',
+					<Resizable
+						size={{ width, height: '100%' }}
+						maxWidth="103%"
+						lockAspectRatio
+						resizeRatio={2}
+						handleComponent={{
+							left: <ResizeHandle position="left" />,
+							right: <ResizeHandle position="right" />,
 						}}
-						width={width}
-						ref={preview}
-					/>
-				</Resizable>
+						enable={{
+							left: true,
+							right: true,
+						}}
+						onResize={(e, direction, ref) => {
+							setWidth(ref.offsetWidth);
+						}}
+						onResizeStop={(e, direction, ref) =>
+							applyNodeWith(ref.offsetWidth)
+						}
+						minWidth={200}
+					>
+						<img
+							alt="yilang-image-container"
+							src={element.src}
+							draggable={false}
+							style={{
+								display: 'block',
+								maxWidth: '100%',
+								paddingLeft: '0px',
+								paddingRight: '0px',
+								cursor: 'pointer',
+								width: '100%',
+								borderRadius: '3px',
+								objectFit: 'cover',
+								border: '1px solid lightgray',
+								boxShadow:
+									selected && focused
+										? `0 0 0 1px ${uiTheme.palette.secondary.dark}`
+										: 'none',
+							}}
+							width={width}
+							ref={preview}
+						/>
+					</Resizable>
+				</Box>
 				{isEditingCaption && (
 					<TextField
 						autoFocus

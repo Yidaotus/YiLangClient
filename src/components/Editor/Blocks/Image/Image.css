@@ -49,17 +49,9 @@
 
 .image-handle::after {
 	display: flex;
-	background-color: rgb(156, 163, 175);
 	content: ' ';
 	width: 3px;
 	height: 64px;
 	border-radius: 6px;
 	opacity: 0%;
-}
-
-.resize-group:active .image-handle::after,
-.resize-group:hover .image-handle::after,
-.resize-group:focus .image-handle::after {
-	opacity: 100%;
-	background-color: rgb(156, 163, 255);
 }

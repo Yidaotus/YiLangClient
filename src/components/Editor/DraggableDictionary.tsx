@@ -13,7 +13,7 @@ import {
 	ExpandMore as ExpandMoreIcon,
 	MenuBookOutlined,
 } from '@mui/icons-material';
-import { BaseSelection, Editor, Range as SlateRange } from 'slate';
+import { BaseSelection, Editor, Range as SlateRange, Transforms } from 'slate';
 import { useSlateStatic } from 'slate-react';
 import { YiEditor, WordElement } from './YiEditor';
 import { useDictionaryEntryResolved } from '@hooks/DictionaryQueryHooks';

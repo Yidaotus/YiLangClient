@@ -31,6 +31,7 @@ import DraggableSRS from './SRS/DraggableSRS';
 import { Plate } from '@udecode/plate';
 import { useSnackbar } from 'notistack';
 import useSavingIndicator from './SavingIndicator/SavingIndicator';
+import FloatingToolbar from './Toolbar/FloatingToolbar/FloatingToolbar';
 
 const AVERAGE_ACTIONS_PER_COMMAND = 15;
 const SAVE_EVERY_ACTIONS = 5 * AVERAGE_ACTIONS_PER_COMMAND;
@@ -226,6 +227,7 @@ const YiEditor: React.FC = () => {
 									<Typography>Document not found</Typography>
 								)}
 								<DraggableSRS editor={editor} />
+								<FloatingToolbar />
 							</div>
 						</Slate>
 						<Accordion>

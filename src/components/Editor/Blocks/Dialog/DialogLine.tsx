@@ -32,6 +32,8 @@ const DialogLine: React.FC<DialogLineProps> = ({
 					marginRight: element.alignment === 'left' ? 7 : 0,
 					marginLeft: element.alignment === 'right' ? 7 : 0,
 					backgroundColor: theme.palette.secondary.main,
+					/* offset-x | offset-y | blur-radius | spread-radius | color */
+					boxShadow: '1',
 					'&:after': {
 						content: '""',
 						position: 'absolute',

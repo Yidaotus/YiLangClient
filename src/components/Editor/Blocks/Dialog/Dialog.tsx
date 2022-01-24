@@ -18,7 +18,6 @@ const Dialog: React.FC<DialogProps> = ({ children, attributes, element }) => {
 			{...attributes}
 			sx={{
 				paddingY: 1,
-				m: 1,
 				position: 'relative',
 				backgroundColor: hovering ? '#eeeeee40' : '',
 				opacity,
