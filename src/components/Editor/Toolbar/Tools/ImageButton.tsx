@@ -23,13 +23,16 @@ const ImageButton: React.FC<IToolbarWrapperItem> = ({
 			tooltip={title}
 			title={title}
 			action={() => {
-				YiEditor.toggleBlockType<'image'>(editor, 'image', false, {
-					caption: 'testImage',
-					src: 'https://images.unsplash.com/photo-1635070041078-e363dbe005cb?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1740&q=80',
-					align: 'center',
-					width: 10,
-				});
-				toolbarChanged();
+				const imgUrl = window.prompt('Enter the image URL');
+				if (imgUrl) {
+					YiEditor.toggleBlockType<'image'>(editor, 'image', false, {
+						caption: 'testImage',
+						src: imgUrl,
+						align: 'center',
+						width: 10,
+					});
+					toolbarChanged();
+				}
 			}}
 			active={isActive}
 			icon={icon}

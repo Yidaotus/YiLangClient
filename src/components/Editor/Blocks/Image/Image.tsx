@@ -179,6 +179,7 @@ const ImageBlock: React.FC<IImageBlockData> = ({
 					<img
 						alt="yilang-image-container"
 						src={element.src}
+						draggable={false}
 						style={{
 							display: 'block',
 							maxWidth: '100%',
@@ -188,6 +189,7 @@ const ImageBlock: React.FC<IImageBlockData> = ({
 							width: '100%',
 							borderRadius: '3px',
 							objectFit: 'cover',
+							border: '1px solid lightgray',
 							boxShadow:
 								selected && focused
 									? '0 0 0 3px #B4D5FF'

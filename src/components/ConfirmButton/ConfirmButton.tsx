@@ -24,7 +24,10 @@ const ConfirmButton: React.FC<ConfirmButtonProps> = ({ onConfirm, icon }) => {
 			onConfirm();
 			setAnchorEl(null);
 		} else {
-			setAnchorEl(event.currentTarget);
+			const target = event.currentTarget;
+			setTimeout(() => {
+				setAnchorEl(target);
+			}, 400);
 		}
 	};
 	const handleClose = () => {

@@ -21,7 +21,6 @@ const NumberedList: React.FC<NumberedListProps> = ({
 		<Box
 			{...attributes}
 			sx={{
-				p: 1,
 				position: 'relative',
 				backgroundColor: hovering ? '#eeeeee40' : 'white',
 				opacity,

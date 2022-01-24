@@ -39,7 +39,6 @@ const Leaf = ({ attributes, leaf, children }: RenderLeafProps) => {
 			style={{
 				fontWeight: leaf.bold ? 'bold' : 'normal',
 				color: leaf.color,
-				position: 'relative',
 			}}
 		>
 			{leaf.placeholder && (
@@ -47,7 +46,8 @@ const Leaf = ({ attributes, leaf, children }: RenderLeafProps) => {
 					style={{
 						opacity: 0.3,
 						position: 'absolute',
-						minWidth: '20rem',
+						left: '0.8em',
+						top: '0.4em',
 						userSelect: 'none',
 						pointerEvents: 'none',
 					}}

@@ -222,9 +222,11 @@ const YiEditor: React.FC = () => {
 								<DraggableSRS editor={editor} />
 							</div>
 						</Slate>
+						{/*
 						<pre id="json">
 							{JSON.stringify(editorNodes, null, '\t')}
 						</pre>
+						*/}
 					</div>
 				</div>
 			</div>
