@@ -71,7 +71,7 @@ const headCells: readonly HeadCell[] = [
 	{
 		id: 'createdAt',
 		disablePadding: false,
-		label: 'Created at',
+		label: 'Created',
 	},
 ];
 
@@ -298,7 +298,10 @@ const DictionaryTable: React.FC = () => {
 						key: orderBy,
 						order: order === 'asc' ? 'ascend' : 'descend',
 				  }
-				: undefined,
+				: {
+						key: 'createdAt',
+						order: 'descend',
+				  },
 			searchTerm: debouncedSearchTerm,
 			tagFilter,
 		}),

@@ -1,5 +1,5 @@
 import { DialogElement } from '@components/Editor/YiEditor';
-import { Paper } from '@mui/material';
+import { Paper, Box } from '@mui/material';
 import React from 'react';
 import { RenderElementProps } from 'slate-react';
 import DragHandle from '@components/Editor/DnD/DragHandle';
@@ -14,7 +14,7 @@ const Dialog: React.FC<DialogProps> = ({ children, attributes, element }) => {
 		useDraggableElement(element);
 
 	return (
-		<Paper
+		<Box
 			{...attributes}
 			sx={{
 				paddingY: 1,
@@ -37,7 +37,7 @@ const Dialog: React.FC<DialogProps> = ({ children, attributes, element }) => {
 		>
 			<div ref={preview}>{children}</div>
 			<DragHandle ref={dragRef} />
-		</Paper>
+		</Box>
 	);
 };
 

@@ -240,7 +240,12 @@ const EditorDocument: React.FC = () => {
 	}, [editor]);
 
 	return (
-		<div style={{ position: 'relative', fontSize: '1.1em' }}>
+		<div
+			style={{
+				position: 'relative',
+				fontSize: '1.1em',
+			}}
+		>
 			<DndProvider backend={HTML5Backend}>
 				<Editable
 					onPaste={(event) => {
