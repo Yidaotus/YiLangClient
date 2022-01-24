@@ -1,15 +1,15 @@
-import { DialogElement } from '@components/Editor/YiEditor';
-import { Paper, Box } from '@mui/material';
+import { TitleElement } from '@components/Editor/YiEditor';
+import { Box } from '@mui/material';
 import React from 'react';
 import { RenderElementProps } from 'slate-react';
 import DragHandle from '@components/Editor/DnD/DragHandle';
 import useDraggableElement from '@components/Editor/DnD/useDraggableElement';
 
-interface DialogProps extends RenderElementProps {
-	element: DialogElement;
+interface TitleProps extends RenderElementProps {
+	element: TitleElement;
 }
 
-const Dialog: React.FC<DialogProps> = ({ children, attributes, element }) => {
+const Title: React.FC<TitleProps> = ({ children, attributes, element }) => {
 	const { hovering, opacity, dragRef, dropRef, preview } =
 		useDraggableElement(element);
 
@@ -17,10 +17,9 @@ const Dialog: React.FC<DialogProps> = ({ children, attributes, element }) => {
 		<Box
 			{...attributes}
 			sx={{
-				paddingY: 1,
-				m: 1,
+				textAlign: element.align || 'left',
 				position: 'relative',
-				backgroundColor: hovering ? '#eeeeee40' : '',
+				backgroundColor: hovering ? '#eeeeee40' : 'white',
 				opacity,
 				'& .drag-handle': {
 					opacity: '0%',
@@ -35,10 +34,12 @@ const Dialog: React.FC<DialogProps> = ({ children, attributes, element }) => {
 				attributes.ref.current = ref;
 			}}
 		>
-			<div ref={preview}>{children}</div>
+			<h1 style={{ textAlign: element.align || 'left' }} ref={preview}>
+				{children}
+			</h1>
 			<DragHandle ref={dragRef} />
 		</Box>
 	);
 };
 
-export default Dialog;
+export default Title;

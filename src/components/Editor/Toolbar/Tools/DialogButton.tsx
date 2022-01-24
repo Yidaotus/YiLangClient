@@ -61,16 +61,10 @@ const DialogButton: React.FC<IDialogButtonProps> = ({
 					type: 'dialog',
 					children: currentTexts.map(([actor, speech]) => ({
 						type: 'dialogLine',
-						children: [
-							{
-								type: 'dialogLineActor',
-								children: [{ text: actor }],
-							},
-							{
-								type: 'dialogLineSpeech',
-								children: [{ text: speech }],
-							},
-						],
+						alignment: 'left',
+						color: '',
+						name: actor,
+						children: [{ text: speech }],
 					})),
 				};
 				Transforms.insertNodes(editor, dialogNode, {

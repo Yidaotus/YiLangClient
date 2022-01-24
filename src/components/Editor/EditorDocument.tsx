@@ -20,17 +20,15 @@ import WordFragment from './Fragments/Word/WordFragment';
 import ImageBlock from './Blocks/Image/Image';
 import WordList from './Blocks/WordList/WordList';
 import VideoBlock, { videoBlockPasteAction } from './Blocks/Video/Video';
-import { Avatar, Box, Grid, Paper, Typography } from '@mui/material';
 import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
 import Paragraph from './Blocks/Paragraph/Paragraph';
 import Dialog from './Blocks/Dialog/Dialog';
-import DialogLineSpeech from './Blocks/Dialog/DialogLineSpeech';
-import DialogLineActor from './Blocks/Dialog/DialogLineActor';
 import DialogLine from './Blocks/Dialog/DialogLine';
 import DocumentTitle from './Blocks/DocumentTitle/DocumentTitle';
 import NumberedList from './Blocks/List/NumberedList';
 import BulletedList from './Blocks/List/BulletedList';
+import Title from './Blocks/Title/Title';
 
 const Leaf = ({ attributes, leaf, children }: RenderLeafProps) => {
 	return (
@@ -79,12 +77,9 @@ const Element = (props: RenderElementProps) => {
 		}
 		case 'title': {
 			return (
-				<h1
-					{...attributes}
-					style={{ textAlign: element.align || 'left' }}
-				>
+				<Title attributes={attributes} element={element}>
 					{children}
-				</h1>
+				</Title>
 			);
 		}
 		case 'subtitle': {
@@ -140,18 +135,10 @@ const Element = (props: RenderElementProps) => {
 				</Dialog>
 			);
 		case 'dialogLine':
-			return <DialogLine attributes={attributes}>{children}</DialogLine>;
-		case 'dialogLineActor':
 			return (
-				<DialogLineActor attributes={attributes}>
+				<DialogLine attributes={attributes} element={element}>
 					{children}
-				</DialogLineActor>
-			);
-		case 'dialogLineSpeech':
-			return (
-				<DialogLineSpeech attributes={attributes}>
-					{children}
-				</DialogLineSpeech>
+				</DialogLine>
 			);
 		case 'listItem':
 			return <li {...attributes}>{children}</li>;
@@ -253,7 +240,12 @@ const EditorDocument: React.FC = () => {
 	}, [editor]);
 
 	return (
-		<div style={{ position: 'relative', fontSize: '1.1em' }}>
+		<div
+			style={{
+				position: 'relative',
+				fontSize: '1.1em',
+			}}
+		>
 			<DndProvider backend={HTML5Backend}>
 				<Editable
 					onPaste={(event) => {

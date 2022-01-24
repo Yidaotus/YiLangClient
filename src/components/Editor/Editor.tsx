@@ -9,7 +9,13 @@ import {
 	useEditorDocument,
 	useUpdateEditorDocument,
 } from '@hooks/DocumentQueryHooks';
-import { CircularProgress, Typography } from '@mui/material';
+import {
+	Accordion,
+	AccordionDetails,
+	AccordionSummary,
+	CircularProgress,
+	Typography,
+} from '@mui/material';
 import EditorDocument from './EditorDocument';
 import Toolbar from './Toolbar/Toolbar';
 import { withYiLang } from './YiEditor';
@@ -222,11 +228,19 @@ const YiEditor: React.FC = () => {
 								<DraggableSRS editor={editor} />
 							</div>
 						</Slate>
-						{/*
-						<pre id="json">
-							{JSON.stringify(editorNodes, null, '\t')}
-						</pre>
-						*/}
+						<Accordion>
+							<AccordionSummary
+								aria-controls="added-words-content"
+								id="added-words-header"
+							>
+								<Typography>Editor State</Typography>
+							</AccordionSummary>
+							<AccordionDetails>
+								<pre id="json">
+									{JSON.stringify(editorNodes, null, '\t')}
+								</pre>
+							</AccordionDetails>
+						</Accordion>
 					</div>
 				</div>
 			</div>
