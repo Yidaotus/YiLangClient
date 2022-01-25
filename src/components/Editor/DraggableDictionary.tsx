@@ -40,6 +40,7 @@ const DraggableDictionary: React.FC<DraggableDictionaryProps> = ({
 	const [dictId, setDictId] = useState<DictionaryEntryID>();
 	const [isEditing, setIsEditing] = useState(false);
 	const [, entry] = useDictionaryEntryResolved(dictId);
+	const nodeRef = React.useRef(null);
 
 	useEffect(() => {
 		if (!isEditing) {
@@ -89,8 +90,9 @@ const DraggableDictionary: React.FC<DraggableDictionaryProps> = ({
 						isDragging.current = false;
 					});
 				}}
+				nodeRef={nodeRef}
 			>
-				<Paper elevation={2}>
+				<Paper elevation={2} ref={nodeRef}>
 					<StyledAccordion expanded={expanded}>
 						<AccordionSummary
 							sx={(theme) => ({

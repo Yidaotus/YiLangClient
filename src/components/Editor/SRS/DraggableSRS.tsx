@@ -29,6 +29,7 @@ const StyledAccordion = styled(Accordion)(() => ({
 
 const DraggableSRS: React.FC<{ editor: CustomEditor }> = ({ editor }) => {
 	const isDragging = useRef(false);
+	const nodeRef = React.useRef(null);
 	const [expanded, setExpanded] = useState(false);
 
 	const vocabs: Array<[WordElement, Path]> = [];
@@ -67,8 +68,9 @@ const DraggableSRS: React.FC<{ editor: CustomEditor }> = ({ editor }) => {
 						isDragging.current = false;
 					});
 				}}
+				nodeRef={nodeRef}
 			>
-				<Paper elevation={2}>
+				<Paper elevation={2} ref={nodeRef}>
 					<StyledAccordion expanded={expanded}>
 						<AccordionSummary
 							sx={(theme) => ({

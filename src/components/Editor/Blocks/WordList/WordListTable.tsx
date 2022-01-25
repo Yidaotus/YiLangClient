@@ -172,28 +172,17 @@ const WordListTable: React.FC<WordListTableProps> = ({ editor }) => {
 													{ border: 0 },
 											}}
 										>
-											<TableCell
-												component="th"
-												scope="row"
-											>
+											<TableCell scope="row">
 												<Typography>
 													{SlateNode.string(
 														sentenceNode
 													)}
 												</Typography>
-											</TableCell>
-											<TableCell
-												component="th"
-												scope="row"
-											>
 												<Typography>
 													{sentenceNode.translation}
 												</Typography>
 											</TableCell>
-											<TableCell
-												component="th"
-												scope="row"
-											>
+											<TableCell scope="row">
 												<IconButton
 													size="small"
 													onMouseUp={() =>
