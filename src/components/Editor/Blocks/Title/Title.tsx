@@ -1,6 +1,6 @@
 import DragContainer from '@components/Editor/DragContainer';
 import { TitleElement } from '@components/Editor/YiEditor';
-import { Box } from '@mui/material';
+import { Box, Typography } from '@mui/material';
 import React from 'react';
 import { RenderElementProps } from 'slate-react';
 
@@ -14,13 +14,15 @@ const Title: React.FC<TitleProps> = ({ children, attributes, element }) => {
 			{...attributes}
 			sx={{
 				textAlign: element.align || 'left',
-				position: 'relative',
 			}}
 		>
 			<DragContainer element={element}>
-				<h1 style={{ textAlign: element.align || 'left' }}>
+				<Typography
+					variant={element.variant}
+					sx={{ textAlign: element.align || 'left' }}
+				>
 					{children}
-				</h1>
+				</Typography>
 			</DragContainer>
 		</Box>
 	);

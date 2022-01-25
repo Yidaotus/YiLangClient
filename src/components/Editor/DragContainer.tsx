@@ -22,6 +22,7 @@ const DragContainer: React.FC<{ element: EditorElement }> = ({
 				p: 1,
 				position: 'relative',
 				backgroundColor: hovering ? HOVER_COLOR : 'white',
+				borderRadius: '5px',
 				opacity,
 				'& .drag-handle': {
 					opacity: '0%',

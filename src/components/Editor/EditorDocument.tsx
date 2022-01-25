@@ -80,16 +80,6 @@ const Element = (props: RenderElementProps) => {
 				</Title>
 			);
 		}
-		case 'subtitle': {
-			return (
-				<h2
-					{...attributes}
-					style={{ textAlign: element.align || 'left' }}
-				>
-					{children}
-				</h2>
-			);
-		}
 		case 'highlight':
 			return element.role === 'highlight' ? (
 				<span

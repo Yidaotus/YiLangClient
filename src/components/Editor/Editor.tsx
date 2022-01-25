@@ -220,7 +220,7 @@ const YiEditor: React.FC = () => {
 									rootElement={editorContainer}
 									selection={selection}
 								/>
-								<DraggableDictionary selection={selection} />
+								{/*<DraggableDictionary selection={selection} />*/}
 								<EditorDocument />
 								{!loadingDocument && !dbDocument && (
 									<Typography>Document not found</Typography>

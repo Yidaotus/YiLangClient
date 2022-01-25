@@ -14,12 +14,7 @@ const BulletedList: React.FC<BulletedListProps> = ({
 	element,
 }) => {
 	return (
-		<Box
-			{...attributes}
-			sx={{
-				p: 0,
-			}}
-		>
+		<Box {...attributes}>
 			<DragContainer element={element}>
 				<ul>{children}</ul>
 			</DragContainer>

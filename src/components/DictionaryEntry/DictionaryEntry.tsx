@@ -175,6 +175,7 @@ const DictionaryEntry: React.FC<IDictionaryEntryProps> = ({
 										flexDirection: 'row',
 										alignItems: 'baseline',
 									}}
+									key={root.id}
 								>
 									<Link
 										component="button"

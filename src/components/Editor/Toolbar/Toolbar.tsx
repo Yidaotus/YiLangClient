@@ -230,12 +230,6 @@ const Toolbar: React.FC<IToolbarProps> = ({
 							{...sharedProps}
 							icon={<TitleIcon />}
 						/>
-						<BlockButton
-							type="subtitle"
-							title="Subtitle"
-							{...sharedProps}
-							icon={<TitleIcon />}
-						/>
 						<ListButton
 							type="numberedList"
 							icon={<FormatListNumbered />}

@@ -27,8 +27,9 @@ const DragHandle = React.forwardRef<HTMLButtonElement, DragHandleProps>(
 						position: 'absolute',
 						top: '0',
 						left: '0',
-						marginLeft: '-30px',
-						marginTop: '6px',
+						zIndex: 10,
+						marginLeft: '-37px',
+						marginTop: '4px',
 						color: 'lightgray',
 						':hover': {
 							opacity: '100%',

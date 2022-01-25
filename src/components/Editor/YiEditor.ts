@@ -21,7 +21,6 @@ export type CustomEditor = BaseEditor & ReactEditor & HistoryEditor;
 const BlockTypes = [
 	'documentTitle',
 	'title',
-	'subtitle',
 	'paragraph',
 	'image',
 	'listItem',
@@ -38,7 +37,6 @@ const ElementTypeLabels: {
 } = {
 	documentTitle: 'Document Title',
 	title: 'Title',
-	subtitle: 'Subtitle',
 	paragraph: 'Paragraph',
 	image: 'Image',
 	word: 'Word',
@@ -119,15 +117,10 @@ export type WordElement = {
 	children: CustomText[];
 };
 
-export type SubtitleElement = {
-	type: 'subtitle';
-	align: AlignValue;
-	children: Array<CustomText | EditorInlineElement>;
-};
-
 export type TitleElement = {
 	type: 'title';
 	align: AlignValue;
+	variant: 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6';
 	children: Array<CustomText | EditorInlineElement>;
 };
 
@@ -166,8 +159,7 @@ export type MarkElement = {
 export type AlignableElement =
 	| ParagraphElement
 	| TitleElement
-	| BlockQuoteElement
-	| SubtitleElement;
+	| BlockQuoteElement;
 
 export type EditorBlockElement =
 	| ParagraphElement
@@ -181,8 +173,7 @@ export type EditorBlockElement =
 	| ListItemElement
 	| WordListElement
 	| DialogElement
-	| DialogLine
-	| SubtitleElement;
+	| DialogLine;
 
 export type EditorInlineElement =
 	| WordElement

@@ -8,12 +8,16 @@ import {
 	LinearProgress,
 	Typography,
 } from '@mui/material';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import React, {
+	useCallback,
+	useEffect,
+	useMemo,
+	useRef,
+	useState,
+} from 'react';
 import SRSCard from './SRSCard';
 
 type SRSAnswer = 'Again' | 'Good' | 'Easy';
-type SRSState = 'Start' | 'Running' | 'Finish';
 
 const LEARNED_TARGET = 1 as const;
 const INITIAL_MEMORY_VALUE = 0;
@@ -61,43 +65,43 @@ function calculateNextIndex<T>(
 	return { done: false, nextItem };
 }
 
+export type CardRenderer<T> = React.FC<{ item: T; side: 'Front' | 'Back' }>;
 const BasicSRS = <T extends unknown>({
 	items,
 	itemRenderer: ItemRenderer,
+	finished,
 }: {
 	items: Array<T>;
-	itemRenderer: React.FC<{ item: T; side: 'Front' | 'Back' }>;
+	itemRenderer: CardRenderer<T>;
+	finished: () => void;
 }) => {
 	const [cardFace, setCardFace] = useState<'Front' | 'Back'>('Front');
-	const [srsState, setSRSState] = useState<SRSState>('Start');
-	const [activeItem, setActiveItem] = useState<T | null>(null);
+	const [activeItem, setActiveItem] = useState<T>();
 	const [memoryMap, setMemoryMap] = useState<Map<T, number>>(new Map());
+	const containerRef = useRef<HTMLDivElement | null>(null);
 
 	useEffect(() => {
-		setSRSState('Start');
-		setCardFace('Front');
-	}, [items]);
+		if (containerRef.current) {
+			containerRef.current.focus();
+		}
+	}, [containerRef]);
 
-	const initializeMemoryMap = () => {
+	useEffect(() => {
+		const randomIndex = Math.floor(Math.random() * items.length);
+		const randomItem = items[randomIndex];
+
 		const newMemoryMap = new Map<T, number>();
 		for (const entry of items) {
 			newMemoryMap.set(entry, INITIAL_MEMORY_VALUE);
 		}
 		setMemoryMap(newMemoryMap);
-	};
-
-	const start = () => {
-		const randomIndex = Math.floor(Math.random() * items.length);
-		const randomId = items[randomIndex];
-		initializeMemoryMap();
-		setActiveItem(randomId);
 		setCardFace('Front');
-		setSRSState('Running');
-	};
+		setActiveItem(randomItem);
+	}, [items]);
 
 	const answerCard = useCallback(
 		(answer: SRSAnswer) => {
-			if (srsState === 'Running' && cardFace === 'Back') {
+			if (cardFace === 'Back') {
 				if (!activeItem) {
 					return;
 				}
@@ -116,22 +120,22 @@ const BasicSRS = <T extends unknown>({
 					activeItem
 				);
 				if (nextEntryResult.done) {
-					setActiveItem(null);
-					setSRSState('Finish');
+					finished();
+					// Callback
 				} else {
 					setActiveItem(nextEntryResult.nextItem);
 					setCardFace('Front');
 				}
 			}
 		},
-		[activeItem, cardFace, memoryMap, srsState]
+		[activeItem, cardFace, finished, memoryMap]
 	);
 
 	const showAnswer = useCallback(() => {
-		if (srsState === 'Running' && cardFace === 'Front') {
+		if (cardFace === 'Front') {
 			setCardFace('Back');
 		}
-	}, [cardFace, srsState]);
+	}, [cardFace]);
 
 	const progress = useMemo(() => {
 		const currentMemoryEntries = [...memoryMap.entries()];
@@ -145,81 +149,42 @@ const BasicSRS = <T extends unknown>({
 		return calculatedProgress;
 	}, [memoryMap]);
 
-	let cardContent;
-	switch (srsState) {
-		case 'Start':
-			cardContent = (
-				<Box
-					sx={{
-						display: 'flex',
-						flexDirection: 'column',
-						alignItems: 'center',
-						justifyContent: 'center',
-					}}
-				>
-					<Typography>Press start to begin</Typography>
-					<Button size="small" variant="contained" onClick={start}>
-						Start
-					</Button>
-				</Box>
-			);
-			break;
-		case 'Running':
-			cardContent = activeItem ? (
-				<SRSCard side={cardFace}>
-					{activeItem && (
-						<ItemRenderer item={activeItem} side={cardFace} />
-					)}
-				</SRSCard>
-			) : (
-				<Typography>Impossible state?!</Typography>
-			);
-			break;
-		case 'Finish':
-			cardContent = <CheckCircleIcon fontSize="large" color="success" />;
-			break;
-		default:
-			break;
-	}
-
 	let cardActions = null;
-	if (activeItem && srsState === 'Running') {
-		cardActions =
-			cardFace === 'Front' ? (
+	cardActions =
+		cardFace === 'Front' ? (
+			<Button
+				size="small"
+				variant="contained"
+				onClick={() => showAnswer()}
+				sx={{ margin: 'auto' }}
+			>
+				Show Answer (Space)
+			</Button>
+		) : (
+			<>
 				<Button
 					size="small"
-					variant="contained"
-					onClick={() => showAnswer()}
-					sx={{ margin: 'auto' }}
+					variant="outlined"
+					onClick={() => answerCard('Again')}
 				>
-					Show Answer (Space)
+					Again (1)
 				</Button>
-			) : (
-				<>
-					<Button
-						size="small"
-						variant="outlined"
-						onClick={() => answerCard('Again')}
-					>
-						Again (1)
-					</Button>
-					<Button
-						size="small"
-						variant="outlined"
-						onClick={() => answerCard('Good')}
-					>
-						Good (2)
-					</Button>
-					<Button
-						size="small"
-						variant="outlined"
-						onClick={() => answerCard('Easy')}
-					>
-						Easy (3)
-					</Button>
-				</>
-			);
-	}
+				<Button
+					size="small"
+					variant="outlined"
+					onClick={() => answerCard('Good')}
+				>
+					Good (2)
+				</Button>
+				<Button
+					size="small"
+					variant="outlined"
+					onClick={() => answerCard('Easy')}
+				>
+					Easy (3)
+				</Button>
+			</>
+		);
 
 	const keyboardHandler = useCallback(
 		(e: React.KeyboardEvent<HTMLDivElement>) => {
@@ -243,7 +208,12 @@ const BasicSRS = <T extends unknown>({
 	);
 
 	return (
-		<Card onKeyPress={keyboardHandler} tabIndex={0}>
+		<Card
+			onKeyPress={keyboardHandler}
+			tabIndex={0}
+			ref={containerRef}
+			sx={{ width: '100%' }}
+		>
 			<LinearProgress variant="determinate" value={progress} />
 			<CardHeader>
 				<Typography>SRS</Typography>
@@ -258,7 +228,11 @@ const BasicSRS = <T extends unknown>({
 						minHeight: '200px',
 					}}
 				>
-					{cardContent}
+					<SRSCard side={cardFace}>
+						{activeItem && (
+							<ItemRenderer item={activeItem} side={cardFace} />
+						)}
+					</SRSCard>
 				</Box>
 			</CardContent>
 			<CardActions>
