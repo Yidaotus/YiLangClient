@@ -174,7 +174,6 @@ const DictionaryEntry: React.FC<IDictionaryEntryProps> = ({
 										display: 'flex',
 										flexDirection: 'row',
 										alignItems: 'baseline',
-										wordBreak: 'break-word',
 									}}
 								>
 									<Link
@@ -187,6 +186,7 @@ const DictionaryEntry: React.FC<IDictionaryEntryProps> = ({
 										<Typography
 											variant="body2"
 											component="div"
+											sx={{ whiteSpace: 'nowrap' }}
 										>
 											{root.key}
 										</Typography>
@@ -195,6 +195,7 @@ const DictionaryEntry: React.FC<IDictionaryEntryProps> = ({
 										variant="body2"
 										gutterBottom
 										component="div"
+										sx={{ whiteSpace: 'pre-line' }}
 									>
 										{` : ${root.translations.join(', ')}`}
 									</Typography>

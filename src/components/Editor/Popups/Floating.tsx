@@ -35,6 +35,7 @@ const Floating = React.forwardRef<
 	) => {
 		const floatingNode = useRef<HTMLDivElement>(null);
 		const [floatingStyle, setFloatingStyle] = useState<CSSProperties>({});
+		const [position, setPosition] = useState<'below' | 'above'>();
 
 		useEffect(() => {
 			if (visible) {
@@ -65,6 +66,7 @@ const Floating = React.forwardRef<
 								offsetY >
 							window.innerHeight - bufferSpace;
 
+						setPosition(shouldRenderAbove ? 'above' : 'below');
 						const top =
 							relativeY +
 							(shouldRenderAbove
@@ -100,6 +102,13 @@ const Floating = React.forwardRef<
 			}
 		}, [floatingNode, parentElement, relativeBounding, visible]);
 
+		let arrowClass;
+		if (arrow) {
+			arrowClass =
+				position === 'above'
+					? 'arrow arrow-above'
+					: 'arrow arrow-below';
+		}
 		return (
 			<div
 				style={floatingStyle}
@@ -117,7 +126,7 @@ const Floating = React.forwardRef<
 						}
 					}
 				}}
-				className={`floating-container ${arrow && 'arrow'}`}
+				className={`floating-container ${arrowClass}`}
 			>
 				{children}
 			</div>

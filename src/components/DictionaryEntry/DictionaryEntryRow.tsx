@@ -68,7 +68,7 @@ const DictionaryEntryRow: React.FC<IDictEntryRowProps> = ({
 				<Typography
 					component="span"
 					sx={{
-						fontWeight: 'bold',
+						fontWeight: '500',
 					}}
 				>
 					{entry.key}

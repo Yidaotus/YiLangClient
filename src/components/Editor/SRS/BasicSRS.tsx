@@ -8,14 +8,10 @@ import {
 	LinearProgress,
 	Typography,
 } from '@mui/material';
-import { DictionaryEntryID } from 'Document/Utility';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import SRSCard from './SRSCard';
 
-interface BasicSRSProps {
-	entryIds: Array<DictionaryEntryID>;
-}
 type SRSAnswer = 'Again' | 'Good' | 'Easy';
 type SRSState = 'Start' | 'Running' | 'Finish';
 
@@ -29,14 +25,12 @@ const SRSFactorMap: Record<SRSAnswer, number> = {
 	Easy: LEARNED_TARGET / 1,
 } as const;
 
-type CalculateIndexResult =
-	| { done: true }
-	| { done: false; nextId: DictionaryEntryID };
+type CalculateIndexResult<T> = { done: true } | { done: false; nextItem: T };
 
-const calculateNextIndex = (
-	memoryMap: Map<DictionaryEntryID, number>,
-	activeId: DictionaryEntryID
-): CalculateIndexResult => {
+function calculateNextIndex<T>(
+	memoryMap: Map<T, number>,
+	activeItem: T
+): CalculateIndexResult<T> {
 	const sortedEntries = [...memoryMap.entries()].sort(
 		([, memoryFactorA], [, memoryFactorB]) => memoryFactorA - memoryFactorB
 	);
@@ -52,47 +46,51 @@ const calculateNextIndex = (
 		([entryId, memoryFactor]) =>
 			memoryFactor < LEARNED_TARGET &&
 			memoryFactor <= selectionThreshold &&
-			entryId !== activeId
+			entryId !== activeItem
 	);
-	let nextId: DictionaryEntryID;
+	let nextItem: T;
 	if (entriesInThreshold.length > 0) {
 		const randomIndexInThreshold = Math.floor(
 			Math.random() * entriesInThreshold.length
 		);
-		nextId = entriesInThreshold[randomIndexInThreshold][0];
+		nextItem = entriesInThreshold[randomIndexInThreshold][0];
 	} else {
 		// Fallback to the lowest rated entry
-		nextId = sortedEntries[0][0];
+		nextItem = sortedEntries[0][0];
 	}
-	return { done: false, nextId };
-};
+	return { done: false, nextItem };
+}
 
-const BasicSRS: React.FC<BasicSRSProps> = ({ entryIds }) => {
+const BasicSRS = <T extends unknown>({
+	items,
+	itemRenderer: ItemRenderer,
+}: {
+	items: Array<T>;
+	itemRenderer: React.FC<{ item: T; side: 'Front' | 'Back' }>;
+}) => {
 	const [cardFace, setCardFace] = useState<'Front' | 'Back'>('Front');
 	const [srsState, setSRSState] = useState<SRSState>('Start');
-	const [activeId, setActiveId] = useState<DictionaryEntryID | null>(null);
-	const [memoryMap, setMemoryMap] = useState<Map<DictionaryEntryID, number>>(
-		new Map()
-	);
+	const [activeItem, setActiveItem] = useState<T | null>(null);
+	const [memoryMap, setMemoryMap] = useState<Map<T, number>>(new Map());
 
 	useEffect(() => {
 		setSRSState('Start');
 		setCardFace('Front');
-	}, [entryIds]);
+	}, [items]);
 
 	const initializeMemoryMap = () => {
-		const newMemoryMap = new Map<DictionaryEntryID, number>();
-		for (const entryId of entryIds) {
-			newMemoryMap.set(entryId, INITIAL_MEMORY_VALUE);
+		const newMemoryMap = new Map<T, number>();
+		for (const entry of items) {
+			newMemoryMap.set(entry, INITIAL_MEMORY_VALUE);
 		}
 		setMemoryMap(newMemoryMap);
 	};
 
 	const start = () => {
-		const randomIndex = Math.floor(Math.random() * entryIds.length);
-		const randomId = entryIds[randomIndex];
+		const randomIndex = Math.floor(Math.random() * items.length);
+		const randomId = items[randomIndex];
 		initializeMemoryMap();
-		setActiveId(randomId);
+		setActiveItem(randomId);
 		setCardFace('Front');
 		setSRSState('Running');
 	};
@@ -100,33 +98,33 @@ const BasicSRS: React.FC<BasicSRSProps> = ({ entryIds }) => {
 	const answerCard = useCallback(
 		(answer: SRSAnswer) => {
 			if (srsState === 'Running' && cardFace === 'Back') {
-				if (!activeId) {
+				if (!activeItem) {
 					return;
 				}
 				const learnFactor = SRSFactorMap[answer];
-				const currentMemory = memoryMap.get(activeId) || 0;
+				const currentMemory = memoryMap.get(activeItem) || 0;
 				const newMemoryMap = new Map([
 					...memoryMap,
 					[
-						activeId,
+						activeItem,
 						Math.min(currentMemory + learnFactor, LEARNED_TARGET),
 					],
 				]);
 				setMemoryMap(newMemoryMap);
 				const nextEntryResult = calculateNextIndex(
 					newMemoryMap,
-					activeId
+					activeItem
 				);
 				if (nextEntryResult.done) {
-					setActiveId(null);
+					setActiveItem(null);
 					setSRSState('Finish');
 				} else {
-					setActiveId(nextEntryResult.nextId);
+					setActiveItem(nextEntryResult.nextItem);
 					setCardFace('Front');
 				}
 			}
 		},
-		[activeId, cardFace, memoryMap, srsState]
+		[activeItem, cardFace, memoryMap, srsState]
 	);
 
 	const showAnswer = useCallback(() => {
@@ -167,8 +165,12 @@ const BasicSRS: React.FC<BasicSRSProps> = ({ entryIds }) => {
 			);
 			break;
 		case 'Running':
-			cardContent = activeId ? (
-				<SRSCard entryId={activeId} side={cardFace} />
+			cardContent = activeItem ? (
+				<SRSCard side={cardFace}>
+					{activeItem && (
+						<ItemRenderer item={activeItem} side={cardFace} />
+					)}
+				</SRSCard>
 			) : (
 				<Typography>Impossible state?!</Typography>
 			);
@@ -181,7 +183,7 @@ const BasicSRS: React.FC<BasicSRSProps> = ({ entryIds }) => {
 	}
 
 	let cardActions = null;
-	if (activeId && srsState === 'Running') {
+	if (activeItem && srsState === 'Running') {
 		cardActions =
 			cardFace === 'Front' ? (
 				<Button

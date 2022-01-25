@@ -18,6 +18,7 @@ import {
 } from 'slate';
 import { CustomEditor, EditorElement, WordElement } from '../YiEditor';
 import BasicSRS from './BasicSRS';
+import DictionaryEntryCard from './DictionaryEntryCard';
 
 const StyledAccordion = styled(Accordion)(() => ({
 	'& .MuiAccordionSummary-root.Mui-expanded': {
@@ -90,9 +91,10 @@ const DraggableSRS: React.FC<{ editor: CustomEditor }> = ({ editor }) => {
 						</AccordionSummary>
 						<AccordionDetails>
 							<BasicSRS
-								entryIds={vocabs.map(
+								items={vocabs.map(
 									([wordNode]) => wordNode.dictId
 								)}
+								itemRenderer={DictionaryEntryCard}
 							/>
 						</AccordionDetails>
 					</StyledAccordion>

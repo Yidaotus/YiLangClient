@@ -77,7 +77,9 @@ const DictPopupController: React.FC<IDictPopupControllerProps> = ({
 				{entry && (
 					<DictEntryWithEdit
 						entry={entry}
-						onRootSelect={(rootId) => {}}
+						onRootSelect={(rootId) => {
+							setDictId(rootId);
+						}}
 					/>
 				)}
 			</Box>

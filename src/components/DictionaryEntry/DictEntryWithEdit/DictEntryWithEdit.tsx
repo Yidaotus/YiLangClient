@@ -42,7 +42,7 @@ const DictEntryWithEdit: React.FC<IDictEntryWithEditProps> = ({
 	}, [deleteEntry, entry.id, removeCallback]);
 
 	return (
-		<Box sx={{ display: 'flex' }}>
+		<Box sx={{ display: 'flex', position: 'relative' }}>
 			{editing && (
 				<Box sx={{ width: '100%' }}>
 					<DictEntryEdit
@@ -61,14 +61,22 @@ const DictEntryWithEdit: React.FC<IDictEntryWithEditProps> = ({
 				/>
 			)}
 			{!editing && (
-				<Box sx={{ marginLeft: 'auto' }}>
+				<Box
+					sx={{
+						marginLeft: 'auto',
+						position: 'absolute',
+						top: 0,
+						right: 0,
+					}}
+				>
 					<Stack spacing={1} direction="row">
 						<IconButton
 							onClick={() =>
 								setEditing((editState) => !editState)
 							}
+							size="small"
 						>
-							<EditIcon />
+							<EditIcon fontSize="small" />
 						</IconButton>
 						{canRemove && (
 							<ConfirmButton

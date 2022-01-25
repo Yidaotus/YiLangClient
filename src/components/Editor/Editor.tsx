@@ -20,19 +20,15 @@ import EditorDocument from './EditorDocument';
 import Toolbar from './Toolbar/Toolbar';
 import { withYiLang } from './YiEditor';
 import WordEditorModal from './Toolbar/Modals/WordEditor/WordEditorModal';
-import SavingIndicator, {
-	SavingState,
-} from './SavingIndicator/SavingIndicator';
+import { SavingState } from './SavingIndicator/SavingIndicator';
 import { useActiveLanguageConf } from '@hooks/ConfigQueryHooks';
 import useUiErrorHandler from '@helpers/useUiErrorHandler';
 import DraggableDictionary from './DraggableDictionary';
 import useDebounce from '@hooks/useDebounce';
 import DraggableSRS from './SRS/DraggableSRS';
-import { Plate } from '@udecode/plate';
-import { useSnackbar } from 'notistack';
 import useSavingIndicator from './SavingIndicator/SavingIndicator';
-import FloatingToolbar from './Toolbar/FloatingToolbar/FloatingToolbar';
 import DictPopupController from './Popups/DictPopupController';
+import SentencePopupController from './Popups/SentencePopupController';
 
 const AVERAGE_ACTIONS_PER_COMMAND = 15;
 const SAVE_EVERY_ACTIONS = 5 * AVERAGE_ACTIONS_PER_COMMAND;
@@ -216,6 +212,10 @@ const YiEditor: React.FC = () => {
 									visible={sentenceEditorVisible}
 									close={closeSentenceEditorModal}
 								/>
+								<SentencePopupController
+									rootElement={editorContainer}
+									selection={selection}
+								/>
 								<DictPopupController
 									rootElement={editorContainer}
 									selection={selection}
@@ -226,7 +226,6 @@ const YiEditor: React.FC = () => {
 									<Typography>Document not found</Typography>
 								)}
 								<DraggableSRS editor={editor} />
-								<FloatingToolbar />
 							</div>
 						</Slate>
 						<Accordion>
