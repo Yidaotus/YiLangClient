@@ -58,7 +58,10 @@ const DictPopupController: React.FC<IDictPopupControllerProps> = ({
 				setRelativeBounding(bounding);
 			}
 		} else {
-			setDictId(undefined);
+			const [clickNode] = Editor.nodes(editor);
+			if (clickNode) {
+				setDictId(undefined);
+			}
 		}
 	}, [editor, selection]);
 
@@ -70,7 +73,7 @@ const DictPopupController: React.FC<IDictPopupControllerProps> = ({
 			arrow
 			ref={floatingRef}
 		>
-			<Box sx={{ p: 1, maxWidth: '500px' }}>
+			<Box sx={{ p: 1, width: '350px' }}>
 				{entry && (
 					<DictEntryWithEdit
 						entry={entry}

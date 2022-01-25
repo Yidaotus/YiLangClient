@@ -6,7 +6,7 @@ import {
 } from 'Document/Dictionary';
 import DictionarySelect from '@components/DictionaryEntry/DictionarySelect/DictionarySelect';
 import TagSelect from '@components/DictionaryEntry/TagSelect/TagSelect';
-import { TextField, Stack, Button } from '@mui/material';
+import { TextField, Stack, Button, Box } from '@mui/material';
 import { Controller } from 'react-hook-form';
 import * as Yup from 'yup';
 import { ITagFormOutput } from '../TagForm/TagForm';
@@ -104,7 +104,7 @@ const EntryForm: React.FC<IEntryFormProps> = ({
 	};
 
 	return (
-		<div>
+		<Box sx={{ width: '100%' }}>
 			<form onSubmit={handleSubmit(onSubmitCB)}>
 				<Stack spacing={2}>
 					<input hidden defaultValue="" {...register('id')} />
@@ -220,7 +220,7 @@ const EntryForm: React.FC<IEntryFormProps> = ({
 					</Button>
 				</Stack>
 			</form>
-		</div>
+		</Box>
 	);
 };
 

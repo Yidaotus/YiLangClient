@@ -109,7 +109,12 @@ const DictionaryEntry: React.FC<IDictionaryEntryProps> = ({
 				<Typography variant="subtitle2" component="div">
 					{entry.spelling}
 				</Typography>
-				<Typography variant="h5" gutterBottom component="div">
+				<Typography
+					variant="h5"
+					gutterBottom
+					component="div"
+					sx={{ fontWeight: '500' }}
+				>
 					{entry.key}
 				</Typography>
 				<Stack

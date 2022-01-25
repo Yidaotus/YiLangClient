@@ -65,12 +65,19 @@ const DictionaryEntryRow: React.FC<IDictEntryRowProps> = ({
 			sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
 		>
 			<TableCell component="th" scope="row">
-				{entry.key}
+				<Typography
+					component="span"
+					sx={{
+						fontWeight: 'bold',
+					}}
+				>
+					{entry.key}
+				</Typography>
 				{entry.spelling && (
 					<Typography
 						variant="caption"
+						component="span"
 						sx={{
-							display: 'inline-block',
 							marginLeft: 1,
 						}}
 					>

@@ -32,6 +32,7 @@ import { Plate } from '@udecode/plate';
 import { useSnackbar } from 'notistack';
 import useSavingIndicator from './SavingIndicator/SavingIndicator';
 import FloatingToolbar from './Toolbar/FloatingToolbar/FloatingToolbar';
+import DictPopupController from './Popups/DictPopupController';
 
 const AVERAGE_ACTIONS_PER_COMMAND = 15;
 const SAVE_EVERY_ACTIONS = 5 * AVERAGE_ACTIONS_PER_COMMAND;
@@ -215,12 +216,10 @@ const YiEditor: React.FC = () => {
 									visible={sentenceEditorVisible}
 									close={closeSentenceEditorModal}
 								/>
-								{/*
 								<DictPopupController
 									rootElement={editorContainer}
 									selection={selection}
 								/>
-								*/}
 								<DraggableDictionary selection={selection} />
 								<EditorDocument />
 								{!loadingDocument && !dbDocument && (

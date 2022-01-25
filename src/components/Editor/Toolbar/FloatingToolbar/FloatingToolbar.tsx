@@ -4,27 +4,60 @@ import { ReactEditor, useSlateStatic } from 'slate-react';
 
 const FloatingToolbar: React.FC = () => {
 	const editor = useSlateStatic();
-	const styleRef = useRef({
-		x: 0,
-		y: 0,
-		width: '100px',
-		height: '100px',
-	});
+	const containerRef = useRef<HTMLDivElement | null>(null);
 
 	useEffect(() => {
 		if (editor.selection) {
 			const domPos = ReactEditor.toDOMRange(editor, editor.selection);
 			const rect = domPos.getBoundingClientRect();
-			styleRef.current = {
+			const newStyle = {
 				x: rect.x,
 				y: rect.y,
 				width: '100px',
 				height: '100px',
 			};
+			const el = document.getElementById('lul123');
+			if (el) {
+				el.style.left = rect.x.toString();
+				el.style.top = rect.y.toString();
+			}
 		}
 	}, [editor, editor.selection]);
 
-	return <div style={styleRef.current}>Hi</div>;
+	useEffect(() => {
+		const updater = (ev: Event) => {
+			if (editor.selection) {
+				const domPos = ReactEditor.toDOMRange(editor, editor.selection);
+				const rect = domPos.getBoundingClientRect();
+				const el = document.getElementById('lul123');
+				if (el) {
+					el.style.left = `${rect.x.toString()}px`;
+					el.style.top = `${rect.y.toString()}px`;
+				}
+			}
+		};
+		document.onselectionchange = updater;
+
+		return () => {
+			document.onselectionchange = null;
+		};
+	});
+
+	return (
+		<div
+			ref={containerRef}
+			id="lul123"
+			style={{
+				position: 'absolute',
+				width: '100px',
+				height: '100px',
+				backgroundColor: 'black',
+				color: 'white',
+			}}
+		>
+			Hi
+		</div>
+	);
 };
 
 export default FloatingToolbar;
