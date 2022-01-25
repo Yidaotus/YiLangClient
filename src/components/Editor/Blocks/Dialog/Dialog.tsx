@@ -1,41 +1,23 @@
 import { DialogElement } from '@components/Editor/YiEditor';
-import { Paper, Box } from '@mui/material';
+import { Box } from '@mui/material';
 import React from 'react';
 import { RenderElementProps } from 'slate-react';
-import DragHandle from '@components/Editor/DnD/DragHandle';
-import useDraggableElement from '@components/Editor/DnD/useDraggableElement';
+import DragContainer from '@components/Editor/DragContainer';
 
 interface DialogProps extends RenderElementProps {
 	element: DialogElement;
 }
 
 const Dialog: React.FC<DialogProps> = ({ children, attributes, element }) => {
-	const { hovering, opacity, dragRef, dropRef, preview } =
-		useDraggableElement(element);
-
 	return (
 		<Box
 			{...attributes}
 			sx={{
 				paddingY: 1,
 				position: 'relative',
-				backgroundColor: hovering ? '#eeeeee40' : '',
-				opacity,
-				'& .drag-handle': {
-					opacity: '0%',
-				},
-				'&:hover .drag-handle': {
-					opacity: '100%',
-				},
-			}}
-			ref={(ref: HTMLDivElement) => {
-				dropRef(ref);
-				// eslint-disable-next-line no-param-reassign
-				attributes.ref.current = ref;
 			}}
 		>
-			<div ref={preview}>{children}</div>
-			<DragHandle ref={dragRef} />
+			<DragContainer element={element}>{children}</DragContainer>
 		</Box>
 	);
 };

@@ -12,8 +12,7 @@ import { Transforms } from 'slate';
 import isHotkey from 'is-hotkey';
 import { Box, TextField, useTheme } from '@mui/material';
 import { Resizable } from 're-resizable';
-import useDraggableElement from '@components/Editor/DnD/useDraggableElement';
-import DragHandle from '@components/Editor/DnD/DragHandle';
+import DragContainer from '@components/Editor/DragContainer';
 
 export type IImageBlockData = Omit<RenderElementProps, 'element'> & {
 	element: ImageElement;
@@ -61,9 +60,6 @@ const ImageBlock: React.FC<IImageBlockData> = ({
 	const selected = useSelected();
 	const focused = useFocused();
 	const uiTheme = useTheme();
-
-	const { hovering, opacity, dragRef, dropRef, preview } =
-		useDraggableElement(element);
 
 	useEffect(() => {
 		setWidth(element.width);
@@ -123,150 +119,131 @@ const ImageBlock: React.FC<IImageBlockData> = ({
 	}, [isEditingCaption, applyCaptionChange, captionEdit]);
 
 	return (
-		<Box
-			{...attributes}
-			ref={(ref: HTMLDivElement) => {
-				dropRef(ref);
-				// eslint-disable-next-line no-param-reassign
-				attributes.ref.current = ref;
-			}}
-			sx={{
-				p: 1,
-				position: 'relative',
-				backgroundColor: hovering ? '#4e4e4e10' : 'white',
-				opacity,
-				'& .drag-handle': {
-					opacity: '0%',
-				},
-				'&:hover .drag-handle': {
-					opacity: '100%',
-				},
-			}}
-		>
-			{children}
-			<DragHandle ref={dragRef} />
-			<div
-				contentEditable={false}
-				style={{
-					display: 'flex',
-					flexDirection: 'column',
-					alignItems: 'center',
-					justifyContent: 'center',
-					marginTop: '15px',
-					marginBottom: '15px',
-				}}
-			>
-				<Box
-					sx={(theme) => ({
-						position: 'relative',
-						maxWidth: '100%',
-						width: '100%',
+		<Box {...attributes}>
+			<DragContainer element={element}>
+				{children}
+				<div
+					contentEditable={false}
+					style={{
 						display: 'flex',
-						justifyContent: 'center',
+						flexDirection: 'column',
 						alignItems: 'center',
-						'&:active .image-handle::after': {
-							opacity: '100%',
-							backgroundColor: theme.palette.secondary.main,
-						},
-						'&:focus .image-handle::after': {
-							opacity: '100%',
-							backgroundColor: theme.palette.secondary.main,
-						},
-						'&:hover .image-handle::after': {
-							opacity: '100%',
-							backgroundColor: theme.palette.secondary.main,
-						},
-					})}
+						justifyContent: 'center',
+						marginTop: '15px',
+						marginBottom: '15px',
+					}}
 				>
-					<Resizable
-						size={{ width, height: '100%' }}
-						maxWidth="103%"
-						lockAspectRatio
-						resizeRatio={2}
-						handleComponent={{
-							left: <ResizeHandle position="left" />,
-							right: <ResizeHandle position="right" />,
-						}}
-						enable={{
-							left: true,
-							right: true,
-						}}
-						onResize={(e, direction, ref) => {
-							setWidth(ref.offsetWidth);
-						}}
-						onResizeStop={(e, direction, ref) =>
-							applyNodeWith(ref.offsetWidth)
-						}
-						minWidth={200}
+					<Box
+						sx={(theme) => ({
+							position: 'relative',
+							maxWidth: '100%',
+							width: '100%',
+							display: 'flex',
+							justifyContent: 'center',
+							alignItems: 'center',
+							'&:active .image-handle::after': {
+								opacity: '100%',
+								backgroundColor: theme.palette.secondary.main,
+							},
+							'&:focus .image-handle::after': {
+								opacity: '100%',
+								backgroundColor: theme.palette.secondary.main,
+							},
+							'&:hover .image-handle::after': {
+								opacity: '100%',
+								backgroundColor: theme.palette.secondary.main,
+							},
+						})}
 					>
-						<img
-							alt="yilang-image-container"
-							src={element.src}
-							draggable={false}
-							style={{
-								display: 'block',
-								maxWidth: '100%',
-								paddingLeft: '0px',
-								paddingRight: '0px',
-								cursor: 'pointer',
-								width: '100%',
-								borderRadius: '3px',
-								objectFit: 'cover',
-								border: '1px solid lightgray',
-								boxShadow:
-									selected && focused
-										? `0 0 0 1px ${uiTheme.palette.secondary.dark}`
-										: 'none',
+						<Resizable
+							size={{ width, height: '100%' }}
+							maxWidth="103%"
+							lockAspectRatio
+							resizeRatio={2}
+							handleComponent={{
+								left: <ResizeHandle position="left" />,
+								right: <ResizeHandle position="right" />,
 							}}
-							width={width}
-							ref={preview}
+							enable={{
+								left: true,
+								right: true,
+							}}
+							onResize={(e, direction, ref) => {
+								setWidth(ref.offsetWidth);
+							}}
+							onResizeStop={(e, direction, ref) =>
+								applyNodeWith(ref.offsetWidth)
+							}
+							minWidth={200}
+						>
+							<img
+								alt="yilang-image-container"
+								src={element.src}
+								draggable={false}
+								style={{
+									display: 'block',
+									maxWidth: '100%',
+									paddingLeft: '0px',
+									paddingRight: '0px',
+									cursor: 'pointer',
+									width: '100%',
+									borderRadius: '3px',
+									objectFit: 'cover',
+									border: '1px solid lightgray',
+									boxShadow:
+										selected && focused
+											? `0 0 0 1px ${uiTheme.palette.secondary.dark}`
+											: 'none',
+								}}
+								width={width}
+							/>
+						</Resizable>
+					</Box>
+					{isEditingCaption && (
+						<TextField
+							autoFocus
+							type="text"
+							defaultValue={element.caption}
+							onKeyDown={onKeyDown}
+							onChange={onCaptionChange}
+							variant="standard"
+							onBlur={onToggleCaptionEditMode}
+							inputProps={{ style: { textAlign: 'center' } }}
+							placeholder="Caption"
+							size="small"
+							sx={{ width: '80%', pt: 1 }}
 						/>
-					</Resizable>
-				</Box>
-				{isEditingCaption && (
-					<TextField
-						autoFocus
-						type="text"
-						defaultValue={element.caption}
-						onKeyDown={onKeyDown}
-						onChange={onCaptionChange}
-						variant="standard"
-						onBlur={onToggleCaptionEditMode}
-						inputProps={{ style: { textAlign: 'center' } }}
-						placeholder="Caption"
-						size="small"
-						sx={{ width: '80%', pt: 1 }}
-					/>
-				)}
-				{!isEditingCaption && element.caption && (
-					<div
-						style={{
-							margin: 'auto',
-							textAlign: 'center',
-							marginBottom: '10px',
-							color: 'lightgray',
-						}}
-						role="none"
-						onClick={onToggleCaptionEditMode}
-					>
-						{element.caption}
-					</div>
-				)}
-				{selected && !isEditingCaption && !element.caption && (
-					<div
-						style={{
-							margin: 'auto',
-							textAlign: 'center',
-							marginBottom: '10px',
-							color: 'lightgray',
-						}}
-						role="none"
-						onClick={onToggleCaptionEditMode}
-					>
-						Edit your caption
-					</div>
-				)}
-			</div>
+					)}
+					{!isEditingCaption && element.caption && (
+						<div
+							style={{
+								margin: 'auto',
+								textAlign: 'center',
+								marginBottom: '10px',
+								color: 'lightgray',
+							}}
+							role="none"
+							onClick={onToggleCaptionEditMode}
+						>
+							{element.caption}
+						</div>
+					)}
+					{selected && !isEditingCaption && !element.caption && (
+						<div
+							style={{
+								margin: 'auto',
+								textAlign: 'center',
+								marginBottom: '10px',
+								color: 'lightgray',
+							}}
+							role="none"
+							onClick={onToggleCaptionEditMode}
+						>
+							Edit your caption
+						</div>
+					)}
+				</div>
+			</DragContainer>
 		</Box>
 	);
 };

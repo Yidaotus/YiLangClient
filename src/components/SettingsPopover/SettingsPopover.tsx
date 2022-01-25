@@ -89,7 +89,10 @@ const SettingsPopover: React.FC = () => {
 								label="Active Language"
 							>
 								{availableLanguages.map((language) => (
-									<MenuItem value={language.id}>
+									<MenuItem
+										value={language.id}
+										key={language.id}
+									>
 										{language.name}
 									</MenuItem>
 								))}

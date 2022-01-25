@@ -105,6 +105,7 @@ const DictionaryEntryRow: React.FC<IDictEntryRowProps> = ({
 								left: i * 10,
 								top: -10,
 							}}
+							key={tag.id}
 						>
 							<EntryTag tag={tag} key={tag.id} />
 						</Box>
@@ -127,10 +128,12 @@ const DictionaryEntryRow: React.FC<IDictEntryRowProps> = ({
 			</TableCell>
 		</TableRow>
 	) : (
-		<>
-			{loading && <CircularProgress />}
-			{!loading && !entry && <span>ERROR</span>}
-		</>
+		<TableRow>
+			<TableCell>
+				{loading && <CircularProgress />}
+				{!loading && !entry && <span>ERROR</span>}
+			</TableCell>
+		</TableRow>
 	);
 };
 
