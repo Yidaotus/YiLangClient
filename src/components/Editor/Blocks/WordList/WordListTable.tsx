@@ -16,13 +16,9 @@ import {
 	TableBody,
 	AccordionActions,
 	Button,
-	TableRow,
-	TableCell,
-	IconButton,
 } from '@mui/material';
 import {
 	ExpandMore as ExpandMoreIcon,
-	Link as LinkIcon,
 	Save as SaveIcon,
 } from '@mui/icons-material';
 import React, { useCallback } from 'react';
@@ -34,8 +30,12 @@ import {
 	Node as SlateNode,
 } from 'slate';
 import { ReactEditor } from 'slate-react';
-import { resolveEntryIdsAndExport } from '@helpers/CSVExporter';
+import {
+	resolveEntryIdsAndExport,
+	resolveSentenceIdsAndExport,
+} from '@helpers/CSVExporter';
 import { useActiveLanguageConf } from '@hooks/ConfigQueryHooks';
+import DictionarySentenceRow from '@components/DictionaryEntry/DictionarySentenceRow';
 
 interface WordListTableProps {
 	editor: CustomEditor;
@@ -165,36 +165,11 @@ const WordListTable: React.FC<WordListTableProps> = ({ editor }) => {
 							<TableBody>
 								{sentences.map(
 									([sentenceNode, sentencePath]) => (
-										<TableRow
-											key={sentenceNode.sentenceId}
-											sx={{
-												'&:last-child td, &:last-child th':
-													{ border: 0 },
-											}}
-										>
-											<TableCell scope="row">
-												<Typography>
-													{SlateNode.string(
-														sentenceNode
-													)}
-												</Typography>
-												<Typography>
-													{sentenceNode.translation}
-												</Typography>
-											</TableCell>
-											<TableCell scope="row">
-												<IconButton
-													size="small"
-													onMouseUp={() =>
-														scrollToPath(
-															sentencePath
-														)
-													}
-												>
-													<LinkIcon />
-												</IconButton>
-											</TableCell>
-										</TableRow>
+										<DictionarySentenceRow
+											id={sentenceNode.sentenceId}
+											path={sentencePath}
+											scrollToPath={scrollToPath}
+										/>
 									)
 								)}
 							</TableBody>
@@ -203,6 +178,23 @@ const WordListTable: React.FC<WordListTableProps> = ({ editor }) => {
 					{sentences.length < 1 && (
 						<span>No sentences added yet!</span>
 					)}
+					<AccordionActions>
+						<Button
+							onClick={() => {
+								resolveSentenceIdsAndExport(
+									sentences.map(
+										(sentenceNode) =>
+											sentenceNode[0].sentenceId
+									),
+									activeLanguage?.id || ''
+								);
+							}}
+							endIcon={<SaveIcon />}
+							variant="contained"
+						>
+							Export
+						</Button>
+					</AccordionActions>
 				</AccordionDetails>
 			</Accordion>
 		</>

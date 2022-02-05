@@ -24,8 +24,13 @@ import {
 	IDictionaryEntryResolved,
 	IDictionarySentence,
 } from 'Document/Dictionary';
-import { DictionaryEntryID, notUndefined } from 'Document/Utility';
 import {
+	DictionaryEntryID,
+	DictionarySentenceID,
+	notUndefined,
+} from 'Document/Utility';
+import {
+	QueryFunction,
 	useMutation,
 	UseMutationResult,
 	useQueries,
@@ -39,18 +44,26 @@ import { useTags } from './useTags';
 const dictSentencesKeys = queryKeyFactory('sentences');
 const dictEntryKeys = queryKeyFactory('entries');
 
+const sentenceQueryFactory = (
+	sentenceId: DictionarySentenceID | undefined,
+	activeLanguageId: string | undefined
+) => {
+	const queryFunction: QueryFunction<IDictionarySentence> = () => {
+		if (!sentenceId || !activeLanguageId) {
+			throw new Error('no sentence / language selected!');
+		}
+		return getSentence({ sentenceId, language: activeLanguageId });
+	};
+	return queryFunction;
+};
+
 const useDictionarySentence = (
-	sentenceId: string | undefined
+	sentenceId: DictionarySentenceID | undefined
 ): [boolean, IDictionarySentence | null] => {
 	const activeLanguage = useActiveLanguageConf();
 	const { data, isLoading } = useQuery(
-		dictSentencesKeys(activeLanguage?.id).list(sentenceId),
-		() => {
-			if (!sentenceId || !activeLanguage) {
-				throw new Error('no sentence / language selected!');
-			}
-			return getSentence({ sentenceId, language: activeLanguage.id });
-		},
+		dictSentencesKeys(activeLanguage?.id).detail(sentenceId),
+		sentenceQueryFactory(sentenceId, activeLanguage?.id),
 		{
 			enabled: !!sentenceId && !!activeLanguage,
 			refetchOnWindowFocus: false,
@@ -81,18 +94,26 @@ const useDictionarySentencesByWord = (
 	return [isLoading, data || []];
 };
 
+const entryQueryFactory = (
+	entryId: DictionarySentenceID | undefined,
+	activeLanguageId: string | undefined
+) => {
+	const queryFunction: QueryFunction<IDictionaryEntry> = () => {
+		if (!entryId || !activeLanguageId) {
+			throw new Error('no entry / language selected!');
+		}
+		return getEntry({ id: entryId, language: activeLanguageId });
+	};
+	return queryFunction;
+};
+
 const useDictionaryEntry = (
 	id: string | undefined
 ): [boolean, IDictionaryEntry | null] => {
 	const activeLanguage = useActiveLanguageConf();
 	const { data, isLoading } = useQuery(
 		dictEntryKeys(activeLanguage?.id).detail(id),
-		() => {
-			if (!id || !activeLanguage) {
-				throw new Error('no id / language selected!');
-			}
-			return getEntry({ id, language: activeLanguage.id });
-		},
+		entryQueryFactory(id, activeLanguage?.id),
 		{
 			enabled: !!id && !!activeLanguage,
 			keepPreviousData: false,
@@ -403,4 +424,6 @@ export {
 	useDictionarySentencesByWord,
 	useDictionarySentence,
 	useDictionaryEntryResolved,
+	sentenceQueryFactory,
+	entryQueryFactory,
 };

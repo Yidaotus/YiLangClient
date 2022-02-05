@@ -91,7 +91,7 @@ const DraggableSRS: React.FC<{ editor: CustomEditor }> = ({ editor }) => {
 						);
 						sentences.push({
 							sentence: nodeContent,
-							translation: sentenceNode[0].translation,
+							translation: sentenceNode[0].sentenceId,
 						});
 					}
 				}
@@ -197,6 +197,9 @@ const DraggableSRS: React.FC<{ editor: CustomEditor }> = ({ editor }) => {
 											value={itemType}
 											onChange={handleTypeChange}
 											label="Item Type"
+											MenuProps={{
+												disableScrollLock: true,
+											}}
 										>
 											<MenuItem value="Vocab">
 												Vocab
@@ -215,8 +218,14 @@ const DraggableSRS: React.FC<{ editor: CustomEditor }> = ({ editor }) => {
 								{srsState === 'Finish' && (
 									<>
 										<Box sx={{ display: 'flex' }}>
-											<DoneIcon color="success" />
-											<Typography>
+											<DoneIcon
+												color="success"
+												fontSize="large"
+											/>
+											<Typography
+												variant="h5"
+												component="span"
+											>
 												All finished up!
 											</Typography>
 										</Box>

@@ -3,6 +3,7 @@ import { addTag, getTag, getTags, searchTags } from 'api/tags.service';
 import { IDictionaryTag } from 'Document/Dictionary';
 import { DictionaryTagID, notUndefined } from 'Document/Utility';
 import {
+	QueryFunction,
 	useMutation,
 	UseMutationResult,
 	useQueries,
@@ -36,11 +37,18 @@ const useDictionaryTag = (
 	return [isLoading, data || null];
 };
 
+const allTagsQueryFactory = (activeLanguageId: string | undefined) => {
+	const queryFunction: QueryFunction<Array<IDictionaryTag>> = () => {
+		return activeLanguageId ? getTags(activeLanguageId) : [];
+	};
+	return queryFunction;
+};
+
 const useAllTags = (): Array<IDictionaryTag> => {
 	const activeLanguage = useActiveLanguageConf();
 	const { data } = useQuery(
 		tagEntryKeys(activeLanguage?.id).all,
-		() => (activeLanguage?.id ? getTags(activeLanguage?.id) : []),
+		allTagsQueryFactory(activeLanguage?.id),
 		{
 			enabled: !!activeLanguage?.id,
 			refetchOnWindowFocus: false,
@@ -147,4 +155,5 @@ export {
 	useDictionaryTag,
 	useTag,
 	useTags,
+	allTagsQueryFactory,
 };

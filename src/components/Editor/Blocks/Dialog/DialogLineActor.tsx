@@ -127,6 +127,11 @@ const DialogLineActor: React.FC<{ element: DialogLine }> = ({ element }) => {
 							value={nameState}
 							onChange={(e) => setNameState(e.target.value)}
 							onKeyPress={keyPressHandler}
+							sx={{
+								'& .MuiOutlinedInput-root': {
+									borderRadius: '3px',
+								},
+							}}
 						/>
 						<Box
 							sx={{

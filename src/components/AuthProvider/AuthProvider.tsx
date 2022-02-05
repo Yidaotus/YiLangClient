@@ -83,7 +83,7 @@ const UserProvider: React.FC = ({ children }) => {
 					const { data } = error.response;
 					const { status, message } = data as IApiResponse<void>;
 					switch (status) {
-						case ApiStatuses.UNAUTHANTICATED:
+						case ApiStatuses.UNAUTHENTICATED:
 						case ApiStatuses.UNAUTHORIZED: {
 							setUser(null);
 							break;

@@ -1,0 +1,25 @@
+Dictionary
+	Comment size (wraps and scrolls table on too much content)
+	Related sentences
+		Which link to the document
+			Maybe in a preview mode to not lose current editor state?
+	Complete Tag interface
+		Table / Edit / Delete / Search 
+
+Sentence Database (Table)
+	why:
+		Learning by sentences:
+
+SRS outside Document:
+	Learn sentences / words last two documents
+		last two days
+
+Editor:
+	Better saving strategy (store)
+	Floating Toolbar for certain tools (font color/ words/ sentences)
+	Instead of modal inline popup for sentence / word Editor
+	launch srs from words/sentence block
+
+Host images (paste images)
+
+Grammar Point Redesign

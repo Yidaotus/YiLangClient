@@ -106,7 +106,6 @@ export type BulletedListElement = {
 export type SentenceElement = {
 	type: 'sentence';
 	sentenceId: string;
-	translation: string;
 	children: Array<CustomText | EditorInlineElement>;
 };
 

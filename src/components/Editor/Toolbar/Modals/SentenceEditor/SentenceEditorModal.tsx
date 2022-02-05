@@ -39,11 +39,10 @@ const SentenceEditorModal: React.FC<ISentenceModalProps> = ({
 	const linkWordSentence = useLinkWordSentence();
 
 	const wrapWithSentence = useCallback(
-		({ translation, id }: { translation: string; id: string }) => {
+		({ id }: { id: string }) => {
 			if (savedSelection) {
 				const sentence: SentenceElement = {
 					type: 'sentence',
-					translation,
 					children: [{ text: '' }],
 					sentenceId: id,
 				};
@@ -103,7 +102,7 @@ const SentenceEditorModal: React.FC<ISentenceModalProps> = ({
 			translation: translationInput,
 		});
 		await linkInnerWords(newSentenceId);
-		wrapWithSentence({ translation: translationInput, id: newSentenceId });
+		wrapWithSentence({ id: newSentenceId });
 		close();
 	};
 

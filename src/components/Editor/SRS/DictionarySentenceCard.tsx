@@ -17,7 +17,7 @@ const DictionarySentenceCard: React.FC<DictionarySentenceCardProps> = ({
 		case 'Front':
 			cardFace = (
 				<Box>
-					<Typography variant="h4" component="div">
+					<Typography variant="h6" component="div">
 						{item.sentence}
 					</Typography>
 				</Box>
@@ -25,7 +25,7 @@ const DictionarySentenceCard: React.FC<DictionarySentenceCardProps> = ({
 			break;
 		case 'Back':
 			cardFace = (
-				<Typography variant="h5" component="div">
+				<Typography variant="h6" component="div">
 					{item.translation}
 				</Typography>
 			);

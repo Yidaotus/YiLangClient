@@ -1,5 +1,7 @@
+import { useDictionarySentence } from '@hooks/DictionaryQueryHooks';
 import useClickOutside from '@hooks/useClickOutside';
 import { Box, Typography } from '@mui/material';
+import { DictionarySentenceID } from 'Document/Utility';
 import React, { useEffect, useRef, useState } from 'react';
 import { BaseSelection, Editor, Range } from 'slate';
 import { ReactEditor, useSlateStatic } from 'slate-react';
@@ -17,7 +19,8 @@ const SentencePopupController: React.FC<ISentencePopupControllerProps> = ({
 }) => {
 	const editor = useSlateStatic();
 	const floatingRef = useRef<HTMLDivElement>(null);
-	const [sentence, setSentence] = useState<string>();
+	const [sentenceId, setSentenceId] = useState<DictionarySentenceID>();
+	const [, sentence] = useDictionarySentence(sentenceId);
 	const [relativeBounding, setRelativeBounding] = useState<DOMRect | null>(
 		null
 	);
@@ -25,7 +28,7 @@ const SentencePopupController: React.FC<ISentencePopupControllerProps> = ({
 		setRelativeBounding(null);
 	});
 
-	const visible = !!sentence;
+	const visible = !!sentenceId;
 
 	useEffect(() => {
 		const clickedSentence = YiEditor.isNodeAtSelection(
@@ -40,13 +43,13 @@ const SentencePopupController: React.FC<ISentencePopupControllerProps> = ({
 				const sentenceNode = sentenceFragment[0] as SentenceElement;
 				const range = ReactEditor.toDOMNode(editor, sentenceNode);
 				const bounding = range.getBoundingClientRect();
-				setSentence(sentenceNode.translation);
+				setSentenceId(sentenceNode.sentenceId);
 				setRelativeBounding(bounding);
 			}
 		} else {
 			const [clickNode] = Editor.nodes(editor);
 			if (clickNode) {
-				setSentence(undefined);
+				setSentenceId(undefined);
 			}
 		}
 	}, [editor, selection]);
@@ -62,7 +65,7 @@ const SentencePopupController: React.FC<ISentencePopupControllerProps> = ({
 			<Box sx={{ p: 1, maxWidth: '650px' }}>
 				{sentence && (
 					<Typography variant="body2" component="span">
-						{sentence}
+						{sentence.translation}
 					</Typography>
 				)}
 			</Box>

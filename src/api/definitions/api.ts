@@ -14,7 +14,7 @@ export type DictionaryEntryField =
 
 export const ApiStatuses = {
 	OK: 1,
-	UNAUTHANTICATED: 2,
+	UNAUTHENTICATED: 2,
 	UNAUTHORIZED: 3,
 	INVALIDARGUMENT: 4,
 	ERROR: 5,

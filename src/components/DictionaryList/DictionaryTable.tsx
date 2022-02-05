@@ -54,11 +54,6 @@ const headCells: readonly HeadCell[] = [
 		label: 'Spelling',
 	},
 	{
-		id: 'comment',
-		disablePadding: false,
-		label: 'Comment',
-	},
-	{
 		id: 'tags',
 		disablePadding: false,
 		label: 'Tags',
@@ -430,7 +425,6 @@ const DictionaryTable: React.FC = () => {
 										>
 											<Link
 												component="button"
-												variant="body2"
 												onClick={() => {
 													navigate(`${entry.id}`);
 												}}
@@ -453,15 +447,6 @@ const DictionaryTable: React.FC = () => {
 											}}
 										>
 											{entry.spelling}
-										</TableCell>
-										<TableCell
-											align="right"
-											sx={{
-												textOverflow: 'ellipsis',
-												width: '200px',
-											}}
-										>
-											{entry.comment}
 										</TableCell>
 										<TableCell
 											align="right"

@@ -22,7 +22,7 @@ import {
 	FormGroup,
 	Stack,
 } from '@mui/material';
-import LookupSourceMenu from './LookupSouceMenu';
+import LookupSourceMenu from './LookupSourceMenu';
 
 export interface IWordInputProps {
 	visible: boolean;
