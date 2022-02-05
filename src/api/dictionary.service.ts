@@ -7,6 +7,8 @@ import {
 	ILinkSentenceWordParams,
 	IListDictionaryParams,
 	IListDictionaryResult,
+	IListSentencesParams,
+	IListSentencesResult,
 	ISearchDictionaryParams,
 } from './definitions/api';
 import ApiService from './api.service';
@@ -122,6 +124,17 @@ const listDictionary = async (
 	return list as IListDictionaryResult;
 };
 
+const listSentences = async (
+	listParams: IListSentencesParams
+): Promise<IListSentencesResult> => {
+	const response = await ApiService.post<IApiResponse<IListSentencesResult>>(
+		`dictionary/${listParams.lang}/sentences/list`,
+		listParams
+	);
+	const list = response.data.payload;
+	return list as IListSentencesResult;
+};
+
 const searchDictionary = async (
 	searchParams: ISearchDictionaryParams
 ): Promise<Array<IDictionaryEntry>> => {
@@ -134,6 +147,7 @@ const searchDictionary = async (
 
 export {
 	listDictionary,
+	listSentences,
 	addDictionaryEntry,
 	getEntry,
 	searchDictionary,

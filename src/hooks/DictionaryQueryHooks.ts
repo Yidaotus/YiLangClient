@@ -1,10 +1,13 @@
 import useUiErrorHandler from '@helpers/useUiErrorHandler';
 import { queryKeyFactory } from '@helpers/queryHelper';
 import {
+	IAddDictionarySentenceParams,
 	IApiResponse,
 	ILinkSentenceWordParams,
 	IListDictionaryParams,
 	IListDictionaryResult,
+	IListSentencesParams,
+	IListSentencesResult,
 } from 'api/definitions/api';
 import {
 	addDictionaryEntry,
@@ -14,6 +17,7 @@ import {
 	getSentence,
 	getSentencesByWord,
 	linkSentenceWord,
+	listSentences,
 	listDictionary,
 	searchDictionary,
 	unlinkSentenceWord,
@@ -162,9 +166,14 @@ const useDictionaryEntryResolved = (
 	return [isLoading, resolvedEntry];
 };
 
-const defaultValue = {
+const DEFAULT_LIST_ENTRIES = {
 	total: 0,
 	entries: [],
+};
+
+const DEFAULT_LIST_SENTENCES = {
+	total: 0,
+	sentences: [],
 };
 
 const useDictionarySearch = (
@@ -217,7 +226,7 @@ const useListDictionaryEntries = (
 						searchTerm: paginationOptions.searchTerm,
 						tagFilter: paginationOptions.tagFilter || [],
 				  })
-				: defaultValue,
+				: DEFAULT_LIST_ENTRIES,
 		{
 			enabled: !!paginationOptions && !!activeLanguage,
 			keepPreviousData: true,
@@ -225,7 +234,7 @@ const useListDictionaryEntries = (
 		}
 	);
 
-	return [isLoading, data || defaultValue];
+	return [isLoading, data || DEFAULT_LIST_ENTRIES];
 };
 const useDeleteDictionaryEntry = (): UseMutationResult<
 	void,
@@ -298,10 +307,43 @@ const useUpdateDictionaryEntry = (): UseMutationResult<
 	);
 };
 
+const useListDictionarySentences = (
+	paginationOptions: Omit<IListSentencesParams, 'lang'> | undefined
+): [boolean, IListSentencesResult] => {
+	const activeLanguage = useActiveLanguageConf();
+	const { data, isLoading } = useQuery(
+		dictSentencesKeys(activeLanguage?.id).list({
+			limit: paginationOptions?.limit,
+			skip: paginationOptions?.skip,
+			filter: paginationOptions?.filter,
+			sortBy: paginationOptions?.sortBy,
+			searchTerm: paginationOptions?.searchTerm,
+		}),
+		() =>
+			paginationOptions && activeLanguage
+				? listSentences({
+						sortBy: paginationOptions.sortBy,
+						filter: paginationOptions.filter,
+						skip: paginationOptions.skip,
+						limit: paginationOptions.limit,
+						lang: activeLanguage.id,
+						searchTerm: paginationOptions.searchTerm,
+				  })
+				: DEFAULT_LIST_SENTENCES,
+		{
+			enabled: !!paginationOptions && !!activeLanguage,
+			keepPreviousData: true,
+			staleTime: 60000,
+		}
+	);
+
+	return [isLoading, data || DEFAULT_LIST_SENTENCES];
+};
+
 const useAddDictionarySentence = (): UseMutationResult<
 	string,
 	IApiResponse<void>,
-	Omit<IDictionarySentence, 'id' | 'lang'>,
+	IAddDictionarySentenceParams,
 	unknown
 > => {
 	const activeLanugage = useActiveLanguageConf();
@@ -310,7 +352,7 @@ const useAddDictionarySentence = (): UseMutationResult<
 	const handleError = useUiErrorHandler();
 
 	return useMutation(
-		(newSentence: Omit<IDictionarySentence, 'id' | 'lang'>) => {
+		(newSentence: IAddDictionarySentenceParams) => {
 			if (!activeLanugage) {
 				throw new Error('No Language selected!');
 			}
@@ -413,6 +455,7 @@ const useAddDictionaryEntry = (): UseMutationResult<
 
 export {
 	useListDictionaryEntries,
+	useListDictionarySentences,
 	useDictionaryEntry,
 	useAddDictionaryEntry,
 	useDeleteDictionaryEntry,

@@ -76,7 +76,9 @@ const SentenceEditorModal: React.FC<ISentenceModalProps> = ({
 	);
 
 	const saveSentence = useCallback(
-		async (sentence: Omit<IDictionarySentence, 'id' | 'lang'>) => {
+		async (
+			sentence: Omit<IDictionarySentence, 'id' | 'lang' | 'createdAt'>
+		) => {
 			const sentenceId = await addDictionarySentence.mutateAsync(
 				sentence
 			);
