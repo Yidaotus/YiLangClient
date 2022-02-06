@@ -8,6 +8,7 @@ export interface IToolbarWrapperItem extends IToolbarItem {
 	editor: Editor;
 	toolbarChanged: () => void;
 	className?: string;
+	blockProperties?: Record<string, unknown>;
 }
 
 const WrapperItem: React.FC<IToolbarWrapperItem> = ({
@@ -17,6 +18,7 @@ const WrapperItem: React.FC<IToolbarWrapperItem> = ({
 	editor,
 	toolbarChanged,
 	className,
+	blockProperties,
 }): JSX.Element => {
 	const isActive = YiEditor.getTextBlockStyle(editor) === type;
 
@@ -25,7 +27,12 @@ const WrapperItem: React.FC<IToolbarWrapperItem> = ({
 			tooltip={title}
 			title={title}
 			action={() => {
-				YiEditor.toggleBlockType(editor, type);
+				YiEditor.toggleBlockType(
+					editor,
+					type,
+					undefined,
+					blockProperties
+				);
 				toolbarChanged();
 			}}
 			active={isActive}

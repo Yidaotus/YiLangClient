@@ -15,7 +15,7 @@ const PrivateRoute: React.FC<IPrivateRouteProps> = ({ children, roles }) => {
 		// See https://github.com/DefinitelyTyped/DefinitelyTyped/issues/33006
 		return <>{children}</>;
 	}
-	return <Navigate to="/login" state={{ from: location }} replace />;
+	return <Navigate to="/splash" state={{ from: location }} replace />;
 };
 
 export default PrivateRoute;

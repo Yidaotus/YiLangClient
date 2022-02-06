@@ -29,6 +29,7 @@ import DocumentTitle from './Blocks/DocumentTitle/DocumentTitle';
 import NumberedList from './Blocks/List/NumberedList';
 import BulletedList from './Blocks/List/BulletedList';
 import Title from './Blocks/Title/Title';
+import { Box } from '@mui/material';
 
 const Leaf = ({ attributes, leaf, children }: RenderLeafProps) => {
 	return (
@@ -228,11 +229,12 @@ const EditorDocument: React.FC = () => {
 	}, [editor]);
 
 	return (
-		<div
-			style={{
+		<Box
+			sx={(theme) => ({
 				position: 'relative',
 				fontSize: '1.1em',
-			}}
+				backgroundColor: theme.palette.secondary.light,
+			})}
 		>
 			<DndProvider backend={HTML5Backend}>
 				<Editable
@@ -250,7 +252,7 @@ const EditorDocument: React.FC = () => {
 					}}
 				/>
 			</DndProvider>
-		</div>
+		</Box>
 	);
 };
 

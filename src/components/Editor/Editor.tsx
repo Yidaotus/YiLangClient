@@ -14,6 +14,7 @@ import {
 	Accordion,
 	AccordionDetails,
 	AccordionSummary,
+	Box,
 	CircularProgress,
 	Typography,
 } from '@mui/material';
@@ -183,7 +184,7 @@ const YiEditor: React.FC = () => {
 					<CircularProgress />
 				) : (
 					<div>
-						<div
+						<Box
 							className={`editor-container ${
 								showSpelling && 'furigana-enabled'
 							}`}
@@ -255,7 +256,7 @@ const YiEditor: React.FC = () => {
 									</pre>
 								</AccordionDetails>
 							</Accordion>
-						</div>
+						</Box>
 					</div>
 				)}
 			</div>

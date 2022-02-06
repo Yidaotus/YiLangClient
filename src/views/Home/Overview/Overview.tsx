@@ -1,8 +1,5 @@
-import './Overview.css';
 import React, { useCallback, useState } from 'react';
-import { IDocumentExcerpt } from 'api/definitions/api';
 import { useNavigate } from 'react-router';
-import { useActiveLanguageConf } from '@hooks/ConfigQueryHooks';
 import {
 	useListDictionaryEntries,
 	useListDictionarySentences,

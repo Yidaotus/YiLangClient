@@ -69,7 +69,7 @@ const ResponsiveAppBar: React.FC = () => {
 						<Link to="/home">
 							<img
 								alt="YiLang.png"
-								src="/yilang.png"
+								src="/yilang-logo.png"
 								style={{
 									objectFit: 'contain',
 									width: '100px',
@@ -136,7 +136,7 @@ const ResponsiveAppBar: React.FC = () => {
 					>
 						<img
 							alt="YiLang.png"
-							src="/yilang.png"
+							src="/yilang-logo.png"
 							className="yi-logo"
 						/>
 					</Typography>

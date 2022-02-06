@@ -229,6 +229,7 @@ const Toolbar: React.FC<IToolbarProps> = ({
 							title="Title"
 							{...sharedProps}
 							icon={<TitleIcon />}
+							blockProperties={{ variant: 'h4' }}
 						/>
 						<ListButton
 							type="numberedList"

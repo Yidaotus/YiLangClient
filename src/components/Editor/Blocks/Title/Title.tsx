@@ -19,7 +19,12 @@ const Title: React.FC<TitleProps> = ({ children, attributes, element }) => {
 			<DragContainer element={element}>
 				<Typography
 					variant={element.variant}
-					sx={{ textAlign: element.align || 'left' }}
+					sx={{
+						textAlign: element.align || 'left',
+						'& span': {
+							fontWeight: 'bold',
+						},
+					}}
 				>
 					{children}
 				</Typography>

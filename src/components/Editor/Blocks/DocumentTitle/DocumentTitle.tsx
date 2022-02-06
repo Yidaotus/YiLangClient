@@ -17,7 +17,7 @@ const DocumentTitle: React.FC<DocumentTitleProps> = ({
 	return (
 		<Typography
 			sx={(theme) => ({
-				borderBottom: `5px solid ${theme.palette.secondary.light}`,
+				borderBottom: `5px solid ${theme.palette.primary.main}`,
 				position: 'relative',
 				m: 2,
 			})}

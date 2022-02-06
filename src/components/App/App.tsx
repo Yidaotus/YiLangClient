@@ -21,15 +21,19 @@ import { SnackbarProvider } from 'notistack';
 
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 import CloseSharpIcon from '@mui/icons-material/CloseSharp';
+import SplashScreen from '@views/SplashScreen';
 
 const baseTheme = createTheme({
 	palette: {
 		mode: 'light',
 		primary: {
-			main: '#070707',
+			main: '#122C3F',
+			light: '#EFF6FB',
 		},
 		secondary: {
-			main: '#F4EDEA',
+			light: '#F9F8F4',
+			main: '#F7F6F2',
+			dark: '#CDC392',
 		},
 	},
 });
@@ -159,6 +163,10 @@ const App: React.FC = () => {
 									element={<Navigate to="/home" />}
 								/>
 								<Route path="/login" element={<Login />} />
+								<Route
+									path="/splash"
+									element={<SplashScreen />}
+								/>
 								<Route
 									path="/verify/:code"
 									element={<Verify />}

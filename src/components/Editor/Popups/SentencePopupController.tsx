@@ -150,7 +150,9 @@ const SentencePopupController: React.FC<ISentencePopupControllerProps> = ({
 								height: `${editingFieldHeight}px`,
 								fontSize: '0.875rem',
 								pl: 1,
-								backgroundColor: theme.palette.secondary.light,
+								border: `1px dashed ${theme.palette.primary.main}`,
+								borderRadius: '3px 0px 0px 3px',
+								backgroundColor: theme.palette.primary.light,
 							})}
 							inputProps={{
 								'aria-label': 'change sentence translation',

@@ -143,15 +143,15 @@ const ImageBlock: React.FC<IImageBlockData> = ({
 							alignItems: 'center',
 							'&:active .image-handle::after': {
 								opacity: '100%',
-								backgroundColor: theme.palette.secondary.main,
+								backgroundColor: theme.palette.primary.main,
 							},
 							'&:focus .image-handle::after': {
 								opacity: '100%',
-								backgroundColor: theme.palette.secondary.main,
+								backgroundColor: theme.palette.primary.main,
 							},
 							'&:hover .image-handle::after': {
 								opacity: '100%',
-								backgroundColor: theme.palette.secondary.main,
+								backgroundColor: theme.palette.primary.main,
 							},
 						})}
 					>
@@ -192,7 +192,7 @@ const ImageBlock: React.FC<IImageBlockData> = ({
 									border: '1px solid lightgray',
 									boxShadow:
 										selected && focused
-											? `0 0 0 1px ${uiTheme.palette.secondary.dark}`
+											? `0 0 0 1px ${uiTheme.palette.primary.dark}`
 											: 'none',
 								}}
 								width={width}
