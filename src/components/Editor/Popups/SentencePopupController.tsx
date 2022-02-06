@@ -4,15 +4,7 @@ import {
 } from '@hooks/DictionaryQueryHooks';
 import useClickOutside from '@hooks/useClickOutside';
 import { Edit, Save } from '@mui/icons-material';
-import {
-	Box,
-	Divider,
-	IconButton,
-	InputBase,
-	styled,
-	TextField,
-	Typography,
-} from '@mui/material';
+import { Box, Divider, IconButton, InputBase, Typography } from '@mui/material';
 import { DictionarySentenceID } from 'Document/Utility';
 import React, { useEffect, useRef, useState } from 'react';
 import { BaseSelection, Editor, Range } from 'slate';
@@ -24,12 +16,6 @@ export interface ISentencePopupControllerProps {
 	rootElement: React.RefObject<HTMLElement>;
 	selection: BaseSelection;
 }
-const StyledInput = styled(TextField)(() => ({
-	'& .MuiAccordionSummary-root.Mui-expanded': {
-		minHeight: '48px',
-		height: '48px',
-	},
-}));
 
 const SentencePopupController: React.FC<ISentencePopupControllerProps> = ({
 	rootElement,
@@ -93,10 +79,13 @@ const SentencePopupController: React.FC<ISentencePopupControllerProps> = ({
 
 	const handleSaveClick = async () => {
 		if (sentenceEdit && sentence) {
-			await updateDictionarySentence.mutateAsync({
-				...sentence,
-				translation: sentenceEdit,
-			});
+			if (sentenceEdit !== sentence.translation) {
+				await updateDictionarySentence.mutateAsync({
+					...sentence,
+					translation: sentenceEdit,
+				});
+			}
+
 			setIsEditing(false);
 		}
 	};
