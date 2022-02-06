@@ -94,11 +94,16 @@ const SentencePopupController: React.FC<ISentencePopupControllerProps> = ({
 		}
 	};
 
-	const handleInputKeyPress: React.KeyboardEventHandler<HTMLDivElement> = (
-		e
-	) => {
-		if (e.key === 'Enter') {
-			handleSaveClick();
+	const handleInputKeyPress: React.KeyboardEventHandler<
+		HTMLTextAreaElement | HTMLInputElement
+	> = (event) => {
+		switch (event.key) {
+			case 'Enter':
+				handleSaveClick();
+				break;
+			case 'Escape':
+				setIsEditing(false);
+				break;
 		}
 	};
 
@@ -139,7 +144,7 @@ const SentencePopupController: React.FC<ISentencePopupControllerProps> = ({
 							value={sentenceEdit}
 							onChange={handleSentenceEditChange}
 							placeholder="Translation"
-							onKeyPress={handleInputKeyPress}
+							onKeyDown={handleInputKeyPress}
 							sx={(theme) => ({
 								width: `${editingFieldWidth}px`,
 								height: `${editingFieldHeight}px`,
