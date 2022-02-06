@@ -26,6 +26,7 @@ const SentencePopupController: React.FC<ISentencePopupControllerProps> = ({
 	const [sentenceEdit, setSentenceEdit] = useState<string>();
 	const [isEditing, setIsEditing] = useState(false);
 	const textSpanRef = useRef<HTMLSpanElement | null>(null);
+	const editInputRef = useRef<HTMLInputElement | null>(null);
 	const [sentenceId, setSentenceId] = useState<DictionarySentenceID>();
 	const [, sentence] = useDictionarySentence(sentenceId);
 	const updateDictionarySentence = useUpdateDictionarySentence();
@@ -74,6 +75,9 @@ const SentencePopupController: React.FC<ISentencePopupControllerProps> = ({
 			}
 			setSentenceEdit(sentence.translation);
 			setIsEditing(true);
+			setTimeout(() => {
+				editInputRef.current?.focus();
+			});
 		}
 	};
 
@@ -87,6 +91,14 @@ const SentencePopupController: React.FC<ISentencePopupControllerProps> = ({
 			}
 
 			setIsEditing(false);
+		}
+	};
+
+	const handleInputKeyPress: React.KeyboardEventHandler<HTMLDivElement> = (
+		e
+	) => {
+		if (e.key === 'Enter') {
+			handleSaveClick();
 		}
 	};
 
@@ -127,6 +139,7 @@ const SentencePopupController: React.FC<ISentencePopupControllerProps> = ({
 							value={sentenceEdit}
 							onChange={handleSentenceEditChange}
 							placeholder="Translation"
+							onKeyPress={handleInputKeyPress}
 							sx={(theme) => ({
 								width: `${editingFieldWidth}px`,
 								height: `${editingFieldHeight}px`,
@@ -137,6 +150,7 @@ const SentencePopupController: React.FC<ISentencePopupControllerProps> = ({
 							inputProps={{
 								'aria-label': 'change sentence translation',
 							}}
+							inputRef={editInputRef}
 						/>
 						<Divider orientation="vertical" flexItem />
 						<IconButton aria-label="save" onClick={handleSaveClick}>
