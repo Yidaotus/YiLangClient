@@ -1,10 +1,12 @@
-import { Box, Typography } from '@mui/material';
+import { useDictionarySentence } from '@hooks/DictionaryQueryHooks';
+import { Box, CircularProgress, Typography } from '@mui/material';
+import { DictionarySentenceID } from 'Document/Utility';
 import React from 'react';
 
 export type SRSSentenceItem = { sentence: string; translation: string };
 
 interface DictionarySentenceCardProps {
-	item: SRSSentenceItem;
+	item: DictionarySentenceID;
 	side: 'Front' | 'Back';
 }
 
@@ -13,26 +15,35 @@ const DictionarySentenceCard: React.FC<DictionarySentenceCardProps> = ({
 	side,
 }) => {
 	let cardFace = null;
-	switch (side) {
-		case 'Front':
-			cardFace = (
-				<Box>
+	const [loading, sentence] = useDictionarySentence(item);
+
+	if (sentence) {
+		switch (side) {
+			case 'Front':
+				cardFace = (
+					<Box>
+						<Typography variant="h6" component="div">
+							{sentence.content}
+						</Typography>
+					</Box>
+				);
+				break;
+			case 'Back':
+				cardFace = (
 					<Typography variant="h6" component="div">
-						{item.sentence}
+						{sentence.translation}
 					</Typography>
-				</Box>
-			);
-			break;
-		case 'Back':
-			cardFace = (
-				<Typography variant="h6" component="div">
-					{item.translation}
-				</Typography>
-			);
-			break;
+				);
+				break;
+		}
 	}
 
-	return <Box>{cardFace}</Box>;
+	return (
+		<Box>
+			{loading && <CircularProgress />}
+			{cardFace}
+		</Box>
+	);
 };
 
 export default DictionarySentenceCard;

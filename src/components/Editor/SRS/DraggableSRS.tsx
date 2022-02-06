@@ -16,21 +16,13 @@ import {
 	SelectChangeEvent,
 } from '@mui/material';
 import { ExpandMore as ExpandMoreIcon, StarRounded } from '@mui/icons-material';
-import {
-	NodeEntry,
-	Node as SlateNode,
-	Element as SlateElement,
-	Editor,
-} from 'slate';
+import { NodeEntry, Node as SlateNode, Element as SlateElement } from 'slate';
 import { CustomEditor, EditorElement, WordElement } from '../YiEditor';
 import BasicSRS, { CardRenderer } from './BasicSRS';
 import DoneIcon from '@mui/icons-material/Done';
 import DictionaryEntryCard from './DictionaryEntryCard';
-import { DictionaryEntryID } from 'Document/Utility';
-import DictionarySentenceCard, {
-	SRSSentenceItem,
-} from './DictionarySentenceCard';
-import { TypeOf } from 'yup';
+import { DictionaryEntryID, DictionarySentenceID } from 'Document/Utility';
+import DictionarySentenceCard from './DictionarySentenceCard';
 
 const StyledAccordion = styled(Accordion)(() => ({
 	'& .MuiAccordionSummary-root.Mui-expanded': {
@@ -51,7 +43,7 @@ const DraggableSRS: React.FC<{ editor: CustomEditor }> = ({ editor }) => {
 	const [srsState, setSRSState] = useState<SRSState>('Start');
 	const [itemType, setItemType] = useState<'Vocab' | 'Sentence'>('Vocab');
 	const [srsItemState, setSrsItemState] =
-		useState<SRSItemState<DictionaryEntryID | SRSSentenceItem>>();
+		useState<SRSItemState<DictionaryEntryID | DictionarySentenceID>>();
 
 	const initialize = useCallback(() => {
 		if (itemType === 'Vocab') {
@@ -77,7 +69,7 @@ const DraggableSRS: React.FC<{ editor: CustomEditor }> = ({ editor }) => {
 				renderer: DictionaryEntryCard,
 			});
 		} else {
-			const sentences: Array<SRSSentenceItem> = [];
+			const sentenceIds: Array<DictionarySentenceID> = [];
 			const sentenceNodes = SlateNode.elements(editor, {
 				pass: (n): n is NodeEntry<WordElement> =>
 					SlateElement.isElement(n) && n.type === 'sentence',
@@ -85,19 +77,12 @@ const DraggableSRS: React.FC<{ editor: CustomEditor }> = ({ editor }) => {
 			if (sentenceNodes) {
 				for (const sentenceNode of sentenceNodes) {
 					if (sentenceNode[0].type === 'sentence') {
-						const nodeContent = Editor.string(
-							editor,
-							sentenceNode[1]
-						);
-						sentences.push({
-							sentence: nodeContent,
-							translation: sentenceNode[0].sentenceId,
-						});
+						sentenceIds.push(sentenceNode[0].sentenceId);
 					}
 				}
 			}
 			setSrsItemState({
-				items: sentences,
+				items: sentenceIds,
 				renderer: DictionarySentenceCard,
 			});
 		}
