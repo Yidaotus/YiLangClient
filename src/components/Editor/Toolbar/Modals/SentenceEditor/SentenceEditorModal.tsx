@@ -89,7 +89,8 @@ const SentenceEditorModal: React.FC<ISentenceModalProps> = ({
 
 	useEffect(() => {
 		if (visible && !visibleBefore && editor.selection) {
-			setSavedSelection(editor.selection);
+			const unhangedRange = Editor.unhangRange(editor, editor.selection);
+			setSavedSelection(unhangedRange);
 			const key = Editor.string(editor, editor.selection, {
 				voids: true,
 			});

@@ -15,6 +15,7 @@ import {
 import { ReactEditor } from 'slate-react';
 import { HistoryEditor, withHistory } from 'slate-history';
 import { DictionaryEntryID } from 'Document/Utility';
+import { withCorrectVoidBehavior } from './Plugins/withCorrectVoidBehavior';
 
 export type CustomEditor = BaseEditor & ReactEditor & HistoryEditor;
 
@@ -737,7 +738,9 @@ const withYiLang = (editor: Editor): CustomEditor => {
 		return voidTypes.includes(element.type) ? true : isVoid(element);
 	};
 
-	return withHistory(withLayout(withList(withDialog(editor))));
+	return withHistory(
+		withLayout(withList(withDialog(withCorrectVoidBehavior(editor))))
+	);
 };
 
 const YiEditor = {
