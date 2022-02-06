@@ -7,6 +7,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import SentenceEditorModal from '@editor/Toolbar/Modals/SentenceEditor/SentenceEditorModal';
 import {
 	useEditorDocument,
+	usePrefetchDocumentItems,
 	useUpdateEditorDocument,
 } from '@hooks/DocumentQueryHooks';
 import {
@@ -49,6 +50,7 @@ const YiEditor: React.FC = () => {
 	// destruct so it can serve as a dependency. See: https://github.com/facebook/react/issues/15924#issuecomment-521253636
 	const { mutateAsync: updateDocumentAsync } = useUpdateEditorDocument();
 	const [loadingDocument, dbDocument] = useEditorDocument(id);
+	const prefetching = usePrefetchDocumentItems(id);
 
 	const [showSpelling, setShowSpelling] = useState(false);
 	const [editor] = useState(withReact(withYiLang(createEditor())));
@@ -177,72 +179,85 @@ const YiEditor: React.FC = () => {
 	return (
 		<div>
 			<div>
-				{loadingDocument && <CircularProgress />}
-				<div>
-					<div
-						className={`editor-container ${
-							showSpelling && 'furigana-enabled'
-						}`}
-					>
-						<Slate
-							editor={editor}
-							value={editorNodes}
-							onChange={onEditorChange}
+				{loadingDocument || prefetching ? (
+					<CircularProgress />
+				) : (
+					<div>
+						<div
+							className={`editor-container ${
+								showSpelling && 'furigana-enabled'
+							}`}
 						>
-							<div
-								ref={editorContainer}
-								style={{ position: 'relative' }}
+							<Slate
+								editor={editor}
+								value={editorNodes}
+								onChange={onEditorChange}
 							>
-								<Toolbar
-									selection={selection}
-									showSentenceEditor={
-										toolbarShowSentenceEditorHandle
-									}
-									showWordEditor={toolbarShowWordEditorHandle}
-									setShowSpelling={toolbarShowSpellingHandle}
-									showSpelling={showSpelling}
-									updateDocument={updateDocument}
-									isEditorDirty={isEditorDirty}
-								/>
-								<WordEditorModal
-									visible={wordEditorVisible}
-									close={closeWordEditorModal}
-								/>
-								<SentenceEditorModal
-									visible={sentenceEditorVisible}
-									close={closeSentenceEditorModal}
-								/>
-								<SentencePopupController
-									rootElement={editorContainer}
-									selection={selection}
-								/>
-								<DictPopupController
-									rootElement={editorContainer}
-									selection={selection}
-								/>
-								{/*<DraggableDictionary selection={selection} />*/}
-								<EditorDocument />
-								{!loadingDocument && !dbDocument && (
-									<Typography>Document not found</Typography>
-								)}
-								<DraggableSRS editor={editor} />
-							</div>
-						</Slate>
-						<Accordion>
-							<AccordionSummary
-								aria-controls="added-words-content"
-								id="added-words-header"
-							>
-								<Typography>Editor State</Typography>
-							</AccordionSummary>
-							<AccordionDetails>
-								<pre id="json">
-									{JSON.stringify(editorNodes, null, '\t')}
-								</pre>
-							</AccordionDetails>
-						</Accordion>
+								<div
+									ref={editorContainer}
+									style={{ position: 'relative' }}
+								>
+									<Toolbar
+										selection={selection}
+										showSentenceEditor={
+											toolbarShowSentenceEditorHandle
+										}
+										showWordEditor={
+											toolbarShowWordEditorHandle
+										}
+										setShowSpelling={
+											toolbarShowSpellingHandle
+										}
+										showSpelling={showSpelling}
+										updateDocument={updateDocument}
+										isEditorDirty={isEditorDirty}
+									/>
+									<WordEditorModal
+										visible={wordEditorVisible}
+										close={closeWordEditorModal}
+									/>
+									<SentenceEditorModal
+										visible={sentenceEditorVisible}
+										close={closeSentenceEditorModal}
+									/>
+									<SentencePopupController
+										rootElement={editorContainer}
+										selection={selection}
+									/>
+									<DictPopupController
+										rootElement={editorContainer}
+										selection={selection}
+									/>
+									{/*<DraggableDictionary selection={selection} />*/}
+									<EditorDocument />
+									{!loadingDocument && !dbDocument && (
+										<Typography>
+											Document not found
+										</Typography>
+									)}
+									<DraggableSRS editor={editor} />
+								</div>
+							</Slate>
+							<Accordion>
+								<AccordionSummary
+									aria-controls="added-words-content"
+									id="added-words-header"
+								>
+									<Typography>Editor State</Typography>
+								</AccordionSummary>
+								<AccordionDetails>
+									<pre id="json">
+										{JSON.stringify(
+											editorNodes,
+											null,
+											'\t'
+										)}
+									</pre>
+								</AccordionDetails>
+							</Accordion>
+						</div>
 					</div>
-				</div>
+				)}
 			</div>
 		</div>
 	);

@@ -11,6 +11,7 @@ import {
 	listDocuments,
 	update,
 	create,
+	fetchDocumentItems,
 } from 'api/document.service';
 import { IDocumentSerialized } from 'Document/Document';
 import {
@@ -20,8 +21,54 @@ import {
 	UseMutationResult,
 } from 'react-query';
 import { useActiveLanguageConf } from './ConfigQueryHooks';
+import { useEffect, useState } from 'react';
 
 const documentKeys = queryKeyFactory('documents');
+//TODO Extract magic string
+const entryKeys = queryKeyFactory('entries');
+const sentenceKeys = queryKeyFactory('sentences');
+
+const usePrefetchDocumentItems = (id: string | undefined) => {
+	const [fetching, setFetching] = useState(false);
+	const queryClient = useQueryClient();
+	const language = useActiveLanguageConf();
+	const handleError = useUiErrorHandler();
+
+	useEffect(() => {
+		if (!id || !language) {
+			return;
+		}
+		const fetch = async () => {
+			setFetching(true);
+			try {
+				const items = await fetchDocumentItems({
+					id,
+					language: language.id,
+				});
+
+				for (const wordItem of items.wordItems) {
+					queryClient.setQueryData(
+						entryKeys(language.id).detail(wordItem.id),
+						wordItem
+					);
+				}
+				for (const sentenceItem of items.sentenceItems) {
+					queryClient.setQueryData(
+						sentenceKeys(language.id).detail(sentenceItem.id),
+						sentenceItem
+					);
+				}
+			} catch (e) {
+				handleError(e);
+			} finally {
+				setFetching(false);
+			}
+		};
+		fetch();
+	}, [handleError, id, language, queryClient]);
+
+	return fetching;
+};
 
 const useEditorDocument = (
 	id: string | undefined
@@ -97,6 +144,7 @@ const useUpdateEditorDocument = (): UseMutationResult<
 > => {
 	const activeLanguage = useActiveLanguageConf();
 	const handleError = useUiErrorHandler();
+	const queryClient = useQueryClient();
 
 	return useMutation(
 		({
@@ -119,14 +167,12 @@ const useUpdateEditorDocument = (): UseMutationResult<
 		},
 		{
 			onSuccess: (_, { id }) => {
-				/*
 				queryClient.invalidateQueries(
 					documentKeys(activeLanguage?.id).lists()
 				);
 				queryClient.invalidateQueries(
 					documentKeys(activeLanguage?.id).detail(id)
 				);
-				*/
 			},
 			onError: (response: IApiResponse<void>) => {
 				handleError(response);
@@ -200,6 +246,7 @@ const useDeleteEditorDocument = (): UseMutationResult<
 
 export {
 	useDeleteEditorDocument,
+	usePrefetchDocumentItems,
 	useEditorDocument,
 	useListDocuments,
 	useUpdateEditorDocument,

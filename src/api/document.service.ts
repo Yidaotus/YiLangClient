@@ -1,6 +1,7 @@
 import { IDocumentSerialized } from 'Document/Document';
 import {
 	IApiResponse,
+	IFetchDocumentItemsResponse,
 	IListDocumentResult,
 	IListDocumentsParams,
 } from './definitions/api';
@@ -45,6 +46,19 @@ const update = async ({
 	);
 };
 
+const fetchDocumentItems = async ({
+	id,
+	language,
+}: {
+	id: string;
+	language: string;
+}): Promise<IFetchDocumentItemsResponse> => {
+	const response = await ApiService.get<
+		IApiResponse<IFetchDocumentItemsResponse>
+	>(`documents/${language}/${id}/items`);
+	return response.data.payload as IFetchDocumentItemsResponse;
+};
+
 const getDocument = async ({
 	id,
 	language,
@@ -77,4 +91,11 @@ const listDocuments = async (
 	} as IListDocumentResult;
 };
 
-export { create, update, getDocument, listDocuments, remove };
+export {
+	create,
+	update,
+	getDocument,
+	listDocuments,
+	remove,
+	fetchDocumentItems,
+};

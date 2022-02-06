@@ -187,6 +187,11 @@ export interface IListSentencesResult {
 	sentences: Array<IDictionarySentence>;
 }
 
+export interface IFetchDocumentItemsResponse {
+	sentenceItems: Array<IDictionarySentence>;
+	wordItems: Array<IDictionaryEntry>;
+}
+
 export interface IListSentencesParams {
 	sortBy?: {
 		key: keyof IDictionarySentence;
