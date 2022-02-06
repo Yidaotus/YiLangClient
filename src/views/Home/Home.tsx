@@ -1,4 +1,3 @@
-import './Home.css';
 import React, { useEffect, useRef, useState } from 'react';
 import { Outlet } from 'react-router-dom';
 
@@ -6,6 +5,7 @@ import { useActiveLanguageConf } from '@hooks/ConfigQueryHooks';
 import { useSnackbar } from 'notistack';
 import ResponsiveAppBar from './AppBar';
 import useUiErrorHandler from '@helpers/useUiErrorHandler';
+import { Box, Grid, Paper } from '@mui/material';
 
 const HomeView: React.FC = () => {
 	const [loading, setLoading] = useState(false);
@@ -41,14 +41,48 @@ const HomeView: React.FC = () => {
 				<ResponsiveAppBar />
 			</header>
 
-			<main className="yi-layout">
-				<div className="yi-content" ref={contentRef}>
-					<Outlet />
-				</div>
-			</main>
-			<footer className="yi-footer-container">
-				<div className="yi-footer">YiLang!</div>
-			</footer>
+			<Grid
+				ref={contentRef}
+				container
+				direction="column"
+				alignItems="center"
+				sx={(theme) => ({
+					pt: '100px',
+					minHeight: '100vh',
+					backgroundColor: theme.palette.secondary.light,
+				})}
+			>
+				<Paper sx={{ width: '950px', mb: 1 }}>
+					<main>
+						<Outlet />
+					</main>
+				</Paper>
+
+				<Box
+					sx={(theme) => ({
+						width: '100%',
+						backgroundColor: theme.palette.secondary.light,
+						pt: 4,
+						marginTop: 'auto',
+					})}
+				>
+					<footer>
+						<Box
+							sx={(theme) => ({
+								height: '50px',
+								color: theme.palette.secondary.dark,
+								borderTop: `1px solid ${theme.palette.secondary.dark}`,
+								width: '100%',
+								display: 'flex',
+								alignItems: 'center',
+								justifyContent: 'center',
+							})}
+						>
+							YiLang!
+						</Box>
+					</footer>
+				</Box>
+			</Grid>
 		</div>
 	);
 };

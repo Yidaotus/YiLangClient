@@ -58,7 +58,7 @@ const ResponsiveAppBar: React.FC = () => {
 
 	return (
 		<AppBar
-			position="static"
+			position="absolute"
 			sx={(theme) => ({
 				backgroundColor: theme.palette.primary.main,
 			})}
