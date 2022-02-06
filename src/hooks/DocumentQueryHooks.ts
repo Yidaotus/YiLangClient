@@ -170,9 +170,15 @@ const useUpdateEditorDocument = (): UseMutationResult<
 				queryClient.invalidateQueries(
 					documentKeys(activeLanguage?.id).lists()
 				);
+				/*
+				Invalidating would refetch and rerender the document.
+				This is very costly and has negative UX since for example video content would
+				rerender and users would lose the current timestamp.
+
 				queryClient.invalidateQueries(
 					documentKeys(activeLanguage?.id).detail(id)
 				);
+				*/
 			},
 			onError: (response: IApiResponse<void>) => {
 				handleError(response);

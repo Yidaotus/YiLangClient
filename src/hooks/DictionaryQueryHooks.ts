@@ -22,6 +22,7 @@ import {
 	searchDictionary,
 	unlinkSentenceWord,
 	updateDictionaryEntry,
+	updateDictionarySentence,
 } from 'api/dictionary.service';
 import {
 	IDictionaryEntry,
@@ -347,7 +348,6 @@ const useAddDictionarySentence = (): UseMutationResult<
 	unknown
 > => {
 	const activeLanugage = useActiveLanguageConf();
-	//		['dictEntries', 'details', lang, id],
 	const queryClient = useQueryClient();
 	const handleError = useUiErrorHandler();
 
@@ -362,6 +362,39 @@ const useAddDictionarySentence = (): UseMutationResult<
 			onSuccess: () => {
 				queryClient.invalidateQueries(
 					dictSentencesKeys(activeLanugage?.id).lists()
+				);
+			},
+			onError: (response: IApiResponse<void>) => {
+				handleError(response);
+			},
+		}
+	);
+};
+
+const useUpdateDictionarySentence = (): UseMutationResult<
+	void,
+	IApiResponse<void>,
+	IDictionarySentence,
+	unknown
+> => {
+	const activeLanugage = useActiveLanguageConf();
+	const queryClient = useQueryClient();
+	const handleError = useUiErrorHandler();
+
+	return useMutation(
+		(entryToUpdate: IDictionarySentence) => {
+			if (!activeLanugage) {
+				throw new Error('No Language selected!');
+			}
+			return updateDictionarySentence(entryToUpdate, activeLanugage.id);
+		},
+		{
+			onSuccess: (_, { id }) => {
+				queryClient.invalidateQueries(
+					dictSentencesKeys(activeLanugage?.id).lists()
+				);
+				queryClient.invalidateQueries(
+					dictSentencesKeys(activeLanugage?.id).detail(id)
 				);
 			},
 			onError: (response: IApiResponse<void>) => {
@@ -460,6 +493,7 @@ export {
 	useAddDictionaryEntry,
 	useDeleteDictionaryEntry,
 	useUpdateDictionaryEntry,
+	useUpdateDictionarySentence,
 	useDictionarySearch,
 	useAddDictionarySentence,
 	useLinkWordSentence,

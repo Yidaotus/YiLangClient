@@ -43,6 +43,16 @@ const addDictionarySentence = async (
 	return response.data.payload as DictionarySentenceID;
 };
 
+const updateDictionarySentence = async (
+	sentenceToUpdate: IDictionarySentence,
+	language: string
+): Promise<void> => {
+	await ApiService.post<IApiResponse<void>>(
+		`dictionary/${language}/sentences/${sentenceToUpdate.id}`,
+		sentenceToUpdate
+	);
+};
+
 const unlinkSentenceWord = async (
 	addParams: ILinkSentenceWordParams,
 	language: string
@@ -152,6 +162,7 @@ export {
 	getEntry,
 	searchDictionary,
 	updateDictionaryEntry,
+	updateDictionarySentence,
 	deleteDictionaryEntry,
 	addDictionarySentence,
 	linkSentenceWord,
