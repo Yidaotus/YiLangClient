@@ -1,23 +1,32 @@
 import './Overview.css';
 import React, { useCallback, useState } from 'react';
 import { IDocumentExcerpt } from 'api/definitions/api';
-import DocumentExcerpt from '@components/DocumentExcerpt/DocumentExcerpt';
 import { useNavigate } from 'react-router';
-import DictionaryEntry from '@components/DictionaryEntry/DictionaryEntry';
 import { useActiveLanguageConf } from '@hooks/ConfigQueryHooks';
 import {
 	useListDictionaryEntries,
 	useListDictionarySentences,
 } from '@hooks/DictionaryQueryHooks';
-import { Backdrop, Card, CircularProgress, Divider } from '@mui/material';
+import {
+	Backdrop,
+	Box,
+	Card,
+	CircularProgress,
+	Divider,
+	Paper,
+	Stack,
+	Table,
+	TableBody,
+	TableContainer,
+} from '@mui/material';
 import { useListDocuments } from '@hooks/DocumentQueryHooks';
+import DictionaryEntryRow from '@components/DictionaryEntry/DictionaryEntryRow';
+import DictionarySentenceRow from '@components/DictionaryEntry/DictionarySentenceRow';
+import Documents from '../Documents/Documents';
 
 // const excerptsToLoad = 3;
 const Overview: React.FC = () => {
-	const [loadingExcerpts, setLoadingExcerpts] = useState(false);
 	const [loading, setLoading] = useState(false);
-	const [excerpts, setExcerpts] = useState<Array<IDocumentExcerpt>>([]);
-	const activeLanguage = useActiveLanguageConf();
 	const navigate = useNavigate();
 
 	const [loadingEntries, latestDictionaryEntries] = useListDictionaryEntries({
@@ -59,34 +68,56 @@ const Overview: React.FC = () => {
 			<Backdrop open={!!loading}>
 				<CircularProgress color="inherit" />
 			</Backdrop>
-			<div>
-				<Card>
-					<h2>Latest Entries</h2>
-					{latestDictionaryEntries.entries.map((entry) => (
-						<div>
-							<p>{entry.key}</p>
-							<p>{entry.translations.join(' ')}</p>
-						</div>
-					))}
-				</Card>
-				<Card>
-					<h2>Latest Sentences</h2>
-					{latestDictionarySentences.sentences.map((sentence) => (
-						<div>
-							<p>{sentence.content}</p>
-							<p>{sentence.translation}</p>
-						</div>
-					))}
-				</Card>
-				<Card>
-					<h2>Latest Documents</h2>
-					{latestDocuments.excerpts.map((document) => (
-						<div>
-							<p>{document.title}</p>
-						</div>
-					))}
-				</Card>
-			</div>
+			<Box sx={{ display: 'flex', flexDirection: 'column' }}>
+				<Stack spacing={1} direction="column">
+					<Card sx={{ p: 1 }}>
+						<h2>Latest Entries</h2>
+						<TableContainer component={Paper}>
+							<Table
+								sx={{ minWidth: 650 }}
+								aria-label="simple table"
+								size="small"
+							>
+								<TableBody>
+									{latestDictionaryEntries.entries.map(
+										(entry) => (
+											<DictionaryEntryRow
+												entryId={entry.id}
+												key={entry.id}
+											/>
+										)
+									)}
+								</TableBody>
+							</Table>
+						</TableContainer>
+					</Card>
+					<Divider orientation="horizontal" flexItem />
+					<Card sx={{ p: 1 }}>
+						<h2>Latest Sentences</h2>
+						<TableContainer component={Paper}>
+							<Table
+								sx={{ minWidth: 650 }}
+								aria-label="simple table"
+								size="small"
+							>
+								<TableBody>
+									{latestDictionarySentences.sentences.map(
+										(sentence) => (
+											<DictionarySentenceRow
+												id={sentence.id}
+											/>
+										)
+									)}
+								</TableBody>
+							</Table>
+						</TableContainer>
+					</Card>
+					<Divider orientation="horizontal" flexItem />
+					<Card>
+						<Documents />
+					</Card>
+				</Stack>
+			</Box>
 		</div>
 	);
 };

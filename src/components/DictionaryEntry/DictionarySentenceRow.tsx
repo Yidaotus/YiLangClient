@@ -13,9 +13,9 @@ import {
 import { DictionarySentenceID } from 'Document/Utility';
 
 type IDictionarySentenceRowProps = {
-	path: Path;
+	path?: Path;
 	id: DictionarySentenceID;
-	scrollToPath: (path: Path) => void;
+	scrollToPath?: (path: Path) => void;
 };
 
 const DictionarySentenceRow: React.FC<IDictionarySentenceRowProps> = ({
@@ -36,11 +36,16 @@ const DictionarySentenceRow: React.FC<IDictionarySentenceRowProps> = ({
 				<Typography>{sentence.content}</Typography>
 				<Typography>{sentence.translation}</Typography>
 			</TableCell>
-			<TableCell scope="row">
-				<IconButton size="small" onMouseUp={() => scrollToPath(path)}>
-					<LinkIcon />
-				</IconButton>
-			</TableCell>
+			{scrollToPath && path && (
+				<TableCell scope="row">
+					<IconButton
+						size="small"
+						onMouseUp={() => scrollToPath(path)}
+					>
+						<LinkIcon />
+					</IconButton>
+				</TableCell>
+			)}
 		</TableRow>
 	) : (
 		<TableRow>

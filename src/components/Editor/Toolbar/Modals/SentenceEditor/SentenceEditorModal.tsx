@@ -104,7 +104,7 @@ const SentenceEditorModal: React.FC<ISentenceModalProps> = ({
 			content: sentenceKey,
 			translation: translationInput,
 		});
-		await linkInnerWords(newSentenceId);
+		linkInnerWords(newSentenceId);
 		wrapWithSentence({ id: newSentenceId });
 		close();
 	};

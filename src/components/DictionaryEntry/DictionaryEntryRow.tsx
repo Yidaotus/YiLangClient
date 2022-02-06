@@ -10,15 +10,14 @@ import {
 	CircularProgress,
 	TableCell,
 	TableRow,
-	Stack,
 	Box,
 	Typography,
 } from '@mui/material';
 
 type IDictEntryRowProps = {
-	path: Path;
+	path?: Path;
 	entryId: string;
-	scrollToPath: (path: Path) => void;
+	scrollToPath?: (path: Path) => void;
 };
 
 export const GrammarPoint: React.FC<{
@@ -121,11 +120,13 @@ const DictionaryEntryRow: React.FC<IDictEntryRowProps> = ({
 					<MenuBookOutlined />
 				</IconButton>
 			</TableCell>
-			<TableCell align="right" width={1}>
-				<IconButton onMouseUp={() => scrollToPath(path)}>
-					<LinkIcon />
-				</IconButton>
-			</TableCell>
+			{scrollToPath && path && (
+				<TableCell align="right" width={1}>
+					<IconButton onMouseUp={() => scrollToPath(path)}>
+						<LinkIcon />
+					</IconButton>
+				</TableCell>
+			)}
 		</TableRow>
 	) : (
 		<TableRow>
