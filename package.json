@@ -44,7 +44,7 @@
 	},
 	"scripts": {
 		"start": "cross-env PORT=3001 craco start",
-		"build": "craco build",
+		"build": "git clone https://github.com/Yidaotus/YiLang_Document ./src/Document && craco build",
 		"test": "react-scripts test",
 		"eject": "craco eject",
 		"postinstall": "npx patch-package"

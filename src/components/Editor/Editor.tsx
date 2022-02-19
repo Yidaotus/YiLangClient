@@ -239,6 +239,7 @@ const YiEditor: React.FC = () => {
 									<DraggableSRS editor={editor} />
 								</div>
 							</Slate>
+							{/*
 							<Accordion>
 								<AccordionSummary
 									aria-controls="added-words-content"
@@ -256,6 +257,7 @@ const YiEditor: React.FC = () => {
 									</pre>
 								</AccordionDetails>
 							</Accordion>
+							*/}
 						</Box>
 					</div>
 				)}

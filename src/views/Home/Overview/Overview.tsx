@@ -20,6 +20,7 @@ import { useListDocuments } from '@hooks/DocumentQueryHooks';
 import DictionaryEntryRow from '@components/DictionaryEntry/DictionaryEntryRow';
 import DictionarySentenceRow from '@components/DictionaryEntry/DictionarySentenceRow';
 import Documents from '../Documents/Documents';
+import PageHeader from '@components/PageHeader/PageHeader';
 
 // const excerptsToLoad = 3;
 const Overview: React.FC = () => {
@@ -68,8 +69,11 @@ const Overview: React.FC = () => {
 			<Box sx={{ display: 'flex', flexDirection: 'column' }}>
 				<Stack spacing={1} direction="column">
 					<Card sx={{ p: 1 }}>
-						<h2>Latest Entries</h2>
-						<TableContainer component={Paper}>
+						<PageHeader
+							title="Latest Dictionary Entries"
+							subtitle="Dictionary entries you recently added"
+						/>
+						<TableContainer component={Paper} sx={{ mt: 2 }}>
 							<Table
 								sx={{ minWidth: 650 }}
 								aria-label="simple table"
@@ -90,8 +94,11 @@ const Overview: React.FC = () => {
 					</Card>
 					<Divider orientation="horizontal" flexItem />
 					<Card sx={{ p: 1 }}>
-						<h2>Latest Sentences</h2>
-						<TableContainer component={Paper}>
+						<PageHeader
+							title="Latest Sentences"
+							subtitle="Sentences you added recently"
+						/>
+						<TableContainer component={Paper} sx={{ mt: 2 }}>
 							<Table
 								sx={{ minWidth: 650 }}
 								aria-label="simple table"
