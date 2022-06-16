@@ -5,7 +5,7 @@ import Slider from 'rc-slider';
 
 interface IHSLColorSliderProps {
 	value: number;
-	onChange: (value: number) => void;
+	onChange: (value: number | number[]) => void;
 	saturation: number;
 	lightness: number;
 }

@@ -67,7 +67,11 @@ const YiColorPickerField: React.FC<YiColorPickerFieldProps> = (
 				<div className="tagform-color-picker" ref={popover}>
 					<HSLColorPicker
 						value={selectedColorValue}
-						onChange={setSelectedColorValue}
+						onChange={(newColorValue) => {
+							if (!Array.isArray(newColorValue)) {
+								setSelectedColorValue(newColorValue);
+							}
+						}}
 						saturation={saturation}
 						lightness={lightness}
 					/>

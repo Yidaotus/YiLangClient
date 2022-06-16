@@ -12,7 +12,9 @@ const ApiService = axios.create({
 
 ApiService.interceptors.request.use((request) => {
 	const token = localStorage.getItem(LS_TOKEN_POINTER);
-	request.headers['X-Auth-Token'] = token;
+	if (token && request.headers) {
+		request.headers['X-Auth-Token'] = token;
+	}
 	return request;
 });
 

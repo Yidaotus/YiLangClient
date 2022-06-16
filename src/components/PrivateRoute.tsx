@@ -1,10 +1,11 @@
-import React from 'react';
+import React, { ReactNode } from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
 import { useUserContext } from '@hooks/useUserContext';
 import { Role } from 'api/user.service';
 
 interface IPrivateRouteProps {
 	roles: Role[];
+	children?: ReactNode;
 }
 
 const PrivateRoute: React.FC<IPrivateRouteProps> = ({ children, roles }) => {

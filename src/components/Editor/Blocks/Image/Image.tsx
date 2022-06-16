@@ -10,9 +10,9 @@ import {
 import { ImageElement } from '@components/Editor/YiEditor';
 import { Transforms } from 'slate';
 import isHotkey from 'is-hotkey';
-import { Box, TextField, useTheme } from '@mui/material';
 import { Resizable } from 're-resizable';
 import DragContainer from '@components/Editor/DragContainer';
+import { Box, TextField, useTheme } from '@mui/material';
 
 export type IImageBlockData = Omit<RenderElementProps, 'element'> & {
 	element: ImageElement;
@@ -79,7 +79,7 @@ const ImageBlock: React.FC<IImageBlockData> = ({
 	);
 
 	const applyCaptionChange = useCallback(
-		(captionInput) => {
+		(captionInput: string) => {
 			const path = ReactEditor.findPath(editor, element);
 
 			Transforms.setNodes(
@@ -92,19 +92,21 @@ const ImageBlock: React.FC<IImageBlockData> = ({
 	);
 
 	const onKeyDown = useCallback(
-		(event) => {
+		(event: React.KeyboardEvent<HTMLDivElement>) => {
 			if (!isHotkey('enter', event)) {
 				return;
 			}
 
-			applyCaptionChange(event.target.value);
+			if (event.currentTarget.nodeValue) {
+				applyCaptionChange(event.currentTarget.nodeValue);
+			}
 			setIsEditingCaption(false);
 		},
 		[applyCaptionChange, setIsEditingCaption]
 	);
 
 	const onCaptionChange = useCallback(
-		(event) => {
+		(event: React.ChangeEvent<HTMLInputElement>) => {
 			setCaptionEdit(event.target.value);
 		},
 		[setCaptionEdit]

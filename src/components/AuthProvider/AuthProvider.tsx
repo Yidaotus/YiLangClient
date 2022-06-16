@@ -3,7 +3,7 @@ import { ApiStatuses, IApiResponse } from 'api/definitions/api';
 import { authorize } from 'api/user.service';
 import { AxiosError } from 'axios';
 import { IConfig } from 'Document/Config';
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { ReactNode, useCallback, useEffect, useState } from 'react';
 import { useQuery } from 'react-query';
 
 export enum Role {
@@ -43,7 +43,11 @@ export const UserContext = React.createContext<IUserContext>({
 	logout: () => {},
 });
 
-const UserProvider: React.FC = ({ children }) => {
+interface UserProviderProps {
+	children?: ReactNode;
+}
+
+const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
 	const serverUser = useQuery(['user'], authorize, {
 		retry: false,
 		cacheTime: Infinity,

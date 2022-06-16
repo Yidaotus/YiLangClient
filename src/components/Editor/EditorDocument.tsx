@@ -14,6 +14,7 @@ import {
 	RenderElementProps,
 	useSlateStatic,
 } from 'slate-react';
+import { Box } from '@mui/material';
 import MarkFragment from './Fragments/Mark/MarkFragment';
 import SentenceFragment from './Fragments/Sentence/SentenceFragment';
 import WordFragment from './Fragments/Word/WordFragment';
@@ -29,7 +30,6 @@ import DocumentTitle from './Blocks/DocumentTitle/DocumentTitle';
 import NumberedList from './Blocks/List/NumberedList';
 import BulletedList from './Blocks/List/BulletedList';
 import Title from './Blocks/Title/Title';
-import { Box } from '@mui/material';
 
 const Leaf = ({ attributes, leaf, children }: RenderLeafProps) => {
 	return (
@@ -174,10 +174,13 @@ const Element = (props: RenderElementProps) => {
 };
 
 const EditorDocument: React.FC = () => {
-	const renderLeaf = useCallback((props) => {
+	const renderLeaf = useCallback((props: RenderLeafProps) => {
 		return <Leaf {...props} />;
 	}, []);
-	const renderElement = useCallback((props) => <Element {...props} />, []);
+	const renderElement = useCallback(
+		(props: RenderElementProps) => <Element {...props} />,
+		[]
+	);
 	const editor = useSlateStatic();
 
 	const decorate = useCallback(

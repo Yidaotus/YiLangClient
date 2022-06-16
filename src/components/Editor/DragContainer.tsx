@@ -1,24 +1,23 @@
-import { Box } from '@mui/material';
-import React from 'react';
+import React, { ReactNode } from 'react';
 import DragHandle from './DnD/DragHandle';
 import useDraggableElement from '@components/Editor/DnD/useDraggableElement';
 import { EditorElement } from './YiEditor';
+import { Box } from '@mui/material';
 
-/**
- * Your Component
- */
 const HOVER_COLOR = '#4e4e4e10';
-const DragContainer: React.FC<{ element: EditorElement }> = ({
-	children,
-	element,
-}) => {
+interface DragContainerProps {
+	element: EditorElement;
+	children?: ReactNode;
+}
+
+const DragContainer: React.FC<DragContainerProps> = ({ children, element }) => {
 	const { hovering, opacity, dragRef, dropRef, preview } =
 		useDraggableElement(element);
 
 	return (
 		<Box
 			ref={dropRef}
-			sx={(theme) => ({
+			sx={{
 				p: 1,
 				position: 'relative',
 				backgroundColor: hovering ? HOVER_COLOR : 'white',
@@ -30,7 +29,7 @@ const DragContainer: React.FC<{ element: EditorElement }> = ({
 				'&:hover .drag-handle': {
 					opacity: '100%',
 				},
-			})}
+			}}
 		>
 			<DragHandle ref={dragRef} />
 			<div ref={preview}>{children}</div>

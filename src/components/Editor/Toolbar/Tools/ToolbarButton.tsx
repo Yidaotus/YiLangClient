@@ -15,7 +15,7 @@ export interface IToolbarItem {
 }
 
 export interface IToolbarButtonProps extends IToolbarItem {
-	action: (e: React.MouseEvent<HTMLButtonElement>) => void;
+	action: (e: React.MouseEvent<HTMLElement>) => void;
 }
 
 const ToolbarButton: React.FC<IToolbarButtonProps> = ({
@@ -32,7 +32,7 @@ const ToolbarButton: React.FC<IToolbarButtonProps> = ({
 			disabled={!enabled}
 			size="small"
 			value="left"
-			onClick={(e) => {
+			onClick={(e: React.MouseEvent<HTMLElement, MouseEvent>) => {
 				if (enabled) {
 					action(e);
 				}

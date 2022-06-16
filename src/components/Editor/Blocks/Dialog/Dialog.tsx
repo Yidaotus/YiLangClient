@@ -1,8 +1,8 @@
 import { DialogElement } from '@components/Editor/YiEditor';
-import { Box } from '@mui/material';
 import React from 'react';
 import { RenderElementProps } from 'slate-react';
 import DragContainer from '@components/Editor/DragContainer';
+import { Box } from '@mui/material';
 
 interface DialogProps extends RenderElementProps {
 	element: DialogElement;

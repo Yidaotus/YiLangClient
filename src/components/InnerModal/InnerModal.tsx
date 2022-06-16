@@ -1,10 +1,11 @@
 import './InnerModal.css';
-import React, { useRef } from 'react';
+import React, { ReactNode, useRef } from 'react';
 import useClickOutside from '@hooks/useClickOutside';
 
 export interface IModalProps {
 	onClose: () => void;
 	width: string;
+	children?: ReactNode;
 }
 
 const InnerModal: React.FC<IModalProps> = ({ onClose, children, width }) => {

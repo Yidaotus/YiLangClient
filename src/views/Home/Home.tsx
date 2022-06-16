@@ -1,11 +1,11 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Outlet } from 'react-router-dom';
 
-import { useActiveLanguageConf } from '@hooks/ConfigQueryHooks';
 import { useSnackbar } from 'notistack';
+import { useActiveLanguageConf } from '@hooks/ConfigQueryHooks';
+import { Box, Grid, Paper } from '@mui/material';
 import ResponsiveAppBar from './AppBar';
 import useUiErrorHandler from '@helpers/useUiErrorHandler';
-import { Box, Grid, Paper } from '@mui/material';
 
 const HomeView: React.FC = () => {
 	const [loading, setLoading] = useState(false);

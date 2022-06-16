@@ -17,11 +17,10 @@ import Editor from '@editor/Editor';
 import Settings from '@views/Home/Settings/Settings';
 import queryClient from '@helpers/QueryClient';
 
-import { SnackbarProvider } from 'notistack';
-
-import { createTheme, ThemeProvider } from '@mui/material/styles';
+import { createTheme, ThemeProvider } from '@mui/material';
 import CloseSharpIcon from '@mui/icons-material/CloseSharp';
 import SplashScreen from '@views/SplashScreen';
+import { SnackbarProvider } from 'notistack';
 
 const baseTheme = createTheme({
 	palette: {

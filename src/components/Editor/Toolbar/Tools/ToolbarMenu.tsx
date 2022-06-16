@@ -1,7 +1,7 @@
 import './ToolbarMenu.css';
-import React, { useState } from 'react';
+import React, { ReactNode, useState } from 'react';
 import ToolbarButton from './ToolbarButton';
-import { Menu, MenuItem } from '@mui/material';
+import { Menu } from '@mui/material';
 
 export interface IToolbarMenuProps {
 	icon: React.ReactElement | string;
@@ -9,6 +9,7 @@ export interface IToolbarMenuProps {
 	active?: boolean;
 	enabled?: boolean;
 	className?: string;
+	children?: ReactNode;
 }
 
 const ToolbarMenu: React.FC<IToolbarMenuProps> = ({
@@ -21,7 +22,7 @@ const ToolbarMenu: React.FC<IToolbarMenuProps> = ({
 }) => {
 	const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
 	const open = Boolean(anchorEl);
-	const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
+	const handleClick = (event: React.MouseEvent<HTMLElement>) => {
 		setAnchorEl(event.currentTarget);
 	};
 	const handleClose = () => {
