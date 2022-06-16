@@ -31,12 +31,14 @@ import DraggableSRS from './SRS/DraggableSRS';
 import useSavingIndicator from './SavingIndicator/SavingIndicator';
 import DictPopupController from './Popups/DictPopupController';
 import SentencePopupController from './Popups/SentencePopupController';
+import { useCurrentFontSize } from '@hooks/useUserContext';
 
 const AVERAGE_ACTIONS_PER_COMMAND = 15;
 const SAVE_EVERY_ACTIONS = 5 * AVERAGE_ACTIONS_PER_COMMAND;
 
 const YiEditor: React.FC = () => {
 	const editorContainer = useRef(null);
+	const [fontSize, changeFontSize] = useCurrentFontSize();
 	const [savingIndicator, setSavingIndicator] = useState<SavingState>('IDLE');
 	const [actionCount, setActionCount] = useState(0);
 	const actionCountDebounced = useDebounce(actionCount, 500);
@@ -54,7 +56,6 @@ const YiEditor: React.FC = () => {
 	const prefetching = usePrefetchDocumentItems(id);
 
 	const [showSpelling, setShowSpelling] = useState(false);
-	const [fontSize, setFontSize] = useState(1.1);
 	const [editor] = useState(withReact(withYiLang(createEditor())));
 	const [selection, setSelection] = useSelection(editor);
 	const [editorNodes, setEditorNodes] = useState<Array<Descendant>>([]);
@@ -177,13 +178,16 @@ const YiEditor: React.FC = () => {
 	const toolbarShowSpellingHandle = useCallback((show: boolean) => {
 		setShowSpelling(show);
 	}, []);
-	const changeFontSize = useCallback((mode: 'up' | 'down') => {
-		if (mode === 'up') {
-			setFontSize((currentFontSize) => currentFontSize + 0.1);
-		} else {
-			setFontSize((currentFontSize) => currentFontSize - 0.1);
-		}
-	}, []);
+	const changeFontSizeHandler = useCallback(
+		(mode: 'up' | 'down') => {
+			if (mode === 'up') {
+				changeFontSize(fontSize + 0.1);
+			} else {
+				changeFontSize(fontSize - 0.1);
+			}
+		},
+		[changeFontSize, fontSize]
+	);
 
 	return (
 		<div>
@@ -218,7 +222,7 @@ const YiEditor: React.FC = () => {
 											toolbarShowSpellingHandle
 										}
 										showSpelling={showSpelling}
-										changeFontSize={changeFontSize}
+										changeFontSize={changeFontSizeHandler}
 										updateDocument={updateDocument}
 										isEditorDirty={isEditorDirty}
 									/>

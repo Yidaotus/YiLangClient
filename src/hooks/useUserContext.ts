@@ -1,13 +1,18 @@
-import { IUser, UserContext } from '@components/AuthProvider/AuthProvider';
+import { UserContext } from '@components/AuthProvider/AuthProvider';
 import { useContext } from 'react';
 
-const useUserContext = (): IUser | null => {
+const useUserContext = () => {
 	return useContext(UserContext).user;
 };
 
-const useActiveDocument = (): [string | null, (id: string | null) => void] => {
+const useActiveDocument = () => {
 	const { activeDocument, changeActiveDocument } = useContext(UserContext);
-	return [activeDocument, changeActiveDocument];
+	return [activeDocument, changeActiveDocument] as const;
 };
 
-export { useUserContext, useActiveDocument };
+const useCurrentFontSize = () => {
+	const { fontSize, changeFontSize } = useContext(UserContext);
+	return [fontSize, changeFontSize] as const;
+};
+
+export { useUserContext, useActiveDocument, useCurrentFontSize };

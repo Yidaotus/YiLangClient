@@ -31,6 +31,8 @@ export interface IUserState {
 
 export interface IUserContext {
 	user: IUser | null;
+	fontSize: number;
+	changeFontSize: (newFontSize: number) => void;
 	activeDocument: string | null;
 	changeActiveDocument: (docId: string | null) => void;
 	logout: () => void;
@@ -39,6 +41,8 @@ export interface IUserContext {
 export const UserContext = React.createContext<IUserContext>({
 	user: null,
 	activeDocument: null,
+	fontSize: 1.1,
+	changeFontSize: () => {},
 	changeActiveDocument: () => {},
 	logout: () => {},
 });
@@ -55,12 +59,18 @@ const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
 	});
 	const [user, setUser] = useState<IUser | null>();
 	const [activeDocument, setActiveDocument] = useState<string | null>(null);
+	const [fontSize, setFontSize] = useState<number>(1.1);
 
 	const changeActiveDocument = useCallback(
 		(docId: string | null) => {
 			setActiveDocument(docId);
 		},
 		[setActiveDocument]
+	);
+
+	const changeFontSize = useCallback(
+		(newFontSize: number) => setFontSize(newFontSize),
+		[]
 	);
 
 	const logout = useCallback(() => {
@@ -125,6 +135,8 @@ const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
 						user,
 						activeDocument,
 						changeActiveDocument,
+						fontSize,
+						changeFontSize,
 						logout,
 					}}
 				>

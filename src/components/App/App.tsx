@@ -5,7 +5,7 @@ import PrivateRoute from '@components/PrivateRoute';
 import Home from '@views/Home/Home';
 import Login from '@views/Login';
 import Verify from '@views/Verify';
-import AuthProvider, { Role } from '@components/AuthProvider/AuthProvider';
+import UserProvider, { Role } from '@components/AuthProvider/AuthProvider';
 import { ReactQueryDevtools } from 'react-query/devtools';
 import { QueryClientProvider } from 'react-query';
 
@@ -154,7 +154,7 @@ const App: React.FC = () => {
 						horizontal: 'center',
 					}}
 				>
-					<AuthProvider>
+					<UserProvider>
 						<BrowserRouter>
 							<Routes>
 								<Route
@@ -207,7 +207,7 @@ const App: React.FC = () => {
 								</Route>
 							</Routes>
 						</BrowserRouter>
-					</AuthProvider>
+					</UserProvider>
 				</SnackbarProvider>
 			</ThemeProvider>
 			<ReactQueryDevtools initialIsOpen={false} />
