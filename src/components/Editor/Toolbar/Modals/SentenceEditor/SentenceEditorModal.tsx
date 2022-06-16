@@ -19,7 +19,6 @@ import {
 } from '@mui/material';
 import { Delete as DeleteIcon, Save as SaveIcon } from '@mui/icons-material';
 import { IDictionarySentence } from '../../../../../Document/Dictionary';
-import { LoadingButton } from '@mui/lab';
 
 export interface ISentenceModalProps {
 	visible: boolean;

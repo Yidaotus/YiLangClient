@@ -4,7 +4,7 @@ import useClickOutside from '@hooks/useClickOutside';
 import { Box } from '@mui/material';
 import { DictionaryEntryID } from 'Document/Utility';
 import React, { useEffect, useRef, useState } from 'react';
-import { BaseSelection, Editor, Range, Transforms } from 'slate';
+import { BaseSelection, Editor, Range } from 'slate';
 import { ReactEditor, useSlateStatic } from 'slate-react';
 import { WordElement, YiEditor } from '../YiEditor';
 import Floating from './Floating';

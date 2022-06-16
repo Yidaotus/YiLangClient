@@ -26,25 +26,27 @@ import { SavingState } from './SavingIndicator/SavingIndicator';
 import { useActiveLanguageConf } from '@hooks/ConfigQueryHooks';
 import useUiErrorHandler from '@helpers/useUiErrorHandler';
 import DraggableDictionary from './DraggableDictionary';
-import useDebounce from '@hooks/useDebounce';
+// import useDebounce from '@hooks/useDebounce';
 import DraggableSRS from './SRS/DraggableSRS';
 import useSavingIndicator from './SavingIndicator/SavingIndicator';
 import DictPopupController from './Popups/DictPopupController';
 import SentencePopupController from './Popups/SentencePopupController';
 import { useCurrentFontSize } from '@hooks/useUserContext';
 
-const AVERAGE_ACTIONS_PER_COMMAND = 15;
-const SAVE_EVERY_ACTIONS = 5 * AVERAGE_ACTIONS_PER_COMMAND;
+// const AVERAGE_ACTIONS_PER_COMMAND = 15;
+// const SAVE_EVERY_ACTIONS = 5 * AVERAGE_ACTIONS_PER_COMMAND;
 
 const YiEditor: React.FC = () => {
 	const editorContainer = useRef(null);
 	const [fontSize, changeFontSize] = useCurrentFontSize();
 	const [savingIndicator, setSavingIndicator] = useState<SavingState>('IDLE');
+	// eslint-disable-next-line @typescript-eslint/no-unused-vars
 	const [actionCount, setActionCount] = useState(0);
-	const actionCountDebounced = useDebounce(actionCount, 500);
+	// const actionCountDebounced = useDebounce(actionCount, 500);
 	const [wordEditorVisible, setWordEditorVisible] = useState(false);
 	const [sentenceEditorVisible, setSentenceEditorVisible] = useState(false);
 	const [isEditorDirty, setIsEditorDirty] = useState(false);
+	// eslint-disable-next-line @typescript-eslint/no-unused-vars
 	const [savedSelection, setSavedSelection] = useState<BaseRange | null>(
 		null
 	);
@@ -242,7 +244,11 @@ const YiEditor: React.FC = () => {
 										rootElement={editorContainer}
 										selection={selection}
 									/>
-									{/*<DraggableDictionary selection={selection} />*/}
+									{
+										<DraggableDictionary
+											selection={selection}
+										/>
+									}
 									<EditorDocument fontSize={fontSize} />
 									{!loadingDocument && !dbDocument && (
 										<Typography>
