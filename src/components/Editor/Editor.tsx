@@ -54,6 +54,7 @@ const YiEditor: React.FC = () => {
 	const prefetching = usePrefetchDocumentItems(id);
 
 	const [showSpelling, setShowSpelling] = useState(false);
+	const [fontSize, setFontSize] = useState(1.1);
 	const [editor] = useState(withReact(withYiLang(createEditor())));
 	const [selection, setSelection] = useSelection(editor);
 	const [editorNodes, setEditorNodes] = useState<Array<Descendant>>([]);
@@ -176,6 +177,13 @@ const YiEditor: React.FC = () => {
 	const toolbarShowSpellingHandle = useCallback((show: boolean) => {
 		setShowSpelling(show);
 	}, []);
+	const changeFontSize = useCallback((mode: 'up' | 'down') => {
+		if (mode === 'up') {
+			setFontSize((currentFontSize) => currentFontSize + 0.1);
+		} else {
+			setFontSize((currentFontSize) => currentFontSize - 0.1);
+		}
+	}, []);
 
 	return (
 		<div>
@@ -210,6 +218,7 @@ const YiEditor: React.FC = () => {
 											toolbarShowSpellingHandle
 										}
 										showSpelling={showSpelling}
+										changeFontSize={changeFontSize}
 										updateDocument={updateDocument}
 										isEditorDirty={isEditorDirty}
 									/>
@@ -230,7 +239,7 @@ const YiEditor: React.FC = () => {
 										selection={selection}
 									/>
 									{/*<DraggableDictionary selection={selection} />*/}
-									<EditorDocument />
+									<EditorDocument fontSize={fontSize} />
 									{!loadingDocument && !dbDocument && (
 										<Typography>
 											Document not found

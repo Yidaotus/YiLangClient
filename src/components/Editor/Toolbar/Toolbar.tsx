@@ -27,6 +27,8 @@ import {
 	ImportContacts,
 	Image,
 	FormatAlignJustify,
+	ZoomIn,
+	ZoomOut,
 } from '@mui/icons-material';
 
 import AlignButton from './Tools/AlignButton';
@@ -65,6 +67,7 @@ export interface IToolbarProps {
 	showWordEditor: () => void;
 	showSentenceEditor: () => void;
 	setShowSpelling: (show: boolean) => void;
+	changeFontSize: (mode: 'up' | 'down') => void;
 	showSpelling: boolean;
 	isEditorDirty: boolean;
 	updateDocument: () => void;
@@ -75,6 +78,7 @@ const Toolbar: React.FC<IToolbarProps> = ({
 	showWordEditor,
 	showSentenceEditor,
 	showSpelling,
+	changeFontSize,
 	setShowSpelling,
 	isEditorDirty,
 	updateDocument,
@@ -371,6 +375,31 @@ const Toolbar: React.FC<IToolbarProps> = ({
 						setShowSpelling(!showSpelling);
 					}}
 					enabled
+				/>
+			</StyledToggleButtonGroup>
+			<Divider flexItem orientation="vertical" sx={{ mx: 0.5, my: 1 }} />
+			<StyledToggleButtonGroup
+				size="small"
+				exclusive
+				value="none"
+				aria-label="text alignment"
+			>
+				<ToolbarButton
+					icon={<ZoomIn />}
+					tooltip="Bigger Fontsize"
+					title="Bigger Fontsize"
+					action={() => {
+						changeFontSize('up');
+						editor.undo();
+					}}
+				/>
+				<ToolbarButton
+					icon={<ZoomOut />}
+					title="Smaller Fontsize"
+					tooltip="Smaller Fontsize"
+					action={() => {
+						changeFontSize('down');
+					}}
 				/>
 			</StyledToggleButtonGroup>
 		</Paper>

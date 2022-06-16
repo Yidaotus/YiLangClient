@@ -173,7 +173,11 @@ const Element = (props: RenderElementProps) => {
 	}
 };
 
-const EditorDocument: React.FC = () => {
+interface EditorDocumentProps {
+	fontSize: number;
+}
+
+const EditorDocument: React.FC<EditorDocumentProps> = ({ fontSize }) => {
 	const renderLeaf = useCallback((props: RenderLeafProps) => {
 		return <Leaf {...props} />;
 	}, []);
@@ -235,7 +239,7 @@ const EditorDocument: React.FC = () => {
 		<Box
 			sx={(theme) => ({
 				position: 'relative',
-				fontSize: '1.1em',
+				fontSize: `${fontSize}em`,
 				backgroundColor: theme.palette.secondary.light,
 			})}
 		>
