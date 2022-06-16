@@ -33,7 +33,7 @@ const DictPopupController: React.FC<IDictPopupControllerProps> = ({
 	});
 
 	useEffect(() => {
-		if (hasFocus || dictId) {
+		if (hasFocus && dictId) {
 			setVisible(true);
 		} else {
 			setVisible(false);

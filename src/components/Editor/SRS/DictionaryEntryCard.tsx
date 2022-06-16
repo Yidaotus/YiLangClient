@@ -20,6 +20,15 @@ const DictionaryEntryCard: React.FC<DictionaryEntryCardProps> = ({
 			case 'Front':
 				cardFace = (
 					<Box>
+						<Typography variant="h4" component="div">
+							{entry.key}
+						</Typography>
+					</Box>
+				);
+				break;
+			case 'Back':
+				cardFace = (
+					<>
 						{entry.spelling && (
 							<Typography
 								variant="caption"
@@ -29,17 +38,10 @@ const DictionaryEntryCard: React.FC<DictionaryEntryCardProps> = ({
 								{entry.spelling}
 							</Typography>
 						)}
-						<Typography variant="h4" component="div">
-							{entry.key}
+						<Typography variant="h5" component="div">
+							{entry.translations.join(', ')}
 						</Typography>
-					</Box>
-				);
-				break;
-			case 'Back':
-				cardFace = (
-					<Typography variant="h5" component="div">
-						{entry.translations.join(', ')}
-					</Typography>
+					</>
 				);
 				break;
 		}
